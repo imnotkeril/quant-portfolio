@@ -1,0 +1,21 @@
+Metadata-Version: 2.4
+Name: investment-portfolio-app
+Version: 0.1.0
+Summary: Investment Portfolio Management System
+Author: Your Name
+Author-email: your.email@example.com
+Keywords: investment,portfolio,finance,analytics
+Requires-Python: >=3.8
+Requires-Dist: fastapi>=0.68.0
+Requires-Dist: uvicorn>=0.15.0
+Requires-Dist: pydantic>=1.8.2
+Requires-Dist: pandas>=1.3.0
+Requires-Dist: numpy>=1.21.0
+Requires-Dist: scipy>=1.7.0
+Requires-Dist: requests>=2.26.0
+Dynamic: author
+Dynamic: author-email
+Dynamic: keywords
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

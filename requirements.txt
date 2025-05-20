@@ -1,0 +1,66 @@
+# Core dependencies
+fastapi
+uvicorn[standard]
+pydantic
+python-dotenv
+python-multipart
+
+# Data processing & analysis
+pandas
+numpy
+scipy
+
+# Financial data
+yfinance
+pandas-datareader
+alpha_vantage
+yahooquery
+
+# Data visualization
+matplotlib
+seaborn
+plotly
+copulae
+# API clients & networking
+requests
+httpx
+
+# Reporting & document generation
+jinja2
+reportlab
+pdfkit
+XlsxWriter
+weasyprint
+
+# Testing
+pytest
+pytest-asyncio
+pytest-cov
+httpx  # For async API testing
+
+# Optimization & scientific computing
+cvxpy  # For portfolio optimization
+scikit-learn  # For statistical analysis
+statsmodels  # For time series analysis
+
+# Utilities
+python-dateutil
+pytz
+tqdm  # For progress bars
+schedule  # For scheduled reports
+tenacity # For retrying operations
+
+# Security
+python-jose[cryptography]  # For JWT
+passlib[bcrypt] # For password hashing
+
+# Development tools
+black
+isort
+flake8
+mypy
+
+diskcache
+
+arch
+pmdarima
