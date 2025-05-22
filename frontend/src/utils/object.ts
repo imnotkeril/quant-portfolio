@@ -12,7 +12,7 @@ export const pick = <T, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> => {
   if (!obj) return {} as Pick<T, K>;
 
   return keys.reduce((result, key) => {
-    if (key in obj) {
+    if (obj != null && typeof obj === 'object' && key in (obj as Record<string, any>)) {
       result[key] = obj[key];
     }
     return result;
@@ -62,16 +62,16 @@ export const getNestedProperty = <T>(
   if (!obj || !path) return defaultValue;
 
   const keys = path.split('.');
-  let current = obj;
+  let current: any = obj;
 
   for (const key of keys) {
-    if (current === null || current === undefined || typeof current !== 'object') {
+    if (current === null || current === undefined || typeof current !== 'object' || Array.isArray(current)) {
       return defaultValue;
     }
     current = current[key];
   }
 
-  return (current === undefined) ? defaultValue : current;
+  return current === undefined ? defaultValue : current;
 };
 
 /**
@@ -90,14 +90,14 @@ export const setNestedProperty = <T>(
 
   const result = { ...obj };
   const keys = path.split('.');
-  let current = result;
+  let current: Record<string, any> = result;
 
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
-    if (!(key in current) || current[key] === null || typeof current[key] !== 'object') {
+    if (!(key in current) || current[key] === null || typeof current[key] !== 'object' || Array.isArray(current[key])) {
       current[key] = {};
     }
-    current = current[key];
+    current = current[key] as Record<string, any>;
   }
 
   current[keys[keys.length - 1]] = value;
@@ -271,7 +271,7 @@ export const isDeepEqual = (obj1: any, obj2: any): boolean => {
     if (keys1.length !== keys2.length) return false;
 
     return keys1.every(key =>
-      Object.prototype.hasOwnProperty.call(obj2, key) &&
+      keys2.includes(key) &&
       isDeepEqual(obj1[key], obj2[key])
     );
   }
@@ -288,13 +288,19 @@ export const deepClone = <T>(obj: T): T => {
   if (obj === null || typeof obj !== 'object') return obj;
 
   if (Array.isArray(obj)) {
-    return obj.map(item => deepClone(item)) as unknown as T;
+    return obj.map(item => deepClone(item)) as T;
   }
 
-  const cloned: Record<string, any> = {};
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      cloned[key] = deepClone((obj as Record<string, any>)[key]);
+  if (obj instanceof Date) {
+    return new Date(obj.getTime()) as T;
+  }
+
+  const cloned = {} as Record<string, any>;
+  const objectToClone = obj as Record<string, any>;
+
+  for (const key in objectToClone) {
+    if (Object.prototype.hasOwnProperty.call(objectToClone, key)) {
+      cloned[key] = deepClone(objectToClone[key]);
     }
   }
 

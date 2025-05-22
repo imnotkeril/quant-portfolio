@@ -31,7 +31,6 @@ export interface OptimizationRequest {
   maxWeight?: number;
   constraints?: Record<string, any>;
   createOptimizedPortfolio?: boolean;
-  riskBudget?: string[];
   targetReturn?: number;
   targetRisk?: number;
 }

@@ -2,9 +2,15 @@
  * API configuration
  * Contains base URLs, endpoints, and other API-related constants
  */
+// Get environment variables safely in React
+const getEnvVar = (key: string, defaultValue: string): string => {
+  if (typeof window !== 'undefined' && (window as any).env) {
+    return (window as any).env[key] || defaultValue;
+  }
+  return defaultValue;
+};
 
-// Base API URL
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1';
+export const API_BASE_URL = getEnvVar('REACT_APP_API_URL', 'http://localhost:8000/api/v1');
 
 // Authentication endpoints
 export const AUTH_API = {

@@ -82,8 +82,8 @@ export const chartTheme = {
 
   // Legend styling
   legend: {
-    align: 'center',
-    verticalAlign: 'bottom',
+    align: 'center' as const,
+    verticalAlign: 'bottom' as const,
     iconSize: 10,
     itemStyle: {
       fontSize: 10,
@@ -102,7 +102,7 @@ export const chartTheme = {
 
   // Animation configuration
   animationDuration: 300,
-  animationEasing: 'ease-in-out',
+  animationEasing: 'ease-in-out' as const,
 
   // Default margins
   margin: {
@@ -127,11 +127,11 @@ export const getChartColor = (index: number): string => {
  * @returns Formatter function for candlestick data
  */
 export const createCandlestickFormatter = () => {
-  return (value: any, name: string) => {
+  return (value: any, name: string): [string, string] => {
     if (name === 'open' || name === 'close' || name === 'high' || name === 'low') {
       return [`${value.toFixed(2)}`, name.charAt(0).toUpperCase() + name.slice(1)];
     }
-    return [value, name];
+    return [String(value), name];
   };
 };
 
@@ -165,7 +165,7 @@ export const currencyFormatter = (value: number, currency: string = 'USD'): stri
  * @param startColor Start color
  * @param endColor End color
  * @param vertical Whether gradient is vertical
- * @returns Gradient definition
+ * @returns Gradient definition object
  */
 export const getLinearGradient = (
   id: string,
@@ -173,17 +173,71 @@ export const getLinearGradient = (
   endColor: string,
   vertical: boolean = false
 ) => {
-  const x1 = vertical ? '0' : '0';
-  const y1 = vertical ? '0' : '1';
-  const x2 = vertical ? '0' : '1';
-  const y2 = vertical ? '1' : '1';
+  const x1 = vertical ? 0 : 0;
+  const y1 = vertical ? 0 : 1;
+  const x2 = vertical ? 0 : 1;
+  const y2 = vertical ? 1 : 1;
 
-  return (
-    <linearGradient id={id} x1={x1} y1={y1} x2={x2} y2={y2}>
-      <stop offset="0%" stopColor={startColor} stopOpacity={0.8} />
-      <stop offset="100%" stopColor={endColor} stopOpacity={0.2} />
-    </linearGradient>
-  );
+  return {
+    id,
+    x1,
+    y1,
+    x2,
+    y2,
+    stops: [
+      { offset: '0%', stopColor: startColor, stopOpacity: 0.8 },
+      { offset: '100%', stopColor: endColor, stopOpacity: 0.2 }
+    ]
+  };
+};
+
+/**
+ * Get gradient CSS string for non-SVG usage
+ * @param startColor Start color
+ * @param endColor End color
+ * @param direction Direction of gradient (default: 'to right')
+ * @returns CSS gradient string
+ */
+export const getGradientCss = (
+  startColor: string,
+  endColor: string,
+  direction: string = 'to right'
+): string => {
+  return `linear-gradient(${direction}, ${startColor} 0%, ${endColor} 100%)`;
+};
+
+/**
+ * Create JSX gradient element for use in SVG defs
+ * @param id Gradient ID
+ * @param startColor Start color
+ * @param endColor End color
+ * @param vertical Whether gradient is vertical
+ * @returns Gradient configuration object that can be used to create JSX
+ */
+export const createGradientConfig = (
+  id: string,
+  startColor: string,
+  endColor: string,
+  vertical: boolean = false
+) => {
+  const gradientData = getLinearGradient(id, startColor, endColor, vertical);
+
+  return {
+    type: 'linearGradient',
+    props: {
+      id: gradientData.id,
+      x1: gradientData.x1,
+      y1: gradientData.y1,
+      x2: gradientData.x2,
+      y2: gradientData.y2,
+    },
+    stops: gradientData.stops.map((stop, index) => ({
+      key: index,
+      offset: stop.offset,
+      stopColor: stop.stopColor,
+      stopOpacity: stop.stopOpacity,
+    }))
+  };
 };
 
 export default chartTheme;

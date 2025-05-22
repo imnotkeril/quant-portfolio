@@ -27,7 +27,7 @@ export const chunk = <T>(array: T[], size: number): T[][] => {
 export const unique = <T>(array: T[]): T[] => {
   if (!array || !array.length) return [];
 
-  return [...new Set(array)];
+  return Array.from(new Set(array));
 };
 
 /**
