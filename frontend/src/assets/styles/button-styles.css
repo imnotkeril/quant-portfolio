@@ -1,0 +1,285 @@
+/**
+ * Button Styles for Wild Market Capital
+ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--spacing-m);
+  height: var(--input-height);
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--button-border-radius);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.btn:focus {
+  outline: none;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-icon-left svg {
+  margin-right: var(--spacing-xs);
+}
+
+.btn-icon-right svg {
+  margin-left: var(--spacing-xs);
+}
+
+/* Button Sizes */
+.btn-sm {
+  height: 32px;
+  padding: 0 var(--spacing-s);
+  font-size: var(--font-size-caption);
+}
+
+.btn-sm svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-lg {
+  height: 48px;
+  padding: 0 var(--spacing-l);
+  font-size: var(--font-size-h3);
+}
+
+.btn-lg svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Icon-only buttons */
+.btn-icon {
+  width: var(--input-height);
+  padding: 0;
+  justify-content: center;
+}
+
+.btn-icon.btn-sm {
+  width: 32px;
+}
+
+.btn-icon.btn-lg {
+  width: 48px;
+}
+
+/* Button Variants */
+.btn-primary {
+  background-color: var(--button-primary-background);
+  color: var(--button-primary-text);
+  border-color: var(--button-primary-background);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-hover);
+  border-color: var(--color-hover);
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-primary:active:not(:disabled) {
+  background-color: var(--color-active);
+  border-color: var(--color-active);
+}
+
+.btn-secondary {
+  background-color: var(--button-secondary-background);
+  color: var(--button-secondary-text);
+  border-color: var(--button-secondary-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  color: var(--color-hover);
+  border-color: var(--color-hover);
+  box-shadow: 0 0 0 1px var(--color-hover);
+}
+
+.btn-secondary:active:not(:disabled) {
+  color: var(--color-active);
+  border-color: var(--color-active);
+  box-shadow: 0 0 0 1px var(--color-active);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border-color: var(--color-divider);
+  color: var(--color-text-light);
+}
+
+.btn-outline:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.btn-outline:active:not(:disabled) {
+  border-color: var(--color-active);
+  color: var(--color-active);
+}
+
+.btn-text {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--color-accent);
+  height: auto;
+  padding: 0;
+}
+
+.btn-text:hover:not(:disabled) {
+  color: var(--color-hover);
+  text-decoration: underline;
+}
+
+.btn-text:active:not(:disabled) {
+  color: var(--color-active);
+}
+
+/* Color Variants */
+.btn-success {
+  background-color: var(--color-positive);
+  color: var(--color-text-dark);
+  border-color: var(--color-positive);
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: var(--color-positive);
+  opacity: 0.8;
+}
+
+.btn-success:active:not(:disabled) {
+  background-color: var(--color-positive);
+  opacity: 0.9;
+}
+
+.btn-danger {
+  background-color: var(--color-negative);
+  color: var(--color-text-dark);
+  border-color: var(--color-negative);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: var(--color-negative);
+  opacity: 0.8;
+}
+
+.btn-danger:active:not(:disabled) {
+  background-color: var(--color-negative);
+  opacity: 0.9;
+}
+
+.btn-neutral {
+  background-color: var(--color-neutral-gray);
+  color: var(--color-text-dark);
+  border-color: var(--color-neutral-gray);
+}
+
+.btn-neutral:hover:not(:disabled) {
+  background-color: var(--color-neutral-gray);
+  opacity: 0.8;
+}
+
+.btn-neutral:active:not(:disabled) {
+  background-color: var(--color-neutral-gray);
+  opacity: 0.9;
+}
+
+/* Button Group */
+.btn-group {
+  display: inline-flex;
+  position: relative;
+}
+
+.btn-group .btn {
+  position: relative;
+  flex: 0 1 auto;
+}
+
+.btn-group .btn:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin-left: -1px;
+}
+
+.btn-group .btn:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.btn-group .btn:hover,
+.btn-group .btn:focus,
+.btn-group .btn:active {
+  z-index: 1;
+}
+
+/* Button with loading state */
+.btn-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.btn-loading .btn-text {
+  visibility: hidden;
+}
+
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: calc(50% - 8px);
+  left: calc(50% - 8px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--color-text-light);
+  animation: btn-spinner 0.6s linear infinite;
+}
+
+.btn-secondary.btn-loading::after,
+.btn-outline.btn-loading::after {
+  border: 2px solid rgba(191, 159, 251, 0.3);
+  border-top-color: var(--color-accent);
+}
+
+@keyframes btn-spinner {
+  to { transform: rotate(360deg); }
+}
+
+/* Full width button */
+.btn-block {
+  display: flex;
+  width: 100%;
+}
+
+/* Button with badge */
+.btn .badge {
+  position: relative;
+  top: -1px;
+  margin-left: var(--spacing-xs);
+}
+
+/* Pill Buttons */
+.btn-pill {
+  border-radius: 50px;
+}

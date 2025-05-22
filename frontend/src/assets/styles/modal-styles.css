@@ -1,0 +1,232 @@
+/**
+ * Modal Styles for Wild Market Capital
+ */
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(13, 16, 21, 0.8);
+  backdrop-filter: blur(5px);
+  z-index: var(--z-index-modal-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-medium), visibility var(--transition-medium);
+}
+
+.modal-backdrop.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal {
+  position: relative;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-m);
+  box-shadow: var(--shadow-large);
+  max-width: 90%;
+  max-height: 90%;
+  width: 500px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity var(--transition-medium), transform var(--transition-medium);
+}
+
+.modal-backdrop.show .modal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Modal Sizes */
+.modal-sm {
+  width: 300px;
+}
+
+.modal-lg {
+  width: 800px;
+}
+
+.modal-xl {
+  width: 1000px;
+}
+
+/* Modal Header */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-m);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.modal-title {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  color: var(--color-text-light);
+  transition: color var(--transition-fast);
+}
+
+.modal-close:hover {
+  color: var(--color-hover);
+}
+
+.modal-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Modal Body */
+.modal-body {
+  padding: var(--spacing-m);
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Modal Footer */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--spacing-s);
+  padding: var(--spacing-m);
+  border-top: 1px solid var(--color-divider);
+}
+
+/* Centered Modal */
+.modal-dialog-centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  margin: auto;
+}
+
+/* Scrollable Modal */
+.modal-dialog-scrollable .modal-body {
+  overflow-y: auto;
+  max-height: 70vh;
+}
+
+/* Fullscreen Modal */
+.modal-fullscreen {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  border-radius: 0;
+}
+
+/* Animations */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+.modal-enter {
+  animation: modalFadeIn 0.3s forwards;
+}
+
+.modal-exit {
+  animation: modalFadeOut 0.3s forwards;
+}
+
+/* Modal Content Types */
+.modal-confirm .modal-body {
+  text-align: center;
+  padding: var(--spacing-l);
+}
+
+.modal-confirm .modal-icon {
+  font-size: 48px;
+  margin-bottom: var(--spacing-m);
+}
+
+.modal-confirm .modal-title {
+  margin-bottom: var(--spacing-s);
+}
+
+.modal-confirm .modal-message {
+  margin-bottom: var(--spacing-l);
+  color: var(--color-neutral-gray);
+}
+
+.modal-confirm.modal-success .modal-icon {
+  color: var(--color-positive);
+}
+
+.modal-confirm.modal-warning .modal-icon {
+  color: var(--color-neutral-2);
+}
+
+.modal-confirm.modal-danger .modal-icon {
+  color: var(--color-negative);
+}
+
+/* Side Modal */
+.modal-side {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 400px;
+  max-width: 90%;
+  margin: 0;
+  border-radius: 0;
+  transform: translateX(100%);
+  transition: transform var(--transition-medium);
+}
+
+.modal-backdrop.show .modal-side {
+  transform: translateX(0);
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0;
+    height: 100%;
+    max-height: 100%;
+  }
+
+  .modal-side {
+    width: 100%;
+  }
+}

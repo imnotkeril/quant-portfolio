@@ -1,0 +1,168 @@
+/**
+ * CSS Variables - Wild Market Capital Design System
+ */
+
+:root {
+  /* Colors */
+  --color-background: #0D1015;
+  --color-accent: #BF9FFB;
+  --color-text-dark: #0D1015;
+  --color-text-light: #FFFFFF;
+
+  /* Indicator Colors */
+  --color-positive: #74F174;
+  --color-negative: #FAA1A4;
+  --color-neutral-1: #90BFF9;
+  --color-neutral-2: #FFF59D;
+  --color-neutral-gray: #D1D4DC;
+
+  /* UI Elements */
+  --color-divider: #2A2E39;
+
+  /* Chart Elements */
+  --color-chart-up: #D1D4DC;
+  --color-chart-down: #BF9FFB;
+
+  /* State Colors */
+  --color-hover: #D3BFFC;
+  --color-active: #A880FA;
+  --color-disabled: #757280;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #BF9FFB 0%, #A880FA 100%);
+  --gradient-dark: linear-gradient(135deg, #0D1015 0%, #1A1E2A 100%);
+
+  /* Background Opacity Variants */
+  --color-background-80: rgba(13, 16, 21, 0.8);
+  --color-background-60: rgba(13, 16, 21, 0.6);
+  --color-background-40: rgba(13, 16, 21, 0.4);
+  --color-background-20: rgba(13, 16, 21, 0.2);
+
+  --color-divider-80: rgba(42, 46, 57, 0.8);
+  --color-divider-60: rgba(42, 46, 57, 0.6);
+  --color-divider-40: rgba(42, 46, 57, 0.4);
+  --color-divider-20: rgba(42, 46, 57, 0.2);
+
+  /* Typography */
+  --font-family: 'Inter', sans-serif;
+
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semi-bold: 600;
+  --font-weight-bold: 700;
+
+  /* Font Sizes */
+  --font-size-h1: 24px;
+  --font-size-h2: 20px;
+  --font-size-h3: 16px;
+  --font-size-body: 12px;
+  --font-size-caption: 10px;
+  --font-size-footer: 9px;
+
+  /* Line Heights */
+  --line-height-h1: 32px;
+  --line-height-h2: 28px;
+  --line-height-h3: 24px;
+  --line-height-body: 18px;
+  --line-height-caption: 16px;
+  --line-height-footer: 14px;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-s: 8px;
+  --spacing-m: 16px;
+  --spacing-l: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  --spacing-xxxl: 64px;
+
+  /* Border Radius */
+  --border-radius-xs: 2px;
+  --border-radius-s: 4px;
+  --border-radius-m: 8px;
+  --border-radius-l: 12px;
+  --border-radius-xl: 16px;
+  --border-radius-circle: 50%;
+
+  /* Shadows */
+  --shadow-small: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.15);
+  --shadow-large: 0 8px 16px rgba(0, 0, 0, 0.2);
+  --shadow-glow: 0px 0px 15px rgba(191, 159, 251, 0.3);
+
+  /* Transitions */
+  --transition-fast: 0.15s ease-in-out;
+  --transition-medium: 0.25s ease-in-out;
+  --transition-slow: 0.35s ease-in-out;
+
+  /* Z-Index Layers */
+  --z-index-base: 1;
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1100;
+  --z-index-fixed: 1200;
+  --z-index-modal-backdrop: 1300;
+  --z-index-modal: 1400;
+  --z-index-popover: 1500;
+  --z-index-tooltip: 1600;
+
+  /* Container Widths */
+  --container-width-sm: 640px;
+  --container-width-md: 768px;
+  --container-width-lg: 1024px;
+  --container-width-xl: 1280px;
+
+  /* Chart Specific */
+  --chart-grid-line: rgba(42, 46, 57, 0.6);
+  --chart-tooltip-background: rgba(13, 16, 21, 0.9);
+  --chart-tooltip-border: var(--color-divider);
+  --chart-axis-text: var(--color-neutral-gray);
+
+  /* Card Styles */
+  --card-background: rgba(13, 16, 21, 0.5);
+  --card-border: var(--color-divider);
+  --card-header-border: var(--color-divider);
+  --card-padding: var(--spacing-m);
+  --card-border-radius: var(--border-radius-m);
+
+  /* Input Styles */
+  --input-background: rgba(42, 46, 57, 0.5);
+  --input-border: var(--color-divider);
+  --input-border-focus: var(--color-accent);
+  --input-text: var(--color-text-light);
+  --input-placeholder: var(--color-neutral-gray);
+  --input-border-radius: var(--border-radius-s);
+  --input-height: 40px;
+  --input-padding: 0 var(--spacing-m);
+
+  /* Button Styles */
+  --button-primary-background: var(--color-accent);
+  --button-primary-text: var(--color-text-light);
+  --button-secondary-background: transparent;
+  --button-secondary-border: var(--color-accent);
+  --button-secondary-text: var(--color-accent);
+  --button-disabled-background: var(--color-disabled);
+  --button-disabled-text: var(--color-text-light);
+  --button-border-radius: var(--border-radius-s);
+
+  /* Table Styles */
+  --table-header-background: rgba(42, 46, 57, 0.5);
+  --table-row-even-background: rgba(42, 46, 57, 0.3);
+  --table-row-odd-background: transparent;
+  --table-row-hover-background: rgba(42, 46, 57, 0.5);
+  --table-border: var(--color-divider);
+
+  /* Scrollbar Styles */
+  --scrollbar-width: 6px;
+  --scrollbar-track: rgba(42, 46, 57, 0.3);
+  --scrollbar-thumb: rgba(42, 46, 57, 0.8);
+  --scrollbar-thumb-hover: var(--color-accent);
+}
+
+/* Dark Mode is the default for this application */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark mode specific overrides would go here if needed */
+  }
+}

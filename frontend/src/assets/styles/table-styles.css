@@ -1,0 +1,220 @@
+/**
+ * Table Styles for Wild Market Capital
+ */
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--border-radius-m);
+  background-color: var(--card-background);
+  border: 1px solid var(--card-border);
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-family: var(--font-family);
+}
+
+.table th {
+  background-color: var(--table-header-background);
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-semi-bold);
+  font-size: var(--font-size-body);
+  padding: var(--spacing-s) var(--spacing-m);
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-bottom: 1px solid var(--table-border);
+}
+
+.table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.table th.sortable:hover {
+  background-color: var(--color-divider-80);
+}
+
+.table th.sorted {
+  background-color: var(--color-divider-80);
+}
+
+.table th .sort-icon {
+  margin-left: var(--spacing-xs);
+  display: inline-block;
+  vertical-align: middle;
+  transition: transform var(--transition-fast);
+}
+
+.table th .sort-icon.asc {
+  transform: rotate(0deg);
+}
+
+.table th .sort-icon.desc {
+  transform: rotate(180deg);
+}
+
+.table td {
+  padding: var(--spacing-s) var(--spacing-m);
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  border-bottom: 1px solid var(--table-border);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:nth-child(even) {
+  background-color: var(--table-row-even-background);
+}
+
+.table tr:hover {
+  background-color: var(--table-row-hover-background);
+}
+
+.table .align-right {
+  text-align: right;
+}
+
+.table .align-center {
+  text-align: center;
+}
+
+.table .numeric {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-family);
+  text-align: right;
+}
+
+.table .ticker {
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.02em;
+}
+
+.table .positive {
+  color: var(--color-positive);
+}
+
+.table .negative {
+  color: var(--color-negative);
+}
+
+.table .highlight {
+  background-color: rgba(191, 159, 251, 0.1);
+}
+
+.table-pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: var(--spacing-s);
+  border-top: 1px solid var(--table-border);
+  background-color: var(--card-background);
+  font-size: var(--font-size-caption);
+}
+
+.table-pagination .pagination-info {
+  margin-right: var(--spacing-m);
+  color: var(--color-neutral-gray);
+}
+
+.table-pagination .pagination-buttons {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.table-pagination button {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+  background-color: transparent;
+  color: var(--color-text-light);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.table-pagination button:hover:not(:disabled) {
+  background-color: var(--color-divider-60);
+}
+
+.table-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.table-pagination button.active {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-text-light);
+}
+
+.table-empty {
+  padding: var(--spacing-l);
+  text-align: center;
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-body);
+}
+
+.table-loading {
+  padding: var(--spacing-l);
+  text-align: center;
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-body);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-s);
+  min-height: 200px;
+}
+
+/* Responsive tables */
+@media (max-width: 768px) {
+  .table-responsive {
+    display: block;
+  }
+
+  .table-responsive thead {
+    display: none;
+  }
+
+  .table-responsive tbody {
+    display: block;
+  }
+
+  .table-responsive tr {
+    display: block;
+    margin-bottom: var(--spacing-m);
+    border: 1px solid var(--table-border);
+    border-radius: var(--border-radius-s);
+    padding: var(--spacing-s);
+  }
+
+  .table-responsive td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-s);
+    border-bottom: 1px solid var(--table-border-60);
+    text-align: right;
+  }
+
+  .table-responsive td:last-child {
+    border-bottom: none;
+  }
+
+  .table-responsive td::before {
+    content: attr(data-label);
+    font-weight: var(--font-weight-medium);
+    text-align: left;
+    margin-right: var(--spacing-s);
+  }
+}
