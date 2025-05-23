@@ -1,95 +1,246 @@
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+/**
+ * Layout Context for managing application layout state
+ */
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+/**
+ * Sidebar state
+ */
+export type SidebarState = 'expanded' | 'collapsed' | 'hidden';
+
+/**
+ * Layout breakpoint
+ */
+export type LayoutBreakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+
+/**
+ * Layout context interface
+ */
 interface LayoutContextType {
-  sidebarOpen: boolean;
+  // Sidebar state
+  sidebarState: SidebarState;
+  setSidebarState: (state: SidebarState) => void;
   toggleSidebar: () => void;
-  setSidebarOpen: (isOpen: boolean) => void;
-  contentWidth: number;
-  setContentWidth: (width: number) => void;
+
+  // Screen size and responsive behavior
+  screenSize: LayoutBreakpoint;
   isMobile: boolean;
   isTablet: boolean;
   isDesktop: boolean;
+
+  // Panel states
+  rightPanelOpen: boolean;
+  setRightPanelOpen: (open: boolean) => void;
+  toggleRightPanel: () => void;
+
+  // Full screen mode
+  isFullScreen: boolean;
+  setFullScreen: (fullScreen: boolean) => void;
+  toggleFullScreen: () => void;
+
+  // Loading states
+  isLoading: boolean;
+  setLoading: (loading: boolean) => void;
+
+  // Modal management
+  activeModal: string | null;
+  openModal: (modalId: string) => void;
+  closeModal: () => void;
 }
 
-const LayoutContext = createContext<LayoutContextType>({
-  sidebarOpen: true,
-  toggleSidebar: () => {},
-  setSidebarOpen: () => {},
-  contentWidth: window.innerWidth,
-  setContentWidth: () => {},
-  isMobile: false,
-  isTablet: false,
-  isDesktop: true,
-});
-
+/**
+ * Layout provider props
+ */
 interface LayoutProviderProps {
   children: ReactNode;
 }
 
+/**
+ * Create the layout context
+ */
+const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
+
+/**
+ * Custom hook to use layout context
+ */
+export const useLayout = (): LayoutContextType => {
+  const context = useContext(LayoutContext);
+  if (!context) {
+    throw new Error('useLayout must be used within a LayoutProvider');
+  }
+  return context;
+};
+
+/**
+ * Get screen size breakpoint from window width
+ */
+const getBreakpoint = (width: number): LayoutBreakpoint => {
+  if (width < 480) return 'xs';
+  if (width < 640) return 'sm';
+  if (width < 768) return 'md';
+  if (width < 1024) return 'lg';
+  if (width < 1280) return 'xl';
+  return 'xxl';
+};
+
+/**
+ * Layout provider component
+ */
 export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
-  // Breakpoints
-  const MOBILE_BREAKPOINT = 768;
-  const TABLET_BREAKPOINT = 1024;
+  // Get initial sidebar state from localStorage or set default based on screen size
+  const [sidebarState, setSidebarState] = useState<SidebarState>(() => {
+    const saved = localStorage.getItem('sidebar-state') as SidebarState;
+    if (saved) return saved;
 
-  // Initial window width
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-
-  // Whether the sidebar is open
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    // On mobile, default to closed
-    return window.innerWidth >= MOBILE_BREAKPOINT;
+    // Default based on initial screen size
+    const width = window.innerWidth;
+    return width >= 1024 ? 'expanded' : 'collapsed';
   });
 
-  // Content width (total width minus sidebar if open)
-  const [contentWidth, setContentWidth] = useState(window.innerWidth);
+  const [screenSize, setScreenSize] = useState<LayoutBreakpoint>(() =>
+    getBreakpoint(window.innerWidth)
+  );
 
-  // Media query states
-  const isMobile = windowWidth < MOBILE_BREAKPOINT;
-  const isTablet = windowWidth >= MOBILE_BREAKPOINT && windowWidth < TABLET_BREAKPOINT;
-  const isDesktop = windowWidth >= TABLET_BREAKPOINT;
+  const [rightPanelOpen, setRightPanelOpen] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeModal, setActiveModal] = useState<string | null>(null);
 
-  // Effect to handle window resize
+  // Derived responsive states
+  const isMobile = screenSize === 'xs' || screenSize === 'sm';
+  const isTablet = screenSize === 'md';
+  const isDesktop = screenSize === 'lg' || screenSize === 'xl' || screenSize === 'xxl';
+
+  // Handle window resize
   useEffect(() => {
     const handleResize = () => {
-      const newWidth = window.innerWidth;
-      setWindowWidth(newWidth);
+      const newBreakpoint = getBreakpoint(window.innerWidth);
+      setScreenSize(newBreakpoint);
 
-      // Auto-close sidebar on mobile
-      if (newWidth < MOBILE_BREAKPOINT && sidebarOpen) {
-        setSidebarOpen(false);
+      // Auto-adjust sidebar based on screen size
+      if (newBreakpoint === 'xs' || newBreakpoint === 'sm') {
+        // Mobile: collapse sidebar
+        if (sidebarState === 'expanded') {
+          setSidebarState('collapsed');
+        }
+      } else if (newBreakpoint === 'md') {
+        // Tablet: collapsed by default
+        if (sidebarState === 'hidden') {
+          setSidebarState('collapsed');
+        }
+      } else {
+        // Desktop: expanded by default
+        if (sidebarState === 'hidden') {
+          setSidebarState('expanded');
+        }
       }
 
-      // Auto-open sidebar when transitioning from mobile to desktop
-      if (newWidth >= MOBILE_BREAKPOINT && windowWidth < MOBILE_BREAKPOINT) {
-        setSidebarOpen(true);
+      // Close right panel on mobile/tablet
+      if ((newBreakpoint === 'xs' || newBreakpoint === 'sm') && rightPanelOpen) {
+        setRightPanelOpen(false);
       }
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [windowWidth, sidebarOpen]);
+  }, [sidebarState, rightPanelOpen]);
 
-  // Effect to update content width when sidebar state or window width changes
-  useEffect(() => {
-    // Calculate content width based on sidebar state
-    // This is a simplified example; in a real app, you'd use actual sidebar width
-    const SIDEBAR_WIDTH = 250;
-    setContentWidth(sidebarOpen && !isMobile ? windowWidth - SIDEBAR_WIDTH : windowWidth);
-  }, [sidebarOpen, windowWidth, isMobile]);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(prev => !prev);
+  // Save sidebar state to localStorage
+  const handleSetSidebarState = (state: SidebarState) => {
+    setSidebarState(state);
+    localStorage.setItem('sidebar-state', state);
   };
 
+  // Toggle sidebar between expanded and collapsed
+  const toggleSidebar = () => {
+    if (isMobile) {
+      // On mobile, toggle between collapsed and hidden
+      handleSetSidebarState(sidebarState === 'hidden' ? 'collapsed' : 'hidden');
+    } else {
+      // On desktop, toggle between expanded and collapsed
+      handleSetSidebarState(sidebarState === 'expanded' ? 'collapsed' : 'expanded');
+    }
+  };
+
+  // Toggle right panel
+  const toggleRightPanel = () => {
+    setRightPanelOpen(!rightPanelOpen);
+  };
+
+  // Toggle full screen mode
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => {
+        setIsFullScreen(true);
+      });
+    } else {
+      document.exitFullscreen().then(() => {
+        setIsFullScreen(false);
+      });
+    }
+  };
+
+  // Handle full screen change events
+  useEffect(() => {
+    const handleFullScreenChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullScreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullScreenChange);
+  }, []);
+
+  // Modal management
+  const openModal = (modalId: string) => {
+    setActiveModal(modalId);
+    // Prevent body scroll when modal is open
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeModal = () => {
+    setActiveModal(null);
+    // Restore body scroll
+    document.body.style.overflow = 'unset';
+  };
+
+  // Handle escape key to close modal
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && activeModal) {
+        closeModal();
+      }
+    };
+
+    if (activeModal) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [activeModal]);
+
   const contextValue: LayoutContextType = {
-    sidebarOpen,
+    sidebarState,
+    setSidebarState: handleSetSidebarState,
     toggleSidebar,
-    setSidebarOpen,
-    contentWidth,
-    setContentWidth,
+
+    screenSize,
     isMobile,
     isTablet,
     isDesktop,
+
+    rightPanelOpen,
+    setRightPanelOpen,
+    toggleRightPanel,
+
+    isFullScreen,
+    setFullScreen: setIsFullScreen,
+    toggleFullScreen,
+
+    isLoading,
+    setLoading: setIsLoading,
+
+    activeModal,
+    openModal,
+    closeModal,
   };
 
   return (
@@ -99,10 +250,4 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   );
 };
 
-export const useLayout = (): LayoutContextType => {
-  const context = useContext(LayoutContext);
-  if (!context) {
-    throw new Error('useLayout must be used within a LayoutProvider');
-  }
-  return context;
-};
+export default LayoutContext;
