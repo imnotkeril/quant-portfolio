@@ -1,0 +1,200 @@
+/**
+ * Tooltip Styles for Wild Market Capital
+ */
+
+.tooltip {
+  position: absolute;
+  z-index: var(--z-index-tooltip);
+  background-color: rgba(13, 16, 21, 0.9);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  box-shadow: var(--shadow-large);
+  padding: var(--spacing-xs) var(--spacing-s);
+  font-size: var(--font-size-caption);
+  font-family: var(--font-family);
+  color: var(--color-text-light);
+  max-width: 250px;
+  word-wrap: break-word;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.8);
+  transition: all var(--transition-fast);
+  pointer-events: none;
+}
+
+.tooltip.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Arrow */
+.withArrow .arrow {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: rgba(13, 16, 21, 0.9);
+  border: 1px solid var(--color-divider);
+  transform: rotate(45deg);
+}
+
+/* Top placements */
+.top .arrow,
+.topLeft .arrow,
+.topRight .arrow {
+  bottom: -4px;
+  border-top: none;
+  border-left: none;
+}
+
+.top .arrow {
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.topLeft .arrow {
+  left: 12px;
+}
+
+.topRight .arrow {
+  right: 12px;
+}
+
+/* Bottom placements */
+.bottom .arrow,
+.bottomLeft .arrow,
+.bottomRight .arrow {
+  top: -4px;
+  border-bottom: none;
+  border-right: none;
+}
+
+.bottom .arrow {
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.bottomLeft .arrow {
+  left: 12px;
+}
+
+.bottomRight .arrow {
+  right: 12px;
+}
+
+/* Left placements */
+.left .arrow,
+.leftTop .arrow,
+.leftBottom .arrow {
+  right: -4px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.left .arrow {
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.leftTop .arrow {
+  top: 12px;
+}
+
+.leftBottom .arrow {
+  bottom: 12px;
+}
+
+/* Right placements */
+.right .arrow,
+.rightTop .arrow,
+.rightBottom .arrow {
+  left: -4px;
+  border-right: none;
+  border-top: none;
+}
+
+.right .arrow {
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.rightTop .arrow {
+  top: 12px;
+}
+
+.rightBottom .arrow {
+  bottom: 12px;
+}
+
+/* Animation variants for different placements */
+.top:not(.visible),
+.topLeft:not(.visible),
+.topRight:not(.visible) {
+  transform: scale(0.8) translateY(4px);
+}
+
+.bottom:not(.visible),
+.bottomLeft:not(.visible),
+.bottomRight:not(.visible) {
+  transform: scale(0.8) translateY(-4px);
+}
+
+.left:not(.visible),
+.leftTop:not(.visible),
+.leftBottom:not(.visible) {
+  transform: scale(0.8) translateX(4px);
+}
+
+.right:not(.visible),
+.rightTop:not(.visible),
+.rightBottom:not(.visible) {
+  transform: scale(0.8) translateX(-4px);
+}
+
+/* Hover interaction */
+.tooltip:hover {
+  pointer-events: auto;
+}
+
+/* Color variations */
+.tooltip[style*="background-color"] .arrow {
+  background-color: inherit;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .tooltip {
+    border-width: 2px;
+    background-color: var(--color-background);
+  }
+
+  .arrow {
+    border-width: 2px;
+    background-color: var(--color-background);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .tooltip {
+    transition: opacity var(--transition-fast);
+    transform: none !important;
+  }
+
+  .tooltip:not(.visible) {
+    transform: none;
+  }
+}
+
+/* Dark theme specific adjustments */
+@media (prefers-color-scheme: dark) {
+  .tooltip {
+    backdrop-filter: blur(8px);
+  }
+}

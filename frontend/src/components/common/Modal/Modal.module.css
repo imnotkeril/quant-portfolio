@@ -1,0 +1,310 @@
+/**
+ * Modal Styles for Wild Market Capital
+ */
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(13, 16, 21, 0.8);
+  backdrop-filter: blur(5px);
+  z-index: var(--z-index-modal-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-medium), visibility var(--transition-medium);
+  padding: var(--spacing-m);
+}
+
+.backdrop.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal {
+  position: relative;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-m);
+  box-shadow: var(--shadow-large);
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: scale(0.95) translateY(20px);
+  transition: opacity var(--transition-medium), transform var(--transition-medium);
+  outline: none;
+  overflow: hidden;
+}
+
+.backdrop.show .modal {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Modal Sizes */
+.small {
+  width: 400px;
+}
+
+.medium {
+  width: 600px;
+}
+
+.large {
+  width: 800px;
+}
+
+.xlarge {
+  width: 1000px;
+}
+
+.fullscreen {
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  border-radius: 0;
+  margin: 0;
+}
+
+/* Modal Variants */
+.side {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  max-height: 100vh;
+  width: 400px;
+  max-width: 90vw;
+  margin: 0;
+  border-radius: 0;
+  transform: translateX(100%);
+  transition: transform var(--transition-medium);
+}
+
+.side.show {
+  transform: translateX(0);
+}
+
+.backdrop.side {
+  justify-content: flex-end;
+  align-items: stretch;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-m);
+  border-bottom: 1px solid var(--color-divider);
+  background-color: var(--color-background);
+  flex-shrink: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  line-height: var(--line-height-h2);
+}
+
+.closeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  border-radius: var(--border-radius-s);
+  color: var(--color-neutral-gray);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 0;
+}
+
+.closeButton:hover {
+  color: var(--color-text-light);
+  background-color: var(--color-divider-20);
+}
+
+.closeButton:active {
+  background-color: var(--color-divider-40);
+  transform: scale(0.95);
+}
+
+.body {
+  flex: 1;
+  padding: var(--spacing-m);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.footer {
+  flex-shrink: 0;
+  padding: var(--spacing-m);
+  border-top: 1px solid var(--color-divider);
+  background-color: var(--color-background);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--spacing-s);
+}
+
+/* Confirm Modal Variant */
+.confirm .body {
+  text-align: center;
+  padding: var(--spacing-l);
+}
+
+.confirm .title {
+  text-align: center;
+  margin-bottom: var(--spacing-s);
+}
+
+/* Animation keyframes */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modalFadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+}
+
+@keyframes sideSlideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes sideSlideOut {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Scrollbar styling for modal body */
+.body::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+.body::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+.body::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--scrollbar-width);
+}
+
+.body::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .backdrop {
+    padding: var(--spacing-s);
+  }
+
+  .modal:not(.side):not(.fullscreen) {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .small,
+  .medium,
+  .large,
+  .xlarge {
+    width: 100%;
+  }
+
+  .side {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .header {
+    padding: var(--spacing-s) var(--spacing-m);
+  }
+
+  .body {
+    padding: var(--spacing-s) var(--spacing-m);
+  }
+
+  .footer {
+    padding: var(--spacing-s) var(--spacing-m);
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .footer > * {
+    width: 100%;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .modal {
+    border-width: 2px;
+  }
+
+  .header {
+    border-bottom-width: 2px;
+  }
+
+  .footer {
+    border-top-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .modal {
+    transition: none;
+  }
+
+  .backdrop.show .modal {
+    transform: none;
+  }
+
+  .side {
+    transition: none;
+  }
+}

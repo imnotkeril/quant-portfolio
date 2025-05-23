@@ -1,0 +1,345 @@
+/**
+ * Pagination Styles for Wild Market Capital
+ */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+  font-family: var(--font-family);
+  user-select: none;
+}
+
+.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Sizes */
+.small {
+  font-size: var(--font-size-caption);
+}
+
+.small .pageButton,
+.small .prevButton,
+.small .nextButton {
+  height: 24px;
+  padding: 0 var(--spacing-xs);
+  font-size: var(--font-size-caption);
+}
+
+.small .jumpInput {
+  height: 24px;
+  width: 40px;
+}
+
+.default {
+  font-size: var(--font-size-body);
+}
+
+.default .pageButton,
+.default .prevButton,
+.default .nextButton {
+  height: 32px;
+  padding: 0 var(--spacing-s);
+  font-size: var(--font-size-body);
+}
+
+.default .jumpInput {
+  height: 32px;
+  width: 50px;
+}
+
+.large {
+  font-size: var(--font-size-h3);
+}
+
+.large .pageButton,
+.large .prevButton,
+.large .nextButton {
+  height: 40px;
+  padding: 0 var(--spacing-m);
+  font-size: var(--font-size-h3);
+}
+
+.large .jumpInput {
+  height: 40px;
+  width: 60px;
+}
+
+/* Total display */
+.total {
+  color: var(--color-neutral-gray);
+  font-size: inherit;
+}
+
+/* Pages container */
+.pages {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* Buttons */
+.pageButton,
+.prevButton,
+.nextButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  color: var(--color-text-light);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  gap: var(--spacing-xs);
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+}
+
+.pageButton:hover:not(:disabled),
+.prevButton:hover:not(:disabled),
+.nextButton:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.pageButton:active:not(:disabled),
+.prevButton:active:not(:disabled),
+.nextButton:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.pageButton:focus-visible,
+.prevButton:focus-visible,
+.nextButton:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+.pageButton:disabled,
+.prevButton:disabled,
+.nextButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageButton.active {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-text-light);
+}
+
+.pageButton.active:hover {
+  background-color: var(--color-hover);
+  border-color: var(--color-hover);
+  color: var(--color-text-light);
+}
+
+/* Navigation button text */
+.prevText,
+.nextText {
+  display: inline;
+}
+
+/* Ellipsis */
+.ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 var(--spacing-xs);
+  color: var(--color-neutral-gray);
+  font-size: inherit;
+  letter-spacing: 2px;
+}
+
+/* Simple pagination */
+.simple {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+}
+
+.pageInfo {
+  color: var(--color-text-light);
+  font-size: inherit;
+  min-width: 60px;
+  text-align: center;
+}
+
+.simple .prevButton,
+.simple .nextButton {
+  padding: 0 var(--spacing-xs);
+  min-width: 32px;
+}
+
+/* Size changer */
+.sizeChanger {
+  display: flex;
+  align-items: center;
+}
+
+.sizeSelect {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  color: var(--color-text-light);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  height: 32px;
+  padding: 0 var(--spacing-s);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.sizeSelect:hover:not(:disabled) {
+  border-color: var(--color-accent);
+}
+
+.sizeSelect:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+/* Quick jumper */
+.quickJumper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--color-text-light);
+  font-size: inherit;
+}
+
+.jumpInput {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  color: var(--color-text-light);
+  font-family: inherit;
+  font-size: inherit;
+  text-align: center;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.jumpInput:hover:not(:disabled) {
+  border-color: var(--color-accent);
+}
+
+.jumpInput:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.jumpInput::placeholder {
+  color: var(--color-neutral-gray);
+}
+
+/* Responsive behavior */
+.responsive {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .pagination {
+    gap: var(--spacing-s);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .total {
+    order: 3;
+    width: 100%;
+    text-align: center;
+    margin-top: var(--spacing-xs);
+  }
+
+  .pages {
+    order: 1;
+    gap: 2px;
+  }
+
+  .sizeChanger,
+  .quickJumper {
+    order: 2;
+  }
+
+  .prevText,
+  .nextText {
+    display: none;
+  }
+
+  .pageButton {
+    min-width: 32px;
+  }
+
+  /* Hide some page numbers on mobile */
+  .pages .pageButton:not(.active) {
+    display: none;
+  }
+
+  .pages .pageButton.active,
+  .pages .pageButton:first-of-type,
+  .pages .pageButton:last-of-type {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination:not(.simple) {
+    gap: var(--spacing-xs);
+  }
+
+  .pages {
+    gap: 1px;
+  }
+
+  .pageButton,
+  .prevButton,
+  .nextButton {
+    min-width: 28px;
+    height: 28px;
+    padding: 0;
+    font-size: var(--font-size-caption);
+  }
+
+  .ellipsis {
+    height: 28px;
+    padding: 0 2px;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .pageButton,
+  .prevButton,
+  .nextButton,
+  .sizeSelect,
+  .jumpInput {
+    border-width: 2px;
+  }
+
+  .pageButton.active {
+    font-weight: var(--font-weight-semi-bold);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .pageButton,
+  .prevButton,
+  .nextButton,
+  .sizeSelect,
+  .jumpInput {
+    transition: none;
+  }
+
+  .pageButton:active:not(:disabled),
+  .prevButton:active:not(:disabled),
+  .nextButton:active:not(:disabled) {
+    transform: none;
+  }
+}

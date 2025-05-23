@@ -1,0 +1,418 @@
+/**
+ * Tabs Styles for Wild Market Capital
+ */
+
+.tabs {
+  display: flex;
+  font-family: var(--font-family);
+}
+
+/* Tab positions */
+.top {
+  flex-direction: column;
+}
+
+.bottom {
+  flex-direction: column-reverse;
+}
+
+.left {
+  flex-direction: row;
+}
+
+.right {
+  flex-direction: row-reverse;
+}
+
+/* Tab bar */
+.tabBar {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+}
+
+.topTabBar,
+.bottomTabBar {
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.bottomTabBar {
+  border-bottom: none;
+  border-top: 1px solid var(--color-divider);
+}
+
+.leftTabBar,
+.rightTabBar {
+  flex-direction: column;
+  border-right: 1px solid var(--color-divider);
+  min-width: 120px;
+}
+
+.rightTabBar {
+  border-right: none;
+  border-left: 1px solid var(--color-divider);
+}
+
+.cardType {
+  border: none;
+}
+
+.centered .tabNav {
+  justify-content: center;
+}
+
+/* Tab navigation */
+.tabNav {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  overflow: hidden;
+}
+
+.leftTabBar .tabNav,
+.rightTabBar .tabNav {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Individual tab */
+.tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+  outline: none;
+  border: none;
+  background: none;
+}
+
+.tab:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+/* Tab sizes */
+.small .tab {
+  padding: var(--spacing-xs) var(--spacing-s);
+  font-size: var(--font-size-caption);
+}
+
+.middle .tab {
+  padding: var(--spacing-s) var(--spacing-m);
+  font-size: var(--font-size-body);
+}
+
+.large .tab {
+  padding: var(--spacing-m) var(--spacing-l);
+  font-size: var(--font-size-h3);
+}
+
+/* Tab types */
+.line .tab {
+  color: var(--color-neutral-gray);
+  border-bottom: 2px solid transparent;
+}
+
+.line .tab:hover:not(.disabled) {
+  color: var(--color-text-light);
+}
+
+.line .tab.active {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+.card .tab,
+.editableCard .tab {
+  background-color: var(--color-background-20);
+  border: 1px solid var(--color-divider);
+  border-bottom: none;
+  border-radius: var(--border-radius-s) var(--border-radius-s) 0 0;
+  margin-right: 2px;
+}
+
+.card .tab:hover:not(.disabled),
+.editableCard .tab:hover:not(.disabled) {
+  background-color: var(--color-background-40);
+}
+
+.card .tab.active,
+.editableCard .tab.active {
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-background);
+  color: var(--color-accent);
+}
+
+/* Bottom positioned card tabs */
+.bottom.card .tab,
+.bottom.editableCard .tab {
+  border-top: none;
+  border-bottom: 1px solid var(--color-divider);
+  border-radius: 0 0 var(--border-radius-s) var(--border-radius-s);
+}
+
+.bottom.card .tab.active,
+.bottom.editableCard .tab.active {
+  border-top: 1px solid var(--color-background);
+  border-bottom: none;
+}
+
+/* Left/Right positioned tabs */
+.left .tab,
+.right .tab {
+  justify-content: flex-start;
+  width: 100%;
+  text-align: left;
+}
+
+.left.line .tab {
+  border-bottom: none;
+  border-right: 2px solid transparent;
+}
+
+.left.line .tab.active {
+  border-right-color: var(--color-accent);
+  border-bottom-color: transparent;
+}
+
+.right.line .tab {
+  border-bottom: none;
+  border-left: 2px solid transparent;
+}
+
+.right.line .tab.active {
+  border-left-color: var(--color-accent);
+  border-bottom-color: transparent;
+}
+
+/* Tab content */
+.tabContent {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex: 1;
+  min-width: 0;
+}
+
+.tabIcon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.tabLabel {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tabClose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: none;
+  border: none;
+  color: var(--color-neutral-gray);
+  cursor: pointer;
+  border-radius: var(--border-radius-xs);
+  transition: all var(--transition-fast);
+  padding: 0;
+  margin-left: var(--spacing-xs);
+}
+
+.tabClose:hover {
+  background-color: var(--color-divider-20);
+  color: var(--color-negative);
+}
+
+/* Disabled tab */
+.tab.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Add tab button */
+.addTab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  color: var(--color-neutral-gray);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-left: var(--spacing-xs);
+}
+
+.addTab:hover {
+  background-color: var(--color-background-20);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* Indicator for line type */
+.indicator {
+  position: absolute;
+  background-color: var(--color-accent);
+  transition: all var(--transition-medium);
+  pointer-events: none;
+}
+
+.topTabBar .indicator,
+.bottomTabBar .indicator {
+  height: 2px;
+  bottom: -1px;
+}
+
+.bottomTabBar .indicator {
+  bottom: auto;
+  top: -1px;
+}
+
+.leftTabBar .indicator {
+  width: 2px;
+  right: -1px;
+}
+
+.rightTabBar .indicator {
+  width: 2px;
+  left: -1px;
+}
+
+/* Tab panes container */
+.tabContent {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.topContent,
+.bottomContent {
+  width: 100%;
+}
+
+.leftContent,
+.rightContent {
+  height: 100%;
+  flex: 1;
+}
+
+/* Individual tab pane */
+.tabPane {
+  width: 100%;
+  height: 100%;
+}
+
+.tabPane.hidden {
+  display: none;
+}
+
+.animated .tabPane {
+  transition: opacity var(--transition-medium);
+}
+
+.animated .tabPane.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.animated .tabPane.active {
+  opacity: 1;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .left,
+  .right {
+    flex-direction: column;
+  }
+
+  .leftTabBar,
+  .rightTabBar {
+    flex-direction: row;
+    min-width: auto;
+    border: none;
+    border-bottom: 1px solid var(--color-divider);
+  }
+
+  .leftTabBar .tabNav,
+  .rightTabBar .tabNav {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .left.line .tab,
+  .right.line .tab {
+    border-right: none;
+    border-left: none;
+    border-bottom: 2px solid transparent;
+  }
+
+  .left.line .tab.active,
+  .right.line .tab.active {
+    border-right: none;
+    border-left: none;
+    border-bottom-color: var(--color-accent);
+  }
+
+  .leftTabBar .indicator,
+  .rightTabBar .indicator {
+    width: auto;
+    height: 2px;
+    bottom: -1px;
+    right: auto;
+    left: auto;
+  }
+}
+
+/* Scrollable tab navigation */
+.tabNav::-webkit-scrollbar {
+  height: 2px;
+}
+
+.tabNav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tabNav::-webkit-scrollbar-thumb {
+  background: var(--color-divider);
+  border-radius: 1px;
+}
+
+.tabNav::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .tab {
+    border-width: 2px;
+  }
+
+  .indicator {
+    height: 3px;
+  }
+
+  .leftTabBar .indicator,
+  .rightTabBar .indicator {
+    width: 3px;
+    height: auto;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .tab,
+  .indicator,
+  .tabPane {
+    transition: none;
+  }
+}

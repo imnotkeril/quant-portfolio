@@ -1,65 +1,35 @@
 /**
- * Hook for debouncing values
+ * Hook for detecting clicks outside of an element
  */
-import { useState, useEffect } from 'react';
+import { useEffect, RefObject } from 'react';
 
-export const useDebounce = <T>(value: T, delay: number): T => {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-
+export const useClickOutside = <T extends HTMLElement = HTMLElement>(
+  ref: RefObject<T>,
+  handler: (event: MouseEvent | TouchEvent) => void,
+  enabled: boolean = true
+): void => {
   useEffect(() => {
-    // Update debounced value after delay
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
+    if (!enabled) return;
 
-    // Cancel the timeout if value changes (also on delay change or unmount)
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
+    const listener = (event: MouseEvent | TouchEvent) => {
+      const element = ref?.current;
 
-  return debouncedValue;
-};
-
-/**
- * Hook for debouncing function calls
- */
-export const useDebouncedCallback = <T extends (...args: any[]) => any>(
-  callback: T,
-  delay: number
-): [T, () => void] => {
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
-
-  const debouncedCallback = ((...args: Parameters<T>) => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-
-    const newTimeoutId = setTimeout(() => {
-      callback(...args);
-      setTimeoutId(null);
-    }, delay);
-
-    setTimeoutId(newTimeoutId);
-  }) as T;
-
-  const cancel = () => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-      setTimeoutId(null);
-    }
-  };
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      // Do nothing if clicking ref's element or descendent elements
+      if (!element || element.contains(event.target as Node)) {
+        return;
       }
-    };
-  }, [timeoutId]);
 
-  return [debouncedCallback, cancel];
+      handler(event);
+    };
+
+    document.addEventListener('mousedown', listener);
+    document.addEventListener('touchstart', listener);
+
+    return () => {
+      document.removeEventListener('mousedown', listener);
+      document.removeEventListener('touchstart', listener);
+    };
+  }, [ref, handler, enabled]);
 };
 
-export default useDebounce;
+export default useClickOutside;

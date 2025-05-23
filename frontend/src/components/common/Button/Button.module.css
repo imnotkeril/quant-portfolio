@@ -1,0 +1,287 @@
+/**
+ * Button Styles for Wild Market Capital
+ */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--border-radius-s);
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(191, 159, 251, 0.5);
+}
+
+.button:focus:not(:focus-visible) {
+  box-shadow: none;
+}
+
+.button:focus-visible {
+  box-shadow: 0 0 0 2px rgba(191, 159, 251, 0.5);
+}
+
+/* Sizes */
+.small {
+  height: 32px;
+  padding: 0 var(--spacing-s);
+  font-size: var(--font-size-caption);
+  gap: var(--spacing-xs);
+}
+
+.medium {
+  height: 40px;
+  padding: 0 var(--spacing-m);
+  font-size: var(--font-size-body);
+  gap: var(--spacing-xs);
+}
+
+.large {
+  height: 48px;
+  padding: 0 var(--spacing-l);
+  font-size: var(--font-size-h3);
+  gap: var(--spacing-s);
+}
+
+/* Full width */
+.fullWidth {
+  width: 100%;
+}
+
+/* Icon styling */
+.iconLeft {
+  display: flex;
+  align-items: center;
+}
+
+.iconRight {
+  display: flex;
+  align-items: center;
+}
+
+.iconOnly {
+  width: var(--input-height);
+  padding: 0;
+}
+
+.iconOnly.small {
+  width: 32px;
+}
+
+.iconOnly.large {
+  width: 48px;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+}
+
+/* Loading state */
+.loading {
+  pointer-events: none;
+}
+
+.loading .content,
+.loading .iconLeft,
+.loading .iconRight {
+  opacity: 0;
+}
+
+.spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: currentColor;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Variants */
+.primary {
+  background-color: var(--color-accent);
+  color: var(--color-text-light);
+  border-color: var(--color-accent);
+}
+
+.primary:hover:not(.disabled):not(.loading) {
+  background-color: var(--color-hover);
+  border-color: var(--color-hover);
+  box-shadow: var(--shadow-glow);
+}
+
+.primary:active:not(.disabled):not(.loading) {
+  background-color: var(--color-active);
+  border-color: var(--color-active);
+  transform: translateY(1px);
+}
+
+.secondary {
+  background-color: transparent;
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.secondary:hover:not(.disabled):not(.loading) {
+  color: var(--color-hover);
+  border-color: var(--color-hover);
+  background-color: rgba(191, 159, 251, 0.1);
+}
+
+.secondary:active:not(.disabled):not(.loading) {
+  color: var(--color-active);
+  border-color: var(--color-active);
+  background-color: rgba(191, 159, 251, 0.2);
+  transform: translateY(1px);
+}
+
+.outline {
+  background-color: transparent;
+  color: var(--color-text-light);
+  border-color: var(--color-divider);
+}
+
+.outline:hover:not(.disabled):not(.loading) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background-color: rgba(191, 159, 251, 0.05);
+}
+
+.outline:active:not(.disabled):not(.loading) {
+  border-color: var(--color-active);
+  color: var(--color-active);
+  background-color: rgba(191, 159, 251, 0.1);
+  transform: translateY(1px);
+}
+
+.text {
+  background-color: transparent;
+  color: var(--color-accent);
+  border-color: transparent;
+  padding: var(--spacing-xs) var(--spacing-s);
+  height: auto;
+  min-height: 32px;
+}
+
+.text:hover:not(.disabled):not(.loading) {
+  color: var(--color-hover);
+  background-color: rgba(191, 159, 251, 0.1);
+}
+
+.text:active:not(.disabled):not(.loading) {
+  color: var(--color-active);
+  background-color: rgba(191, 159, 251, 0.2);
+}
+
+.success {
+  background-color: var(--color-positive);
+  color: var(--color-text-dark);
+  border-color: var(--color-positive);
+}
+
+.success:hover:not(.disabled):not(.loading) {
+  background-color: var(--color-positive);
+  opacity: 0.8;
+  box-shadow: 0 0 15px rgba(116, 241, 116, 0.3);
+}
+
+.success:active:not(.disabled):not(.loading) {
+  background-color: var(--color-positive);
+  opacity: 0.9;
+  transform: translateY(1px);
+}
+
+.danger {
+  background-color: var(--color-negative);
+  color: var(--color-text-dark);
+  border-color: var(--color-negative);
+}
+
+.danger:hover:not(.disabled):not(.loading) {
+  background-color: var(--color-negative);
+  opacity: 0.8;
+  box-shadow: 0 0 15px rgba(250, 161, 164, 0.3);
+}
+
+.danger:active:not(.disabled):not(.loading) {
+  background-color: var(--color-negative);
+  opacity: 0.9;
+  transform: translateY(1px);
+}
+
+.neutral {
+  background-color: var(--color-neutral-gray);
+  color: var(--color-text-dark);
+  border-color: var(--color-neutral-gray);
+}
+
+.neutral:hover:not(.disabled):not(.loading) {
+  background-color: var(--color-neutral-gray);
+  opacity: 0.8;
+}
+
+.neutral:active:not(.disabled):not(.loading) {
+  background-color: var(--color-neutral-gray);
+  opacity: 0.9;
+  transform: translateY(1px);
+}
+
+/* Disabled state */
+.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.disabled:hover,
+.disabled:active,
+.disabled:focus {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Loading spinner colors */
+.secondary .spinner,
+.outline .spinner,
+.text .spinner {
+  border-color: rgba(191, 159, 251, 0.3);
+  border-top-color: var(--color-accent);
+}
+
+.success .spinner {
+  border-color: rgba(13, 16, 21, 0.3);
+  border-top-color: var(--color-text-dark);
+}
+
+.danger .spinner {
+  border-color: rgba(13, 16, 21, 0.3);
+  border-top-color: var(--color-text-dark);
+}
+
+.neutral .spinner {
+  border-color: rgba(13, 16, 21, 0.3);
+  border-top-color: var(--color-text-dark);
+}

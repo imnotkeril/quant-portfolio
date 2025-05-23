@@ -1,0 +1,397 @@
+/**
+ * Dropdown Styles for Wild Market Capital
+ */
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.overlay {
+  position: absolute;
+  z-index: var(--z-index-dropdown);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  box-shadow: var(--shadow-large);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all var(--transition-fast);
+  min-width: 120px;
+  max-width: 300px;
+}
+
+.overlay.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Placement styles */
+.bottomStart {
+  top: 100%;
+  left: 0;
+}
+
+.bottomEnd {
+  top: 100%;
+  right: 0;
+}
+
+.bottomCenter {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bottomCenter.visible {
+  transform: translateX(-50%) translateY(0);
+}
+
+.topStart {
+  bottom: 100%;
+  left: 0;
+  transform: translateY(8px);
+}
+
+.topStart.visible {
+  transform: translateY(0);
+}
+
+.topEnd {
+  bottom: 100%;
+  right: 0;
+  transform: translateY(8px);
+}
+
+.topEnd.visible {
+  transform: translateY(0);
+}
+
+.topCenter {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+}
+
+.topCenter.visible {
+  transform: translateX(-50%) translateY(0);
+}
+
+.leftStart {
+  top: 0;
+  right: 100%;
+  transform: translateX(8px);
+}
+
+.leftStart.visible {
+  transform: translateX(0);
+}
+
+.leftEnd {
+  bottom: 0;
+  right: 100%;
+  transform: translateX(8px);
+}
+
+.leftEnd.visible {
+  transform: translateX(0);
+}
+
+.rightStart {
+  top: 0;
+  left: 100%;
+  transform: translateX(-8px);
+}
+
+.rightStart.visible {
+  transform: translateX(0);
+}
+
+.rightEnd {
+  bottom: 0;
+  left: 100%;
+  transform: translateX(-8px);
+}
+
+.rightEnd.visible {
+  transform: translateX(0);
+}
+
+/* Arrow */
+.withArrow .arrow {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-divider);
+  transform: rotate(45deg);
+}
+
+/* Arrow positioning for bottom placements */
+.bottomStart.withArrow .arrow,
+.bottomEnd.withArrow .arrow,
+.bottomCenter.withArrow .arrow {
+  top: -4px;
+  border-bottom: none;
+  border-right: none;
+}
+
+.bottomStart.withArrow .arrow {
+  left: 12px;
+}
+
+.bottomEnd.withArrow .arrow {
+  right: 12px;
+}
+
+.bottomCenter.withArrow .arrow {
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+/* Arrow positioning for top placements */
+.topStart.withArrow .arrow,
+.topEnd.withArrow .arrow,
+.topCenter.withArrow .arrow {
+  bottom: -4px;
+  border-top: none;
+  border-left: none;
+}
+
+.topStart.withArrow .arrow {
+  left: 12px;
+}
+
+.topEnd.withArrow .arrow {
+  right: 12px;
+}
+
+.topCenter.withArrow .arrow {
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+/* Arrow positioning for left placements */
+.leftStart.withArrow .arrow,
+.leftEnd.withArrow .arrow {
+  right: -4px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.leftStart.withArrow .arrow {
+  top: 12px;
+}
+
+.leftEnd.withArrow .arrow {
+  bottom: 12px;
+}
+
+/* Arrow positioning for right placements */
+.rightStart.withArrow .arrow,
+.rightEnd.withArrow .arrow {
+  left: -4px;
+  border-right: none;
+  border-top: none;
+}
+
+.rightStart.withArrow .arrow {
+  top: 12px;
+}
+
+.rightEnd.withArrow .arrow {
+  bottom: 12px;
+}
+
+.overlayContent {
+  position: relative;
+  z-index: 1;
+}
+
+/* Menu styles */
+.menu {
+  padding: var(--spacing-xs) 0;
+  min-width: 160px;
+}
+
+.menuItem {
+  position: relative;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.menuItem:hover:not(.disabled) {
+  background-color: var(--color-divider-20);
+}
+
+.menuItem.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.menuItem.danger {
+  color: var(--color-negative);
+}
+
+.menuItem.danger:hover:not(.disabled) {
+  background-color: rgba(250, 161, 164, 0.1);
+}
+
+.menuItemContent {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-m);
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+}
+
+.menuItemIcon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--color-neutral-gray);
+}
+
+.menuItemLabel {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menuItemArrow {
+  display: flex;
+  align-items: center;
+  color: var(--color-neutral-gray);
+  margin-left: auto;
+}
+
+.hasChildren {
+  position: relative;
+}
+
+.hasChildren:hover .submenu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+.submenu {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  box-shadow: var(--shadow-large);
+  min-width: 160px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-8px);
+  transition: all var(--transition-fast);
+  z-index: var(--z-index-dropdown);
+  margin-left: 4px;
+  padding: var(--spacing-xs) 0;
+}
+
+.divider {
+  height: 1px;
+  background-color: var(--color-divider);
+  margin: var(--spacing-xs) 0;
+}
+
+/* Scrollbar for long menus */
+.menu::-webkit-scrollbar,
+.submenu::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+.menu::-webkit-scrollbar-track,
+.submenu::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+.menu::-webkit-scrollbar-thumb,
+.submenu::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--scrollbar-width);
+}
+
+.menu::-webkit-scrollbar-thumb:hover,
+.submenu::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .overlay {
+    position: fixed;
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: translate(-50%, -50%) !important;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
+
+  .overlay.visible {
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .withArrow .arrow {
+    display: none;
+  }
+
+  .submenu {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    box-shadow: none;
+    border: none;
+    border-top: 1px solid var(--color-divider);
+    border-radius: 0;
+    margin: 0;
+    padding-left: var(--spacing-m);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .overlay {
+    border-width: 2px;
+  }
+
+  .arrow {
+    border-width: 2px;
+  }
+
+  .submenu {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .submenu {
+    transition: none;
+  }
+
+  .overlay.visible {
+    transform: none;
+  }
+}
