@@ -1,0 +1,180 @@
+/**
+ * CandlestickChart Styles for Wild Market Capital
+ */
+
+.container {
+  width: 100%;
+  min-height: 200px;
+  background-color: rgba(13, 16, 21, 0.5);
+  border-radius: var(--border-radius-m);
+  border: 1px solid var(--color-divider);
+  padding: var(--spacing-m);
+  position: relative;
+  overflow: hidden;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-neutral-gray);
+  gap: var(--spacing-s);
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(191, 159, 251, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--color-accent);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-body);
+  font-family: var(--font-family);
+}
+
+/* Custom tooltip styling */
+.customTooltip {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  padding: var(--spacing-s);
+  box-shadow: var(--shadow-large);
+  font-family: var(--font-family);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-light);
+  min-width: 140px;
+}
+
+.tooltipLabel {
+  font-weight: var(--font-weight-semi-bold);
+  margin-bottom: var(--spacing-xs);
+  color: var(--color-accent);
+  font-size: var(--font-size-body);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.tooltipContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tooltipContent p {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tooltipKey {
+  color: var(--color-neutral-gray);
+  margin-right: var(--spacing-s);
+}
+
+/* Recharts customization */
+.container :global(.recharts-wrapper) {
+  font-family: var(--font-family);
+}
+
+.container :global(.recharts-cartesian-axis-tick-value) {
+  font-family: var(--font-family);
+  font-size: var(--font-size-caption);
+}
+
+/* Grid styling */
+.container :global(.recharts-cartesian-grid-horizontal line) {
+  stroke: var(--color-divider);
+  stroke-dasharray: 3 3;
+}
+
+.container :global(.recharts-cartesian-grid-vertical line) {
+  stroke: var(--color-divider);
+  stroke-dasharray: 3 3;
+}
+
+/* Bar styling for candles */
+.container :global(.recharts-bar-rectangle) {
+  transition: opacity var(--transition-fast);
+}
+
+.container :global(.recharts-bar-rectangle:hover) {
+  opacity: 0.8;
+}
+
+/* Volume bars styling */
+.container :global(.recharts-bar[opacity="0.3"]) {
+  transition: opacity var(--transition-fast);
+}
+
+.container :global(.recharts-bar[opacity="0.3"]:hover) {
+  opacity: 0.5;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-s);
+  }
+
+  .container :global(.recharts-cartesian-axis-tick-value) {
+    font-size: 10px;
+  }
+
+  .customTooltip {
+    font-size: 10px;
+    padding: var(--spacing-xs);
+    min-width: 120px;
+  }
+
+  .tooltipLabel {
+    font-size: var(--font-size-caption);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .container {
+    border-width: 2px;
+  }
+
+  .container :global(.recharts-cartesian-grid-horizontal line),
+  .container :global(.recharts-cartesian-grid-vertical line) {
+    stroke-width: 1px;
+    stroke-dasharray: none;
+  }
+
+  .customTooltip {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+
+  .container :global(.recharts-bar-rectangle) {
+    transition: none !important;
+  }
+
+  .container :global(.recharts-bar) {
+    transition: none !important;
+  }
+}

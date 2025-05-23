@@ -1,0 +1,208 @@
+/**
+ * ChartContainer Styles for Wild Market Capital
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--card-background);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-border-radius);
+  overflow: hidden;
+  transition: all var(--transition-medium);
+}
+
+.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-index-modal);
+  border-radius: 0;
+  border: none;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: var(--spacing-m);
+  border-bottom: 1px solid var(--card-header-border);
+  background-color: var(--card-background);
+  flex-shrink: 0;
+}
+
+.titleSection {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-xs) 0;
+  line-height: var(--line-height-h3);
+}
+
+.subtitle {
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-gray);
+  margin: 0;
+  line-height: var(--line-height-body);
+}
+
+.actionSection {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  flex-shrink: 0;
+  margin-left: var(--spacing-m);
+}
+
+.content {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+  overflow: hidden;
+}
+
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(13, 16, 21, 0.8);
+  backdrop-filter: blur(2px);
+  z-index: 10;
+}
+
+.errorOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(13, 16, 21, 0.9);
+  z-index: 10;
+}
+
+.errorContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-s);
+  color: var(--color-negative);
+  text-align: center;
+  padding: var(--spacing-l);
+}
+
+.errorContent svg {
+  color: var(--color-negative);
+}
+
+.errorContent span {
+  font-size: var(--font-size-body);
+  font-family: var(--font-family);
+  max-width: 300px;
+}
+
+/* Loading state */
+.loading {
+  pointer-events: none;
+}
+
+.loading .content {
+  opacity: 0.6;
+}
+
+/* Error state */
+.error .content {
+  opacity: 0.3;
+}
+
+/* Fullscreen specific styles */
+.fullscreen .header {
+  padding: var(--spacing-l);
+}
+
+.fullscreen .content {
+  padding: var(--spacing-l);
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-s);
+  }
+
+  .titleSection {
+    margin-bottom: var(--spacing-s);
+  }
+
+  .actionSection {
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+
+  .title {
+    font-size: var(--font-size-body);
+  }
+
+  .subtitle {
+    font-size: var(--font-size-caption);
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: var(--spacing-s);
+  }
+
+  .actionSection {
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+
+  .fullscreen .header {
+    padding: var(--spacing-m);
+  }
+
+  .fullscreen .content {
+    padding: var(--spacing-m);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .container {
+    border-width: 2px;
+  }
+
+  .header {
+    border-bottom-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .container {
+    transition: none;
+  }
+
+  .loadingOverlay {
+    backdrop-filter: none;
+  }
+}
