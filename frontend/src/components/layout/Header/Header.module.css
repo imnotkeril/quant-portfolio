@@ -1,0 +1,260 @@
+/**
+ * Header Styles for Wild Market Capital
+ */
+
+.header {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-l);
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-divider);
+  z-index: var(--z-index-header);
+  transition: left var(--transition-medium);
+}
+
+.collapsed {
+  left: var(--sidebar-width-collapsed);
+}
+
+.hidden {
+  left: 0;
+}
+
+.fullScreen {
+  left: 0;
+  top: 0;
+  z-index: calc(var(--z-index-modal) - 1);
+}
+
+.mobile {
+  left: 0;
+  padding: 0 var(--spacing-m);
+}
+
+/* Left section */
+.left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+  flex-shrink: 0;
+}
+
+.menuButton {
+  display: none;
+  color: var(--color-text-light);
+}
+
+.mobile .menuButton {
+  display: flex;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  color: var(--color-accent);
+}
+
+.logoText {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  white-space: nowrap;
+}
+
+.mobile .logoText {
+  display: none;
+}
+
+/* Center section */
+.center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--spacing-l);
+}
+
+.search {
+  max-width: 400px;
+  width: 100%;
+}
+
+.searchInput {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background-color: rgba(42, 46, 57, 0.5);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  transition: all var(--transition-fast);
+}
+
+.searchInput:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.searchInput svg {
+  position: absolute;
+  left: var(--spacing-s);
+  color: var(--color-neutral-gray);
+  pointer-events: none;
+}
+
+.searchField {
+  width: 100%;
+  height: 36px;
+  padding: 0 var(--spacing-s) 0 40px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+}
+
+.searchField::placeholder {
+  color: var(--color-neutral-gray);
+}
+
+.mobile .center {
+  display: none;
+}
+
+/* Right section */
+.right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+  flex-shrink: 0;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.controlButton {
+  color: var(--color-neutral-gray);
+  transition: color var(--transition-fast);
+}
+
+.controlButton:hover {
+  color: var(--color-accent);
+}
+
+.controlButton.active {
+  color: var(--color-accent);
+  background-color: rgba(191, 159, 251, 0.1);
+}
+
+.mobile .controls {
+  gap: var(--spacing-xs);
+}
+
+.mobile .controlButton {
+  display: none;
+}
+
+.mobile .controlButton:nth-last-child(-n+2) {
+  display: flex;
+}
+
+/* User section */
+.userSection {
+  display: flex;
+  align-items: center;
+}
+
+.userButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  padding: var(--spacing-xs) var(--spacing-s);
+  color: var(--color-text-light);
+  transition: all var(--transition-fast);
+}
+
+.userButton:hover {
+  background-color: rgba(42, 46, 57, 0.5);
+  color: var(--color-accent);
+}
+
+.userAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: var(--color-accent);
+  border-radius: var(--border-radius-circle);
+  color: var(--color-text-light);
+}
+
+.userName {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.mobile .userName {
+  display: none;
+}
+
+/* Badge positioning */
+.controls :global(.badge-container) {
+  display: flex;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .header {
+    padding: 0 var(--spacing-s);
+  }
+
+  .left {
+    gap: var(--spacing-s);
+  }
+
+  .right {
+    gap: var(--spacing-s);
+  }
+
+  .controls {
+    gap: 2px;
+  }
+
+  .userButton {
+    padding: var(--spacing-xs);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .header {
+    border-bottom-width: 2px;
+  }
+
+  .searchInput {
+    border-width: 2px;
+  }
+
+  .logoText {
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+/* Sticky behavior for mobile */
+@media (max-width: 768px) {
+  .header {
+    position: sticky;
+    top: 0;
+  }
+}

@@ -85,7 +85,7 @@ investment-portfolio-frontend/
 │   ├── utils/                     # Utility functions
 │   ├── App.tsx                    # Main application component
 │   ├── AppRoutes.tsx              # Application routes
-│   ├── index.tsx                  # Entry point
+│   ├── Header.tsx                  # Entry point
 ```
 
 ## Backend Integration

@@ -1,0 +1,339 @@
+/**
+ * Sidebar Styles for Wild Market Capital
+ */
+
+:root {
+  --sidebar-width: 280px;
+  --sidebar-width-collapsed: 80px;
+  --header-height: 64px;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: var(--color-background);
+  border-right: 1px solid var(--color-divider);
+  z-index: var(--z-index-elevated);
+  transition: all var(--transition-medium);
+  transform: translateX(0);
+}
+
+.collapsed {
+  width: var(--sidebar-width-collapsed);
+}
+
+.hidden {
+  transform: translateX(-100%);
+}
+
+.fullScreen {
+  z-index: calc(var(--z-index-modal) - 2);
+}
+
+.mobile {
+  transform: translateX(-100%);
+  box-shadow: var(--shadow-large);
+}
+
+.mobile:not(.hidden) {
+  transform: translateX(0);
+}
+
+/* Sidebar content */
+.sidebarContent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Brand section */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  padding: var(--spacing-l) var(--spacing-m);
+  border-bottom: 1px solid var(--color-divider);
+  flex-shrink: 0;
+  min-height: var(--header-height);
+}
+
+.brandIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--color-gradient-primary);
+  border-radius: var(--border-radius-m);
+  color: var(--color-text-light);
+  flex-shrink: 0;
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  overflow: hidden;
+}
+
+.brandName {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-light);
+  white-space: nowrap;
+}
+
+.brandSub {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+
+.collapsed .brandText {
+  display: none;
+}
+
+/* Navigation section */
+.navigation {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-s) 0;
+}
+
+.navSection {
+  padding: 0 var(--spacing-s);
+}
+
+.navItem {
+  margin-bottom: var(--spacing-xs);
+}
+
+.navButton {
+  width: 100%;
+  justify-content: flex-start;
+  padding: var(--spacing-s) var(--spacing-m);
+  border-radius: var(--border-radius-s);
+  color: var(--color-neutral-gray);
+  transition: all var(--transition-fast);
+  text-align: left;
+  min-height: 44px;
+}
+
+.navButton:hover {
+  background-color: rgba(42, 46, 57, 0.5);
+  color: var(--color-text-light);
+}
+
+.navButtonContent {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  width: 100%;
+}
+
+.navIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.navLabel {
+  flex: 1;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.expandIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+}
+
+.expandIcon.rotated {
+  transform: rotate(90deg);
+}
+
+/* Active states */
+.active .navButton {
+  background-color: rgba(191, 159, 251, 0.15);
+  color: var(--color-accent);
+}
+
+.active .navButton:hover {
+  background-color: rgba(191, 159, 251, 0.2);
+  color: var(--color-accent);
+}
+
+.childActive .navButton {
+  background-color: rgba(191, 159, 251, 0.05);
+  color: var(--color-text-light);
+}
+
+/* Collapsed state */
+.collapsed .navButton {
+  padding: var(--spacing-s);
+  justify-content: center;
+}
+
+.collapsed .navLabel,
+.collapsed .expandIcon {
+  display: none;
+}
+
+.collapsed .navIcon {
+  width: 24px;
+  height: 24px;
+}
+
+/* Submenu */
+.subMenu {
+  margin-left: var(--spacing-l);
+  margin-top: var(--spacing-xs);
+  border-left: 1px solid var(--color-divider);
+  padding-left: var(--spacing-s);
+}
+
+.subMenu .navButton {
+  font-size: var(--font-size-caption);
+  min-height: 36px;
+  padding: var(--spacing-xs) var(--spacing-s);
+}
+
+.subMenu .navIcon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Footer section */
+.footer {
+  padding: var(--spacing-m);
+  border-top: 1px solid var(--color-divider);
+  flex-shrink: 0;
+}
+
+.footerContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.version {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  text-align: center;
+}
+
+.status {
+  display: flex;
+  justify-content: center;
+}
+
+.collapsed .footer {
+  padding: var(--spacing-s);
+}
+
+.collapsed .footerContent {
+  align-items: center;
+}
+
+.collapsed .version {
+  display: none;
+}
+
+/* Scrollbar styling */
+.navigation::-webkit-scrollbar {
+  width: 4px;
+}
+
+.navigation::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.navigation::-webkit-scrollbar-thumb {
+  background-color: var(--color-divider);
+  border-radius: 2px;
+}
+
+.navigation::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-accent);
+}
+
+/* Badge positioning */
+.navButtonContent :global(.badge) {
+  margin-left: auto;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 280px;
+    box-shadow: var(--shadow-large);
+  }
+
+  .collapsed {
+    width: 280px;
+  }
+
+  .hidden {
+    transform: translateX(-100%);
+  }
+}
+
+/* Animation for mobile slide */
+@media (max-width: 768px) {
+  .sidebar {
+    transition: transform var(--transition-medium);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .sidebar {
+    border-right-width: 2px;
+  }
+
+  .brand {
+    border-bottom-width: 2px;
+  }
+
+  .footer {
+    border-top-width: 2px;
+  }
+
+  .brandName {
+    font-weight: var(--font-weight-bold);
+  }
+
+  .active .navButton {
+    border: 2px solid var(--color-accent);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .navButton,
+  .expandIcon {
+    transition: none;
+  }
+
+  .expandIcon.rotated {
+    transform: none;
+  }
+}

@@ -1,0 +1,324 @@
+/**
+ * Footer Styles for Wild Market Capital
+ */
+
+.footer {
+  position: relative;
+  margin-left: var(--sidebar-width);
+  background-color: var(--color-background);
+  border-top: 1px solid var(--color-divider);
+  transition: margin-left var(--transition-medium);
+}
+
+.collapsed {
+  margin-left: var(--sidebar-width-collapsed);
+}
+
+.hidden,
+.mobile {
+  margin-left: 0;
+}
+
+.fullScreen {
+  display: none;
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-l) var(--spacing-xl);
+}
+
+/* Content sections */
+.content {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: var(--spacing-l);
+  margin-bottom: var(--spacing-l);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+/* Brand section */
+.brand {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-s);
+}
+
+.brandIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--color-gradient-primary);
+  border-radius: var(--border-radius-s);
+  color: var(--color-text-light);
+  flex-shrink: 0;
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.brandName {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  line-height: 1.2;
+}
+
+.brandDescription {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  line-height: 1.4;
+}
+
+/* Section titles */
+.sectionTitle {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-s) 0;
+}
+
+/* Links */
+.linkList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.link {
+  color: var(--color-neutral-gray);
+  text-decoration: none;
+  font-size: var(--font-size-caption);
+  transition: color var(--transition-fast);
+}
+
+.link:hover {
+  color: var(--color-accent);
+}
+
+/* Social links */
+.socialLinks {
+  display: flex;
+  gap: var(--spacing-s);
+}
+
+.socialLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: rgba(42, 46, 57, 0.5);
+  border-radius: var(--border-radius-s);
+  color: var(--color-neutral-gray);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.socialLink:hover {
+  background-color: var(--color-accent);
+  color: var(--color-text-light);
+  transform: translateY(-2px);
+}
+
+/* System info */
+.systemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+  align-items: flex-end;
+}
+
+.version {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-xs);
+}
+
+.versionLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+}
+
+.versionNumber {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.statusIndicator {
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-positive);
+  border-radius: var(--border-radius-circle);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.statusText {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+}
+
+/* Bottom section */
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--spacing-m);
+  border-top: 1px solid var(--color-divider);
+}
+
+.copyright {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+}
+
+.legal {
+  display: flex;
+  gap: var(--spacing-s);
+}
+
+.legalText {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .container {
+    padding: var(--spacing-m) var(--spacing-l);
+  }
+
+  .content {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-m);
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-s) var(--spacing-m);
+  }
+
+  .content {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-m);
+  }
+
+  .systemInfo {
+    align-items: flex-start;
+  }
+
+  .version {
+    align-items: flex-start;
+  }
+
+  .bottom {
+    flex-direction: column;
+    gap: var(--spacing-s);
+    align-items: flex-start;
+  }
+
+  .brand {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+
+  .socialLinks {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: var(--spacing-xs) var(--spacing-s);
+  }
+
+  .content {
+    gap: var(--spacing-s);
+  }
+
+  .brandName {
+    font-size: var(--font-size-body);
+  }
+
+  .brandDescription {
+    font-size: var(--font-size-footer);
+  }
+
+  .socialLinks {
+    gap: var(--spacing-xs);
+  }
+
+  .socialLink {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .footer {
+    border-top-width: 2px;
+  }
+
+  .bottom {
+    border-top-width: 2px;
+  }
+
+  .brandName {
+    font-weight: var(--font-weight-bold);
+  }
+
+  .sectionTitle {
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .footer {
+    transition: none;
+  }
+
+  .socialLink:hover {
+    transform: none;
+  }
+
+  .statusIndicator {
+    animation: none;
+  }
+}

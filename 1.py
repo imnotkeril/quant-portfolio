@@ -293,13 +293,13 @@ def create_structure():
     for page in page_types:
         page_dir = pages_dir / page
         page_dir.mkdir(exist_ok=True)
-        (page_dir / "index.tsx").touch()
+        (page_dir / "Header.tsx").touch()
 
         # Additional files for Dashboard page as an example of page structure
         if page == "Dashboard":
             (page_dir / "DashboardWidget.tsx").touch()
             (page_dir / "DashboardLayout.tsx").touch()
-            (page_dir / "styles.module.css").touch()
+            (page_dir / "Sidebar.module.css").touch()
 
     # Services directory
     services_dir = src_dir / "services"
@@ -392,7 +392,7 @@ def create_structure():
     # Frontend main files
     (src_dir / "App.tsx").touch()
     (src_dir / "AppRoutes.tsx").touch()
-    (src_dir / "index.tsx").touch()
+    (src_dir / "Header.tsx").touch()
 
     # Frontend project files
     (frontend_dir / "package.json").touch()
