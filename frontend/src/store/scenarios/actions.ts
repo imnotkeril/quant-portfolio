@@ -1,20 +1,16 @@
 /**
  * Scenarios store actions
  */
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import { scenarioService } from '../../services/scenarios/scenarioService';
 import {
-  ScenariosActionTypes,
-  ScenariosAction,
   RunSimulationPayload,
   AnalyzeImpactPayload,
   CreateChainPayload,
   ModifyChainPayload,
   LoadChainPayload,
   DeleteChainPayload,
-  ScenarioViewMode,
-  CustomScenario,
-  ScenariosState,
 } from './types';
-import { ApiError } from '../../types/common';
 import {
   ScenarioListResponse,
   ScenarioSimulationResponse,
@@ -23,296 +19,151 @@ import {
 } from '../../types/scenarios';
 
 /**
- * Scenario list actions
+ * Load available scenarios
  */
-export const loadScenariosRequest = (): ScenariosAction => ({
-  type: ScenariosActionTypes.LOAD_SCENARIOS_REQUEST,
-});
-
-export const loadScenariosSuccess = (data: ScenarioListResponse): ScenariosAction => ({
-  type: ScenariosActionTypes.LOAD_SCENARIOS_SUCCESS,
-  payload: data,
-});
-
-export const loadScenariosFailure = (error: ApiError): ScenariosAction => ({
-  type: ScenariosActionTypes.LOAD_SCENARIOS_FAILURE,
-  payload: { error },
-});
+export const loadScenarios = createAsyncThunk<
+  ScenarioListResponse,
+  void,
+  { rejectValue: string }
+>(
+  'scenarios/loadScenarios',
+  async (_, { rejectWithValue }) => {
+    try {
+      return await scenarioService.getAvailableScenarios();
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to load scenarios');
+    }
+  }
+);
 
 /**
- * Simulation actions
+ * Run scenario simulation
  */
-export const runSimulationRequest = (payload: RunSimulationPayload): ScenariosAction => ({
-  type: ScenariosActionTypes.RUN_SIMULATION_REQUEST,
-  payload,
-});
+export const runSimulation = createAsyncThunk<
+  { simulationId: string; data: ScenarioSimulationResponse },
+  RunSimulationPayload,
+  { rejectValue: string }
+>(
+  'scenarios/runSimulation',
+  async (payload, { rejectWithValue }) => {
+    try {
+      // Validate request
+      const validation = scenarioService.validateScenarioSimulationRequest(payload.request);
+      if (!validation.isValid) {
+        return rejectWithValue(validation.errors.join(', '));
+      }
 
-export const runSimulationSuccess = (
-  simulationId: string,
-  data: ScenarioSimulationResponse
-): ScenariosAction => ({
-  type: ScenariosActionTypes.RUN_SIMULATION_SUCCESS,
-  payload: { simulationId, data },
-});
-
-export const runSimulationFailure = (error: ApiError): ScenariosAction => ({
-  type: ScenariosActionTypes.RUN_SIMULATION_FAILURE,
-  payload: { error },
-});
+      const data = await scenarioService.simulateScenarioChain(payload.request);
+      return { simulationId: payload.simulationId, data };
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to run simulation');
+    }
+  }
+);
 
 /**
- * Impact analysis actions
+ * Analyze scenario impact
  */
-export const analyzeImpactRequest = (payload: AnalyzeImpactPayload): ScenariosAction => ({
-  type: ScenariosActionTypes.ANALYZE_IMPACT_REQUEST,
-  payload,
-});
+export const analyzeImpact = createAsyncThunk<
+  { portfolioId: string; data: ScenarioImpactResponse },
+  AnalyzeImpactPayload,
+  { rejectValue: string }
+>(
+  'scenarios/analyzeImpact',
+  async (payload, { rejectWithValue }) => {
+    try {
+      // Validate request
+      const validation = scenarioService.validateScenarioImpactRequest(payload.request);
+      if (!validation.isValid) {
+        return rejectWithValue(validation.errors.join(', '));
+      }
 
-export const analyzeImpactSuccess = (
-  portfolioId: string,
-  data: ScenarioImpactResponse
-): ScenariosAction => ({
-  type: ScenariosActionTypes.ANALYZE_IMPACT_SUCCESS,
-  payload: { portfolioId, data },
-});
-
-export const analyzeImpactFailure = (error: ApiError): ScenariosAction => ({
-  type: ScenariosActionTypes.ANALYZE_IMPACT_FAILURE,
-  payload: { error },
-});
+      const data = await scenarioService.analyzeScenarioImpact(payload.request);
+      return { portfolioId: payload.portfolioId, data };
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to analyze scenario impact');
+    }
+  }
+);
 
 /**
- * Chain management actions
+ * Create scenario chain
  */
-export const createChainRequest = (payload: CreateChainPayload): ScenariosAction => ({
-  type: ScenariosActionTypes.CREATE_CHAIN_REQUEST,
-  payload,
-});
+export const createChain = createAsyncThunk<
+  { name: string; data: ScenarioChainResponse },
+  CreateChainPayload,
+  { rejectValue: string }
+>(
+  'scenarios/createChain',
+  async (payload, { rejectWithValue }) => {
+    try {
+      // Validate request
+      const validation = scenarioService.validateScenarioChainRequest(payload.request);
+      if (!validation.isValid) {
+        return rejectWithValue(validation.errors.join(', '));
+      }
 
-export const createChainSuccess = (
-  name: string,
-  data: ScenarioChainResponse
-): ScenariosAction => ({
-  type: ScenariosActionTypes.CREATE_CHAIN_SUCCESS,
-  payload: { name, data },
-});
-
-export const createChainFailure = (error: ApiError): ScenariosAction => ({
-  type: ScenariosActionTypes.CREATE_CHAIN_FAILURE,
-  payload: { error },
-});
-
-export const modifyChainRequest = (payload: ModifyChainPayload): ScenariosAction => ({
-  type: ScenariosActionTypes.MODIFY_CHAIN_REQUEST,
-  payload,
-});
-
-export const modifyChainSuccess = (
-  name: string,
-  data: ScenarioChainResponse
-): ScenariosAction => ({
-  type: ScenariosActionTypes.MODIFY_CHAIN_SUCCESS,
-  payload: { name, data },
-});
-
-export const modifyChainFailure = (error: ApiError): ScenariosAction => ({
-  type: ScenariosActionTypes.MODIFY_CHAIN_FAILURE,
-  payload: { error },
-});
-
-export const deleteChainRequest = (payload: DeleteChainPayload): ScenariosAction => ({
-  type: ScenariosActionTypes.DELETE_CHAIN_REQUEST,
-  payload,
-});
-
-export const deleteChainSuccess = (name: string): ScenariosAction => ({
-  type: ScenariosActionTypes.DELETE_CHAIN_SUCCESS,
-  payload: { name },
-});
-
-export const deleteChainFailure = (error: ApiError): ScenariosAction => ({
-  type: ScenariosActionTypes.DELETE_CHAIN_FAILURE,
-  payload: { error },
-});
-
-export const loadChainRequest = (payload: LoadChainPayload): ScenariosAction => ({
-  type: ScenariosActionTypes.LOAD_CHAIN_REQUEST,
-  payload,
-});
-
-export const loadChainSuccess = (
-  name: string,
-  data: ScenarioChainResponse
-): ScenariosAction => ({
-  type: ScenariosActionTypes.LOAD_CHAIN_SUCCESS,
-  payload: { name, data },
-});
-
-export const loadChainFailure = (error: ApiError): ScenariosAction => ({
-  type: ScenariosActionTypes.LOAD_CHAIN_FAILURE,
-  payload: { error },
-});
+      const data = await scenarioService.createScenarioChain(payload.request);
+      return { name: payload.request.name, data };
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to create scenario chain');
+    }
+  }
+);
 
 /**
- * UI state actions
+ * Modify scenario chain
  */
-export const setCurrentPortfolio = (portfolioId: string | null): ScenariosAction => ({
-  type: ScenariosActionTypes.SET_CURRENT_PORTFOLIO,
-  payload: portfolioId,
-});
-
-export const setSelectedScenarios = (scenarios: string[]): ScenariosAction => ({
-  type: ScenariosActionTypes.SET_SELECTED_SCENARIOS,
-  payload: scenarios,
-});
-
-export const setActiveSimulation = (simulationId: string | null): ScenariosAction => ({
-  type: ScenariosActionTypes.SET_ACTIVE_SIMULATION,
-  payload: simulationId,
-});
-
-export const setViewMode = (viewMode: ScenarioViewMode): ScenariosAction => ({
-  type: ScenariosActionTypes.SET_VIEW_MODE,
-  payload: viewMode,
-});
-
-export const setSelectedChain = (chainName: string | null): ScenariosAction => ({
-  type: ScenariosActionTypes.SET_SELECTED_CHAIN,
-  payload: chainName,
-});
-
-export const setChainVisualizationData = (data: any): ScenariosAction => ({
-  type: ScenariosActionTypes.SET_CHAIN_VISUALIZATION_DATA,
-  payload: data,
-});
+export const modifyChain = createAsyncThunk<
+  { name: string; data: ScenarioChainResponse },
+  ModifyChainPayload,
+  { rejectValue: string }
+>(
+  'scenarios/modifyChain',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const data = await scenarioService.modifyScenarioChain(payload.request);
+      return { name: payload.request.name, data };
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to modify scenario chain');
+    }
+  }
+);
 
 /**
- * Parameters actions
+ * Load scenario chain
  */
-export const updateSimulationParameters = (
-  parameters: Partial<ScenariosState['simulationParameters']>
-): ScenariosAction => ({
-  type: ScenariosActionTypes.UPDATE_SIMULATION_PARAMETERS,
-  payload: parameters,
-});
-
-export const resetSimulationParameters = (): ScenariosAction => ({
-  type: ScenariosActionTypes.RESET_SIMULATION_PARAMETERS,
-});
+export const loadChain = createAsyncThunk<
+  { name: string; data: ScenarioChainResponse },
+  LoadChainPayload,
+  { rejectValue: string }
+>(
+  'scenarios/loadChain',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const data = await scenarioService.getScenarioChain(payload.name);
+      return { name: payload.name, data };
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to load scenario chain');
+    }
+  }
+);
 
 /**
- * Custom scenarios actions
+ * Delete scenario chain
  */
-export const addCustomScenario = (scenario: CustomScenario): ScenariosAction => ({
-  type: ScenariosActionTypes.ADD_CUSTOM_SCENARIO,
-  payload: scenario,
-});
-
-export const updateCustomScenario = (
-  id: string,
-  updates: Partial<CustomScenario>
-): ScenariosAction => ({
-  type: ScenariosActionTypes.UPDATE_CUSTOM_SCENARIO,
-  payload: { id, updates },
-});
-
-export const deleteCustomScenario = (id: string): ScenariosAction => ({
-  type: ScenariosActionTypes.DELETE_CUSTOM_SCENARIO,
-  payload: id,
-});
-
-/**
- * Cache management actions
- */
-export const clearCache = (): ScenariosAction => ({
-  type: ScenariosActionTypes.CLEAR_CACHE,
-});
-
-export const clearSimulationCache = (): ScenariosAction => ({
-  type: ScenariosActionTypes.CLEAR_SIMULATION_CACHE,
-});
-
-export const clearImpactCache = (): ScenariosAction => ({
-  type: ScenariosActionTypes.CLEAR_IMPACT_CACHE,
-});
-
-/**
- * Settings actions
- */
-export const updateSettings = (settings: Partial<ScenariosState['settings']>): ScenariosAction => ({
-  type: ScenariosActionTypes.UPDATE_SETTINGS,
-  payload: settings,
-});
-
-export const resetSettings = (): ScenariosAction => ({
-  type: ScenariosActionTypes.RESET_SETTINGS,
-});
-
-/**
- * General actions
- */
-export const clearErrors = (): ScenariosAction => ({
-  type: ScenariosActionTypes.CLEAR_ERRORS,
-});
-
-export const resetState = (): ScenariosAction => ({
-  type: ScenariosActionTypes.RESET_STATE,
-});
-
-/**
- * Thunk action creators (for async operations)
- */
-export const loadScenarios = () => {
-  return {
-    type: 'ASYNC_ACTION',
-    action: 'LOAD_SCENARIOS',
-  };
-};
-
-export const runSimulation = (payload: RunSimulationPayload) => {
-  return {
-    type: 'ASYNC_ACTION',
-    action: 'RUN_SIMULATION',
-    payload,
-  };
-};
-
-export const analyzeImpact = (payload: AnalyzeImpactPayload) => {
-  return {
-    type: 'ASYNC_ACTION',
-    action: 'ANALYZE_IMPACT',
-    payload,
-  };
-};
-
-export const createChain = (payload: CreateChainPayload) => {
-  return {
-    type: 'ASYNC_ACTION',
-    action: 'CREATE_CHAIN',
-    payload,
-  };
-};
-
-export const modifyChain = (payload: ModifyChainPayload) => {
-  return {
-    type: 'ASYNC_ACTION',
-    action: 'MODIFY_CHAIN',
-    payload,
-  };
-};
-
-export const loadChain = (payload: LoadChainPayload) => {
-  return {
-    type: 'ASYNC_ACTION',
-    action: 'LOAD_CHAIN',
-    payload,
-  };
-};
-
-export const deleteChain = (payload: DeleteChainPayload) => {
-  return {
-    type: 'ASYNC_ACTION',
-    action: 'DELETE_CHAIN',
-    payload,
-  };
-};
+export const deleteChain = createAsyncThunk<
+  string,
+  DeleteChainPayload,
+  { rejectValue: string }
+>(
+  'scenarios/deleteChain',
+  async (payload, { rejectWithValue }) => {
+    try {
+      await scenarioService.deleteScenarioChain(payload.name);
+      return payload.name;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to delete scenario chain');
+    }
+  }
+);

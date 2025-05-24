@@ -1,7 +1,7 @@
 /**
  * Scenarios store selectors
  */
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../rootReducer';
 import { ScenariosState } from './types';
 
@@ -281,13 +281,10 @@ export const selectScenarioCategories = createSelector(
   selectAvailableScenarios,
   selectCustomScenarios,
   (available, custom) => {
-    // Group scenarios by category
-    const categories = {
+    return {
       predefined: available,
       custom: Object.keys(custom),
     };
-
-    return categories;
   }
 );
 
@@ -436,4 +433,66 @@ export const selectCanAnalyzeImpact = createSelector(
   (selectedScenarios, portfolioId, loading) => {
     return selectedScenarios.length > 0 && portfolioId && !loading;
   }
+);
+
+/**
+ * Analytics selectors
+ */
+export const selectActiveSimulationData = createSelector(
+  selectActiveSimulation,
+  selectSimulationResults,
+  (activeId, results) => {
+    if (!activeId) return null;
+    return results[activeId];
+  }
+);
+
+export const selectHasSimulationData = createSelector(
+  selectSimulationResults,
+  (results) => Object.keys(results).length > 0
+);
+
+export const selectHasImpactData = createSelector(
+  selectImpactResults,
+  (results) => Object.keys(results).length > 0
+);
+
+export const selectHasChainData = createSelector(
+  selectScenarioChains,
+  (chains) => Object.keys(chains).length > 0
+);
+
+export const selectHasAnyData = createSelector(
+  selectHasSimulationData,
+  selectHasImpactData,
+  selectHasChainData,
+  (hasSimulation, hasImpact, hasChain) => hasSimulation || hasImpact || hasChain
+);
+
+/**
+ * Performance selectors
+ */
+export const selectCacheStats = createSelector(
+  selectScenarios,
+  (scenarios) => {
+    const { simulationCache, impactCache } = scenarios.cache;
+
+    return {
+      simulationCacheSize: Object.keys(simulationCache).length,
+      impactCacheSize: Object.keys(impactCache).length,
+      totalCacheSize: Object.keys(simulationCache).length + Object.keys(impactCache).length,
+    };
+  }
+);
+
+export const selectLoadingStats = createSelector(
+  selectScenarios,
+  (scenarios) => ({
+    scenariosLoading: scenarios.scenariosLoading,
+    simulationLoading: scenarios.simulationLoading,
+    impactAnalysisLoading: scenarios.impactAnalysisLoading,
+    chainManagementLoading: scenarios.chainManagementLoading,
+    anyLoading: scenarios.scenariosLoading || scenarios.simulationLoading ||
+                scenarios.impactAnalysisLoading || scenarios.chainManagementLoading,
+  })
 );

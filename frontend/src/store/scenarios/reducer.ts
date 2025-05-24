@@ -1,11 +1,18 @@
 /**
- * Scenarios store reducer
+ * Scenarios reducer
  */
-import { ScenariosState, ScenariosAction, ScenariosActionTypes } from './types';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { ScenariosState, ScenarioViewMode, CustomScenario } from './types';
+import {
+  loadScenarios,
+  runSimulation,
+  analyzeImpact,
+  createChain,
+  modifyChain,
+  loadChain,
+  deleteChain,
+} from './actions';
 
-/**
- * Initial scenarios state
- */
 const initialState: ScenariosState = {
   // Loading states
   scenariosLoading: false,
@@ -63,345 +70,260 @@ const initialState: ScenariosState = {
   },
 };
 
-/**
- * Scenarios reducer
- */
-export const scenariosReducer = (
-  state: ScenariosState = initialState,
-  action: ScenariosAction
-): ScenariosState => {
-  switch (action.type) {
-    // Scenario list
-    case ScenariosActionTypes.LOAD_SCENARIOS_REQUEST:
-      return {
-        ...state,
-        scenariosLoading: true,
-        errors: {
-          ...state.errors,
-          scenarios: null,
-        },
-      };
-
-    case ScenariosActionTypes.LOAD_SCENARIOS_SUCCESS:
-      return {
-        ...state,
-        scenariosLoading: false,
-        availableScenarios: action.payload.scenarios,
-        cache: {
-          ...state.cache,
-          scenarioListCache: {
-            data: action.payload.scenarios,
-            timestamp: Date.now(),
-          },
-        },
-        errors: {
-          ...state.errors,
-          scenarios: null,
-        },
-      };
-
-    case ScenariosActionTypes.LOAD_SCENARIOS_FAILURE:
-      return {
-        ...state,
-        scenariosLoading: false,
-        errors: {
-          ...state.errors,
-          scenarios: action.payload.error,
-        },
-      };
-
-    // Simulation
-    case ScenariosActionTypes.RUN_SIMULATION_REQUEST:
-      return {
-        ...state,
-        simulationLoading: true,
-        errors: {
-          ...state.errors,
-          simulation: null,
-        },
-      };
-
-    case ScenariosActionTypes.RUN_SIMULATION_SUCCESS:
-      return {
-        ...state,
-        simulationLoading: false,
-        simulationResults: {
-          ...state.simulationResults,
-          [action.payload.simulationId]: action.payload.data,
-        },
-        cache: {
-          ...state.cache,
-          simulationCache: {
-            ...state.cache.simulationCache,
-            [action.payload.simulationId]: {
-              data: action.payload.data,
-              timestamp: Date.now(),
-            },
-          },
-        },
-        errors: {
-          ...state.errors,
-          simulation: null,
-        },
-      };
-
-    case ScenariosActionTypes.RUN_SIMULATION_FAILURE:
-      return {
-        ...state,
-        simulationLoading: false,
-        errors: {
-          ...state.errors,
-          simulation: action.payload.error,
-        },
-      };
-
-    // Impact analysis
-    case ScenariosActionTypes.ANALYZE_IMPACT_REQUEST:
-      return {
-        ...state,
-        impactAnalysisLoading: true,
-        errors: {
-          ...state.errors,
-          impact: null,
-        },
-      };
-
-    case ScenariosActionTypes.ANALYZE_IMPACT_SUCCESS:
-      return {
-        ...state,
-        impactAnalysisLoading: false,
-        impactResults: {
-          ...state.impactResults,
-          [action.payload.portfolioId]: action.payload.data,
-        },
-        cache: {
-          ...state.cache,
-          impactCache: {
-            ...state.cache.impactCache,
-            [action.payload.portfolioId]: {
-              data: action.payload.data,
-              timestamp: Date.now(),
-            },
-          },
-        },
-        errors: {
-          ...state.errors,
-          impact: null,
-        },
-      };
-
-    case ScenariosActionTypes.ANALYZE_IMPACT_FAILURE:
-      return {
-        ...state,
-        impactAnalysisLoading: false,
-        errors: {
-          ...state.errors,
-          impact: action.payload.error,
-        },
-      };
-
-    // Chain management
-    case ScenariosActionTypes.CREATE_CHAIN_REQUEST:
-    case ScenariosActionTypes.MODIFY_CHAIN_REQUEST:
-    case ScenariosActionTypes.DELETE_CHAIN_REQUEST:
-    case ScenariosActionTypes.LOAD_CHAIN_REQUEST:
-      return {
-        ...state,
-        chainManagementLoading: true,
-        errors: {
-          ...state.errors,
-          chainManagement: null,
-        },
-      };
-
-    case ScenariosActionTypes.CREATE_CHAIN_SUCCESS:
-    case ScenariosActionTypes.MODIFY_CHAIN_SUCCESS:
-    case ScenariosActionTypes.LOAD_CHAIN_SUCCESS:
-      return {
-        ...state,
-        chainManagementLoading: false,
-        scenarioChains: {
-          ...state.scenarioChains,
-          [action.payload.name]: action.payload.data,
-        },
-        errors: {
-          ...state.errors,
-          chainManagement: null,
-        },
-      };
-
-    case ScenariosActionTypes.DELETE_CHAIN_SUCCESS:
-      const { [action.payload.name]: deletedChain, ...remainingChains } = state.scenarioChains;
-      return {
-        ...state,
-        chainManagementLoading: false,
-        scenarioChains: remainingChains,
-        selectedChain: state.selectedChain === action.payload.name ? null : state.selectedChain,
-        errors: {
-          ...state.errors,
-          chainManagement: null,
-        },
-      };
-
-    case ScenariosActionTypes.CREATE_CHAIN_FAILURE:
-    case ScenariosActionTypes.MODIFY_CHAIN_FAILURE:
-    case ScenariosActionTypes.DELETE_CHAIN_FAILURE:
-    case ScenariosActionTypes.LOAD_CHAIN_FAILURE:
-      return {
-        ...state,
-        chainManagementLoading: false,
-        errors: {
-          ...state.errors,
-          chainManagement: action.payload.error,
-        },
-      };
-
+const scenariosSlice = createSlice({
+  name: 'scenarios',
+  initialState,
+  reducers: {
     // UI state actions
-    case ScenariosActionTypes.SET_CURRENT_PORTFOLIO:
-      return {
-        ...state,
-        currentPortfolioId: action.payload,
-      };
+    setCurrentPortfolio: (state, action: PayloadAction<string | null>) => {
+      state.currentPortfolioId = action.payload;
+    },
+    setSelectedScenarios: (state, action: PayloadAction<string[]>) => {
+      state.selectedScenarios = action.payload;
+    },
+    setActiveSimulation: (state, action: PayloadAction<string | null>) => {
+      state.activeSimulation = action.payload;
+    },
+    setViewMode: (state, action: PayloadAction<ScenarioViewMode>) => {
+      state.viewMode = action.payload;
+    },
+    setSelectedChain: (state, action: PayloadAction<string | null>) => {
+      state.selectedChain = action.payload;
+    },
+    setChainVisualizationData: (state, action: PayloadAction<any>) => {
+      state.chainVisualizationData = action.payload;
+    },
 
-    case ScenariosActionTypes.SET_SELECTED_SCENARIOS:
-      return {
-        ...state,
-        selectedScenarios: action.payload,
-      };
+    // Parameters actions
+    updateSimulationParameters: (
+      state,
+      action: PayloadAction<Partial<ScenariosState['simulationParameters']>>
+    ) => {
+      state.simulationParameters = { ...state.simulationParameters, ...action.payload };
+    },
+    resetSimulationParameters: (state) => {
+      state.simulationParameters = initialState.simulationParameters;
+    },
 
-    case ScenariosActionTypes.SET_ACTIVE_SIMULATION:
-      return {
-        ...state,
-        activeSimulation: action.payload,
-      };
+    // Custom scenarios actions
+    addCustomScenario: (state, action: PayloadAction<CustomScenario>) => {
+      state.customScenarios[action.payload.id] = action.payload;
+    },
+    updateCustomScenario: (
+      state,
+      action: PayloadAction<{ id: string; updates: Partial<CustomScenario> }>
+    ) => {
+      const { id, updates } = action.payload;
+      if (state.customScenarios[id]) {
+        state.customScenarios[id] = {
+          ...state.customScenarios[id],
+          ...updates,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+    },
+    deleteCustomScenario: (state, action: PayloadAction<string>) => {
+      delete state.customScenarios[action.payload];
+    },
 
-    case ScenariosActionTypes.SET_VIEW_MODE:
-      return {
-        ...state,
-        viewMode: action.payload,
+    // Cache management actions
+    clearCache: (state) => {
+      state.cache = {
+        scenarioListCache: null,
+        simulationCache: {},
+        impactCache: {},
       };
+    },
+    clearSimulationCache: (state) => {
+      state.cache.simulationCache = {};
+    },
+    clearImpactCache: (state) => {
+      state.cache.impactCache = {};
+    },
 
-    case ScenariosActionTypes.SET_SELECTED_CHAIN:
-      return {
-        ...state,
-        selectedChain: action.payload,
-      };
-
-    case ScenariosActionTypes.SET_CHAIN_VISUALIZATION_DATA:
-      return {
-        ...state,
-        chainVisualizationData: action.payload,
-      };
-
-    // Parameters
-    case ScenariosActionTypes.UPDATE_SIMULATION_PARAMETERS:
-      return {
-        ...state,
-        simulationParameters: {
-          ...state.simulationParameters,
-          ...action.payload,
-        },
-      };
-
-    case ScenariosActionTypes.RESET_SIMULATION_PARAMETERS:
-      return {
-        ...state,
-        simulationParameters: initialState.simulationParameters,
-      };
-
-    // Custom scenarios
-    case ScenariosActionTypes.ADD_CUSTOM_SCENARIO:
-      return {
-        ...state,
-        customScenarios: {
-          ...state.customScenarios,
-          [action.payload.id]: action.payload,
-        },
-      };
-
-    case ScenariosActionTypes.UPDATE_CUSTOM_SCENARIO:
-      return {
-        ...state,
-        customScenarios: {
-          ...state.customScenarios,
-          [action.payload.id]: {
-            ...state.customScenarios[action.payload.id],
-            ...action.payload.updates,
-            updatedAt: new Date().toISOString(),
-          },
-        },
-      };
-
-    case ScenariosActionTypes.DELETE_CUSTOM_SCENARIO:
-      const { [action.payload]: deletedScenario, ...remainingScenarios } = state.customScenarios;
-      return {
-        ...state,
-        customScenarios: remainingScenarios,
-      };
-
-    // Cache management
-    case ScenariosActionTypes.CLEAR_CACHE:
-      return {
-        ...state,
-        cache: {
-          scenarioListCache: null,
-          simulationCache: {},
-          impactCache: {},
-        },
-      };
-
-    case ScenariosActionTypes.CLEAR_SIMULATION_CACHE:
-      return {
-        ...state,
-        cache: {
-          ...state.cache,
-          simulationCache: {},
-        },
-      };
-
-    case ScenariosActionTypes.CLEAR_IMPACT_CACHE:
-      return {
-        ...state,
-        cache: {
-          ...state.cache,
-          impactCache: {},
-        },
-      };
-
-    // Settings
-    case ScenariosActionTypes.UPDATE_SETTINGS:
-      return {
-        ...state,
-        settings: {
-          ...state.settings,
-          ...action.payload,
-        },
-      };
-
-    case ScenariosActionTypes.RESET_SETTINGS:
-      return {
-        ...state,
-        settings: initialState.settings,
-      };
+    // Settings actions
+    updateSettings: (
+      state,
+      action: PayloadAction<Partial<ScenariosState['settings']>>
+    ) => {
+      state.settings = { ...state.settings, ...action.payload };
+    },
+    resetSettings: (state) => {
+      state.settings = initialState.settings;
+    },
 
     // General actions
-    case ScenariosActionTypes.CLEAR_ERRORS:
-      return {
-        ...state,
-        errors: {
-          scenarios: null,
-          simulation: null,
-          impact: null,
-          chainManagement: null,
-        },
+    clearErrors: (state) => {
+      state.errors = {
+        scenarios: null,
+        simulation: null,
+        impact: null,
+        chainManagement: null,
       };
+    },
+    clearScenariosData: (state) => {
+      state.availableScenarios = [];
+      state.simulationResults = {};
+      state.impactResults = {};
+      state.scenarioChains = {};
+      state.selectedScenarios = [];
+      state.activeSimulation = null;
+      state.selectedChain = null;
+      state.chainVisualizationData = null;
+    },
+    resetState: () => initialState,
+  },
+  extraReducers: (builder) => {
+    // Load scenarios
+    builder
+      .addCase(loadScenarios.pending, (state) => {
+        state.scenariosLoading = true;
+        state.errors.scenarios = null;
+      })
+      .addCase(loadScenarios.fulfilled, (state, action) => {
+        state.scenariosLoading = false;
+        state.availableScenarios = action.payload.scenarios;
+        state.cache.scenarioListCache = {
+          data: action.payload.scenarios,
+          timestamp: Date.now(),
+        };
+      })
+      .addCase(loadScenarios.rejected, (state, action) => {
+        state.scenariosLoading = false;
+        state.errors.scenarios = action.payload || 'Failed to load scenarios';
+      });
 
-    case ScenariosActionTypes.RESET_STATE:
-      return initialState;
+    // Run simulation
+    builder
+      .addCase(runSimulation.pending, (state) => {
+        state.simulationLoading = true;
+        state.errors.simulation = null;
+      })
+      .addCase(runSimulation.fulfilled, (state, action) => {
+        state.simulationLoading = false;
+        const { simulationId, data } = action.payload;
+        state.simulationResults[simulationId] = data;
+        state.cache.simulationCache[simulationId] = {
+          data,
+          timestamp: Date.now(),
+        };
+        state.activeSimulation = simulationId;
+      })
+      .addCase(runSimulation.rejected, (state, action) => {
+        state.simulationLoading = false;
+        state.errors.simulation = action.payload || 'Failed to run simulation';
+      });
 
-    default:
-      return state;
-  }
-};
+    // Analyze impact
+    builder
+      .addCase(analyzeImpact.pending, (state) => {
+        state.impactAnalysisLoading = true;
+        state.errors.impact = null;
+      })
+      .addCase(analyzeImpact.fulfilled, (state, action) => {
+        state.impactAnalysisLoading = false;
+        const { portfolioId, data } = action.payload;
+        state.impactResults[portfolioId] = data;
+        state.cache.impactCache[portfolioId] = {
+          data,
+          timestamp: Date.now(),
+        };
+      })
+      .addCase(analyzeImpact.rejected, (state, action) => {
+        state.impactAnalysisLoading = false;
+        state.errors.impact = action.payload || 'Failed to analyze impact';
+      });
 
-export default scenariosReducer;
+    // Create chain
+    builder
+      .addCase(createChain.pending, (state) => {
+        state.chainManagementLoading = true;
+        state.errors.chainManagement = null;
+      })
+      .addCase(createChain.fulfilled, (state, action) => {
+        state.chainManagementLoading = false;
+        const { name, data } = action.payload;
+        state.scenarioChains[name] = data;
+        state.selectedChain = name;
+      })
+      .addCase(createChain.rejected, (state, action) => {
+        state.chainManagementLoading = false;
+        state.errors.chainManagement = action.payload || 'Failed to create chain';
+      });
+
+    // Modify chain
+    builder
+      .addCase(modifyChain.pending, (state) => {
+        state.chainManagementLoading = true;
+        state.errors.chainManagement = null;
+      })
+      .addCase(modifyChain.fulfilled, (state, action) => {
+        state.chainManagementLoading = false;
+        const { name, data } = action.payload;
+        state.scenarioChains[name] = data;
+      })
+      .addCase(modifyChain.rejected, (state, action) => {
+        state.chainManagementLoading = false;
+        state.errors.chainManagement = action.payload || 'Failed to modify chain';
+      });
+
+    // Load chain
+    builder
+      .addCase(loadChain.pending, (state) => {
+        state.chainManagementLoading = true;
+        state.errors.chainManagement = null;
+      })
+      .addCase(loadChain.fulfilled, (state, action) => {
+        state.chainManagementLoading = false;
+        const { name, data } = action.payload;
+        state.scenarioChains[name] = data;
+      })
+      .addCase(loadChain.rejected, (state, action) => {
+        state.chainManagementLoading = false;
+        state.errors.chainManagement = action.payload || 'Failed to load chain';
+      });
+
+    // Delete chain
+    builder
+      .addCase(deleteChain.pending, (state) => {
+        state.chainManagementLoading = true;
+        state.errors.chainManagement = null;
+      })
+      .addCase(deleteChain.fulfilled, (state, action) => {
+        state.chainManagementLoading = false;
+        const chainName = action.payload;
+        delete state.scenarioChains[chainName];
+        if (state.selectedChain === chainName) {
+          state.selectedChain = null;
+        }
+      })
+      .addCase(deleteChain.rejected, (state, action) => {
+        state.chainManagementLoading = false;
+        state.errors.chainManagement = action.payload || 'Failed to delete chain';
+      });
+  },
+});
+
+export const {
+  setCurrentPortfolio,
+  setSelectedScenarios,
+  setActiveSimulation,
+  setViewMode,
+  setSelectedChain,
+  setChainVisualizationData,
+  updateSimulationParameters,
+  resetSimulationParameters,
+  addCustomScenario,
+  updateCustomScenario,
+  deleteCustomScenario,
+  clearCache,
+  clearSimulationCache,
+  clearImpactCache,
+  updateSettings,
+  resetSettings,
+  clearErrors,
+  clearScenariosData,
+  resetState,
+} = scenariosSlice.actions;
+
+export default scenariosSlice.reducer;

@@ -1,48 +1,33 @@
 /**
  * Scenarios store sagas
  */
-import { call, put, takeLatest, takeEvery, select, delay, race, take } from 'redux-saga/effects';
+import { SagaIterator } from 'redux-saga';
+import { call, put, takeLatest, takeEvery, select, delay, all, race, take } from 'redux-saga/effects';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { scenarioService } from '../../services/scenarios/scenarioService';
 import {
-  loadScenariosSuccess,
-  loadScenariosFailure,
-  runSimulationSuccess,
-  runSimulationFailure,
-  analyzeImpactSuccess,
-  analyzeImpactFailure,
-  createChainSuccess,
-  createChainFailure,
-  modifyChainSuccess,
-  modifyChainFailure,
-  deleteChainSuccess,
-  deleteChainFailure,
-  loadChainSuccess,
-  loadChainFailure,
-  setChainVisualizationData,
+  loadScenarios,
+  runSimulation,
+  analyzeImpact,
+  createChain,
+  modifyChain,
+  loadChain,
+  deleteChain,
 } from './actions';
 import {
-  ScenariosActionTypes,
-  RunSimulationPayload,
-  AnalyzeImpactPayload,
-  CreateChainPayload,
-  ModifyChainPayload,
-  LoadChainPayload,
-  DeleteChainPayload,
-} from './types';
-import {
-  ScenarioListResponse,
-  ScenarioSimulationResponse,
-  ScenarioImpactResponse,
-  ScenarioChainResponse,
-} from '../../types/scenarios';
-import { ApiError } from '../../types/common';
+  setChainVisualizationData,
+  clearCache,
+  updateSettings,
+} from './reducer';
 import {
   selectAutoRunSimulations,
   selectMaxConcurrentAnalyses,
   selectCacheTimeout,
   selectShouldRefreshScenarios,
+  selectCurrentPortfolioId,
+  selectSelectedScenarios,
 } from './selectors';
+import { RootState } from '../rootReducer';
 
 /**
  * Active analyses tracker
@@ -50,218 +35,15 @@ import {
 let activeAnalyses = 0;
 
 /**
- * Load scenarios saga
- */
-function* loadScenariosSaga() {
-  try {
-    const response: ScenarioListResponse = yield call(
-      scenarioService.getAvailableScenarios
-    );
-
-    yield put(loadScenariosSuccess(response));
-  } catch (error) {
-    const apiError: ApiError = {
-      message: error instanceof Error ? error.message : 'Failed to load scenarios',
-      status: 500,
-    };
-    yield put(loadScenariosFailure(apiError));
-  }
-}
-
-/**
- * Run simulation saga
- */
-function* runSimulationSaga(action: PayloadAction<RunSimulationPayload>) {
-  try {
-    const { request, simulationId } = action.payload;
-
-    // Check if we can run more analyses
-    const maxConcurrent: number = yield select(selectMaxConcurrentAnalyses);
-    if (activeAnalyses >= maxConcurrent) {
-      throw new Error(`Maximum concurrent analyses (${maxConcurrent}) reached`);
-    }
-
-    activeAnalyses++;
-
-    // Validate request
-    const validation = scenarioService.validateScenarioSimulationRequest(request);
-    if (!validation.isValid) {
-      throw new Error(validation.errors.join(', '));
-    }
-
-    const response: ScenarioSimulationResponse = yield call(
-      scenarioService.simulateScenarioChain,
-      request
-    );
-
-    yield put(runSimulationSuccess(simulationId, response));
-
-    // Generate visualization data if needed
-    if (response.chainVisualizationData) {
-      yield put(setChainVisualizationData(response.chainVisualizationData));
-    }
-  } catch (error) {
-    const apiError: ApiError = {
-      message: error instanceof Error ? error.message : 'Failed to run simulation',
-      status: 500,
-    };
-    yield put(runSimulationFailure(apiError));
-  } finally {
-    activeAnalyses--;
-  }
-}
-
-/**
- * Analyze impact saga
- */
-function* analyzeImpactSaga(action: PayloadAction<AnalyzeImpactPayload>) {
-  try {
-    const { request, portfolioId } = action.payload;
-
-    // Check if we can run more analyses
-    const maxConcurrent: number = yield select(selectMaxConcurrentAnalyses);
-    if (activeAnalyses >= maxConcurrent) {
-      throw new Error(`Maximum concurrent analyses (${maxConcurrent}) reached`);
-    }
-
-    activeAnalyses++;
-
-    // Validate request
-    const validation = scenarioService.validateScenarioImpactRequest(request);
-    if (!validation.isValid) {
-      throw new Error(validation.errors.join(', '));
-    }
-
-    const response: ScenarioImpactResponse = yield call(
-      scenarioService.analyzeScenarioImpact,
-      request
-    );
-
-    yield put(analyzeImpactSuccess(portfolioId, response));
-  } catch (error) {
-    const apiError: ApiError = {
-      message: error instanceof Error ? error.message : 'Failed to analyze scenario impact',
-      status: 500,
-    };
-    yield put(analyzeImpactFailure(apiError));
-  } finally {
-    activeAnalyses--;
-  }
-}
-
-/**
- * Create chain saga
- */
-function* createChainSaga(action: PayloadAction<CreateChainPayload>) {
-  try {
-    const { request } = action.payload;
-
-    // Validate request
-    const validation = scenarioService.validateScenarioChainRequest(request);
-    if (!validation.isValid) {
-      throw new Error(validation.errors.join(', '));
-    }
-
-    const response: ScenarioChainResponse = yield call(
-      scenarioService.createScenarioChain,
-      request
-    );
-
-    yield put(createChainSuccess(request.name, response));
-
-    // Generate visualization data
-    const visualizationData = scenarioService.generateVisualizationData(response.scenarioChain);
-    yield put(setChainVisualizationData(visualizationData));
-  } catch (error) {
-    const apiError: ApiError = {
-      message: error instanceof Error ? error.message : 'Failed to create scenario chain',
-      status: 500,
-    };
-    yield put(createChainFailure(apiError));
-  }
-}
-
-/**
- * Modify chain saga
- */
-function* modifyChainSaga(action: PayloadAction<ModifyChainPayload>) {
-  try {
-    const { request } = action.payload;
-
-    const response: ScenarioChainResponse = yield call(
-      scenarioService.modifyScenarioChain,
-      request
-    );
-
-    yield put(modifyChainSuccess(request.name, response));
-
-    // Update visualization data
-    const visualizationData = scenarioService.generateVisualizationData(response.scenarioChain);
-    yield put(setChainVisualizationData(visualizationData));
-  } catch (error) {
-    const apiError: ApiError = {
-      message: error instanceof Error ? error.message : 'Failed to modify scenario chain',
-      status: 500,
-    };
-    yield put(modifyChainFailure(apiError));
-  }
-}
-
-/**
- * Load chain saga
- */
-function* loadChainSaga(action: PayloadAction<LoadChainPayload>) {
-  try {
-    const { name } = action.payload;
-
-    const response: ScenarioChainResponse = yield call(
-      scenarioService.getScenarioChain,
-      name
-    );
-
-    yield put(loadChainSuccess(name, response));
-
-    // Generate visualization data
-    const visualizationData = scenarioService.generateVisualizationData(response.scenarioChain);
-    yield put(setChainVisualizationData(visualizationData));
-  } catch (error) {
-    const apiError: ApiError = {
-      message: error instanceof Error ? error.message : 'Failed to load scenario chain',
-      status: 500,
-    };
-    yield put(loadChainFailure(apiError));
-  }
-}
-
-/**
- * Delete chain saga
- */
-function* deleteChainSaga(action: PayloadAction<DeleteChainPayload>) {
-  try {
-    const { name } = action.payload;
-
-    yield call(scenarioService.deleteScenarioChain, name);
-
-    yield put(deleteChainSuccess(name));
-  } catch (error) {
-    const apiError: ApiError = {
-      message: error instanceof Error ? error.message : 'Failed to delete scenario chain',
-      status: 500,
-    };
-    yield put(deleteChainFailure(apiError));
-  }
-}
-
-/**
  * Auto refresh scenarios saga
  */
-function* autoRefreshScenariosSaga() {
+function* autoRefreshScenariosSaga(): SagaIterator {
   while (true) {
     try {
       const shouldRefresh: boolean = yield select(selectShouldRefreshScenarios);
 
       if (shouldRefresh) {
-        yield put({ type: ScenariosActionTypes.LOAD_SCENARIOS_REQUEST });
+        yield put(loadScenarios());
       }
 
       // Wait for cache timeout period before checking again
@@ -282,7 +64,7 @@ function* batchScenarioAnalysisSaga(action: PayloadAction<{
   scenarios: string[];
   portfolio: any;
   dataFetcher: any;
-}>) {
+}>): SagaIterator {
   try {
     const { portfolioId, scenarios, portfolio, dataFetcher } = action.payload;
 
@@ -293,32 +75,26 @@ function* batchScenarioAnalysisSaga(action: PayloadAction<{
     }
 
     // Run impact analysis
-    yield put({
-      type: ScenariosActionTypes.ANALYZE_IMPACT_REQUEST,
-      payload: {
-        request: {
-          portfolio,
-          scenarios,
-          dataFetcher,
-        },
-        portfolioId,
+    yield put(analyzeImpact({
+      request: {
+        portfolio,
+        scenarios,
+        dataFetcher,
       },
-    });
+      portfolioId,
+    }));
 
     // Run simulations for each scenario
     for (const scenario of scenarios) {
       const simulationId = `${portfolioId}_${scenario}_${Date.now()}`;
 
-      yield put({
-        type: ScenariosActionTypes.RUN_SIMULATION_REQUEST,
-        payload: {
-          request: {
-            startingScenario: scenario,
-            numSimulations: 100, // Smaller number for batch operations
-          },
-          simulationId,
+      yield put(runSimulation({
+        request: {
+          startingScenario: scenario,
+          numSimulations: 100, // Smaller number for batch operations
         },
-      });
+        simulationId,
+      }));
 
       // Small delay between simulations to prevent overwhelming the server
       yield delay(1000);
@@ -331,13 +107,13 @@ function* batchScenarioAnalysisSaga(action: PayloadAction<{
 /**
  * Concurrent analysis manager saga
  */
-function* concurrentAnalysisManagerSaga() {
+function* concurrentAnalysisManagerSaga(): SagaIterator {
   while (true) {
     try {
       // Wait for any analysis request
       const action = yield take([
-        ScenariosActionTypes.RUN_SIMULATION_REQUEST,
-        ScenariosActionTypes.ANALYZE_IMPACT_REQUEST,
+        runSimulation.pending.type,
+        analyzeImpact.pending.type,
       ]);
 
       const maxConcurrent: number = yield select(selectMaxConcurrentAnalyses);
@@ -355,30 +131,76 @@ function* concurrentAnalysisManagerSaga() {
 }
 
 /**
- * Error handling saga
+ * Handle chain creation success saga
  */
-function* errorHandlingSaga(action: PayloadAction<{ error: ApiError }>) {
-  const { error } = action.payload;
+function* handleChainCreationSuccessSaga(action: PayloadAction<{ name: string; data: any }>): SagaIterator {
+  try {
+    const { data } = action.payload;
 
-  console.error('Scenarios error:', error);
-
-  // Implement retry logic for network errors
-  if (error.status === 0) {
-    yield delay(5000);
-    // Could dispatch retry action here
+    // Generate visualization data
+    if (data.scenarioChain) {
+      const visualizationData = scenarioService.generateVisualizationData(data.scenarioChain);
+      yield put(setChainVisualizationData(visualizationData));
+    }
+  } catch (error) {
+    console.error('Error handling chain creation success:', error);
   }
+}
 
-  // Handle specific error types
-  if (error.status === 429) {
-    // Rate limiting - wait longer
-    yield delay(30000);
+/**
+ * Handle chain modification success saga
+ */
+function* handleChainModificationSuccessSaga(action: PayloadAction<{ name: string; data: any }>): SagaIterator {
+  try {
+    const { data } = action.payload;
+
+    // Update visualization data
+    if (data.scenarioChain) {
+      const visualizationData = scenarioService.generateVisualizationData(data.scenarioChain);
+      yield put(setChainVisualizationData(visualizationData));
+    }
+  } catch (error) {
+    console.error('Error handling chain modification success:', error);
+  }
+}
+
+/**
+ * Handle chain load success saga
+ */
+function* handleChainLoadSuccessSaga(action: PayloadAction<{ name: string; data: any }>): SagaIterator {
+  try {
+    const { data } = action.payload;
+
+    // Generate visualization data
+    if (data.scenarioChain) {
+      const visualizationData = scenarioService.generateVisualizationData(data.scenarioChain);
+      yield put(setChainVisualizationData(visualizationData));
+    }
+  } catch (error) {
+    console.error('Error handling chain load success:', error);
+  }
+}
+
+/**
+ * Handle simulation success saga
+ */
+function* handleSimulationSuccessSaga(action: PayloadAction<{ simulationId: string; data: any }>): SagaIterator {
+  try {
+    const { data } = action.payload;
+
+    // Generate visualization data if available
+    if (data.chainVisualizationData) {
+      yield put(setChainVisualizationData(data.chainVisualizationData));
+    }
+  } catch (error) {
+    console.error('Error handling simulation success:', error);
   }
 }
 
 /**
  * Cache cleanup saga
  */
-function* cacheCleanupSaga() {
+function* cacheCleanupSaga(): SagaIterator {
   while (true) {
     try {
       // Clean up expired cache entries every 10 minutes
@@ -387,9 +209,29 @@ function* cacheCleanupSaga() {
       const cacheTimeout: number = yield select(selectCacheTimeout);
       const now = Date.now();
 
-      // This would typically dispatch actions to clean up expired cache entries
-      // The actual implementation would check timestamps and remove expired entries
-      console.log('Cleaning up expired scenarios cache entries');
+      // Get current state to check cache timestamps
+      const state: RootState = yield select();
+      const { simulationCache, impactCache } = state.scenarios.cache;
+
+      // Check for expired simulation cache entries
+      const expiredSimulations = Object.keys(simulationCache).filter(key => {
+        const cached = simulationCache[key];
+        return cached && (now - cached.timestamp > cacheTimeout);
+      });
+
+      // Check for expired impact cache entries
+      const expiredImpacts = Object.keys(impactCache).filter(key => {
+        const cached = impactCache[key];
+        return cached && (now - cached.timestamp > cacheTimeout);
+      });
+
+      if (expiredSimulations.length > 0 || expiredImpacts.length > 0) {
+        console.log(`Cleaning up ${expiredSimulations.length} simulation and ${expiredImpacts.length} impact cache entries`);
+
+        // For now, we clear all cache if there are expired entries
+        // In a more sophisticated implementation, we could selectively remove entries
+        yield put(clearCache());
+      }
     } catch (error) {
       console.error('Cache cleanup error:', error);
     }
@@ -399,13 +241,20 @@ function* cacheCleanupSaga() {
 /**
  * Performance monitoring saga
  */
-function* performanceMonitoringSaga() {
+function* performanceMonitoringSaga(): SagaIterator {
   while (true) {
     try {
       yield delay(60000); // Check every minute
 
       // Log performance metrics
       console.log(`Active scenario analyses: ${activeAnalyses}`);
+
+      // Get cache statistics
+      const state: RootState = yield select();
+      const { simulationCache, impactCache } = state.scenarios.cache;
+      const totalCacheSize = Object.keys(simulationCache).length + Object.keys(impactCache).length;
+
+      console.log(`Scenarios cache size: ${totalCacheSize} entries`);
 
       // Could implement more sophisticated monitoring here
       // such as tracking average response times, error rates, etc.
@@ -416,64 +265,149 @@ function* performanceMonitoringSaga() {
 }
 
 /**
- * Race condition handler for simultaneous requests
+ * Error handling saga
  */
-function* raceConditionHandlerSaga(action: PayloadAction<any>) {
+function* errorHandlingSaga(action: PayloadAction<any>): SagaIterator {
   try {
-    const { type, payload } = action;
+    const error = action.payload;
 
-    // Create a unique key for the request
-    const requestKey = `${type}_${JSON.stringify(payload)}`;
+    console.error('Scenarios error:', error);
 
-    // Use race to handle simultaneous identical requests
-    const { response, timeout } = yield race({
-      response: call(function* () {
-        // The actual saga call would go here
-        yield delay(100); // Placeholder
-      }),
-      timeout: delay(30000), // 30 second timeout
+    // Implement retry logic for network errors
+    if (typeof error === 'string' && error.includes('network')) {
+      yield delay(5000);
+      // Could dispatch retry action here
+    }
+
+    // Handle specific error types
+    if (typeof error === 'string' && error.includes('rate limit')) {
+      // Rate limiting - wait longer
+      yield delay(30000);
+    }
+  } catch (err) {
+    console.error('Error in error handling saga:', err);
+  }
+}
+
+/**
+ * Auto-analyze scenarios when portfolio changes
+ */
+function* autoAnalyzeOnPortfolioChangeSaga(action: PayloadAction<string | null>): SagaIterator {
+  try {
+    const portfolioId = action.payload;
+    if (!portfolioId) return;
+
+    const autoRun: boolean = yield select(selectAutoRunSimulations);
+    if (!autoRun) return;
+
+    const selectedScenarios: string[] = yield select(selectSelectedScenarios);
+    if (selectedScenarios.length === 0) return;
+
+    // Wait a bit to allow other changes to settle
+    yield delay(2000);
+
+    // Trigger batch analysis
+    yield put({
+      type: 'scenarios/batchAnalysis',
+      payload: {
+        portfolioId,
+        scenarios: selectedScenarios,
+        portfolio: {}, // This would need to be populated with actual portfolio data
+        dataFetcher: null, // This would need to be populated with actual data fetcher
+      },
     });
+  } catch (error) {
+    console.error('Auto-analyze on portfolio change error:', error);
+  }
+}
 
-    if (timeout) {
-      throw new Error('Request timeout');
+/**
+ * Track active analyses
+ */
+function* trackActiveAnalysesSaga(): SagaIterator {
+  yield takeEvery([runSimulation.pending.type, analyzeImpact.pending.type], function* () {
+    activeAnalyses++;
+  });
+
+  yield takeEvery([
+    runSimulation.fulfilled.type,
+    runSimulation.rejected.type,
+    analyzeImpact.fulfilled.type,
+    analyzeImpact.rejected.type,
+  ], function* () {
+    activeAnalyses = Math.max(0, activeAnalyses - 1);
+  });
+}
+
+/**
+ * Settings change handler
+ */
+function* handleSettingsChangeSaga(action: PayloadAction<any>): SagaIterator {
+  try {
+    const settings = action.payload;
+
+    // If auto-run was enabled and we have a current portfolio, trigger analysis
+    if (settings.autoRunSimulations) {
+      const currentPortfolio: string | null = yield select(selectCurrentPortfolioId);
+      const selectedScenarios: string[] = yield select(selectSelectedScenarios);
+
+      if (currentPortfolio && selectedScenarios.length > 0) {
+        yield delay(1000); // Brief delay
+
+        yield put({
+          type: 'scenarios/batchAnalysis',
+          payload: {
+            portfolioId: currentPortfolio,
+            scenarios: selectedScenarios,
+            portfolio: {},
+            dataFetcher: null,
+          },
+        });
+      }
     }
   } catch (error) {
-    console.error('Race condition handler error:', error);
+    console.error('Handle settings change error:', error);
   }
 }
 
 /**
  * Root scenarios saga
  */
-export function* scenariosSaga() {
-  // Watch for specific actions
-  yield takeLatest(ScenariosActionTypes.LOAD_SCENARIOS_REQUEST, loadScenariosSaga);
-  yield takeEvery(ScenariosActionTypes.RUN_SIMULATION_REQUEST, runSimulationSaga);
-  yield takeEvery(ScenariosActionTypes.ANALYZE_IMPACT_REQUEST, analyzeImpactSaga);
-  yield takeLatest(ScenariosActionTypes.CREATE_CHAIN_REQUEST, createChainSaga);
-  yield takeLatest(ScenariosActionTypes.MODIFY_CHAIN_REQUEST, modifyChainSaga);
-  yield takeLatest(ScenariosActionTypes.LOAD_CHAIN_REQUEST, loadChainSaga);
-  yield takeLatest(ScenariosActionTypes.DELETE_CHAIN_REQUEST, deleteChainSaga);
+export function* scenariosSaga(): SagaIterator {
+  // Handle success actions for visualization updates
+  yield takeEvery(createChain.fulfilled.type, handleChainCreationSuccessSaga);
+  yield takeEvery(modifyChain.fulfilled.type, handleChainModificationSuccessSaga);
+  yield takeEvery(loadChain.fulfilled.type, handleChainLoadSuccessSaga);
+  yield takeEvery(runSimulation.fulfilled.type, handleSimulationSuccessSaga);
 
-  // Watch for batch operations
-  yield takeLatest('scenarios/BATCH_ANALYSIS_REQUEST', batchScenarioAnalysisSaga);
+  // Handle batch operations
+  yield takeLatest('scenarios/batchAnalysis', batchScenarioAnalysisSaga);
 
-  // Watch for error handling
+  // Handle settings changes
+  yield takeEvery('scenarios/updateSettings', handleSettingsChangeSaga);
+
+  // Handle portfolio changes for auto-analysis
+  yield takeEvery('scenarios/setCurrentPortfolio', autoAnalyzeOnPortfolioChangeSaga);
+
+  // Handle error cases
   yield takeEvery([
-    ScenariosActionTypes.LOAD_SCENARIOS_FAILURE,
-    ScenariosActionTypes.RUN_SIMULATION_FAILURE,
-    ScenariosActionTypes.ANALYZE_IMPACT_FAILURE,
-    ScenariosActionTypes.CREATE_CHAIN_FAILURE,
-    ScenariosActionTypes.MODIFY_CHAIN_FAILURE,
-    ScenariosActionTypes.DELETE_CHAIN_FAILURE,
-    ScenariosActionTypes.LOAD_CHAIN_FAILURE,
+    loadScenarios.rejected.type,
+    runSimulation.rejected.type,
+    analyzeImpact.rejected.type,
+    createChain.rejected.type,
+    modifyChain.rejected.type,
+    loadChain.rejected.type,
+    deleteChain.rejected.type,
   ], errorHandlingSaga);
 
   // Start background processes
-  yield call(autoRefreshScenariosSaga);
-  yield call(concurrentAnalysisManagerSaga);
-  yield call(cacheCleanupSaga);
-  yield call(performanceMonitoringSaga);
+  yield all([
+    call(autoRefreshScenariosSaga),
+    call(concurrentAnalysisManagerSaga),
+    call(cacheCleanupSaga),
+    call(performanceMonitoringSaga),
+    call(trackActiveAnalysesSaga),
+  ]);
 }
 
 export default scenariosSaga;
