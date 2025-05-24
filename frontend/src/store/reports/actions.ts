@@ -1,287 +1,195 @@
 /**
  * Reports actions
  */
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import { reportService } from '../../services/reports/reportService';
 import {
   ReportRequest,
   ComparisonReportRequest,
   ScheduleReportRequest,
   ReportTemplateRequest,
-  ReportType,
+  ReportResponse,
+  ScheduleReportResponse,
+  ReportHistoryResponse,
+  ReportTemplateResponse,
 } from '../../types/reports';
 
-// Action Types
-export const REPORTS_ACTION_TYPES = {
-  // Generate report actions
-  GENERATE_REPORT_REQUEST: 'GENERATE_REPORT_REQUEST',
-  GENERATE_REPORT_SUCCESS: 'GENERATE_REPORT_SUCCESS',
-  GENERATE_REPORT_FAILURE: 'GENERATE_REPORT_FAILURE',
+/**
+ * Generate report
+ */
+export const generateReport = createAsyncThunk<
+  ReportResponse,
+  ReportRequest,
+  { rejectValue: string }
+>(
+  'reports/generateReport',
+  async (request, { rejectWithValue }) => {
+    try {
+      const report = await reportService.generateReport(request);
+      return report;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to generate report');
+    }
+  }
+);
 
-  // Generate comparison report actions
-  GENERATE_COMPARISON_REPORT_REQUEST: 'GENERATE_COMPARISON_REPORT_REQUEST',
-  GENERATE_COMPARISON_REPORT_SUCCESS: 'GENERATE_COMPARISON_REPORT_SUCCESS',
-  GENERATE_COMPARISON_REPORT_FAILURE: 'GENERATE_COMPARISON_REPORT_FAILURE',
+/**
+ * Generate comparison report
+ */
+export const generateComparisonReport = createAsyncThunk<
+  ReportResponse,
+  ComparisonReportRequest,
+  { rejectValue: string }
+>(
+  'reports/generateComparisonReport',
+  async (request, { rejectWithValue }) => {
+    try {
+      const report = await reportService.generateComparisonReport(request);
+      return report;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to generate comparison report');
+    }
+  }
+);
 
-  // Schedule report actions
-  SCHEDULE_REPORT_REQUEST: 'SCHEDULE_REPORT_REQUEST',
-  SCHEDULE_REPORT_SUCCESS: 'SCHEDULE_REPORT_SUCCESS',
-  SCHEDULE_REPORT_FAILURE: 'SCHEDULE_REPORT_FAILURE',
+/**
+ * Schedule report
+ */
+export const scheduleReport = createAsyncThunk<
+  ScheduleReportResponse,
+  ScheduleReportRequest,
+  { rejectValue: string }
+>(
+  'reports/scheduleReport',
+  async (request, { rejectWithValue }) => {
+    try {
+      const scheduledReport = await reportService.scheduleReport(request);
+      return scheduledReport;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to schedule report');
+    }
+  }
+);
 
-  // Scheduled reports actions
-  LOAD_SCHEDULED_REPORTS_REQUEST: 'LOAD_SCHEDULED_REPORTS_REQUEST',
-  LOAD_SCHEDULED_REPORTS_SUCCESS: 'LOAD_SCHEDULED_REPORTS_SUCCESS',
-  LOAD_SCHEDULED_REPORTS_FAILURE: 'LOAD_SCHEDULED_REPORTS_FAILURE',
+/**
+ * Load scheduled reports
+ */
+export const loadScheduledReports = createAsyncThunk<
+  ScheduleReportResponse[],
+  void,
+  { rejectValue: string }
+>(
+  'reports/loadScheduledReports',
+  async (_, { rejectWithValue }) => {
+    try {
+      const scheduledReports = await reportService.getScheduledReports();
+      return scheduledReports;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to load scheduled reports');
+    }
+  }
+);
 
-  // Cancel scheduled report actions
-  CANCEL_SCHEDULED_REPORT_REQUEST: 'CANCEL_SCHEDULED_REPORT_REQUEST',
-  CANCEL_SCHEDULED_REPORT_SUCCESS: 'CANCEL_SCHEDULED_REPORT_SUCCESS',
-  CANCEL_SCHEDULED_REPORT_FAILURE: 'CANCEL_SCHEDULED_REPORT_FAILURE',
+/**
+ * Cancel scheduled report
+ */
+export const cancelScheduledReport = createAsyncThunk<
+  string,
+  string,
+  { rejectValue: string }
+>(
+  'reports/cancelScheduledReport',
+  async (reportId, { rejectWithValue }) => {
+    try {
+      await reportService.cancelScheduledReport(reportId);
+      return reportId;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to cancel scheduled report');
+    }
+  }
+);
 
-  // Report history actions
-  LOAD_REPORT_HISTORY_REQUEST: 'LOAD_REPORT_HISTORY_REQUEST',
-  LOAD_REPORT_HISTORY_SUCCESS: 'LOAD_REPORT_HISTORY_SUCCESS',
-  LOAD_REPORT_HISTORY_FAILURE: 'LOAD_REPORT_HISTORY_FAILURE',
+/**
+ * Load report history
+ */
+export const loadReportHistory = createAsyncThunk<
+  ReportHistoryResponse[],
+  {
+    portfolioId?: string;
+    reportType?: string;
+    startDate?: string;
+    endDate?: string;
+  },
+  { rejectValue: string }
+>(
+  'reports/loadReportHistory',
+  async (filters, { rejectWithValue }) => {
+    try {
+      const history = await reportService.getReportHistory(
+        filters.portfolioId,
+        filters.reportType,
+        filters.startDate,
+        filters.endDate
+      );
+      return history;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to load report history');
+    }
+  }
+);
 
-  // Report templates actions
-  LOAD_REPORT_TEMPLATES_REQUEST: 'LOAD_REPORT_TEMPLATES_REQUEST',
-  LOAD_REPORT_TEMPLATES_SUCCESS: 'LOAD_REPORT_TEMPLATES_SUCCESS',
-  LOAD_REPORT_TEMPLATES_FAILURE: 'LOAD_REPORT_TEMPLATES_FAILURE',
+/**
+ * Load report templates
+ */
+export const loadReportTemplates = createAsyncThunk<
+  ReportTemplateResponse[],
+  void,
+  { rejectValue: string }
+>(
+  'reports/loadReportTemplates',
+  async (_, { rejectWithValue }) => {
+    try {
+      const templates = await reportService.getReportTemplates();
+      return templates;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to load report templates');
+    }
+  }
+);
 
-  // Create template actions
-  CREATE_REPORT_TEMPLATE_REQUEST: 'CREATE_REPORT_TEMPLATE_REQUEST',
-  CREATE_REPORT_TEMPLATE_SUCCESS: 'CREATE_REPORT_TEMPLATE_SUCCESS',
-  CREATE_REPORT_TEMPLATE_FAILURE: 'CREATE_REPORT_TEMPLATE_FAILURE',
+/**
+ * Create report template
+ */
+export const createReportTemplate = createAsyncThunk<
+  ReportTemplateResponse,
+  ReportTemplateRequest,
+  { rejectValue: string }
+>(
+  'reports/createReportTemplate',
+  async (request, { rejectWithValue }) => {
+    try {
+      const template = await reportService.createReportTemplate(request);
+      return template;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to create report template');
+    }
+  }
+);
 
-  // Download report actions
-  DOWNLOAD_REPORT_REQUEST: 'DOWNLOAD_REPORT_REQUEST',
-  DOWNLOAD_REPORT_SUCCESS: 'DOWNLOAD_REPORT_SUCCESS',
-  DOWNLOAD_REPORT_FAILURE: 'DOWNLOAD_REPORT_FAILURE',
-
-  // Preview actions
-  SHOW_REPORT_PREVIEW: 'SHOW_REPORT_PREVIEW',
-  HIDE_REPORT_PREVIEW: 'HIDE_REPORT_PREVIEW',
-
-  // UI actions
-  SET_CURRENT_REPORT: 'SET_CURRENT_REPORT',
-  CLEAR_REPORT_ERRORS: 'CLEAR_REPORT_ERRORS',
-  SET_HISTORY_FILTERS: 'SET_HISTORY_FILTERS',
-  CLEAR_HISTORY_FILTERS: 'CLEAR_HISTORY_FILTERS',
-} as const;
-
-// Action Creators
-
-// Generate report actions
-export const generateReportRequest = (request: ReportRequest) => ({
-  type: REPORTS_ACTION_TYPES.GENERATE_REPORT_REQUEST,
-  payload: request,
-});
-
-export const generateReportSuccess = (report: any) => ({
-  type: REPORTS_ACTION_TYPES.GENERATE_REPORT_SUCCESS,
-  payload: report,
-});
-
-export const generateReportFailure = (error: string) => ({
-  type: REPORTS_ACTION_TYPES.GENERATE_REPORT_FAILURE,
-  payload: error,
-});
-
-// Generate comparison report actions
-export const generateComparisonReportRequest = (request: ComparisonReportRequest) => ({
-  type: REPORTS_ACTION_TYPES.GENERATE_COMPARISON_REPORT_REQUEST,
-  payload: request,
-});
-
-export const generateComparisonReportSuccess = (report: any) => ({
-  type: REPORTS_ACTION_TYPES.GENERATE_COMPARISON_REPORT_SUCCESS,
-  payload: report,
-});
-
-export const generateComparisonReportFailure = (error: string) => ({
-  type: REPORTS_ACTION_TYPES.GENERATE_COMPARISON_REPORT_FAILURE,
-  payload: error,
-});
-
-// Schedule report actions
-export const scheduleReportRequest = (request: ScheduleReportRequest) => ({
-  type: REPORTS_ACTION_TYPES.SCHEDULE_REPORT_REQUEST,
-  payload: request,
-});
-
-export const scheduleReportSuccess = (scheduledReport: any) => ({
-  type: REPORTS_ACTION_TYPES.SCHEDULE_REPORT_SUCCESS,
-  payload: scheduledReport,
-});
-
-export const scheduleReportFailure = (error: string) => ({
-  type: REPORTS_ACTION_TYPES.SCHEDULE_REPORT_FAILURE,
-  payload: error,
-});
-
-// Scheduled reports actions
-export const loadScheduledReportsRequest = () => ({
-  type: REPORTS_ACTION_TYPES.LOAD_SCHEDULED_REPORTS_REQUEST,
-});
-
-export const loadScheduledReportsSuccess = (scheduledReports: any[]) => ({
-  type: REPORTS_ACTION_TYPES.LOAD_SCHEDULED_REPORTS_SUCCESS,
-  payload: scheduledReports,
-});
-
-export const loadScheduledReportsFailure = (error: string) => ({
-  type: REPORTS_ACTION_TYPES.LOAD_SCHEDULED_REPORTS_FAILURE,
-  payload: error,
-});
-
-// Cancel scheduled report actions
-export const cancelScheduledReportRequest = (reportId: string) => ({
-  type: REPORTS_ACTION_TYPES.CANCEL_SCHEDULED_REPORT_REQUEST,
-  payload: reportId,
-});
-
-export const cancelScheduledReportSuccess = (reportId: string) => ({
-  type: REPORTS_ACTION_TYPES.CANCEL_SCHEDULED_REPORT_SUCCESS,
-  payload: reportId,
-});
-
-export const cancelScheduledReportFailure = (error: string) => ({
-  type: REPORTS_ACTION_TYPES.CANCEL_SCHEDULED_REPORT_FAILURE,
-  payload: error,
-});
-
-// Report history actions
-export const loadReportHistoryRequest = (filters?: {
-  portfolioId?: string;
-  reportType?: string;
-  startDate?: string;
-  endDate?: string;
-}) => ({
-  type: REPORTS_ACTION_TYPES.LOAD_REPORT_HISTORY_REQUEST,
-  payload: filters,
-});
-
-export const loadReportHistorySuccess = (history: any[]) => ({
-  type: REPORTS_ACTION_TYPES.LOAD_REPORT_HISTORY_SUCCESS,
-  payload: history,
-});
-
-export const loadReportHistoryFailure = (error: string) => ({
-  type: REPORTS_ACTION_TYPES.LOAD_REPORT_HISTORY_FAILURE,
-  payload: error,
-});
-
-// Report templates actions
-export const loadReportTemplatesRequest = () => ({
-  type: REPORTS_ACTION_TYPES.LOAD_REPORT_TEMPLATES_REQUEST,
-});
-
-export const loadReportTemplatesSuccess = (templates: any[]) => ({
-  type: REPORTS_ACTION_TYPES.LOAD_REPORT_TEMPLATES_SUCCESS,
-  payload: templates,
-});
-
-export const loadReportTemplatesFailure = (error: string) => ({
-  type: REPORTS_ACTION_TYPES.LOAD_REPORT_TEMPLATES_FAILURE,
-  payload: error,
-});
-
-// Create template actions
-export const createReportTemplateRequest = (request: ReportTemplateRequest) => ({
-  type: REPORTS_ACTION_TYPES.CREATE_REPORT_TEMPLATE_REQUEST,
-  payload: request,
-});
-
-export const createReportTemplateSuccess = (template: any) => ({
-  type: REPORTS_ACTION_TYPES.CREATE_REPORT_TEMPLATE_SUCCESS,
-  payload: template,
-});
-
-export const createReportTemplateFailure = (error: string) => ({
-  type: REPORTS_ACTION_TYPES.CREATE_REPORT_TEMPLATE_FAILURE,
-  payload: error,
-});
-
-// Download report actions
-export const downloadReportRequest = (reportId: string) => ({
-  type: REPORTS_ACTION_TYPES.DOWNLOAD_REPORT_REQUEST,
-  payload: reportId,
-});
-
-export const downloadReportSuccess = (reportId: string) => ({
-  type: REPORTS_ACTION_TYPES.DOWNLOAD_REPORT_SUCCESS,
-  payload: reportId,
-});
-
-export const downloadReportFailure = (error: string) => ({
-  type: REPORTS_ACTION_TYPES.DOWNLOAD_REPORT_FAILURE,
-  payload: error,
-});
-
-// Preview actions
-export const showReportPreview = (data: any) => ({
-  type: REPORTS_ACTION_TYPES.SHOW_REPORT_PREVIEW,
-  payload: data,
-});
-
-export const hideReportPreview = () => ({
-  type: REPORTS_ACTION_TYPES.HIDE_REPORT_PREVIEW,
-});
-
-// UI actions
-export const setCurrentReport = (report: any) => ({
-  type: REPORTS_ACTION_TYPES.SET_CURRENT_REPORT,
-  payload: report,
-});
-
-export const clearReportErrors = () => ({
-  type: REPORTS_ACTION_TYPES.CLEAR_REPORT_ERRORS,
-});
-
-export const setHistoryFilters = (filters: {
-  portfolioId?: string;
-  reportType?: ReportType;
-  startDate?: string;
-  endDate?: string;
-}) => ({
-  type: REPORTS_ACTION_TYPES.SET_HISTORY_FILTERS,
-  payload: filters,
-});
-
-export const clearHistoryFilters = () => ({
-  type: REPORTS_ACTION_TYPES.CLEAR_HISTORY_FILTERS,
-});
-
-// Action types
-export type ReportsAction =
-  | ReturnType<typeof generateReportRequest>
-  | ReturnType<typeof generateReportSuccess>
-  | ReturnType<typeof generateReportFailure>
-  | ReturnType<typeof generateComparisonReportRequest>
-  | ReturnType<typeof generateComparisonReportSuccess>
-  | ReturnType<typeof generateComparisonReportFailure>
-  | ReturnType<typeof scheduleReportRequest>
-  | ReturnType<typeof scheduleReportSuccess>
-  | ReturnType<typeof scheduleReportFailure>
-  | ReturnType<typeof loadScheduledReportsRequest>
-  | ReturnType<typeof loadScheduledReportsSuccess>
-  | ReturnType<typeof loadScheduledReportsFailure>
-  | ReturnType<typeof cancelScheduledReportRequest>
-  | ReturnType<typeof cancelScheduledReportSuccess>
-  | ReturnType<typeof cancelScheduledReportFailure>
-  | ReturnType<typeof loadReportHistoryRequest>
-  | ReturnType<typeof loadReportHistorySuccess>
-  | ReturnType<typeof loadReportHistoryFailure>
-  | ReturnType<typeof loadReportTemplatesRequest>
-  | ReturnType<typeof loadReportTemplatesSuccess>
-  | ReturnType<typeof loadReportTemplatesFailure>
-  | ReturnType<typeof createReportTemplateRequest>
-  | ReturnType<typeof createReportTemplateSuccess>
-  | ReturnType<typeof createReportTemplateFailure>
-  | ReturnType<typeof downloadReportRequest>
-  | ReturnType<typeof downloadReportSuccess>
-  | ReturnType<typeof downloadReportFailure>
-  | ReturnType<typeof showReportPreview>
-  | ReturnType<typeof hideReportPreview>
-  | ReturnType<typeof setCurrentReport>
-  | ReturnType<typeof clearReportErrors>
-  | ReturnType<typeof setHistoryFilters>
-  | ReturnType<typeof clearHistoryFilters>;
+/**
+ * Download report
+ */
+export const downloadReport = createAsyncThunk<
+  void,
+  string,
+  { rejectValue: string }
+>(
+  'reports/downloadReport',
+  async (reportId, { rejectWithValue }) => {
+    try {
+      await reportService.downloadReport(reportId);
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to download report');
+    }
+  }
+);

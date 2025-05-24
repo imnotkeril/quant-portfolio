@@ -2,7 +2,7 @@
  * Reports selectors
  */
 import { createSelector } from '@reduxjs/toolkit';
-import { RootState } from '../index';
+import { RootState } from '../rootReducer';
 import { ReportType } from '../../types/reports';
 
 // Basic selectors
