@@ -1,84 +1,158 @@
 /**
- * Risk store selectors
+ * Risk selectors
  */
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../rootReducer';
-import { RiskState } from './types';
 
-/**
- * Base risk selector
- */
-export const selectRisk = (state: RootState): RiskState => state.risk;
+// Base selector
+export const selectRiskState = (state: RootState) => state.risk;
 
-/**
- * Loading state selectors
- */
+// VaR selectors
+export const selectVaRResults = createSelector(
+  selectRiskState,
+  (state) => state.varResults
+);
+
 export const selectVaRLoading = createSelector(
-  selectRisk,
-  (risk) => risk.varLoading
+  selectRiskState,
+  (state) => state.varLoading
+);
+
+export const selectVaRError = createSelector(
+  selectRiskState,
+  (state) => state.varError
+);
+
+// Stress test selectors
+export const selectStressTestResults = createSelector(
+  selectRiskState,
+  (state) => state.stressTestResults
 );
 
 export const selectStressTestLoading = createSelector(
-  selectRisk,
-  (risk) => risk.stressTestLoading
+  selectRiskState,
+  (state) => state.stressTestLoading
+);
+
+export const selectStressTestError = createSelector(
+  selectRiskState,
+  (state) => state.stressTestError
+);
+
+// Monte Carlo selectors
+export const selectMonteCarloResults = createSelector(
+  selectRiskState,
+  (state) => state.monteCarloResults
 );
 
 export const selectMonteCarloLoading = createSelector(
-  selectRisk,
-  (risk) => risk.monteCarloLoading
+  selectRiskState,
+  (state) => state.monteCarloLoading
+);
+
+export const selectMonteCarloError = createSelector(
+  selectRiskState,
+  (state) => state.monteCarloError
+);
+
+// Drawdown selectors
+export const selectDrawdownResults = createSelector(
+  selectRiskState,
+  (state) => state.drawdownResults
 );
 
 export const selectDrawdownsLoading = createSelector(
-  selectRisk,
-  (risk) => risk.drawdownsLoading
+  selectRiskState,
+  (state) => state.drawdownsLoading
+);
+
+export const selectDrawdownsError = createSelector(
+  selectRiskState,
+  (state) => state.drawdownsError
+);
+
+// Risk contribution selectors
+export const selectRiskContributionResults = createSelector(
+  selectRiskState,
+  (state) => state.riskContributionResults
 );
 
 export const selectRiskContributionLoading = createSelector(
-  selectRisk,
-  (risk) => risk.riskContributionLoading
+  selectRiskState,
+  (state) => state.riskContributionLoading
+);
+
+export const selectRiskContributionError = createSelector(
+  selectRiskState,
+  (state) => state.riskContributionError
+);
+
+// UI state selectors
+export const selectSelectedPortfolioId = createSelector(
+  selectRiskState,
+  (state) => state.selectedPortfolioId
+);
+
+export const selectSelectedAnalysisType = createSelector(
+  selectRiskState,
+  (state) => state.selectedAnalysisType
+);
+
+export const selectSelectedScenarios = createSelector(
+  selectRiskState,
+  (state) => state.selectedScenarios
+);
+
+export const selectSelectedConfidenceLevels = createSelector(
+  selectRiskState,
+  (state) => state.selectedConfidenceLevels
+);
+
+export const selectSelectedTimeHorizons = createSelector(
+  selectRiskState,
+  (state) => state.selectedTimeHorizons
+);
+
+export const selectRiskParams = createSelector(
+  selectRiskState,
+  (state) => state.riskParams
+);
+
+// Loading state selectors
+export const selectRiskLoading = createSelector(
+  selectRiskState,
+  (state) => ({
+    var: state.varLoading,
+    stressTest: state.stressTestLoading,
+    monteCarlo: state.monteCarloLoading,
+    drawdowns: state.drawdownsLoading,
+    riskContribution: state.riskContributionLoading,
+  })
 );
 
 export const selectAnyRiskLoading = createSelector(
-  selectVaRLoading,
-  selectStressTestLoading,
-  selectMonteCarloLoading,
-  selectDrawdownsLoading,
-  selectRiskContributionLoading,
-  (varLoading, stressLoading, monteLoading, drawdownLoading, contributionLoading) =>
-    varLoading || stressLoading || monteLoading || drawdownLoading || contributionLoading
+  selectRiskLoading,
+  (loading) => Object.values(loading).some(Boolean)
 );
 
-/**
- * Data selectors
- */
-export const selectVaRResults = createSelector(
-  selectRisk,
-  (risk) => risk.varResults
+// Error state selectors
+export const selectRiskErrors = createSelector(
+  selectRiskState,
+  (state) => ({
+    var: state.varError,
+    stressTest: state.stressTestError,
+    monteCarlo: state.monteCarloError,
+    drawdowns: state.drawdownsError,
+    riskContribution: state.riskContributionError,
+  })
 );
 
-export const selectStressTestResults = createSelector(
-  selectRisk,
-  (risk) => risk.stressTestResults
+export const selectAnyRiskError = createSelector(
+  selectRiskErrors,
+  (errors) => Object.values(errors).some(Boolean)
 );
 
-export const selectMonteCarloResults = createSelector(
-  selectRisk,
-  (risk) => risk.monteCarloResults
-);
-
-export const selectDrawdownResults = createSelector(
-  selectRisk,
-  (risk) => risk.drawdownResults
-);
-
-export const selectRiskContributionResults = createSelector(
-  selectRisk,
-  (risk) => risk.riskContributionResults
-);
-
-/**
- * Portfolio-specific data selectors
- */
+// Portfolio-specific selectors
 export const selectVaRForPortfolio = (portfolioId: string) =>
   createSelector(
     selectVaRResults,
@@ -109,189 +183,24 @@ export const selectRiskContributionForPortfolio = (portfolioId: string) =>
     (results) => results[portfolioId]
   );
 
-/**
- * Current analysis selectors
- */
-export const selectCurrentPortfolioId = createSelector(
-  selectRisk,
-  (risk) => risk.currentPortfolioId
+// Combined data selectors
+export const selectRiskData = createSelector(
+  selectRiskState,
+  (state) => ({
+    varResults: state.varResults,
+    stressTestResults: state.stressTestResults,
+    monteCarloResults: state.monteCarloResults,
+    drawdownResults: state.drawdownResults,
+    riskContributionResults: state.riskContributionResults,
+  })
 );
 
-export const selectCurrentAnalysisType = createSelector(
-  selectRisk,
-  (risk) => risk.currentAnalysisType
+export const selectHasRiskData = createSelector(
+  selectRiskData,
+  (data) => Object.values(data).some(results => Object.keys(results).length > 0)
 );
 
-export const selectCurrentPortfolioRiskData = createSelector(
-  selectRisk,
-  selectCurrentPortfolioId,
-  (risk, portfolioId) => {
-    if (!portfolioId) return null;
-
-    return {
-      var: risk.varResults[portfolioId],
-      stressTest: risk.stressTestResults[portfolioId],
-      monteCarlo: risk.monteCarloResults[portfolioId],
-      drawdowns: risk.drawdownResults[portfolioId],
-      riskContribution: risk.riskContributionResults[portfolioId],
-    };
-  }
-);
-
-/**
- * UI state selectors
- */
-export const selectSelectedScenarios = createSelector(
-  selectRisk,
-  (risk) => risk.selectedScenarios
-);
-
-export const selectSelectedConfidenceLevels = createSelector(
-  selectRisk,
-  (risk) => risk.selectedConfidenceLevels
-);
-
-export const selectSelectedTimeHorizons = createSelector(
-  selectRisk,
-  (risk) => risk.selectedTimeHorizons
-);
-
-/**
- * Cache selectors
- */
-export const selectVaRCache = createSelector(
-  selectRisk,
-  (risk) => risk.cache.varCache
-);
-
-export const selectStressTestCache = createSelector(
-  selectRisk,
-  (risk) => risk.cache.stressTestCache
-);
-
-export const selectMonteCarloCache = createSelector(
-  selectRisk,
-  (risk) => risk.cache.monteCarloCache
-);
-
-export const selectCachedVaRForPortfolio = (portfolioId: string) =>
-  createSelector(
-    selectVaRCache,
-    (cache) => cache[portfolioId]
-  );
-
-export const selectCachedStressTestForPortfolio = (portfolioId: string) =>
-  createSelector(
-    selectStressTestCache,
-    (cache) => cache[portfolioId]
-  );
-
-export const selectCachedMonteCarloForPortfolio = (portfolioId: string) =>
-  createSelector(
-    selectMonteCarloCache,
-    (cache) => cache[portfolioId]
-  );
-
-/**
- * Error selectors
- */
-export const selectRiskErrors = createSelector(
-  selectRisk,
-  (risk) => risk.errors
-);
-
-export const selectVaRError = createSelector(
-  selectRiskErrors,
-  (errors) => errors.var
-);
-
-export const selectStressTestError = createSelector(
-  selectRiskErrors,
-  (errors) => errors.stressTest
-);
-
-export const selectMonteCarloError = createSelector(
-  selectRiskErrors,
-  (errors) => errors.monteCarlo
-);
-
-export const selectDrawdownsError = createSelector(
-  selectRiskErrors,
-  (errors) => errors.drawdowns
-);
-
-export const selectRiskContributionError = createSelector(
-  selectRiskErrors,
-  (errors) => errors.riskContribution
-);
-
-export const selectHasAnyRiskError = createSelector(
-  selectRiskErrors,
-  (errors) => Object.values(errors).some(error => error !== null)
-);
-
-/**
- * Settings selectors
- */
-export const selectRiskSettings = createSelector(
-  selectRisk,
-  (risk) => risk.settings
-);
-
-export const selectDefaultConfidenceLevel = createSelector(
-  selectRiskSettings,
-  (settings) => settings.defaultConfidenceLevel
-);
-
-export const selectDefaultTimeHorizon = createSelector(
-  selectRiskSettings,
-  (settings) => settings.defaultTimeHorizon
-);
-
-export const selectDefaultSimulations = createSelector(
-  selectRiskSettings,
-  (settings) => settings.defaultSimulations
-);
-
-export const selectAutoRefresh = createSelector(
-  selectRiskSettings,
-  (settings) => settings.autoRefresh
-);
-
-export const selectRefreshInterval = createSelector(
-  selectRiskSettings,
-  (settings) => settings.refreshInterval
-);
-
-/**
- * Computed selectors
- */
-export const selectPortfoliosWithRiskData = createSelector(
-  selectVaRResults,
-  selectStressTestResults,
-  selectMonteCarloResults,
-  selectDrawdownResults,
-  selectRiskContributionResults,
-  (varResults, stressResults, monteResults, drawdownResults, contributionResults) => {
-    const allPortfolioIds = new Set([
-      ...Object.keys(varResults),
-      ...Object.keys(stressResults),
-      ...Object.keys(monteResults),
-      ...Object.keys(drawdownResults),
-      ...Object.keys(contributionResults),
-    ]);
-
-    return Array.from(allPortfolioIds).map(portfolioId => ({
-      portfolioId,
-      hasVaR: !!varResults[portfolioId],
-      hasStressTest: !!stressResults[portfolioId],
-      hasMonteCarlo: !!monteResults[portfolioId],
-      hasDrawdowns: !!drawdownResults[portfolioId],
-      hasRiskContribution: !!contributionResults[portfolioId],
-    }));
-  }
-);
-
+// Computed selectors
 export const selectRiskSummaryForPortfolio = (portfolioId: string) =>
   createSelector(
     selectVaRForPortfolio(portfolioId),
@@ -309,37 +218,31 @@ export const selectRiskSummaryForPortfolio = (portfolioId: string) =>
         var95: varData?.var,
         worstCaseScenario: stressData?.scenarioName,
         maxDrawdown: drawdownData?.maxDrawdown,
-        expectedValue: monteData?.percentiles?.mean,
+        expectedValue: monteData?.percentiles?.['50.0'],
         riskContribution: contributionData?.riskContributions,
         hasCompleteAnalysis: !!(varData && stressData && monteData && drawdownData && contributionData),
       };
     }
   );
 
-/**
- * Cache utility selectors
- */
-export const selectIsCacheValid = (cacheTimestamp: number, maxAge: number = 300000) => // 5 minutes default
-  createSelector(
-    () => Date.now(),
-    (now) => now - cacheTimestamp < maxAge
-  );
+export const selectPortfoliosWithRiskData = createSelector(
+  selectRiskData,
+  (data) => {
+    const allPortfolioIds = new Set([
+      ...Object.keys(data.varResults),
+      ...Object.keys(data.stressTestResults),
+      ...Object.keys(data.monteCarloResults),
+      ...Object.keys(data.drawdownResults),
+      ...Object.keys(data.riskContributionResults),
+    ]);
 
-export const selectShouldRefreshData = (portfolioId: string) =>
-  createSelector(
-    selectCachedVaRForPortfolio(portfolioId),
-    selectCachedStressTestForPortfolio(portfolioId),
-    selectCachedMonteCarloForPortfolio(portfolioId),
-    selectAutoRefresh,
-    selectRefreshInterval,
-    (varCache, stressCache, monteCache, autoRefresh, refreshInterval) => {
-      if (!autoRefresh) return false;
-
-      const now = Date.now();
-      const shouldRefreshVar = !varCache || (now - varCache.timestamp) > refreshInterval;
-      const shouldRefreshStress = !stressCache || (now - stressCache.timestamp) > refreshInterval;
-      const shouldRefreshMonte = !monteCache || (now - monteCache.timestamp) > refreshInterval;
-
-      return shouldRefreshVar || shouldRefreshStress || shouldRefreshMonte;
-    }
-  );
+    return Array.from(allPortfolioIds).map(portfolioId => ({
+      portfolioId,
+      hasVaR: !!data.varResults[portfolioId],
+      hasStressTest: !!data.stressTestResults[portfolioId],
+      hasMonteCarlo: !!data.monteCarloResults[portfolioId],
+      hasDrawdowns: !!data.drawdownResults[portfolioId],
+      hasRiskContribution: !!data.riskContributionResults[portfolioId],
+    }));
+  }
+);

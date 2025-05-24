@@ -1,378 +1,188 @@
 /**
- * Risk store reducer
+ * Risk reducer
  */
-import { RiskState, RiskAction, RiskActionTypes } from './types';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { RiskState, RiskParams } from './types';
+import {
+  calculateVaR,
+  performStressTest,
+  performMonteCarlo,
+  analyzeDrawdowns,
+  calculateRiskContribution,
+} from './actions';
 
-/**
- * Initial risk state
- */
 const initialState: RiskState = {
-  // Loading states
-  varLoading: false,
-  stressTestLoading: false,
-  monteCarloLoading: false,
-  drawdownsLoading: false,
-  riskContributionLoading: false,
-
-  // Data
+  // VaR analysis
   varResults: {},
-  stressTestResults: {},
-  monteCarloResults: {},
-  drawdownResults: {},
-  riskContributionResults: {},
+  varLoading: false,
+  varError: null,
 
-  // Current analysis
-  currentPortfolioId: null,
-  currentAnalysisType: null,
+  // Stress test analysis
+  stressTestResults: {},
+  stressTestLoading: false,
+  stressTestError: null,
+
+  // Monte Carlo simulation
+  monteCarloResults: {},
+  monteCarloLoading: false,
+  monteCarloError: null,
+
+  // Drawdown analysis
+  drawdownResults: {},
+  drawdownsLoading: false,
+  drawdownsError: null,
+
+  // Risk contribution analysis
+  riskContributionResults: {},
+  riskContributionLoading: false,
+  riskContributionError: null,
 
   // UI state
+  selectedPortfolioId: null,
+  selectedAnalysisType: null,
   selectedScenarios: [],
   selectedConfidenceLevels: [0.95],
   selectedTimeHorizons: [1],
-
-  // Cache
-  cache: {
-    varCache: {},
-    stressTestCache: {},
-    monteCarloCache: {},
-  },
-
-  // Errors
-  errors: {
-    var: null,
-    stressTest: null,
-    monteCarlo: null,
-    drawdowns: null,
-    riskContribution: null,
-  },
-
-  // Settings
-  settings: {
-    defaultConfidenceLevel: 0.95,
-    defaultTimeHorizon: 1,
-    defaultSimulations: 1000,
-    autoRefresh: false,
-    refreshInterval: 300000, // 5 minutes
+  riskParams: {
+    confidenceLevel: 0.95,
+    timeHorizon: 1,
+    simulations: 1000,
+    startDate: null,
+    endDate: null,
+    riskFreeRate: 0.02,
   },
 };
 
-/**
- * Risk reducer
- */
-export const riskReducer = (
-  state: RiskState = initialState,
-  action: RiskAction
-): RiskState => {
-  switch (action.type) {
-    // VaR calculation
-    case RiskActionTypes.CALCULATE_VAR_REQUEST:
-      return {
-        ...state,
-        varLoading: true,
-        errors: {
-          ...state.errors,
-          var: null,
-        },
-      };
+const riskSlice = createSlice({
+  name: 'risk',
+  initialState,
+  reducers: {
+    // UI actions
+    setSelectedPortfolio: (state, action: PayloadAction<string | null>) => {
+      state.selectedPortfolioId = action.payload;
+    },
+    setSelectedAnalysisType: (state, action: PayloadAction<RiskState['selectedAnalysisType']>) => {
+      state.selectedAnalysisType = action.payload;
+    },
+    setSelectedScenarios: (state, action: PayloadAction<string[]>) => {
+      state.selectedScenarios = action.payload;
+    },
+    setSelectedConfidenceLevels: (state, action: PayloadAction<number[]>) => {
+      state.selectedConfidenceLevels = action.payload;
+    },
+    setSelectedTimeHorizons: (state, action: PayloadAction<number[]>) => {
+      state.selectedTimeHorizons = action.payload;
+    },
+    setRiskParams: (state, action: PayloadAction<Partial<RiskParams>>) => {
+      state.riskParams = { ...state.riskParams, ...action.payload };
+    },
+    clearRiskData: (state) => {
+      state.varResults = {};
+      state.stressTestResults = {};
+      state.monteCarloResults = {};
+      state.drawdownResults = {};
+      state.riskContributionResults = {};
+    },
+    clearRiskErrors: (state) => {
+      state.varError = null;
+      state.stressTestError = null;
+      state.monteCarloError = null;
+      state.drawdownsError = null;
+      state.riskContributionError = null;
+    },
+  },
+  extraReducers: (builder) => {
+    // Calculate VaR
+    builder
+      .addCase(calculateVaR.pending, (state) => {
+        state.varLoading = true;
+        state.varError = null;
+      })
+      .addCase(calculateVaR.fulfilled, (state, action) => {
+        state.varLoading = false;
+        const portfolioId = action.meta.arg.portfolioId;
+        state.varResults[portfolioId] = action.payload;
+      })
+      .addCase(calculateVaR.rejected, (state, action) => {
+        state.varLoading = false;
+        state.varError = action.payload || 'Failed to calculate VaR';
+      });
 
-    case RiskActionTypes.CALCULATE_VAR_SUCCESS:
-      return {
-        ...state,
-        varLoading: false,
-        varResults: {
-          ...state.varResults,
-          [action.payload.portfolioId]: action.payload.data,
-        },
-        cache: {
-          ...state.cache,
-          varCache: {
-            ...state.cache.varCache,
-            [action.payload.portfolioId]: {
-              data: action.payload.data,
-              timestamp: Date.now(),
-            },
-          },
-        },
-        errors: {
-          ...state.errors,
-          var: null,
-        },
-      };
+    // Perform stress test
+    builder
+      .addCase(performStressTest.pending, (state) => {
+        state.stressTestLoading = true;
+        state.stressTestError = null;
+      })
+      .addCase(performStressTest.fulfilled, (state, action) => {
+        state.stressTestLoading = false;
+        const portfolioId = action.meta.arg.portfolioId;
+        state.stressTestResults[portfolioId] = action.payload;
+      })
+      .addCase(performStressTest.rejected, (state, action) => {
+        state.stressTestLoading = false;
+        state.stressTestError = action.payload || 'Failed to perform stress test';
+      });
 
-    case RiskActionTypes.CALCULATE_VAR_FAILURE:
-      return {
-        ...state,
-        varLoading: false,
-        errors: {
-          ...state.errors,
-          var: action.payload.error,
-        },
-      };
+    // Perform Monte Carlo
+    builder
+      .addCase(performMonteCarlo.pending, (state) => {
+        state.monteCarloLoading = true;
+        state.monteCarloError = null;
+      })
+      .addCase(performMonteCarlo.fulfilled, (state, action) => {
+        state.monteCarloLoading = false;
+        const portfolioId = action.meta.arg.portfolioId;
+        state.monteCarloResults[portfolioId] = action.payload;
+      })
+      .addCase(performMonteCarlo.rejected, (state, action) => {
+        state.monteCarloLoading = false;
+        state.monteCarloError = action.payload || 'Failed to perform Monte Carlo simulation';
+      });
 
-    // Stress test
-    case RiskActionTypes.PERFORM_STRESS_TEST_REQUEST:
-      return {
-        ...state,
-        stressTestLoading: true,
-        errors: {
-          ...state.errors,
-          stressTest: null,
-        },
-      };
+    // Analyze drawdowns
+    builder
+      .addCase(analyzeDrawdowns.pending, (state) => {
+        state.drawdownsLoading = true;
+        state.drawdownsError = null;
+      })
+      .addCase(analyzeDrawdowns.fulfilled, (state, action) => {
+        state.drawdownsLoading = false;
+        const portfolioId = action.meta.arg.portfolioId;
+        state.drawdownResults[portfolioId] = action.payload;
+      })
+      .addCase(analyzeDrawdowns.rejected, (state, action) => {
+        state.drawdownsLoading = false;
+        state.drawdownsError = action.payload || 'Failed to analyze drawdowns';
+      });
 
-    case RiskActionTypes.PERFORM_STRESS_TEST_SUCCESS:
-      return {
-        ...state,
-        stressTestLoading: false,
-        stressTestResults: {
-          ...state.stressTestResults,
-          [action.payload.portfolioId]: action.payload.data,
-        },
-        cache: {
-          ...state.cache,
-          stressTestCache: {
-            ...state.cache.stressTestCache,
-            [action.payload.portfolioId]: {
-              data: action.payload.data,
-              timestamp: Date.now(),
-            },
-          },
-        },
-        errors: {
-          ...state.errors,
-          stressTest: null,
-        },
-      };
+    // Calculate risk contribution
+    builder
+      .addCase(calculateRiskContribution.pending, (state) => {
+        state.riskContributionLoading = true;
+        state.riskContributionError = null;
+      })
+      .addCase(calculateRiskContribution.fulfilled, (state, action) => {
+        state.riskContributionLoading = false;
+        const portfolioId = action.meta.arg.portfolioId;
+        state.riskContributionResults[portfolioId] = action.payload;
+      })
+      .addCase(calculateRiskContribution.rejected, (state, action) => {
+        state.riskContributionLoading = false;
+        state.riskContributionError = action.payload || 'Failed to calculate risk contribution';
+      });
+  },
+});
 
-    case RiskActionTypes.PERFORM_STRESS_TEST_FAILURE:
-      return {
-        ...state,
-        stressTestLoading: false,
-        errors: {
-          ...state.errors,
-          stressTest: action.payload.error,
-        },
-      };
+export const {
+  setSelectedPortfolio,
+  setSelectedAnalysisType,
+  setSelectedScenarios,
+  setSelectedConfidenceLevels,
+  setSelectedTimeHorizons,
+  setRiskParams,
+  clearRiskData,
+  clearRiskErrors,
+} = riskSlice.actions;
 
-    // Monte Carlo simulation
-    case RiskActionTypes.PERFORM_MONTE_CARLO_REQUEST:
-      return {
-        ...state,
-        monteCarloLoading: true,
-        errors: {
-          ...state.errors,
-          monteCarlo: null,
-        },
-      };
-
-    case RiskActionTypes.PERFORM_MONTE_CARLO_SUCCESS:
-      return {
-        ...state,
-        monteCarloLoading: false,
-        monteCarloResults: {
-          ...state.monteCarloResults,
-          [action.payload.portfolioId]: action.payload.data,
-        },
-        cache: {
-          ...state.cache,
-          monteCarloCache: {
-            ...state.cache.monteCarloCache,
-            [action.payload.portfolioId]: {
-              data: action.payload.data,
-              timestamp: Date.now(),
-            },
-          },
-        },
-        errors: {
-          ...state.errors,
-          monteCarlo: null,
-        },
-      };
-
-    case RiskActionTypes.PERFORM_MONTE_CARLO_FAILURE:
-      return {
-        ...state,
-        monteCarloLoading: false,
-        errors: {
-          ...state.errors,
-          monteCarlo: action.payload.error,
-        },
-      };
-
-    // Drawdown analysis
-    case RiskActionTypes.ANALYZE_DRAWDOWNS_REQUEST:
-      return {
-        ...state,
-        drawdownsLoading: true,
-        errors: {
-          ...state.errors,
-          drawdowns: null,
-        },
-      };
-
-    case RiskActionTypes.ANALYZE_DRAWDOWNS_SUCCESS:
-      return {
-        ...state,
-        drawdownsLoading: false,
-        drawdownResults: {
-          ...state.drawdownResults,
-          [action.payload.portfolioId]: action.payload.data,
-        },
-        errors: {
-          ...state.errors,
-          drawdowns: null,
-        },
-      };
-
-    case RiskActionTypes.ANALYZE_DRAWDOWNS_FAILURE:
-      return {
-        ...state,
-        drawdownsLoading: false,
-        errors: {
-          ...state.errors,
-          drawdowns: action.payload.error,
-        },
-      };
-
-    // Risk contribution
-    case RiskActionTypes.CALCULATE_RISK_CONTRIBUTION_REQUEST:
-      return {
-        ...state,
-        riskContributionLoading: true,
-        errors: {
-          ...state.errors,
-          riskContribution: null,
-        },
-      };
-
-    case RiskActionTypes.CALCULATE_RISK_CONTRIBUTION_SUCCESS:
-      return {
-        ...state,
-        riskContributionLoading: false,
-        riskContributionResults: {
-          ...state.riskContributionResults,
-          [action.payload.portfolioId]: action.payload.data,
-        },
-        errors: {
-          ...state.errors,
-          riskContribution: null,
-        },
-      };
-
-    case RiskActionTypes.CALCULATE_RISK_CONTRIBUTION_FAILURE:
-      return {
-        ...state,
-        riskContributionLoading: false,
-        errors: {
-          ...state.errors,
-          riskContribution: action.payload.error,
-        },
-      };
-
-    // UI state actions
-    case RiskActionTypes.SET_CURRENT_PORTFOLIO:
-      return {
-        ...state,
-        currentPortfolioId: action.payload,
-      };
-
-    case RiskActionTypes.SET_CURRENT_ANALYSIS_TYPE:
-      return {
-        ...state,
-        currentAnalysisType: action.payload,
-      };
-
-    case RiskActionTypes.SET_SELECTED_SCENARIOS:
-      return {
-        ...state,
-        selectedScenarios: action.payload,
-      };
-
-    case RiskActionTypes.SET_SELECTED_CONFIDENCE_LEVELS:
-      return {
-        ...state,
-        selectedConfidenceLevels: action.payload,
-      };
-
-    case RiskActionTypes.SET_SELECTED_TIME_HORIZONS:
-      return {
-        ...state,
-        selectedTimeHorizons: action.payload,
-      };
-
-    // Cache management
-    case RiskActionTypes.CLEAR_CACHE:
-      return {
-        ...state,
-        cache: {
-          varCache: {},
-          stressTestCache: {},
-          monteCarloCache: {},
-        },
-      };
-
-    case RiskActionTypes.CLEAR_VAR_CACHE:
-      return {
-        ...state,
-        cache: {
-          ...state.cache,
-          varCache: {},
-        },
-      };
-
-    case RiskActionTypes.CLEAR_STRESS_TEST_CACHE:
-      return {
-        ...state,
-        cache: {
-          ...state.cache,
-          stressTestCache: {},
-        },
-      };
-
-    case RiskActionTypes.CLEAR_MONTE_CARLO_CACHE:
-      return {
-        ...state,
-        cache: {
-          ...state.cache,
-          monteCarloCache: {},
-        },
-      };
-
-    // Settings
-    case RiskActionTypes.UPDATE_SETTINGS:
-      return {
-        ...state,
-        settings: {
-          ...state.settings,
-          ...action.payload,
-        },
-      };
-
-    case RiskActionTypes.RESET_SETTINGS:
-      return {
-        ...state,
-        settings: initialState.settings,
-      };
-
-    // General actions
-    case RiskActionTypes.CLEAR_ERRORS:
-      return {
-        ...state,
-        errors: {
-          var: null,
-          stressTest: null,
-          monteCarlo: null,
-          drawdowns: null,
-          riskContribution: null,
-        },
-      };
-
-    case RiskActionTypes.RESET_STATE:
-      return initialState;
-
-    default:
-      return state;
-  }
-};
-
-export default riskReducer;
+export default riskSlice.reducer;

@@ -1,18 +1,6 @@
 /**
- * Risk store actions
+ * Risk state types
  */
-import {
-  RiskActionTypes,
-  RiskAction,
-  CalculateVaRPayload,
-  PerformStressTestPayload,
-  PerformMonteCarloPayload,
-  AnalyzeDrawdownsPayload,
-  CalculateRiskContributionPayload,
-  RiskAnalysisType,
-  RiskState,
-} from './types';
-import { ApiError } from '../../types/common';
 import {
   VaRResponse,
   StressTestResponse,
@@ -22,219 +10,168 @@ import {
 } from '../../types/risk';
 
 /**
- * VaR calculation actions
+ * Risk analysis types
  */
-export const calculateVaRRequest = (payload: CalculateVaRPayload): RiskAction => ({
-  type: RiskActionTypes.CALCULATE_VAR_REQUEST,
-  payload,
-});
-
-export const calculateVaRSuccess = (
-  portfolioId: string,
-  data: VaRResponse
-): RiskAction => ({
-  type: RiskActionTypes.CALCULATE_VAR_SUCCESS,
-  payload: { portfolioId, data },
-});
-
-export const calculateVaRFailure = (error: ApiError): RiskAction => ({
-  type: RiskActionTypes.CALCULATE_VAR_FAILURE,
-  payload: { error },
-});
+export type RiskAnalysisType =
+  | 'var'
+  | 'stress_test'
+  | 'monte_carlo'
+  | 'drawdowns'
+  | 'risk_contribution';
 
 /**
- * Stress test actions
+ * Risk state interface
  */
-export const performStressTestRequest = (payload: PerformStressTestPayload): RiskAction => ({
-  type: RiskActionTypes.PERFORM_STRESS_TEST_REQUEST,
-  payload,
-});
+export interface RiskState {
+  // VaR analysis
+  varResults: Record<string, VaRResponse>;
+  varLoading: boolean;
+  varError: string | null;
 
-export const performStressTestSuccess = (
-  portfolioId: string,
-  data: StressTestResponse
-): RiskAction => ({
-  type: RiskActionTypes.PERFORM_STRESS_TEST_SUCCESS,
-  payload: { portfolioId, data },
-});
+  // Stress test analysis
+  stressTestResults: Record<string, StressTestResponse>;
+  stressTestLoading: boolean;
+  stressTestError: string | null;
 
-export const performStressTestFailure = (error: ApiError): RiskAction => ({
-  type: RiskActionTypes.PERFORM_STRESS_TEST_FAILURE,
-  payload: { error },
-});
+  // Monte Carlo simulation
+  monteCarloResults: Record<string, MonteCarloResponse>;
+  monteCarloLoading: boolean;
+  monteCarloError: string | null;
+
+  // Drawdown analysis
+  drawdownResults: Record<string, DrawdownResponse>;
+  drawdownsLoading: boolean;
+  drawdownsError: string | null;
+
+  // Risk contribution analysis
+  riskContributionResults: Record<string, RiskContributionResponse>;
+  riskContributionLoading: boolean;
+  riskContributionError: string | null;
+
+  // UI state
+  selectedPortfolioId: string | null;
+  selectedAnalysisType: RiskAnalysisType | null;
+  selectedScenarios: string[];
+  selectedConfidenceLevels: number[];
+  selectedTimeHorizons: number[];
+  riskParams: RiskParams;
+}
 
 /**
- * Monte Carlo simulation actions
+ * Risk analysis parameters
  */
-export const performMonteCarloRequest = (payload: PerformMonteCarloPayload): RiskAction => ({
-  type: RiskActionTypes.PERFORM_MONTE_CARLO_REQUEST,
-  payload,
-});
-
-export const performMonteCarloSuccess = (
-  portfolioId: string,
-  data: MonteCarloResponse
-): RiskAction => ({
-  type: RiskActionTypes.PERFORM_MONTE_CARLO_SUCCESS,
-  payload: { portfolioId, data },
-});
-
-export const performMonteCarloFailure = (error: ApiError): RiskAction => ({
-  type: RiskActionTypes.PERFORM_MONTE_CARLO_FAILURE,
-  payload: { error },
-});
+export interface RiskParams {
+  confidenceLevel: number;
+  timeHorizon: number;
+  simulations: number;
+  startDate: string | null;
+  endDate: string | null;
+  riskFreeRate: number;
+}
 
 /**
- * Drawdown analysis actions
+ * Calculate VaR payload
  */
-export const analyzeDrawdownsRequest = (payload: AnalyzeDrawdownsPayload): RiskAction => ({
-  type: RiskActionTypes.ANALYZE_DRAWDOWNS_REQUEST,
-  payload,
-});
-
-export const analyzeDrawdownsSuccess = (
-  portfolioId: string,
-  data: DrawdownResponse
-): RiskAction => ({
-  type: RiskActionTypes.ANALYZE_DRAWDOWNS_SUCCESS,
-  payload: { portfolioId, data },
-});
-
-export const analyzeDrawdownsFailure = (error: ApiError): RiskAction => ({
-  type: RiskActionTypes.ANALYZE_DRAWDOWNS_FAILURE,
-  payload: { error },
-});
+export interface CalculateVaRPayload {
+  portfolioId: string;
+  returns: Record<string, number[]>;
+  confidenceLevel?: number;
+  timeHorizon?: number;
+  simulations?: number;
+  method?: 'parametric' | 'historical' | 'monte_carlo';
+}
 
 /**
- * Risk contribution actions
+ * Perform stress test payload
  */
-export const calculateRiskContributionRequest = (payload: CalculateRiskContributionPayload): RiskAction => ({
-  type: RiskActionTypes.CALCULATE_RISK_CONTRIBUTION_REQUEST,
-  payload,
-});
+export interface PerformStressTestPayload {
+  portfolioId: string;
+  scenario: string;
+  returns?: Record<string, any>;
+  portfolioValue?: number;
+  dataFetcher?: any;
+  currentPortfolioTickers?: string[];
+  weights?: Record<string, number>;
+  portfolioData?: Record<string, any>;
+  testType?: 'historical' | 'custom' | 'advanced';
 
-export const calculateRiskContributionSuccess = (
-  portfolioId: string,
-  data: RiskContributionResponse
-): RiskAction => ({
-  type: RiskActionTypes.CALCULATE_RISK_CONTRIBUTION_SUCCESS,
-  payload: { portfolioId, data },
-});
+  // For custom stress test
+  shocks?: Record<string, number>;
 
-export const calculateRiskContributionFailure = (error: ApiError): RiskAction => ({
-  type: RiskActionTypes.CALCULATE_RISK_CONTRIBUTION_FAILURE,
-  payload: { error },
-});
+  // For advanced stress test
+  customShocks?: Record<string, any>;
+  assetSectors?: Record<string, string>;
+  correlationAdjusted?: boolean;
+  useBeta?: boolean;
+}
 
 /**
- * UI state actions
+ * Perform Monte Carlo payload
  */
-export const setCurrentPortfolio = (portfolioId: string | null): RiskAction => ({
-  type: RiskActionTypes.SET_CURRENT_PORTFOLIO,
-  payload: portfolioId,
-});
-
-export const setCurrentAnalysisType = (analysisType: RiskAnalysisType | null): RiskAction => ({
-  type: RiskActionTypes.SET_CURRENT_ANALYSIS_TYPE,
-  payload: analysisType,
-});
-
-export const setSelectedScenarios = (scenarios: string[]): RiskAction => ({
-  type: RiskActionTypes.SET_SELECTED_SCENARIOS,
-  payload: scenarios,
-});
-
-export const setSelectedConfidenceLevels = (levels: number[]): RiskAction => ({
-  type: RiskActionTypes.SET_SELECTED_CONFIDENCE_LEVELS,
-  payload: levels,
-});
-
-export const setSelectedTimeHorizons = (horizons: number[]): RiskAction => ({
-  type: RiskActionTypes.SET_SELECTED_TIME_HORIZONS,
-  payload: horizons,
-});
+export interface PerformMonteCarloPayload {
+  portfolioId: string;
+  returns: Record<string, any>;
+  initialValue?: number;
+  years?: number;
+  simulations?: number;
+  annualContribution?: number;
+}
 
 /**
- * Cache management actions
+ * Analyze drawdowns payload
  */
-export const clearCache = (): RiskAction => ({
-  type: RiskActionTypes.CLEAR_CACHE,
-});
-
-export const clearVaRCache = (): RiskAction => ({
-  type: RiskActionTypes.CLEAR_VAR_CACHE,
-});
-
-export const clearStressTestCache = (): RiskAction => ({
-  type: RiskActionTypes.CLEAR_STRESS_TEST_CACHE,
-});
-
-export const clearMonteCarloCache = (): RiskAction => ({
-  type: RiskActionTypes.CLEAR_MONTE_CARLO_CACHE,
-});
+export interface AnalyzeDrawdownsPayload {
+  portfolioId: string;
+  returns: Record<string, any>;
+}
 
 /**
- * Settings actions
+ * Calculate risk contribution payload
  */
-export const updateSettings = (settings: Partial<RiskState['settings']>): RiskAction => ({
-  type: RiskActionTypes.UPDATE_SETTINGS,
-  payload: settings,
-});
-
-export const resetSettings = (): RiskAction => ({
-  type: RiskActionTypes.RESET_SETTINGS,
-});
+export interface CalculateRiskContributionPayload {
+  portfolioId: string;
+  returns: Record<string, any>;
+  weights: Record<string, number>;
+}
 
 /**
- * General actions
+ * Set risk params payload
  */
-export const clearErrors = (): RiskAction => ({
-  type: RiskActionTypes.CLEAR_ERRORS,
-});
-
-export const resetState = (): RiskAction => ({
-  type: RiskActionTypes.RESET_STATE,
-});
+export interface SetRiskParamsPayload {
+  params: Partial<RiskParams>;
+}
 
 /**
- * Thunk action creators (for async operations)
+ * Set selected portfolio payload
  */
-export const calculateVaR = (payload: CalculateVaRPayload) => {
-  return {
-    type: 'ASYNC_ACTION',
-    action: 'CALCULATE_VAR',
-    payload,
-  };
-};
+export interface SetSelectedPortfolioPayload {
+  portfolioId: string | null;
+}
 
-export const performStressTest = (payload: PerformStressTestPayload) => {
-  return {
-    type: 'ASYNC_ACTION',
-    action: 'PERFORM_STRESS_TEST',
-    payload,
-  };
-};
+/**
+ * Set selected analysis type payload
+ */
+export interface SetSelectedAnalysisTypePayload {
+  analysisType: RiskAnalysisType | null;
+}
 
-export const performMonteCarlo = (payload: PerformMonteCarloPayload) => {
-  return {
-    type: 'ASYNC_ACTION',
-    action: 'PERFORM_MONTE_CARLO',
-    payload,
-  };
-};
+/**
+ * Set selected scenarios payload
+ */
+export interface SetSelectedScenariosPayload {
+  scenarios: string[];
+}
 
-export const analyzeDrawdowns = (payload: AnalyzeDrawdownsPayload) => {
-  return {
-    type: 'ASYNC_ACTION',
-    action: 'ANALYZE_DRAWDOWNS',
-    payload,
-  };
-};
+/**
+ * Set selected confidence levels payload
+ */
+export interface SetSelectedConfidenceLevelsPayload {
+  levels: number[];
+}
 
-export const calculateRiskContribution = (payload: CalculateRiskContributionPayload) => {
-  return {
-    type: 'ASYNC_ACTION',
-    action: 'CALCULATE_RISK_CONTRIBUTION',
-    payload,
-  };
-};
+/**
+ * Set selected time horizons payload
+ */
+export interface SetSelectedTimeHorizonsPayload {
+  horizons: number[];
+}

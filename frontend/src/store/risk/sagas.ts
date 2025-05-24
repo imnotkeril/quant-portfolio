@@ -1,353 +1,347 @@
 /**
- * Risk store sagas
+ * Risk sagas
+ * Side effects and complex async logic for risk operations
  */
-import { call, put, takeLatest, takeEvery, select, delay } from 'redux-saga/effects';
+import { SagaIterator } from 'redux-saga';
+import { call, put, takeEvery, takeLatest, select, delay, all } from 'redux-saga/effects';
 import { PayloadAction } from '@reduxjs/toolkit';
-import { riskService } from '../../services/risk/riskService';
 import {
-  calculateVaRSuccess,
-  calculateVaRFailure,
-  performStressTestSuccess,
-  performStressTestFailure,
-  performMonteCarloSuccess,
-  performMonteCarloFailure,
-  analyzeDrawdownsSuccess,
-  analyzeDrawdownsFailure,
-  calculateRiskContributionSuccess,
-  calculateRiskContributionFailure,
+  calculateVaR,
+  performStressTest,
+  performMonteCarlo,
+  analyzeDrawdowns,
+  calculateRiskContribution,
 } from './actions';
 import {
-  CalculateVaRPayload,
-  PerformStressTestPayload,
-  PerformMonteCarloPayload,
-  AnalyzeDrawdownsPayload,
-  CalculateRiskContributionPayload,
-  RiskActionTypes,
-} from './types';
-import {
-  VaRResponse,
-  StressTestResponse,
-  MonteCarloResponse,
-  DrawdownResponse,
-  RiskContributionResponse,
-} from '../../types/risk';
-import { ApiError } from '../../types/common';
-import { selectAutoRefresh, selectRefreshInterval } from './selectors';
+  selectSelectedPortfolioId,
+  selectRiskParams,
+  selectSelectedScenarios,
+  selectSelectedConfidenceLevels,
+} from './selectors';
+import { RootState } from '../rootReducer';
 
 /**
- * Calculate VaR saga
+ * Load all risk analysis for a portfolio
  */
-function* calculateVaRSaga(action: PayloadAction<CalculateVaRPayload>) {
+function* loadAllRiskAnalysisSaga(action: PayloadAction<{ portfolioId: string; returns: Record<string, any>; weights?: Record<string, number> }>): SagaIterator {
   try {
-    const { request, method = 'historical', portfolioId } = action.payload;
+    const { portfolioId, returns, weights } = action.payload;
+    const riskParams = yield select(selectRiskParams);
+    const selectedScenarios: string[] = yield select(selectSelectedScenarios);
+    const selectedConfidenceLevels: number[] = yield select(selectSelectedConfidenceLevels);
 
-    const response: VaRResponse = yield call(
-      riskService.calculateVaR,
-      request,
-      method
-    );
-
-    yield put(calculateVaRSuccess(portfolioId, response));
-  } catch (error) {
-    const apiError: ApiError = {
-      message: error instanceof Error ? error.message : 'Failed to calculate VaR',
-      status: 500,
+    const commonParams = {
+      portfolioId,
+      returns,
+      confidenceLevel: riskParams.confidenceLevel,
+      timeHorizon: riskParams.timeHorizon,
+      simulations: riskParams.simulations,
     };
-    yield put(calculateVaRFailure(apiError));
-  }
-}
 
-/**
- * Perform stress test saga
- */
-function* performStressTestSaga(action: PayloadAction<PerformStressTestPayload>) {
-  try {
-    const { request, portfolioId, testType = 'historical' } = action.payload;
-
-    let response: StressTestResponse;
-
-    switch (testType) {
-      case 'historical':
-        response = yield call(riskService.performHistoricalStressTest, request);
-        break;
-      case 'custom':
-        response = yield call(riskService.performCustomStressTest, request);
-        break;
-      case 'advanced':
-        response = yield call(riskService.performAdvancedStressTest, request);
-        break;
-      default:
-        response = yield call(riskService.performStressTest, request);
-        break;
-    }
-
-    yield put(performStressTestSuccess(portfolioId, response));
-  } catch (error) {
-    const apiError: ApiError = {
-      message: error instanceof Error ? error.message : 'Failed to perform stress test',
-      status: 500,
-    };
-    yield put(performStressTestFailure(apiError));
-  }
-}
-
-/**
- * Perform Monte Carlo simulation saga
- */
-function* performMonteCarloSaga(action: PayloadAction<PerformMonteCarloPayload>) {
-  try {
-    const { request, portfolioId } = action.payload;
-
-    const response: MonteCarloResponse = yield call(
-      riskService.performMonteCarloSimulation,
-      request
-    );
-
-    yield put(performMonteCarloSuccess(portfolioId, response));
-  } catch (error) {
-    const apiError: ApiError = {
-      message: error instanceof Error ? error.message : 'Failed to perform Monte Carlo simulation',
-      status: 500,
-    };
-    yield put(performMonteCarloFailure(apiError));
-  }
-}
-
-/**
- * Analyze drawdowns saga
- */
-function* analyzeDrawdownsSaga(action: PayloadAction<AnalyzeDrawdownsPayload>) {
-  try {
-    const { request, portfolioId } = action.payload;
-
-    const response: DrawdownResponse = yield call(
-      riskService.analyzeDrawdowns,
-      request
-    );
-
-    yield put(analyzeDrawdownsSuccess(portfolioId, response));
-  } catch (error) {
-    const apiError: ApiError = {
-      message: error instanceof Error ? error.message : 'Failed to analyze drawdowns',
-      status: 500,
-    };
-    yield put(analyzeDrawdownsFailure(apiError));
-  }
-}
-
-/**
- * Calculate risk contribution saga
- */
-function* calculateRiskContributionSaga(action: PayloadAction<CalculateRiskContributionPayload>) {
-  try {
-    const { request, portfolioId } = action.payload;
-
-    const response: RiskContributionResponse = yield call(
-      riskService.calculateRiskContribution,
-      request
-    );
-
-    yield put(calculateRiskContributionSuccess(portfolioId, response));
-  } catch (error) {
-    const apiError: ApiError = {
-      message: error instanceof Error ? error.message : 'Failed to calculate risk contribution',
-      status: 500,
-    };
-    yield put(calculateRiskContributionFailure(apiError));
-  }
-}
-
-/**
- * Auto refresh saga
- */
-function* autoRefreshSaga() {
-  while (true) {
-    const autoRefresh: boolean = yield select(selectAutoRefresh);
-    const refreshInterval: number = yield select(selectRefreshInterval);
-
-    if (autoRefresh) {
-      // Trigger refresh of all risk data
-      // This would typically check which portfolios need refreshing
-      // and dispatch appropriate actions
-      yield delay(refreshInterval);
-    } else {
-      // If auto refresh is disabled, wait a bit and check again
-      yield delay(5000); // Check every 5 seconds
-    }
-  }
-}
-
-/**
- * Batch risk analysis saga
- * Performs all risk analyses for a portfolio in sequence
- */
-function* batchRiskAnalysisSaga(action: PayloadAction<{
-  portfolioId: string;
-  returns: any;
-  weights?: Record<string, number>;
-  scenarios?: string[];
-}>) {
-  try {
-    const { portfolioId, returns, weights, scenarios } = action.payload;
-
-    // 1. Calculate VaR
-    yield put({
-      type: RiskActionTypes.CALCULATE_VAR_REQUEST,
-      payload: {
-        request: { returns, confidenceLevel: 0.95 },
+    // Load all risk analyses in parallel
+    const riskActions = [
+      // VaR calculation
+      put(calculateVaR(commonParams)),
+      // Monte Carlo simulation
+      put(performMonteCarlo({
+        ...commonParams,
+        initialValue: 10000,
+        years: 10,
+        annualContribution: 0,
+      })),
+      // Drawdown analysis
+      put(analyzeDrawdowns({
         portfolioId,
-      },
-    });
+        returns,
+      })),
+    ];
 
-    // 2. Perform stress tests
-    if (scenarios && scenarios.length > 0) {
-      for (const scenario of scenarios) {
-        yield put({
-          type: RiskActionTypes.PERFORM_STRESS_TEST_REQUEST,
-          payload: {
-            request: { scenario, returns },
+    // Add stress tests for selected scenarios
+    if (selectedScenarios.length > 0) {
+      selectedScenarios.forEach(scenario => {
+        riskActions.push(
+          put(performStressTest({
             portfolioId,
-          },
-        });
-      }
-    }
-
-    // 3. Perform Monte Carlo simulation
-    yield put({
-      type: RiskActionTypes.PERFORM_MONTE_CARLO_REQUEST,
-      payload: {
-        request: { returns, initialValue: 10000, years: 10, simulations: 1000 },
-        portfolioId,
-      },
-    });
-
-    // 4. Analyze drawdowns
-    yield put({
-      type: RiskActionTypes.ANALYZE_DRAWDOWNS_REQUEST,
-      payload: {
-        request: { returns },
-        portfolioId,
-      },
-    });
-
-    // 5. Calculate risk contribution (if weights are provided)
-    if (weights) {
-      yield put({
-        type: RiskActionTypes.CALCULATE_RISK_CONTRIBUTION_REQUEST,
-        payload: {
-          request: { returns, weights },
-          portfolioId,
-        },
+            scenario,
+            returns,
+            testType: 'historical',
+          }))
+        );
       });
     }
+
+    // Add risk contribution if weights are provided
+    if (weights) {
+      riskActions.push(
+        put(calculateRiskContribution({
+          portfolioId,
+          returns,
+          weights,
+        }))
+      );
+    }
+
+    yield all(riskActions);
   } catch (error) {
-    console.error('Batch risk analysis failed:', error);
+    console.error('Error loading all risk analysis:', error);
   }
 }
 
 /**
- * Validate risk request saga
+ * Refresh risk analysis data
  */
-function* validateRiskRequestSaga(action: PayloadAction<any>) {
+function* refreshRiskAnalysisSaga(): SagaIterator {
   try {
-    const { type, payload } = action;
+    const selectedPortfolioId: string | null = yield select(selectSelectedPortfolioId);
 
-    // Validate based on action type
-    switch (type) {
-      case RiskActionTypes.CALCULATE_VAR_REQUEST:
-        const varValidation = riskService.validateVaRRequest(payload.request);
-        if (!varValidation.isValid) {
-          throw new Error(varValidation.errors.join(', '));
-        }
-        break;
-
-      case RiskActionTypes.PERFORM_STRESS_TEST_REQUEST:
-        const stressValidation = riskService.validateStressTestRequest(payload.request);
-        if (!stressValidation.isValid) {
-          throw new Error(stressValidation.errors.join(', '));
-        }
-        break;
-
-      case RiskActionTypes.PERFORM_MONTE_CARLO_REQUEST:
-        const monteValidation = riskService.validateMonteCarloRequest(payload.request);
-        if (!monteValidation.isValid) {
-          throw new Error(monteValidation.errors.join(', '));
-        }
-        break;
+    if (selectedPortfolioId) {
+      // This would typically get returns data from portfolio or analytics store
+      // For now, we'll just dispatch a refresh action
+      yield put({ type: 'risk/loadAllRiskAnalysis', payload: { portfolioId: selectedPortfolioId, returns: {} } });
     }
   } catch (error) {
-    console.error('Risk request validation failed:', error);
-    // Could dispatch a validation error action here
+    console.error('Error refreshing risk analysis:', error);
   }
 }
 
 /**
- * Cache management saga
+ * Auto-refresh risk analysis data
  */
-function* cacheManagementSaga() {
+function* autoRefreshRiskAnalysisSaga(): SagaIterator {
   while (true) {
-    // Clean up expired cache entries every 10 minutes
-    yield delay(600000);
+    try {
+      // Wait 15 minutes (risk analysis is more intensive)
+      yield delay(15 * 60 * 1000);
 
-    // This would typically check cache timestamps and remove expired entries
-    // Implementation would depend on specific cache management requirements
-    console.log('Cleaning up expired risk cache entries');
+      // Refresh risk analysis if portfolio is selected
+      yield call(refreshRiskAnalysisSaga);
+    } catch (error) {
+      console.error('Auto-refresh risk analysis error:', error);
+    }
   }
 }
 
 /**
- * Error handling saga
+ * Handle confidence level change
  */
-function* errorHandlingSaga(action: PayloadAction<{ error: ApiError }>) {
-  const { error } = action.payload;
+function* handleConfidenceLevelChangeSaga(action: PayloadAction<number[]>): SagaIterator {
+  try {
+    const selectedPortfolioId: string | null = yield select(selectSelectedPortfolioId);
 
-  // Log error for debugging
-  console.error('Risk analysis error:', error);
+    if (selectedPortfolioId) {
+      // Small delay to prevent too frequent updates
+      yield delay(500);
 
-  // Could implement additional error handling logic here
-  // such as retry logic, user notifications, etc.
+      // Recalculate VaR with new confidence levels
+      const riskParams = yield select(selectRiskParams);
 
-  // Example: Retry logic for network errors
-  if (error.status === 0) {
-    // Network error, could retry after delay
-    yield delay(5000);
-    // Dispatch retry action if needed
+      for (const confidenceLevel of action.payload) {
+        yield put(calculateVaR({
+          portfolioId: selectedPortfolioId,
+          returns: {}, // This should come from portfolio data
+          confidenceLevel,
+          timeHorizon: riskParams.timeHorizon,
+          simulations: riskParams.simulations,
+        }));
+      }
+    }
+  } catch (error) {
+    console.error('Error handling confidence level change:', error);
+  }
+}
+
+/**
+ * Handle scenario selection change
+ */
+function* handleScenarioSelectionChangeSaga(action: PayloadAction<string[]>): SagaIterator {
+  try {
+    const selectedPortfolioId: string | null = yield select(selectSelectedPortfolioId);
+    const scenarios = action.payload;
+
+    if (selectedPortfolioId && scenarios.length > 0) {
+      // Small delay to prevent too frequent updates
+      yield delay(500);
+
+      // Perform stress tests for selected scenarios
+      for (const scenario of scenarios) {
+        yield put(performStressTest({
+          portfolioId: selectedPortfolioId,
+          scenario,
+          returns: {}, // This should come from portfolio data
+          testType: 'historical',
+        }));
+      }
+    }
+  } catch (error) {
+    console.error('Error handling scenario selection change:', error);
+  }
+}
+
+/**
+ * Handle risk params change
+ */
+function* handleRiskParamsChangeSaga(action: PayloadAction<any>): SagaIterator {
+  try {
+    const selectedPortfolioId: string | null = yield select(selectSelectedPortfolioId);
+
+    if (selectedPortfolioId) {
+      // Small delay to prevent too frequent updates
+      yield delay(1000);
+
+      // Reload risk analysis with new params
+      yield put({ type: 'risk/loadAllRiskAnalysis', payload: { portfolioId: selectedPortfolioId, returns: {} } });
+    }
+  } catch (error) {
+    console.error('Error handling risk params change:', error);
+  }
+}
+
+/**
+ * Batch stress test saga
+ */
+function* batchStressTestSaga(action: PayloadAction<{ portfolioId: string; scenarios: string[]; returns: Record<string, any> }>): SagaIterator {
+  try {
+    const { portfolioId, scenarios, returns } = action.payload;
+
+    // Perform all stress tests in parallel
+    const stressTestActions = scenarios.map(scenario =>
+      put(performStressTest({
+        portfolioId,
+        scenario,
+        returns,
+        testType: 'historical',
+      }))
+    );
+
+    yield all(stressTestActions);
+  } catch (error) {
+    console.error('Error performing batch stress tests:', error);
+  }
+}
+
+/**
+ * Export risk analysis data saga
+ */
+function* exportRiskDataSaga(action: PayloadAction<{ format: string }>): SagaIterator {
+  try {
+    const { format } = action.payload;
+    const riskData = yield select((state: RootState) => state.risk);
+
+    // Prepare data for export
+    const exportData = {
+      varResults: riskData.varResults,
+      stressTestResults: riskData.stressTestResults,
+      monteCarloResults: riskData.monteCarloResults,
+      drawdownResults: riskData.drawdownResults,
+      riskContributionResults: riskData.riskContributionResults,
+      exportedAt: new Date().toISOString(),
+    };
+
+    // Export based on format
+    switch (format) {
+      case 'json':
+        const jsonBlob = new Blob([JSON.stringify(exportData, null, 2)], {
+          type: 'application/json',
+        });
+        const jsonUrl = URL.createObjectURL(jsonBlob);
+        const jsonLink = document.createElement('a');
+        jsonLink.href = jsonUrl;
+        jsonLink.download = `risk_analysis_${Date.now()}.json`;
+        jsonLink.click();
+        URL.revokeObjectURL(jsonUrl);
+        break;
+
+      case 'csv':
+        // Convert to CSV format (simplified)
+        let csvContent = 'Portfolio ID,Analysis Type,Result\n';
+
+        // VaR results
+        Object.entries(riskData.varResults).forEach(([portfolioId, result]: [string, any]) => {
+          csvContent += `${portfolioId},VaR,${result.var}\n`;
+        });
+
+        // Stress test results
+        Object.entries(riskData.stressTestResults).forEach(([portfolioId, result]: [string, any]) => {
+          csvContent += `${portfolioId},Stress Test,${result.portfolioLoss}\n`;
+        });
+
+        const csvBlob = new Blob([csvContent], { type: 'text/csv' });
+        const csvUrl = URL.createObjectURL(csvBlob);
+        const csvLink = document.createElement('a');
+        csvLink.href = csvUrl;
+        csvLink.download = `risk_analysis_${Date.now()}.csv`;
+        csvLink.click();
+        URL.revokeObjectURL(csvUrl);
+        break;
+
+      default:
+        console.warn('Unsupported export format:', format);
+    }
+  } catch (error) {
+    console.error('Error exporting risk data:', error);
+  }
+}
+
+/**
+ * Risk analysis validation saga
+ */
+function* validateRiskAnalysisSaga(action: PayloadAction<any>): SagaIterator {
+  try {
+    const { payload } = action;
+
+    // Basic validation
+    if (!payload.portfolioId) {
+      throw new Error('Portfolio ID is required for risk analysis');
+    }
+
+    if (!payload.returns || Object.keys(payload.returns).length === 0) {
+      throw new Error('Returns data is required for risk analysis');
+    }
+
+    // Additional validation based on analysis type
+    if (payload.confidenceLevel && (payload.confidenceLevel <= 0 || payload.confidenceLevel >= 1)) {
+      throw new Error('Confidence level must be between 0 and 1');
+    }
+
+    if (payload.simulations && payload.simulations <= 0) {
+      throw new Error('Number of simulations must be positive');
+    }
+  } catch (error) {
+    console.error('Risk analysis validation failed:', error);
+    // Could dispatch a validation error action here
   }
 }
 
 /**
  * Root risk saga
  */
-export function* riskSaga() {
-  // Watch for specific actions
-  yield takeLatest(RiskActionTypes.CALCULATE_VAR_REQUEST, calculateVaRSaga);
-  yield takeLatest(RiskActionTypes.PERFORM_STRESS_TEST_REQUEST, performStressTestSaga);
-  yield takeLatest(RiskActionTypes.PERFORM_MONTE_CARLO_REQUEST, performMonteCarloSaga);
-  yield takeLatest(RiskActionTypes.ANALYZE_DRAWDOWNS_REQUEST, analyzeDrawdownsSaga);
-  yield takeLatest(RiskActionTypes.CALCULATE_RISK_CONTRIBUTION_REQUEST, calculateRiskContributionSaga);
+export function* riskSaga(): SagaIterator {
+  // Load all risk analysis
+  yield takeEvery('risk/loadAllRiskAnalysis', loadAllRiskAnalysisSaga);
 
-  // Watch for batch operations
-  yield takeLatest('risk/BATCH_ANALYSIS_REQUEST', batchRiskAnalysisSaga);
+  // Auto-refresh risk analysis
+  yield takeLatest('risk/startAutoRefresh', autoRefreshRiskAnalysisSaga);
 
-  // Watch for validation
+  // Handle UI changes
+  yield takeEvery('risk/setSelectedConfidenceLevels', handleConfidenceLevelChangeSaga);
+  yield takeEvery('risk/setSelectedScenarios', handleScenarioSelectionChangeSaga);
+  yield takeLatest('risk/setRiskParams', handleRiskParamsChangeSaga);
+
+  // Batch operations
+  yield takeEvery('risk/batchStressTest', batchStressTestSaga);
+
+  // Export risk data
+  yield takeEvery('risk/exportRiskData', exportRiskDataSaga);
+
+  // Validation
   yield takeEvery([
-    RiskActionTypes.CALCULATE_VAR_REQUEST,
-    RiskActionTypes.PERFORM_STRESS_TEST_REQUEST,
-    RiskActionTypes.PERFORM_MONTE_CARLO_REQUEST,
-  ], validateRiskRequestSaga);
+    'risk/calculateVaR',
+    'risk/performStressTest',
+    'risk/performMonteCarlo',
+  ], validateRiskAnalysisSaga);
 
-  // Watch for error handling
-  yield takeEvery([
-    RiskActionTypes.CALCULATE_VAR_FAILURE,
-    RiskActionTypes.PERFORM_STRESS_TEST_FAILURE,
-    RiskActionTypes.PERFORM_MONTE_CARLO_FAILURE,
-    RiskActionTypes.ANALYZE_DRAWDOWNS_FAILURE,
-    RiskActionTypes.CALCULATE_RISK_CONTRIBUTION_FAILURE,
-  ], errorHandlingSaga);
-
-  // Start background processes
-  yield call(autoRefreshSaga);
-  yield call(cacheManagementSaga);
+  // Refresh risk analysis
+  yield takeEvery('risk/refreshRiskAnalysis', refreshRiskAnalysisSaga);
 }
 
 export default riskSaga;
