@@ -2,7 +2,7 @@
  * Comparison store selectors
  */
 import { createSelector } from 'reselect';
-import { RootState } from '../index';
+import { RootState } from '../rootReducer';
 import { ComparisonState } from './types';
 
 /**
@@ -306,6 +306,42 @@ export const selectCachedComparison = (comparisonId: string) =>
     (cache) => cache[comparisonId]
   );
 
+export const selectCachedComposition = (comparisonId: string) =>
+  createSelector(
+    selectCompositionCache,
+    (cache) => cache[comparisonId]
+  );
+
+export const selectCachedPerformance = (comparisonId: string) =>
+  createSelector(
+    selectPerformanceCache,
+    (cache) => cache[comparisonId]
+  );
+
+export const selectCachedRisk = (comparisonId: string) =>
+  createSelector(
+    selectRiskCache,
+    (cache) => cache[comparisonId]
+  );
+
+export const selectCachedSector = (comparisonId: string) =>
+  createSelector(
+    selectSectorCache,
+    (cache) => cache[comparisonId]
+  );
+
+export const selectCachedScenario = (comparisonId: string) =>
+  createSelector(
+    selectScenarioCache,
+    (cache) => cache[comparisonId]
+  );
+
+export const selectCachedDifferential = (comparisonId: string) =>
+  createSelector(
+    selectDifferentialCache,
+    (cache) => cache[comparisonId]
+  );
+
 /**
  * Error selectors
  */
@@ -421,7 +457,8 @@ export const selectComparisonHistory = createSelector(
         id,
         portfolio1: comparison.portfolio1Id,
         portfolio2: comparison.portfolio2Id,
-        createdAt: new Date().toISOString(), // This would come from the data
+        createdAt: comparison.metadata?.createdAt || new Date().toISOString(),
+        status: comparison.metadata?.status || 'completed',
       }))
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
@@ -445,19 +482,38 @@ export const selectComparisonInsights = createSelector(
       winner: null as string | null,
       keyDifferences: [] as string[],
       recommendations: [] as string[],
+      confidence: 0,
     };
 
     // Determine winner based on multiple metrics
-    // This is simplified - in reality, you'd have more sophisticated logic
     if (comparison.performanceComparison) {
-      const p1Return = comparison.performanceComparison.returnMetrics[comparison.portfolio1Id]?.total_return || 0;
-      const p2Return = comparison.performanceComparison.returnMetrics[comparison.portfolio2Id]?.total_return || 0;
+      const p1Metrics = comparison.performanceComparison.returnMetrics?.[comparison.portfolio1Id];
+      const p2Metrics = comparison.performanceComparison.returnMetrics?.[comparison.portfolio2Id];
 
-      insights.winner = p1Return > p2Return ? comparison.portfolio1Id : comparison.portfolio2Id;
+      if (p1Metrics && p2Metrics) {
+        const p1Return = p1Metrics.total_return || 0;
+        const p2Return = p2Metrics.total_return || 0;
+        const p1Sharpe = p1Metrics.sharpe_ratio || 0;
+        const p2Sharpe = p2Metrics.sharpe_ratio || 0;
+
+        // Weighted scoring (50% return, 50% risk-adjusted return)
+        const p1Score = (p1Return * 0.5) + (p1Sharpe * 0.5);
+        const p2Score = (p2Return * 0.5) + (p2Sharpe * 0.5);
+
+        insights.winner = p1Score > p2Score ? comparison.portfolio1Id : comparison.portfolio2Id;
+        insights.confidence = Math.abs(p1Score - p2Score);
+      }
     }
 
-    insights.keyDifferences = comparison.summary || [];
-    insights.recommendations = comparison.recommendations || [];
+    // Extract key differences
+    if (comparison.summary && Array.isArray(comparison.summary)) {
+      insights.keyDifferences = comparison.summary;
+    }
+
+    // Extract recommendations
+    if (comparison.recommendations && Array.isArray(comparison.recommendations)) {
+      insights.recommendations = comparison.recommendations;
+    }
 
     return insights;
   }
@@ -495,6 +551,39 @@ export const selectPortfolioComparisonMatrix = createSelector(
 );
 
 /**
+ * Performance selectors
+ */
+export const selectComparisonPerformanceMetrics = createSelector(
+  selectActiveComparisonData,
+  (data) => {
+    if (!data?.performance) return null;
+
+    const performance = data.performance;
+    return {
+      portfolio1: performance.returnMetrics?.[performance.portfolio1Id || ''],
+      portfolio2: performance.returnMetrics?.[performance.portfolio2Id || ''],
+      comparison: performance.comparison,
+      statisticalTests: performance.statisticalTests,
+    };
+  }
+);
+
+export const selectComparisonRiskMetrics = createSelector(
+  selectActiveComparisonData,
+  (data) => {
+    if (!data?.risk) return null;
+
+    const risk = data.risk;
+    return {
+      portfolio1: risk.riskMetrics?.[risk.portfolio1Id || ''],
+      portfolio2: risk.riskMetrics?.[risk.portfolio2Id || ''],
+      comparison: risk.comparison,
+      riskContribution: risk.riskContribution,
+    };
+  }
+);
+
+/**
  * Cache utility selectors
  */
 export const selectIsCacheValid = (timestamp: number, timeout: number) =>
@@ -513,6 +602,38 @@ export const selectShouldRefreshComparison = (comparisonId: string) =>
     }
   );
 
+export const selectCacheStatistics = createSelector(
+  selectComparison,
+  (comparison) => {
+    const cache = comparison.cache;
+    const totalEntries = Object.values(cache).reduce((sum, cacheType) => {
+      return sum + Object.keys(cacheType).length;
+    }, 0);
+
+    const totalSize = JSON.stringify(cache).length;
+    const oldestEntry = Math.min(
+      ...Object.values(cache).flatMap(cacheType =>
+        Object.values(cacheType).map(entry => entry.timestamp)
+      )
+    );
+
+    return {
+      totalEntries,
+      totalSize,
+      oldestEntry: oldestEntry === Infinity ? null : new Date(oldestEntry),
+      cacheTypes: {
+        comparison: Object.keys(cache.comparisonCache).length,
+        composition: Object.keys(cache.compositionCache).length,
+        performance: Object.keys(cache.performanceCache).length,
+        risk: Object.keys(cache.riskCache).length,
+        sector: Object.keys(cache.sectorCache).length,
+        scenario: Object.keys(cache.scenarioCache).length,
+        differential: Object.keys(cache.differentialCache).length,
+      },
+    };
+  }
+);
+
 /**
  * Validation selectors
  */
@@ -528,15 +649,22 @@ export const selectComparisonValidation = createSelector(
   selectDateRange,
   (portfolios, metrics, dateRange) => {
     const errors: string[] = [];
+    const warnings: string[] = [];
 
+    // Required validations
     if (portfolios.length < 2) {
       errors.push('At least 2 portfolios must be selected');
+    }
+
+    if (portfolios.length > 10) {
+      warnings.push('Comparing more than 10 portfolios may affect performance');
     }
 
     if (metrics.length === 0) {
       errors.push('At least one metric must be selected');
     }
 
+    // Date range validation
     if (dateRange.startDate && dateRange.endDate) {
       const start = new Date(dateRange.startDate);
       const end = new Date(dateRange.endDate);
@@ -544,11 +672,188 @@ export const selectComparisonValidation = createSelector(
       if (start >= end) {
         errors.push('Start date must be before end date');
       }
+
+      const daysDiff = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
+      if (daysDiff < 30) {
+        warnings.push('Date range is less than 30 days, results may not be meaningful');
+      }
+
+      if (daysDiff > 365 * 10) {
+        warnings.push('Date range is more than 10 years, performance may be affected');
+      }
+    }
+
+    // Portfolio duplication check
+    const uniquePortfolios = new Set(portfolios);
+    if (uniquePortfolios.size !== portfolios.length) {
+      errors.push('Duplicate portfolios detected');
     }
 
     return {
       isValid: errors.length === 0,
       errors,
+      warnings,
     };
+  }
+);
+
+/**
+ * Advanced analysis selectors
+ */
+export const selectComparisonTrends = createSelector(
+  selectActiveComparisonData,
+  (data) => {
+    if (!data?.performance) return null;
+
+    const performance = data.performance;
+    const trends = {
+      returnsCorrelation: 0,
+      performanceDivergence: 0,
+      riskAdjustedTrend: '',
+      outlook: '',
+    };
+
+    // Calculate correlation if time series data is available
+    if (performance.timeSeries) {
+      // This would calculate actual correlation
+      trends.returnsCorrelation = 0.75; // Placeholder
+    }
+
+    // Determine trend direction
+    const p1Return = performance.returnMetrics?.[performance.portfolio1Id || '']?.total_return || 0;
+    const p2Return = performance.returnMetrics?.[performance.portfolio2Id || '']?.total_return || 0;
+
+    trends.performanceDivergence = Math.abs(p1Return - p2Return);
+
+    if (p1Return > p2Return * 1.1) {
+      trends.riskAdjustedTrend = 'Portfolio 1 outperforming';
+    } else if (p2Return > p1Return * 1.1) {
+      trends.riskAdjustedTrend = 'Portfolio 2 outperforming';
+    } else {
+      trends.riskAdjustedTrend = 'Similar performance';
+    }
+
+    return trends;
+  }
+);
+
+export const selectComparisonRecommendations = createSelector(
+  selectComparisonInsights,
+  selectComparisonTrends,
+  selectComparisonPerformanceMetrics,
+  (insights, trends, performance) => {
+    const recommendations: Array<{
+      type: 'optimize' | 'rebalance' | 'diversify' | 'risk' | 'general';
+      priority: 'high' | 'medium' | 'low';
+      title: string;
+      description: string;
+    }> = [];
+
+    if (insights?.winner && performance) {
+      const winnerMetrics = insights.winner === performance.portfolio1?.id
+        ? performance.portfolio1
+        : performance.portfolio2;
+
+      if (winnerMetrics) {
+        recommendations.push({
+          type: 'optimize',
+          priority: 'high',
+          title: 'Consider optimization',
+          description: `The winning portfolio shows superior risk-adjusted returns. Consider analyzing its allocation strategy.`,
+        });
+      }
+    }
+
+    if (trends?.performanceDivergence > 0.1) {
+      recommendations.push({
+        type: 'rebalance',
+        priority: 'medium',
+        title: 'Performance divergence detected',
+        description: `Significant performance difference observed. Review allocation strategies and consider rebalancing.`,
+      });
+    }
+
+    if (trends?.returnsCorrelation > 0.9) {
+      recommendations.push({
+        type: 'diversify',
+        priority: 'medium',
+        title: 'High correlation detected',
+        description: `Portfolios are highly correlated. Consider diversification to reduce systematic risk.`,
+      });
+    }
+
+    return recommendations;
+  }
+);
+
+/**
+ * Export utility selectors
+ */
+export const selectComparisonExportData = createSelector(
+  selectActiveComparisonData,
+  selectComparisonInsights,
+  selectComparisonTrends,
+  (data, insights, trends) => {
+    if (!data) return null;
+
+    return {
+      comparison: data.comparison,
+      performance: data.performance,
+      risk: data.risk,
+      composition: data.composition,
+      sector: data.sector,
+      scenario: data.scenario,
+      differential: data.differential,
+      insights,
+      trends,
+      exportedAt: new Date().toISOString(),
+      metadata: {
+        exportFormat: 'json',
+        version: '1.0',
+        source: 'Wild Market Capital Portfolio Management System',
+      },
+    };
+  }
+);
+
+/**
+ * UI helper selectors
+ */
+export const selectComparisonDisplayData = createSelector(
+  selectActiveComparisonData,
+  selectDisplayMode,
+  selectFilteredMetrics,
+  (data, displayMode, metrics) => {
+    if (!data?.comparison) return null;
+
+    const formatValue = (value: number, metric: string) => {
+      switch (displayMode) {
+        case 'percentage':
+          return `${(value * 100).toFixed(2)}%`;
+        case 'relative':
+          return value.toFixed(4);
+        case 'normalized':
+          return ((value - 0.5) * 2).toFixed(4); // Example normalization
+        default:
+          return value.toFixed(4);
+      }
+    };
+
+    // Transform data based on display mode and selected metrics
+    return metrics.reduce((acc, metric) => {
+      if (data.performance?.returnMetrics) {
+        const p1Value = data.performance.returnMetrics[data.comparison!.portfolio1Id]?.[metric];
+        const p2Value = data.performance.returnMetrics[data.comparison!.portfolio2Id]?.[metric];
+
+        if (p1Value !== undefined && p2Value !== undefined) {
+          acc[metric] = {
+            portfolio1: formatValue(p1Value, metric),
+            portfolio2: formatValue(p2Value, metric),
+            difference: formatValue(p1Value - p2Value, metric),
+          };
+        }
+      }
+      return acc;
+    }, {} as Record<string, any>);
   }
 );

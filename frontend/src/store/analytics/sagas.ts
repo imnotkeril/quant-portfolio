@@ -2,6 +2,7 @@
  * Analytics sagas
  * Side effects and complex async logic for analytics operations
  */
+import { SagaIterator } from 'redux-saga';
 import { call, put, takeEvery, takeLatest, select, delay, all } from 'redux-saga/effects';
 import { PayloadAction } from '@reduxjs/toolkit';
 import {
@@ -18,12 +19,12 @@ import {
   selectSelectedBenchmark,
   selectAnalysisParams
 } from './selectors';
-import { RootState } from '../index';
+import { RootState } from '../rootReducer';
 
 /**
  * Load all analytics data for a portfolio
  */
-function* loadAllAnalyticsSaga(action: PayloadAction<{ portfolioId: string }>) {
+function* loadAllAnalyticsSaga(action: PayloadAction<{ portfolioId: string }>): SagaIterator {
   try {
     const { portfolioId } = action.payload;
     const selectedBenchmark: string | null = yield select(selectSelectedBenchmark);
@@ -59,7 +60,7 @@ function* loadAllAnalyticsSaga(action: PayloadAction<{ portfolioId: string }>) {
 /**
  * Refresh analytics data
  */
-function* refreshAnalyticsSaga() {
+function* refreshAnalyticsSaga(): SagaIterator {
   try {
     const selectedPortfolioId: string | null = yield select(selectSelectedPortfolioId);
 
@@ -74,7 +75,7 @@ function* refreshAnalyticsSaga() {
 /**
  * Auto-refresh analytics data
  */
-function* autoRefreshAnalyticsSaga() {
+function* autoRefreshAnalyticsSaga(): SagaIterator {
   while (true) {
     try {
       // Wait 10 minutes
@@ -91,7 +92,7 @@ function* autoRefreshAnalyticsSaga() {
 /**
  * Handle timeframe change
  */
-function* handleTimeframeChangeSaga(action: PayloadAction<string>) {
+function* handleTimeframeChangeSaga(action: PayloadAction<string>): SagaIterator {
   try {
     const timeframe = action.payload;
     const selectedPortfolioId: string | null = yield select(selectSelectedPortfolioId);
@@ -147,7 +148,7 @@ function* handleTimeframeChangeSaga(action: PayloadAction<string>) {
 /**
  * Handle benchmark change
  */
-function* handleBenchmarkChangeSaga(action: PayloadAction<string | null>) {
+function* handleBenchmarkChangeSaga(action: PayloadAction<string | null>): SagaIterator {
   try {
     const selectedPortfolioId: string | null = yield select(selectSelectedPortfolioId);
 
@@ -163,7 +164,7 @@ function* handleBenchmarkChangeSaga(action: PayloadAction<string | null>) {
 /**
  * Handle analysis params change
  */
-function* handleAnalysisParamsChangeSaga(action: PayloadAction<any>) {
+function* handleAnalysisParamsChangeSaga(action: PayloadAction<any>): SagaIterator {
   try {
     const selectedPortfolioId: string | null = yield select(selectSelectedPortfolioId);
 
@@ -182,7 +183,7 @@ function* handleAnalysisParamsChangeSaga(action: PayloadAction<any>) {
 /**
  * Calculate additional metrics saga
  */
-function* calculateAdditionalMetricsSaga(action: PayloadAction<{ metrics: string[] }>) {
+function* calculateAdditionalMetricsSaga(action: PayloadAction<{ metrics: string[] }>): SagaIterator {
   try {
     const { metrics } = action.payload;
     const selectedPortfolioId: string | null = yield select(selectSelectedPortfolioId);
@@ -214,7 +215,7 @@ function* calculateAdditionalMetricsSaga(action: PayloadAction<{ metrics: string
 /**
  * Export analytics data saga
  */
-function* exportAnalyticsDataSaga(action: PayloadAction<{ format: string }>) {
+function* exportAnalyticsDataSaga(action: PayloadAction<{ format: string }>): SagaIterator {
   try {
     const { format } = action.payload;
     const analyticsData = yield select((state: RootState) => state.analytics);
@@ -277,7 +278,7 @@ function* exportAnalyticsDataSaga(action: PayloadAction<{ format: string }>) {
 /**
  * Root analytics saga
  */
-export function* analyticsSaga() {
+export function* analyticsSaga(): SagaIterator {
   // Load all analytics data
   yield takeEvery('analytics/loadAllAnalytics', loadAllAnalyticsSaga);
 

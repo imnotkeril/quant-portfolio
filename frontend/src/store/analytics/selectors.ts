@@ -2,7 +2,7 @@
  * Analytics selectors
  */
 import { createSelector } from '@reduxjs/toolkit';
-import { RootState } from '../index';
+import { RootState } from '../rootReducer';
 
 // Base selector
 export const selectAnalyticsState = (state: RootState) => state.analytics;

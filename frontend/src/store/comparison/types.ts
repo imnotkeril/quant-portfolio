@@ -106,6 +106,92 @@ export interface ComparisonState {
 }
 
 /**
+ * Initial comparison state
+ */
+export const initialComparisonState: ComparisonState = {
+  // Loading states
+  comparisonLoading: false,
+  compositionLoading: false,
+  performanceLoading: false,
+  riskLoading: false,
+  sectorLoading: false,
+  scenarioLoading: false,
+  differentialLoading: false,
+
+  // Data
+  comparisons: {},
+  compositionComparisons: {},
+  performanceComparisons: {},
+  riskComparisons: {},
+  sectorComparisons: {},
+  scenarioComparisons: {},
+  differentialReturns: {},
+
+  // Current comparison
+  activeComparison: null,
+  selectedPortfolios: [],
+  benchmarkPortfolio: null,
+
+  // UI state
+  viewMode: 'overview',
+  displayMode: 'absolute',
+  selectedMetrics: ['totalReturn', 'sharpeRatio', 'volatility', 'maxDrawdown'],
+  selectedTimeframe: '1Y',
+
+  // Filters and grouping
+  filters: {
+    dateRange: {
+      startDate: null,
+      endDate: null,
+    },
+    includeOnly: [],
+    excludeMetrics: [],
+    minDifference: 0.01,
+  },
+
+  // Comparison parameters
+  parameters: {
+    confidenceLevel: 0.95,
+    includeStatisticalTests: true,
+    adjustForRisk: true,
+    normalizeReturns: false,
+    includeBenchmark: true,
+  },
+
+  // Cache
+  cache: {
+    comparisonCache: {},
+    compositionCache: {},
+    performanceCache: {},
+    riskCache: {},
+    sectorCache: {},
+    scenarioCache: {},
+    differentialCache: {},
+  },
+
+  // Errors
+  errors: {
+    comparison: null,
+    composition: null,
+    performance: null,
+    risk: null,
+    sector: null,
+    scenario: null,
+    differential: null,
+  },
+
+  // Settings
+  settings: {
+    autoRefresh: false,
+    refreshInterval: 300000, // 5 minutes
+    cacheTimeout: 600000, // 10 minutes
+    maxComparisons: 10,
+    defaultMetrics: ['totalReturn', 'sharpeRatio', 'volatility', 'maxDrawdown'],
+    enableNotifications: true,
+  },
+};
+
+/**
  * Comparison view modes
  */
 export type ComparisonViewMode =

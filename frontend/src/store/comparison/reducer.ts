@@ -1,99 +1,13 @@
 /**
  * Comparison store reducer
  */
-import { ComparisonState, ComparisonAction, ComparisonActionTypes } from './types';
-
-/**
- * Initial comparison state
- */
-const initialState: ComparisonState = {
-  // Loading states
-  comparisonLoading: false,
-  compositionLoading: false,
-  performanceLoading: false,
-  riskLoading: false,
-  sectorLoading: false,
-  scenarioLoading: false,
-  differentialLoading: false,
-
-  // Data
-  comparisons: {},
-  compositionComparisons: {},
-  performanceComparisons: {},
-  riskComparisons: {},
-  sectorComparisons: {},
-  scenarioComparisons: {},
-  differentialReturns: {},
-
-  // Current comparison
-  activeComparison: null,
-  selectedPortfolios: [],
-  benchmarkPortfolio: null,
-
-  // UI state
-  viewMode: 'overview',
-  displayMode: 'absolute',
-  selectedMetrics: ['totalReturn', 'sharpeRatio', 'volatility', 'maxDrawdown'],
-  selectedTimeframe: '1Y',
-
-  // Filters and grouping
-  filters: {
-    dateRange: {
-      startDate: null,
-      endDate: null,
-    },
-    includeOnly: [],
-    excludeMetrics: [],
-    minDifference: 0.01,
-  },
-
-  // Comparison parameters
-  parameters: {
-    confidenceLevel: 0.95,
-    includeStatisticalTests: true,
-    adjustForRisk: true,
-    normalizeReturns: false,
-    includeBenchmark: true,
-  },
-
-  // Cache
-  cache: {
-    comparisonCache: {},
-    compositionCache: {},
-    performanceCache: {},
-    riskCache: {},
-    sectorCache: {},
-    scenarioCache: {},
-    differentialCache: {},
-  },
-
-  // Errors
-  errors: {
-    comparison: null,
-    composition: null,
-    performance: null,
-    risk: null,
-    sector: null,
-    scenario: null,
-    differential: null,
-  },
-
-  // Settings
-  settings: {
-    autoRefresh: false,
-    refreshInterval: 300000, // 5 minutes
-    cacheTimeout: 600000, // 10 minutes
-    maxComparisons: 10,
-    defaultMetrics: ['totalReturn', 'sharpeRatio', 'volatility', 'maxDrawdown'],
-    enableNotifications: true,
-  },
-};
+import { ComparisonState, ComparisonAction, ComparisonActionTypes, initialComparisonState } from './types';
 
 /**
  * Comparison reducer
  */
 export const comparisonReducer = (
-  state: ComparisonState = initialState,
+  state: ComparisonState = initialComparisonState,
   action: ComparisonAction
 ): ComparisonState => {
   switch (action.type) {
@@ -420,9 +334,16 @@ export const comparisonReducer = (
       };
 
     case ComparisonActionTypes.SET_SELECTED_PORTFOLIOS:
+      // Validate portfolios array
+      const validatedPortfolios = Array.isArray(action.payload)
+        ? action.payload.filter((id, index, arr) => arr.indexOf(id) === index) // Remove duplicates
+        : [];
+
       return {
         ...state,
-        selectedPortfolios: action.payload,
+        selectedPortfolios: validatedPortfolios,
+        // Clear active comparison if portfolios changed
+        activeComparison: validatedPortfolios.length < 2 ? null : state.activeComparison,
       };
 
     case ComparisonActionTypes.SET_BENCHMARK_PORTFOLIO:
@@ -444,9 +365,14 @@ export const comparisonReducer = (
       };
 
     case ComparisonActionTypes.SET_SELECTED_METRICS:
+      // Validate metrics array
+      const validatedMetrics = Array.isArray(action.payload)
+        ? action.payload.filter(Boolean) // Remove empty values
+        : state.selectedMetrics;
+
       return {
         ...state,
-        selectedMetrics: action.payload,
+        selectedMetrics: validatedMetrics,
       };
 
     case ComparisonActionTypes.SET_SELECTED_TIMEFRAME:
@@ -480,24 +406,43 @@ export const comparisonReducer = (
       };
 
     case ComparisonActionTypes.SET_DATE_RANGE:
+      // Validate date range
+      const { startDate, endDate } = action.payload;
+      let validatedDateRange = { startDate, endDate };
+
+      if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        if (start >= end) {
+          console.warn('Invalid date range: start date must be before end date');
+          validatedDateRange = { startDate: null, endDate: null };
+        }
+      }
+
       return {
         ...state,
         filters: {
           ...state.filters,
-          dateRange: {
-            startDate: action.payload.startDate,
-            endDate: action.payload.endDate,
-          },
+          dateRange: validatedDateRange,
         },
       };
 
     // Parameters actions
     case ComparisonActionTypes.UPDATE_PARAMETERS:
+      // Validate parameters
+      const updatedParams = { ...action.payload };
+
+      // Ensure confidence level is between 0 and 1
+      if (updatedParams.confidenceLevel !== undefined) {
+        updatedParams.confidenceLevel = Math.max(0, Math.min(1, updatedParams.confidenceLevel));
+      }
+
       return {
         ...state,
         parameters: {
           ...state.parameters,
-          ...action.payload,
+          ...updatedParams,
         },
       };
 
@@ -593,11 +538,27 @@ export const comparisonReducer = (
 
     // Settings
     case ComparisonActionTypes.UPDATE_SETTINGS:
+      // Validate settings
+      const updatedSettings = { ...action.payload };
+
+      // Ensure intervals are positive numbers
+      if (updatedSettings.refreshInterval !== undefined) {
+        updatedSettings.refreshInterval = Math.max(1000, updatedSettings.refreshInterval); // Min 1 second
+      }
+
+      if (updatedSettings.cacheTimeout !== undefined) {
+        updatedSettings.cacheTimeout = Math.max(10000, updatedSettings.cacheTimeout); // Min 10 seconds
+      }
+
+      if (updatedSettings.maxComparisons !== undefined) {
+        updatedSettings.maxComparisons = Math.max(1, Math.min(50, updatedSettings.maxComparisons)); // 1-50 range
+      }
+
       return {
         ...state,
         settings: {
           ...state.settings,
-          ...action.payload,
+          ...updatedSettings,
         },
       };
 
@@ -630,7 +591,7 @@ export const comparisonReducer = (
       };
 
     case ComparisonActionTypes.RESET_STATE:
-      return initialState;
+      return initialComparisonState;
 
     default:
       return state;
