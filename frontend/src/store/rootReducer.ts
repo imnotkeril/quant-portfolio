@@ -3,19 +3,14 @@
  * Combines all feature reducers into a single root reducer
  */
 import { combineReducers } from '@reduxjs/toolkit';
-
-// Note: Individual reducers will be imported and added here as they are created
-// This is the initial setup with placeholder structure
-
-// Placeholder for future reducers - will be replaced when feature slices are created
-const portfolioReducer = (state = {}, action: any) => state;
-const analyticsReducer = (state = {}, action: any) => state;
-const optimizationReducer = (state = {}, action: any) => state;
-const riskReducer = (state = {}, action: any) => state;
-const scenariosReducer = (state = {}, action: any) => state;
-const historicalReducer = (state = {}, action: any) => state;
-const comparisonReducer = (state = {}, action: any) => state;
-const reportsReducer = (state = {}, action: any) => state;
+import portfolioReducer from './portfolio/reducer';
+import analyticsReducer from './analytics/reducer';
+import optimizationReducer from './optimization/reducer';
+import riskReducer from './risk/reducer';
+import scenariosReducer from './scenarios/reducer';
+import historicalReducer from './historical/reducer';
+import comparisonReducer from './comparison/reducer';
+import reportsReducer from './reports/reducer';
 
 export const rootReducer = combineReducers({
   portfolio: portfolioReducer,

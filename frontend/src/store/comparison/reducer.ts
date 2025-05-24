@@ -468,7 +468,15 @@ export const comparisonReducer = (
     case ComparisonActionTypes.RESET_FILTERS:
       return {
         ...state,
-        filters: initialState.filters,
+        filters: {
+          dateRange: {
+            startDate: null,
+            endDate: null,
+          },
+          includeOnly: [],
+          excludeMetrics: [],
+          minDifference: 0.01,
+        },
       };
 
     case ComparisonActionTypes.SET_DATE_RANGE:
@@ -496,7 +504,13 @@ export const comparisonReducer = (
     case ComparisonActionTypes.RESET_PARAMETERS:
       return {
         ...state,
-        parameters: initialState.parameters,
+        parameters: {
+          confidenceLevel: 0.95,
+          includeStatisticalTests: true,
+          adjustForRisk: true,
+          normalizeReturns: false,
+          includeBenchmark: true,
+        },
       };
 
     // Cache management
@@ -590,7 +604,14 @@ export const comparisonReducer = (
     case ComparisonActionTypes.RESET_SETTINGS:
       return {
         ...state,
-        settings: initialState.settings,
+        settings: {
+          autoRefresh: false,
+          refreshInterval: 300000, // 5 minutes
+          cacheTimeout: 600000, // 10 minutes
+          maxComparisons: 10,
+          defaultMetrics: ['totalReturn', 'sharpeRatio', 'volatility', 'maxDrawdown'],
+          enableNotifications: true,
+        },
       };
 
     // General actions

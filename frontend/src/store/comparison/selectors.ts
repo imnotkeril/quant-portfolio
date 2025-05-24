@@ -2,7 +2,7 @@
  * Comparison store selectors
  */
 import { createSelector } from 'reselect';
-import { RootState } from '../rootReducer';
+import { RootState } from '../index';
 import { ComparisonState } from './types';
 
 /**
@@ -467,6 +467,12 @@ export const selectPortfolioComparisonMatrix = createSelector(
   selectSelectedPortfolios,
   selectComparisons,
   (portfolios, comparisons) => {
+    // Limit portfolios for performance - Wild Market Capital design system colors will be applied in UI
+    if (portfolios.length > 10) {
+      console.warn('Too many portfolios for comparison matrix, limiting to first 10');
+      portfolios = portfolios.slice(0, 10);
+    }
+
     const matrix: Record<string, Record<string, any>> = {};
 
     portfolios.forEach(p1 => {
