@@ -411,11 +411,19 @@ export const comparisonReducer = (
       let validatedDateRange = { startDate, endDate };
 
       if (startDate && endDate) {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
+        try {
+          const start = new Date(startDate);
+          const end = new Date(endDate);
 
-        if (start >= end) {
-          console.warn('Invalid date range: start date must be before end date');
+          if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+            console.warn('Invalid date format in date range');
+            validatedDateRange = { startDate: null, endDate: null };
+          } else if (start >= end) {
+            console.warn('Invalid date range: start date must be before end date');
+            validatedDateRange = { startDate: null, endDate: null };
+          }
+        } catch (error) {
+          console.warn('Error parsing date range:', error);
           validatedDateRange = { startDate: null, endDate: null };
         }
       }

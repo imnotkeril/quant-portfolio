@@ -269,3 +269,6 @@ export const reportsReducer = (
       return state;
   }
 };
+
+// Add default export
+export default reportsReducer;

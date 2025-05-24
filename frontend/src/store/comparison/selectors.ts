@@ -1,7 +1,7 @@
 /**
  * Comparison store selectors
  */
-import { createSelector } from 'reselect';
+import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../rootReducer';
 import { ComparisonState } from './types';
 
@@ -97,51 +97,6 @@ export const selectDifferentialReturns = createSelector(
   selectComparison,
   (comparison) => comparison.differentialReturns
 );
-
-/**
- * Specific comparison selectors
- */
-export const selectComparisonById = (comparisonId: string) =>
-  createSelector(
-    selectComparisons,
-    (comparisons) => comparisons[comparisonId]
-  );
-
-export const selectCompositionComparisonById = (comparisonId: string) =>
-  createSelector(
-    selectCompositionComparisons,
-    (comparisons) => comparisons[comparisonId]
-  );
-
-export const selectPerformanceComparisonById = (comparisonId: string) =>
-  createSelector(
-    selectPerformanceComparisons,
-    (comparisons) => comparisons[comparisonId]
-  );
-
-export const selectRiskComparisonById = (comparisonId: string) =>
-  createSelector(
-    selectRiskComparisons,
-    (comparisons) => comparisons[comparisonId]
-  );
-
-export const selectSectorComparisonById = (comparisonId: string) =>
-  createSelector(
-    selectSectorComparisons,
-    (comparisons) => comparisons[comparisonId]
-  );
-
-export const selectScenarioComparisonById = (comparisonId: string) =>
-  createSelector(
-    selectScenarioComparisons,
-    (comparisons) => comparisons[comparisonId]
-  );
-
-export const selectDifferentialReturnsById = (comparisonId: string) =>
-  createSelector(
-    selectDifferentialReturns,
-    (differentials) => differentials[comparisonId]
-  );
 
 /**
  * Current comparison selectors
@@ -263,86 +218,6 @@ export const selectIncludeBenchmark = createSelector(
 );
 
 /**
- * Cache selectors
- */
-export const selectComparisonCache = createSelector(
-  selectComparison,
-  (comparison) => comparison.cache.comparisonCache
-);
-
-export const selectCompositionCache = createSelector(
-  selectComparison,
-  (comparison) => comparison.cache.compositionCache
-);
-
-export const selectPerformanceCache = createSelector(
-  selectComparison,
-  (comparison) => comparison.cache.performanceCache
-);
-
-export const selectRiskCache = createSelector(
-  selectComparison,
-  (comparison) => comparison.cache.riskCache
-);
-
-export const selectSectorCache = createSelector(
-  selectComparison,
-  (comparison) => comparison.cache.sectorCache
-);
-
-export const selectScenarioCache = createSelector(
-  selectComparison,
-  (comparison) => comparison.cache.scenarioCache
-);
-
-export const selectDifferentialCache = createSelector(
-  selectComparison,
-  (comparison) => comparison.cache.differentialCache
-);
-
-export const selectCachedComparison = (comparisonId: string) =>
-  createSelector(
-    selectComparisonCache,
-    (cache) => cache[comparisonId]
-  );
-
-export const selectCachedComposition = (comparisonId: string) =>
-  createSelector(
-    selectCompositionCache,
-    (cache) => cache[comparisonId]
-  );
-
-export const selectCachedPerformance = (comparisonId: string) =>
-  createSelector(
-    selectPerformanceCache,
-    (cache) => cache[comparisonId]
-  );
-
-export const selectCachedRisk = (comparisonId: string) =>
-  createSelector(
-    selectRiskCache,
-    (cache) => cache[comparisonId]
-  );
-
-export const selectCachedSector = (comparisonId: string) =>
-  createSelector(
-    selectSectorCache,
-    (cache) => cache[comparisonId]
-  );
-
-export const selectCachedScenario = (comparisonId: string) =>
-  createSelector(
-    selectScenarioCache,
-    (cache) => cache[comparisonId]
-  );
-
-export const selectCachedDifferential = (comparisonId: string) =>
-  createSelector(
-    selectDifferentialCache,
-    (cache) => cache[comparisonId]
-  );
-
-/**
  * Error selectors
  */
 export const selectComparisonErrors = createSelector(
@@ -429,6 +304,44 @@ export const selectEnableNotifications = createSelector(
 );
 
 /**
+ * Cache selectors
+ */
+export const selectComparisonCache = createSelector(
+  selectComparison,
+  (comparison) => comparison.cache.comparisonCache
+);
+
+export const selectCompositionCache = createSelector(
+  selectComparison,
+  (comparison) => comparison.cache.compositionCache
+);
+
+export const selectPerformanceCache = createSelector(
+  selectComparison,
+  (comparison) => comparison.cache.performanceCache
+);
+
+export const selectRiskCache = createSelector(
+  selectComparison,
+  (comparison) => comparison.cache.riskCache
+);
+
+export const selectSectorCache = createSelector(
+  selectComparison,
+  (comparison) => comparison.cache.sectorCache
+);
+
+export const selectScenarioCache = createSelector(
+  selectComparison,
+  (comparison) => comparison.cache.scenarioCache
+);
+
+export const selectDifferentialCache = createSelector(
+  selectComparison,
+  (comparison) => comparison.cache.differentialCache
+);
+
+/**
  * Computed selectors
  */
 export const selectCanCompare = createSelector(
@@ -449,188 +362,11 @@ export const selectComparisonSummary = createSelector(
   })
 );
 
-export const selectComparisonHistory = createSelector(
-  selectComparisons,
-  (comparisons) => {
-    return Object.entries(comparisons)
-      .map(([id, comparison]) => ({
-        id,
-        portfolio1: comparison.portfolio1Id,
-        portfolio2: comparison.portfolio2Id,
-        createdAt: comparison.metadata?.createdAt || new Date().toISOString(),
-        status: comparison.metadata?.status || 'completed',
-      }))
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }
-);
-
 export const selectFilteredMetrics = createSelector(
   selectSelectedMetrics,
   selectExcludeMetrics,
   (selectedMetrics, excludeMetrics) => {
     return selectedMetrics.filter(metric => !excludeMetrics.includes(metric));
-  }
-);
-
-export const selectComparisonInsights = createSelector(
-  selectActiveComparisonData,
-  (data) => {
-    if (!data?.comparison) return null;
-
-    const comparison = data.comparison;
-    const insights = {
-      winner: null as string | null,
-      keyDifferences: [] as string[],
-      recommendations: [] as string[],
-      confidence: 0,
-    };
-
-    // Determine winner based on multiple metrics
-    if (comparison.performanceComparison) {
-      const p1Metrics = comparison.performanceComparison.returnMetrics?.[comparison.portfolio1Id];
-      const p2Metrics = comparison.performanceComparison.returnMetrics?.[comparison.portfolio2Id];
-
-      if (p1Metrics && p2Metrics) {
-        const p1Return = p1Metrics.total_return || 0;
-        const p2Return = p2Metrics.total_return || 0;
-        const p1Sharpe = p1Metrics.sharpe_ratio || 0;
-        const p2Sharpe = p2Metrics.sharpe_ratio || 0;
-
-        // Weighted scoring (50% return, 50% risk-adjusted return)
-        const p1Score = (p1Return * 0.5) + (p1Sharpe * 0.5);
-        const p2Score = (p2Return * 0.5) + (p2Sharpe * 0.5);
-
-        insights.winner = p1Score > p2Score ? comparison.portfolio1Id : comparison.portfolio2Id;
-        insights.confidence = Math.abs(p1Score - p2Score);
-      }
-    }
-
-    // Extract key differences
-    if (comparison.summary && Array.isArray(comparison.summary)) {
-      insights.keyDifferences = comparison.summary;
-    }
-
-    // Extract recommendations
-    if (comparison.recommendations && Array.isArray(comparison.recommendations)) {
-      insights.recommendations = comparison.recommendations;
-    }
-
-    return insights;
-  }
-);
-
-export const selectPortfolioComparisonMatrix = createSelector(
-  selectSelectedPortfolios,
-  selectComparisons,
-  (portfolios, comparisons) => {
-    // Limit portfolios for performance - Wild Market Capital design system colors will be applied in UI
-    if (portfolios.length > 10) {
-      console.warn('Too many portfolios for comparison matrix, limiting to first 10');
-      portfolios = portfolios.slice(0, 10);
-    }
-
-    const matrix: Record<string, Record<string, any>> = {};
-
-    portfolios.forEach(p1 => {
-      matrix[p1] = {};
-      portfolios.forEach(p2 => {
-        if (p1 !== p2) {
-          // Find comparison between p1 and p2
-          const comparison = Object.values(comparisons).find(c =>
-            (c.portfolio1Id === p1 && c.portfolio2Id === p2) ||
-            (c.portfolio1Id === p2 && c.portfolio2Id === p1)
-          );
-
-          matrix[p1][p2] = comparison || null;
-        }
-      });
-    });
-
-    return matrix;
-  }
-);
-
-/**
- * Performance selectors
- */
-export const selectComparisonPerformanceMetrics = createSelector(
-  selectActiveComparisonData,
-  (data) => {
-    if (!data?.performance) return null;
-
-    const performance = data.performance;
-    return {
-      portfolio1: performance.returnMetrics?.[performance.portfolio1Id || ''],
-      portfolio2: performance.returnMetrics?.[performance.portfolio2Id || ''],
-      comparison: performance.comparison,
-      statisticalTests: performance.statisticalTests,
-    };
-  }
-);
-
-export const selectComparisonRiskMetrics = createSelector(
-  selectActiveComparisonData,
-  (data) => {
-    if (!data?.risk) return null;
-
-    const risk = data.risk;
-    return {
-      portfolio1: risk.riskMetrics?.[risk.portfolio1Id || ''],
-      portfolio2: risk.riskMetrics?.[risk.portfolio2Id || ''],
-      comparison: risk.comparison,
-      riskContribution: risk.riskContribution,
-    };
-  }
-);
-
-/**
- * Cache utility selectors
- */
-export const selectIsCacheValid = (timestamp: number, timeout: number) =>
-  createSelector(
-    () => Date.now(),
-    (now) => now - timestamp < timeout
-  );
-
-export const selectShouldRefreshComparison = (comparisonId: string) =>
-  createSelector(
-    selectCachedComparison(comparisonId),
-    selectCacheTimeout,
-    (cache, timeout) => {
-      if (!cache) return true;
-      return Date.now() - cache.timestamp > timeout;
-    }
-  );
-
-export const selectCacheStatistics = createSelector(
-  selectComparison,
-  (comparison) => {
-    const cache = comparison.cache;
-    const totalEntries = Object.values(cache).reduce((sum, cacheType) => {
-      return sum + Object.keys(cacheType).length;
-    }, 0);
-
-    const totalSize = JSON.stringify(cache).length;
-    const oldestEntry = Math.min(
-      ...Object.values(cache).flatMap(cacheType =>
-        Object.values(cacheType).map(entry => entry.timestamp)
-      )
-    );
-
-    return {
-      totalEntries,
-      totalSize,
-      oldestEntry: oldestEntry === Infinity ? null : new Date(oldestEntry),
-      cacheTypes: {
-        comparison: Object.keys(cache.comparisonCache).length,
-        composition: Object.keys(cache.compositionCache).length,
-        performance: Object.keys(cache.performanceCache).length,
-        risk: Object.keys(cache.riskCache).length,
-        sector: Object.keys(cache.sectorCache).length,
-        scenario: Object.keys(cache.scenarioCache).length,
-        differential: Object.keys(cache.differentialCache).length,
-      },
-    };
   }
 );
 
@@ -698,102 +434,76 @@ export const selectComparisonValidation = createSelector(
 );
 
 /**
- * Advanced analysis selectors
+ * Specific comparison data selectors
  */
-export const selectComparisonTrends = createSelector(
-  selectActiveComparisonData,
-  (data) => {
-    if (!data?.performance) return null;
+export const selectComparisonById = (comparisonId: string) =>
+  createSelector(
+    selectComparisons,
+    (comparisons) => comparisons[comparisonId] || null
+  );
 
-    const performance = data.performance;
-    const trends = {
-      returnsCorrelation: 0,
-      performanceDivergence: 0,
-      riskAdjustedTrend: '',
-      outlook: '',
-    };
+export const selectCompositionComparisonById = (comparisonId: string) =>
+  createSelector(
+    selectCompositionComparisons,
+    (comparisons) => comparisons[comparisonId] || null
+  );
 
-    // Calculate correlation if time series data is available
-    if (performance.timeSeries) {
-      // This would calculate actual correlation
-      trends.returnsCorrelation = 0.75; // Placeholder
-    }
+export const selectPerformanceComparisonById = (comparisonId: string) =>
+  createSelector(
+    selectPerformanceComparisons,
+    (comparisons) => comparisons[comparisonId] || null
+  );
 
-    // Determine trend direction
-    const p1Return = performance.returnMetrics?.[performance.portfolio1Id || '']?.total_return || 0;
-    const p2Return = performance.returnMetrics?.[performance.portfolio2Id || '']?.total_return || 0;
+export const selectRiskComparisonById = (comparisonId: string) =>
+  createSelector(
+    selectRiskComparisons,
+    (comparisons) => comparisons[comparisonId] || null
+  );
 
-    trends.performanceDivergence = Math.abs(p1Return - p2Return);
+export const selectSectorComparisonById = (comparisonId: string) =>
+  createSelector(
+    selectSectorComparisons,
+    (comparisons) => comparisons[comparisonId] || null
+  );
 
-    if (p1Return > p2Return * 1.1) {
-      trends.riskAdjustedTrend = 'Portfolio 1 outperforming';
-    } else if (p2Return > p1Return * 1.1) {
-      trends.riskAdjustedTrend = 'Portfolio 2 outperforming';
-    } else {
-      trends.riskAdjustedTrend = 'Similar performance';
-    }
+export const selectScenarioComparisonById = (comparisonId: string) =>
+  createSelector(
+    selectScenarioComparisons,
+    (comparisons) => comparisons[comparisonId] || null
+  );
 
-    return trends;
-  }
-);
-
-export const selectComparisonRecommendations = createSelector(
-  selectComparisonInsights,
-  selectComparisonTrends,
-  selectComparisonPerformanceMetrics,
-  (insights, trends, performance) => {
-    const recommendations: Array<{
-      type: 'optimize' | 'rebalance' | 'diversify' | 'risk' | 'general';
-      priority: 'high' | 'medium' | 'low';
-      title: string;
-      description: string;
-    }> = [];
-
-    if (insights?.winner && performance) {
-      const winnerMetrics = insights.winner === performance.portfolio1?.id
-        ? performance.portfolio1
-        : performance.portfolio2;
-
-      if (winnerMetrics) {
-        recommendations.push({
-          type: 'optimize',
-          priority: 'high',
-          title: 'Consider optimization',
-          description: `The winning portfolio shows superior risk-adjusted returns. Consider analyzing its allocation strategy.`,
-        });
-      }
-    }
-
-    if (trends?.performanceDivergence > 0.1) {
-      recommendations.push({
-        type: 'rebalance',
-        priority: 'medium',
-        title: 'Performance divergence detected',
-        description: `Significant performance difference observed. Review allocation strategies and consider rebalancing.`,
-      });
-    }
-
-    if (trends?.returnsCorrelation > 0.9) {
-      recommendations.push({
-        type: 'diversify',
-        priority: 'medium',
-        title: 'High correlation detected',
-        description: `Portfolios are highly correlated. Consider diversification to reduce systematic risk.`,
-      });
-    }
-
-    return recommendations;
-  }
-);
+export const selectDifferentialReturnsById = (comparisonId: string) =>
+  createSelector(
+    selectDifferentialReturns,
+    (differentials) => differentials[comparisonId] || null
+  );
 
 /**
- * Export utility selectors
+ * Cache validation selectors
+ */
+export const selectIsCacheValid = (timestamp: number, timeout: number) =>
+  createSelector(
+    () => Date.now(),
+    (now) => now - timestamp < timeout
+  );
+
+export const selectShouldRefreshComparison = (comparisonId: string) =>
+  createSelector(
+    selectComparisonCache,
+    selectCacheTimeout,
+    (cache, timeout) => {
+      const cachedItem = cache[comparisonId];
+      if (!cachedItem) return true;
+      return Date.now() - cachedItem.timestamp > timeout;
+    }
+  );
+
+/**
+ * Export data selectors
  */
 export const selectComparisonExportData = createSelector(
   selectActiveComparisonData,
-  selectComparisonInsights,
-  selectComparisonTrends,
-  (data, insights, trends) => {
+  (data) => {
     if (!data) return null;
 
     return {
@@ -804,8 +514,6 @@ export const selectComparisonExportData = createSelector(
       sector: data.sector,
       scenario: data.scenario,
       differential: data.differential,
-      insights,
-      trends,
       exportedAt: new Date().toISOString(),
       metadata: {
         exportFormat: 'json',
@@ -813,47 +521,5 @@ export const selectComparisonExportData = createSelector(
         source: 'Wild Market Capital Portfolio Management System',
       },
     };
-  }
-);
-
-/**
- * UI helper selectors
- */
-export const selectComparisonDisplayData = createSelector(
-  selectActiveComparisonData,
-  selectDisplayMode,
-  selectFilteredMetrics,
-  (data, displayMode, metrics) => {
-    if (!data?.comparison) return null;
-
-    const formatValue = (value: number, metric: string) => {
-      switch (displayMode) {
-        case 'percentage':
-          return `${(value * 100).toFixed(2)}%`;
-        case 'relative':
-          return value.toFixed(4);
-        case 'normalized':
-          return ((value - 0.5) * 2).toFixed(4); // Example normalization
-        default:
-          return value.toFixed(4);
-      }
-    };
-
-    // Transform data based on display mode and selected metrics
-    return metrics.reduce((acc, metric) => {
-      if (data.performance?.returnMetrics) {
-        const p1Value = data.performance.returnMetrics[data.comparison!.portfolio1Id]?.[metric];
-        const p2Value = data.performance.returnMetrics[data.comparison!.portfolio2Id]?.[metric];
-
-        if (p1Value !== undefined && p2Value !== undefined) {
-          acc[metric] = {
-            portfolio1: formatValue(p1Value, metric),
-            portfolio2: formatValue(p2Value, metric),
-            difference: formatValue(p1Value - p2Value, metric),
-          };
-        }
-      }
-      return acc;
-    }, {} as Record<string, any>);
   }
 );

@@ -25,7 +25,7 @@ import {
   ScenarioComparisonResponse,
   DifferentialReturnsResponse,
 } from '../../types/comparison';
-
+import { AppThunk } from '../index';
 /**
  * Portfolio comparison actions
  */

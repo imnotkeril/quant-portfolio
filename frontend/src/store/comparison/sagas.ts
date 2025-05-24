@@ -3,7 +3,8 @@
  * Note: All financial metrics calculations use logarithmic returns as per Wild Market Capital requirements
  * UI components will use colors: Background #0D1015, Accent #BF9FFB, Positive #74F174, Negative #FAA1A4
  */
-import { call, put, takeLatest, takeEvery, select, delay, race, fork, cancel, cancelled } from 'redux-saga/effects';
+import { SagaIterator } from 'redux-saga';
+import { call, put, takeLatest, takeEvery, select, delay, all, fork, cancel, cancelled } from 'redux-saga/effects';
 import { Task } from 'redux-saga';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { comparisonService } from '../../services/comparison/comparisonService';
@@ -77,7 +78,7 @@ function createApiError(error: unknown, defaultMessage: string): ApiError {
 /**
  * Compare portfolios saga
  */
-function* comparePortfoliosSaga(action: PayloadAction<ComparePortfoliosPayload>) {
+function* comparePortfoliosSaga(action: PayloadAction<ComparePortfoliosPayload>): SagaIterator {
   try {
     const { request, comparisonId } = action.payload;
 
@@ -100,7 +101,17 @@ function* comparePortfoliosSaga(action: PayloadAction<ComparePortfoliosPayload>)
       throw new Error('Both portfolios must be specified for comparison');
     }
 
-    if (request.portfolio1.id === request.portfolio2.id) {
+    // Get portfolio IDs for validation
+    const getPortfolioId = (portfolio: any): string | null => {
+      if (typeof portfolio === 'string') return portfolio;
+      if (typeof portfolio === 'object' && portfolio.id) return portfolio.id;
+      return null;
+    };
+
+    const p1Id = getPortfolioId(request.portfolio1);
+    const p2Id = getPortfolioId(request.portfolio2);
+
+    if (p1Id && p2Id && p1Id === p2Id) {
       throw new Error('Cannot compare portfolio with itself');
     }
 
@@ -119,7 +130,7 @@ function* comparePortfoliosSaga(action: PayloadAction<ComparePortfoliosPayload>)
 /**
  * Compare composition saga
  */
-function* compareCompositionSaga(action: PayloadAction<CompareCompositionPayload>) {
+function* compareCompositionSaga(action: PayloadAction<CompareCompositionPayload>): SagaIterator {
   try {
     const { request, comparisonId } = action.payload;
 
@@ -152,7 +163,7 @@ function* compareCompositionSaga(action: PayloadAction<CompareCompositionPayload
 /**
  * Compare performance saga
  */
-function* comparePerformanceSaga(action: PayloadAction<ComparePerformancePayload>) {
+function* comparePerformanceSaga(action: PayloadAction<ComparePerformancePayload>): SagaIterator {
   try {
     const { request, comparisonId } = action.payload;
 
@@ -185,7 +196,7 @@ function* comparePerformanceSaga(action: PayloadAction<ComparePerformancePayload
 /**
  * Compare risk saga
  */
-function* compareRiskSaga(action: PayloadAction<CompareRiskPayload>) {
+function* compareRiskSaga(action: PayloadAction<CompareRiskPayload>): SagaIterator {
   try {
     const { request, comparisonId } = action.payload;
 
@@ -218,7 +229,7 @@ function* compareRiskSaga(action: PayloadAction<CompareRiskPayload>) {
 /**
  * Compare sectors saga
  */
-function* compareSectorsSaga(action: PayloadAction<CompareSectorsPayload>) {
+function* compareSectorsSaga(action: PayloadAction<CompareSectorsPayload>): SagaIterator {
   try {
     const { request, comparisonId } = action.payload;
 
@@ -251,7 +262,7 @@ function* compareSectorsSaga(action: PayloadAction<CompareSectorsPayload>) {
 /**
  * Compare scenarios saga
  */
-function* compareScenariosSaga(action: PayloadAction<CompareScenariosPayload>) {
+function* compareScenariosSaga(action: PayloadAction<CompareScenariosPayload>): SagaIterator {
   try {
     const { request, comparisonId } = action.payload;
 
@@ -284,7 +295,7 @@ function* compareScenariosSaga(action: PayloadAction<CompareScenariosPayload>) {
 /**
  * Calculate differential returns saga
  */
-function* calculateDifferentialSaga(action: PayloadAction<CalculateDifferentialPayload>) {
+function* calculateDifferentialSaga(action: PayloadAction<CalculateDifferentialPayload>): SagaIterator {
   try {
     const { request, comparisonId } = action.payload;
 
@@ -315,13 +326,192 @@ function* calculateDifferentialSaga(action: PayloadAction<CalculateDifferentialP
 }
 
 /**
+ * Auto refresh comparisons saga
+ */
+function* autoRefreshComparisonsSaga(): SagaIterator {
+  let refreshTask: Task | null = null;
+
+  try {
+    while (true) {
+      const autoRefresh: boolean = yield select(
+        (state: RootState) => state.comparison.settings.autoRefresh
+      );
+      const refreshInterval: number = yield select(
+        (state: RootState) => state.comparison.settings.refreshInterval
+      );
+
+      if (autoRefresh) {
+        // Cancel previous refresh task if running
+        if (refreshTask) {
+          yield cancel(refreshTask);
+        }
+
+        // Start new refresh task
+        refreshTask = yield fork(function* () {
+          try {
+            const activeComparison: string | null = yield select(
+              (state: RootState) => state.comparison.activeComparison
+            );
+
+            if (activeComparison) {
+              console.log('Auto refreshing active comparison:', activeComparison);
+              // Refresh logic would go here
+            }
+          } catch (error) {
+            console.error('Auto refresh task error:', error);
+          }
+        });
+      }
+
+      yield delay(refreshInterval);
+    }
+  } finally {
+    if (yield cancelled()) {
+      if (refreshTask) {
+        yield cancel(refreshTask);
+      }
+    }
+  }
+}
+
+/**
+ * Cache management saga
+ */
+function* cacheManagementSaga(): SagaIterator {
+  while (true) {
+    try {
+      // Clean up expired cache entries every 10 minutes
+      yield delay(600000);
+
+      const cacheTimeout: number = yield select(
+        (state: RootState) => state.comparison.settings.cacheTimeout
+      );
+      const now = Date.now();
+
+      // Get all cache data
+      const cacheData: {
+        comparisonCache: Record<string, { timestamp: number }>;
+        compositionCache: Record<string, { timestamp: number }>;
+        performanceCache: Record<string, { timestamp: number }>;
+        riskCache: Record<string, { timestamp: number }>;
+        sectorCache: Record<string, { timestamp: number }>;
+        scenarioCache: Record<string, { timestamp: number }>;
+        differentialCache: Record<string, { timestamp: number }>;
+      } = yield select((state: RootState) => state.comparison.cache);
+
+      // Check for expired entries
+      const cacheTypes = Object.keys(cacheData) as Array<keyof typeof cacheData>;
+
+      for (const cacheType of cacheTypes) {
+        const cache = cacheData[cacheType];
+        const expiredKeys = Object.entries(cache)
+          .filter(([, entry]) => now - entry.timestamp > cacheTimeout)
+          .map(([key]) => key);
+
+        if (expiredKeys.length > 0) {
+          console.log(`Cleaning up ${expiredKeys.length} expired ${cacheType} entries`);
+          // Cache cleanup logic would go here
+        }
+      }
+    } catch (error) {
+      console.error('Cache management error:', error);
+    }
+  }
+}
+
+/**
+ * Error handling saga
+ */
+function* errorHandlingSaga(action: PayloadAction<{ error: ApiError }>): SagaIterator {
+  const { error } = action.payload;
+
+  console.error('Comparison error:', error);
+
+  // Implement retry logic for network errors
+  if (!error.status || error.status === 0) {
+    yield delay(5000);
+    // Retry logic would go here
+  }
+
+  // Handle specific error types
+  if (error.status === 429) {
+    // Rate limiting - wait longer
+    yield delay(30000);
+  }
+
+  // Critical error handling
+  if (error.status && error.status >= 500) {
+    // Log critical error and continue operation
+    console.error('Critical comparison error:', error);
+    // Notification logic would go here
+  }
+}
+
+/**
+ * Data validation saga
+ */
+function* dataValidationSaga(action: PayloadAction<any>): SagaIterator {
+  try {
+    const { type, payload } = action;
+
+    // Basic validation for all comparison requests
+    if (payload?.request) {
+      const request = payload.request;
+
+      // Validate portfolio IDs exist
+      if (request.portfolio1Id && request.portfolio2Id) {
+        if (request.portfolio1Id === request.portfolio2Id) {
+          throw new Error('Cannot compare portfolio with itself');
+        }
+      }
+
+      // Validate date ranges
+      if (request.startDate && request.endDate) {
+        const start = new Date(request.startDate);
+        const end = new Date(request.endDate);
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          throw new Error('Invalid date format');
+        }
+
+        if (start >= end) {
+          throw new Error('Start date must be before end date');
+        }
+
+        // Check if date range is reasonable
+        const now = new Date();
+        const maxPastDate = new Date(now.getFullYear() - 50, 0, 1);
+        const maxFutureDate = new Date(now.getFullYear() + 1, 11, 31);
+
+        if (start < maxPastDate || end > maxFutureDate) {
+          console.warn('Date range outside reasonable bounds');
+        }
+      }
+
+      // Validate metrics if provided
+      if (request.metrics && Array.isArray(request.metrics)) {
+        const validMetrics = ['totalReturn', 'sharpeRatio', 'volatility', 'maxDrawdown', 'alpha', 'beta'];
+        const invalidMetrics = request.metrics.filter((metric: string) => !validMetrics.includes(metric));
+
+        if (invalidMetrics.length > 0) {
+          console.warn('Invalid metrics detected:', invalidMetrics);
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Data validation failed:', error);
+    // Validation error handling would go here
+  }
+}
+
+/**
  * Batch comparison saga
  */
 function* batchComparisonSaga(action: PayloadAction<{
   portfolios: string[];
   metrics: string[];
   includeAll: boolean;
-}>) {
+}>): SagaIterator {
   try {
     const { portfolios, metrics, includeAll } = action.payload;
     const maxComparisons: number = yield select(
@@ -399,104 +589,9 @@ function* batchComparisonSaga(action: PayloadAction<{
 }
 
 /**
- * Auto refresh comparisons saga
- */
-function* autoRefreshComparisonsSaga() {
-  let refreshTask: Task | null = null;
-
-  try {
-    while (true) {
-      const autoRefresh: boolean = yield select(
-        (state: RootState) => state.comparison.settings.autoRefresh
-      );
-      const refreshInterval: number = yield select(
-        (state: RootState) => state.comparison.settings.refreshInterval
-      );
-
-      if (autoRefresh) {
-        // Cancel previous refresh task if running
-        if (refreshTask) {
-          yield cancel(refreshTask);
-        }
-
-        // Start new refresh task
-        refreshTask = yield fork(function* () {
-          try {
-            const activeComparison: string | null = yield select(
-              (state: RootState) => state.comparison.activeComparison
-            );
-
-            if (activeComparison) {
-              // Refresh active comparison
-              console.log('Auto refreshing active comparison:', activeComparison);
-              // Could dispatch refresh actions here
-            }
-          } catch (error) {
-            console.error('Auto refresh task error:', error);
-          }
-        });
-      }
-
-      yield delay(refreshInterval);
-    }
-  } finally {
-    if (yield cancelled()) {
-      if (refreshTask) {
-        yield cancel(refreshTask);
-      }
-    }
-  }
-}
-
-/**
- * Cache management saga
- */
-function* cacheManagementSaga() {
-  while (true) {
-    try {
-      // Clean up expired cache entries every 10 minutes
-      yield delay(600000);
-
-      const cacheTimeout: number = yield select(
-        (state: RootState) => state.comparison.settings.cacheTimeout
-      );
-      const now = Date.now();
-
-      // Get all cache data
-      const cacheData: {
-        comparisonCache: Record<string, { timestamp: number }>;
-        compositionCache: Record<string, { timestamp: number }>;
-        performanceCache: Record<string, { timestamp: number }>;
-        riskCache: Record<string, { timestamp: number }>;
-        sectorCache: Record<string, { timestamp: number }>;
-        scenarioCache: Record<string, { timestamp: number }>;
-        differentialCache: Record<string, { timestamp: number }>;
-      } = yield select((state: RootState) => state.comparison.cache);
-
-      // Check for expired entries
-      const cacheTypes = Object.keys(cacheData) as Array<keyof typeof cacheData>;
-
-      for (const cacheType of cacheTypes) {
-        const cache = cacheData[cacheType];
-        const expiredKeys = Object.entries(cache)
-          .filter(([, entry]) => now - entry.timestamp > cacheTimeout)
-          .map(([key]) => key);
-
-        if (expiredKeys.length > 0) {
-          console.log(`Cleaning up ${expiredKeys.length} expired ${cacheType} entries`);
-          // Could dispatch cache cleanup actions here
-        }
-      }
-    } catch (error) {
-      console.error('Cache management error:', error);
-    }
-  }
-}
-
-/**
  * Performance monitoring saga
  */
-function* performanceMonitoringSaga() {
+function* performanceMonitoringSaga(): SagaIterator {
   while (true) {
     try {
       yield delay(300000); // Check every 5 minutes
@@ -513,7 +608,7 @@ function* performanceMonitoringSaga() {
         memoryUsage: JSON.stringify(state.comparison).length,
       });
 
-      // Could implement alerts for performance thresholds
+      // Implement alerts for performance thresholds
       if (activeComparisons > 50) {
         console.warn('High number of active comparisons, consider cleanup');
       }
@@ -528,124 +623,19 @@ function* performanceMonitoringSaga() {
  * Calculate cache hit ratio helper
  */
 function calculateCacheHitRatio(cache: any): number {
-  const allEntries = Object.values(cache).reduce((total, cacheType: any) => {
-    return total + Object.keys(cacheType).length;
+  const allEntries = Object.values(cache).reduce((total: number, cacheType: any) => {
+    return total + Object.keys(cacheType || {}).length;
   }, 0);
 
-  // This is a simplified calculation - in real implementation,
+  // Simplified calculation - in real implementation,
   // you'd track actual hits vs misses
   return allEntries > 0 ? Math.min(allEntries / 100, 1) : 0;
 }
 
 /**
- * Error handling saga with retry logic
- */
-function* errorHandlingSaga(action: PayloadAction<{ error: ApiError }>) {
-  const { error } = action.payload;
-
-  console.error('Comparison error:', error);
-
-  // Implement retry logic for network errors
-  if (!error.status || error.status === 0) {
-    yield delay(5000);
-    // Could dispatch retry action here
-  }
-
-  // Handle specific error types
-  if (error.status === 429) {
-    // Rate limiting - wait longer
-    yield delay(30000);
-  }
-
-  // Critical error handling - prevent app crash
-  if (error.status && error.status >= 500) {
-    // Log critical error and continue operation
-    console.error('Critical comparison error:', error);
-    // Could dispatch notification action here
-  }
-}
-
-/**
- * Data validation saga
- */
-function* dataValidationSaga(action: PayloadAction<any>) {
-  try {
-    const { type, payload } = action;
-
-    // Basic validation for all comparison requests
-    if (payload?.request) {
-      const request = payload.request;
-
-      // Validate portfolio IDs exist
-      if (request.portfolio1Id && request.portfolio2Id) {
-        if (request.portfolio1Id === request.portfolio2Id) {
-          throw new Error('Cannot compare portfolio with itself');
-        }
-      }
-
-      // Validate date ranges
-      if (request.startDate && request.endDate) {
-        const start = new Date(request.startDate);
-        const end = new Date(request.endDate);
-
-        if (start >= end) {
-          throw new Error('Start date must be before end date');
-        }
-
-        // Check if date range is reasonable (not too far in the past/future)
-        const now = new Date();
-        const maxPastDate = new Date(now.getFullYear() - 50, 0, 1);
-        const maxFutureDate = new Date(now.getFullYear() + 1, 11, 31);
-
-        if (start < maxPastDate || end > maxFutureDate) {
-          console.warn('Date range outside reasonable bounds');
-        }
-      }
-
-      // Validate metrics if provided
-      if (request.metrics && Array.isArray(request.metrics)) {
-        const validMetrics = ['totalReturn', 'sharpeRatio', 'volatility', 'maxDrawdown', 'alpha', 'beta'];
-        const invalidMetrics = request.metrics.filter((metric: string) => !validMetrics.includes(metric));
-
-        if (invalidMetrics.length > 0) {
-          console.warn('Invalid metrics detected:', invalidMetrics);
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Data validation failed:', error);
-    // Could dispatch validation error action here
-  }
-}
-
-/**
- * Insights generation saga
- */
-function* insightsGenerationSaga(action: PayloadAction<{
-  comparisonId: string;
-  data: PortfolioComparisonResponse;
-}>) {
-  try {
-    const { comparisonId, data } = action.payload;
-
-    // Generate insights from comparison data
-    const insights = yield call([comparisonService, 'generateComparisonInsights'], data);
-
-    // Store insights or dispatch action to update UI
-    console.log(`Generated insights for comparison ${comparisonId}:`, insights);
-
-    // Could dispatch action to store insights in state
-    // yield put(setComparisonInsights(comparisonId, insights));
-
-  } catch (error) {
-    console.error('Insights generation failed:', error);
-  }
-}
-
-/**
  * Notification saga
  */
-function* notificationSaga(action: PayloadAction<any>) {
+function* notificationSaga(action: PayloadAction<any>): SagaIterator {
   try {
     const { type } = action;
 
@@ -657,13 +647,13 @@ function* notificationSaga(action: PayloadAction<any>) {
 
       if (enableNotifications) {
         console.log('Comparison completed successfully');
-        // Could integrate with notification system here
+        // Notification system integration would go here
       }
     }
 
     if (type.endsWith('_FAILURE')) {
       console.log('Comparison failed');
-      // Could show error notifications
+      // Error notification would go here
     }
   } catch (error) {
     console.error('Notification error:', error);
@@ -671,37 +661,9 @@ function* notificationSaga(action: PayloadAction<any>) {
 }
 
 /**
- * Race condition prevention saga
- */
-function* raceConditionPreventionSaga(action: PayloadAction<any>) {
-  try {
-    const { type, payload } = action;
-    const requestKey = `${type}_${JSON.stringify(payload)}`;
-
-    // Use race to handle simultaneous identical requests
-    const { response, timeout } = yield race({
-      response: call(function* () {
-        // This would contain the actual saga logic
-        yield delay(100);
-        return 'completed';
-      }),
-      timeout: delay(30000), // 30 second timeout
-    });
-
-    if (timeout) {
-      throw new Error('Request timeout');
-    }
-
-    return response;
-  } catch (error) {
-    console.error('Race condition handling error:', error);
-  }
-}
-
-/**
  * Root comparison saga
  */
-export function* comparisonSaga() {
+export function* comparisonSaga(): SagaIterator {
   // Watch for specific actions
   yield takeLatest(ComparisonActionTypes.COMPARE_PORTFOLIOS_REQUEST, comparePortfoliosSaga);
   yield takeEvery(ComparisonActionTypes.COMPARE_COMPOSITION_REQUEST, compareCompositionSaga);
@@ -713,9 +675,6 @@ export function* comparisonSaga() {
 
   // Watch for batch operations
   yield takeLatest('comparison/BATCH_COMPARISON_REQUEST', batchComparisonSaga);
-
-  // Watch for insights generation
-  yield takeEvery(ComparisonActionTypes.COMPARE_PORTFOLIOS_SUCCESS, insightsGenerationSaga);
 
   // Watch for validation
   yield takeEvery([
