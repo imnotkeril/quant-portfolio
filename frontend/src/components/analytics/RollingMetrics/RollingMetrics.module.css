@@ -1,0 +1,203 @@
+/**
+ * RollingMetrics Styles for Wild Market Capital
+ */
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.controlsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.windowControl {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  flex-wrap: wrap;
+}
+
+.metricsControl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.controlLabel {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  white-space: nowrap;
+}
+
+.windowSelect {
+  min-width: 150px;
+}
+
+.customWindowInput {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  margin-top: var(--spacing-s);
+}
+
+.metricButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.metricButton {
+  white-space: nowrap;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-m);
+  padding: var(--spacing-s) var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.2);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 120px;
+}
+
+.summaryLabel {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+}
+
+.summaryValue {
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-semi-bold);
+  font-family: 'Inter', monospace;
+}
+
+.legend {
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.2);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.legendTitle {
+  margin: 0 0 var(--spacing-s) 0;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.legendItems {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+}
+
+.legendColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.legendLabel {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.legendDescription {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-regular);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .controlsSection {
+    gap: var(--spacing-s);
+  }
+
+  .windowControl {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .metricsControl {
+    gap: var(--spacing-xs);
+  }
+
+  .metricButtons {
+    flex-direction: column;
+  }
+
+  .metricButton {
+    width: 100%;
+  }
+
+  .summary {
+    flex-direction: column;
+    gap: var(--spacing-s);
+  }
+
+  .summaryItem {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    min-width: auto;
+  }
+
+  .legendItems {
+    gap: var(--spacing-xs);
+  }
+
+  .legendItem {
+    align-items: flex-start;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .controlsSection,
+  .summary,
+  .legend {
+    border-width: 2px;
+  }
+
+  .legendColor {
+    border: 1px solid var(--color-text-light);
+  }
+}

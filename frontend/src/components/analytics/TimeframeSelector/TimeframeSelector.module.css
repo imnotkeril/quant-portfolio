@@ -1,0 +1,130 @@
+/**
+ * TimeframeSelector Styles for Wild Market Capital
+ */
+
+.wrapper {
+  width: 100%;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.timeframeButton {
+  min-width: 50px;
+  transition: all var(--transition-fast);
+}
+
+.customButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  min-width: auto;
+}
+
+.customRange {
+  padding: var(--spacing-s);
+  background-color: rgba(191, 159, 251, 0.1);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--border-radius-s);
+  margin-top: var(--spacing-xs);
+}
+
+.customRangeText {
+  font-size: var(--font-size-caption);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+.customDateInputs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.dateError {
+  font-size: var(--font-size-caption);
+  color: var(--color-negative);
+  padding: var(--spacing-xs);
+  background-color: rgba(250, 161, 164, 0.1);
+  border: 1px solid var(--color-negative);
+  border-radius: var(--border-radius-xs);
+  margin-top: var(--spacing-xs);
+}
+
+/* Button group styling */
+.buttonGroup .timeframeButton:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.buttonGroup .timeframeButton:not(:first-child):not(:last-child):not(.customButton) {
+  border-radius: 0;
+  margin-left: -1px;
+}
+
+.buttonGroup .timeframeButton:last-child:not(.customButton) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin-left: -1px;
+}
+
+.buttonGroup .customButton {
+  margin-left: var(--spacing-s);
+}
+
+/* Focus states for accessibility */
+.timeframeButton:focus {
+  z-index: 1;
+  position: relative;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .buttonGroup {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .timeframeButton,
+  .customButton {
+    width: 100%;
+    margin-left: 0 !important;
+    border-radius: var(--border-radius-s) !important;
+  }
+
+  .customButton {
+    margin-top: var(--spacing-xs);
+    justify-content: center;
+  }
+
+  .customDateInputs {
+    gap: var(--spacing-s);
+  }
+}
+
+@media (max-width: 480px) {
+  .buttonGroup {
+    gap: var(--spacing-xs);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .customRange {
+    border-width: 2px;
+  }
+
+  .dateError {
+    border-width: 2px;
+  }
+}

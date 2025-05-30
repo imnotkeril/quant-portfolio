@@ -1,0 +1,98 @@
+/**
+ * ReturnsChart Styles for Wild Market Capital
+ */
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+}
+
+.periodSelect {
+  min-width: 100px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-m);
+  padding: var(--spacing-s) var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 120px;
+}
+
+.summaryLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-regular);
+}
+
+.summaryValue {
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-semi-bold);
+  font-family: 'Inter', monospace;
+}
+
+.positive {
+  color: var(--color-positive);
+}
+
+.negative {
+  color: var(--color-negative);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-xs);
+  }
+
+  .periodSelect {
+    min-width: auto;
+  }
+
+  .summary {
+    flex-direction: column;
+    gap: var(--spacing-s);
+  }
+
+  .summaryItem {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    min-width: auto;
+    gap: var(--spacing-s);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .summary {
+    border-width: 2px;
+  }
+
+  .positive {
+    font-weight: var(--font-weight-bold);
+  }
+
+  .negative {
+    font-weight: var(--font-weight-bold);
+  }
+}

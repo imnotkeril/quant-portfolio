@@ -1,0 +1,251 @@
+/**
+ * MetricsCard Styles for Wild Market Capital
+ */
+
+.card {
+  background: linear-gradient(135deg, rgba(13, 16, 21, 0.8) 0%, rgba(26, 30, 42, 0.8) 100%);
+  border: 1px solid var(--color-divider);
+  transition: all var(--transition-fast);
+}
+
+.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium), var(--shadow-glow);
+  border-color: var(--color-accent);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-s);
+}
+
+.titleSection {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-s);
+  flex: 1;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--border-radius-s);
+  background-color: rgba(191, 159, 251, 0.1);
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.titleWrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  line-height: var(--line-height-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subtitle {
+  margin: 0;
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-neutral-gray);
+  line-height: var(--line-height-caption);
+}
+
+.trendIcon {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+.valueSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+  flex: 1;
+}
+
+.mainValue {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-light);
+  line-height: var(--line-height-h2);
+  font-family: 'Inter', monospace;
+}
+
+.metrics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.change {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+}
+
+.changeIcon {
+  font-weight: var(--font-weight-bold);
+}
+
+.changeValue {
+  font-family: 'Inter', monospace;
+}
+
+.benchmark {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-caption);
+}
+
+.benchmarkLabel {
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-regular);
+}
+
+.benchmarkValue {
+  font-weight: var(--font-weight-medium);
+  font-family: 'Inter', monospace;
+}
+
+.positive {
+  color: var(--color-positive);
+}
+
+.negative {
+  color: var(--color-negative);
+}
+
+.description {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  line-height: var(--line-height-caption);
+  margin-top: auto;
+}
+
+/* Size variations */
+.small {
+  min-height: 120px;
+}
+
+.small .icon {
+  width: 24px;
+  height: 24px;
+}
+
+.small .title {
+  font-size: var(--font-size-caption);
+}
+
+.small .mainValue {
+  font-size: var(--font-size-h3);
+}
+
+.small .trendIcon {
+  font-size: var(--font-size-body);
+}
+
+.medium {
+  min-height: 140px;
+}
+
+.large {
+  min-height: 180px;
+}
+
+.large .icon {
+  width: 40px;
+  height: 40px;
+}
+
+.large .title {
+  font-size: var(--font-size-h3);
+}
+
+.large .mainValue {
+  font-size: var(--font-size-h1);
+}
+
+.large .trendIcon {
+  font-size: var(--font-size-h2);
+}
+
+/* Loading state */
+.loading .content {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .titleSection {
+    align-items: center;
+  }
+
+  .metrics {
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .benchmark {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .card {
+    border-width: 2px;
+  }
+
+  .positive {
+    font-weight: var(--font-weight-bold);
+  }
+
+  .negative {
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .clickable:hover {
+    transform: none;
+  }
+
+  .card {
+    transition: none;
+  }
+}

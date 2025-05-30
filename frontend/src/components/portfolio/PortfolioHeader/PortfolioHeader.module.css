@@ -1,0 +1,248 @@
+/**
+ * PortfolioHeader Styles for Wild Market Capital
+ */
+
+.container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+  padding: var(--spacing-l);
+  background-color: var(--card-background);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-border-radius);
+  margin-bottom: var(--spacing-m);
+}
+
+.topSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-m);
+}
+
+.titleSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-light);
+  line-height: var(--line-height-h1);
+}
+
+.currentPortfolio {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+}
+
+.currentLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-s);
+  flex-shrink: 0;
+}
+
+.controlsSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-m);
+  padding-top: var(--spacing-s);
+  border-top: 1px solid var(--color-divider);
+}
+
+.portfolioSelector {
+  flex: 1;
+  max-width: 400px;
+}
+
+.portfolioSelect {
+  width: 100%;
+}
+
+.viewControls {
+  display: flex;
+  gap: var(--spacing-s);
+  flex-shrink: 0;
+}
+
+.sortSelect {
+  min-width: 200px;
+}
+
+.statsSection {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-m);
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  text-align: center;
+}
+
+.statValue {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+  line-height: var(--line-height-h2);
+}
+
+.statLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.loadingBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: rgba(42, 46, 57, 0.5);
+  border-radius: 0 0 var(--card-border-radius) var(--card-border-radius);
+  overflow: hidden;
+}
+
+.loadingProgress {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-hover));
+  animation: loading 2s ease-in-out infinite;
+  width: 30%;
+}
+
+@keyframes loading {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(350%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .statsSection {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-s);
+  }
+
+  .sortSelect {
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-m);
+    gap: var(--spacing-s);
+  }
+
+  .topSection {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-s);
+  }
+
+  .title {
+    font-size: var(--font-size-h2);
+    text-align: center;
+  }
+
+  .actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .controlsSection {
+    flex-direction: column;
+    gap: var(--spacing-s);
+  }
+
+  .portfolioSelector {
+    max-width: 100%;
+  }
+
+  .viewControls {
+    justify-content: center;
+  }
+
+  .sortSelect {
+    min-width: 100%;
+  }
+
+  .statsSection {
+    grid-template-columns: repeat(2, 1fr);
+    padding: var(--spacing-s);
+  }
+
+  .statValue {
+    font-size: var(--font-size-h3);
+  }
+}
+
+@media (max-width: 480px) {
+  .actions {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .statsSection {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xs);
+  }
+
+  .stat {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .controlsSection {
+    border-top-width: 2px;
+  }
+
+  .statsSection {
+    border: 1px solid var(--color-divider);
+  }
+
+  .statValue {
+    font-weight: var(--font-weight-bold);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .loadingProgress {
+    animation: none;
+    width: 100%;
+    opacity: 0.5;
+  }
+}

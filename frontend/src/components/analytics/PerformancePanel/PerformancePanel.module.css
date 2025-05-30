@@ -1,0 +1,118 @@
+/**
+ * PerformancePanel Styles for Wild Market Capital
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+.controlsCard {
+  background: linear-gradient(135deg, rgba(42, 46, 57, 0.5) 0%, rgba(26, 30, 42, 0.5) 100%);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-l);
+  flex-wrap: wrap;
+}
+
+.controlGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+}
+
+.controlLabel {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  white-space: nowrap;
+}
+
+.timeframeSelect,
+.benchmarkSelect {
+  min-width: 100px;
+}
+
+.refreshButton {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-m);
+}
+
+.chartContainer {
+  min-height: 400px;
+}
+
+.advancedMetrics {
+  margin-top: var(--spacing-m);
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .metricsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    gap: var(--spacing-m);
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-m);
+  }
+
+  .controlGroup {
+    justify-content: space-between;
+  }
+
+  .timeframeSelect,
+  .benchmarkSelect {
+    min-width: 120px;
+    flex: 1;
+  }
+
+  .refreshButton {
+    margin-left: 0;
+    justify-content: center;
+  }
+
+  .metricsGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-s);
+  }
+
+  .chartContainer {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .controlGroup {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-xs);
+  }
+
+  .controlLabel {
+    text-align: center;
+  }
+}

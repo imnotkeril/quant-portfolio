@@ -1,0 +1,191 @@
+/**
+ * PortfolioFilters Styles for Wild Market Capital
+ */
+
+.container {
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-m);
+  padding-bottom: var(--spacing-s);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  line-height: var(--line-height-h3);
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--spacing-s);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.sectionLabel {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-xs);
+}
+
+.tagsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.tagBadge {
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tagBadge:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-small);
+}
+
+.selectedTags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding-top: var(--spacing-s);
+  border-top: 1px solid var(--color-divider);
+}
+
+.selectedLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+}
+
+.selectedTag {
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.selectedTag:hover {
+  background-color: var(--color-negative);
+  border-color: var(--color-negative);
+}
+
+.rangeInputs {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+}
+
+.rangeInputs > * {
+  flex: 1;
+}
+
+.rangeSeparator {
+  flex: none;
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+}
+
+.customDateRange {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+  padding: var(--spacing-s);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  margin-top: var(--spacing-s);
+}
+
+.summary {
+  padding-top: var(--spacing-m);
+  border-top: 1px solid var(--color-divider);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.summaryLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+}
+
+.summaryItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-s);
+  }
+
+  .headerActions {
+    justify-content: space-between;
+  }
+
+  .tagsList {
+    justify-content: center;
+  }
+
+  .rangeInputs {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .rangeSeparator {
+    align-self: center;
+  }
+
+  .customDateRange .rangeInputs {
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 480px) {
+  .selectedTags {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .summaryItems {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .header,
+  .selectedTags,
+  .summary {
+    border-width: 2px;
+  }
+
+  .customDateRange {
+    border: 1px solid var(--color-divider);
+  }
+}

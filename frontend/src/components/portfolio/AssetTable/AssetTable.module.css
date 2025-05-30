@@ -1,0 +1,131 @@
+/**
+ * AssetTable Styles for Wild Market Capital
+ */
+
+.table {
+  width: 100%;
+  background-color: var(--card-background);
+  border-radius: var(--border-radius-s);
+  overflow: hidden;
+}
+
+.tickerCell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.ticker {
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+}
+
+.assetName {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  line-height: var(--line-height-caption);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
+}
+
+.pnlCell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-xs);
+}
+
+.pnlValue {
+  font-weight: var(--font-weight-semi-bold);
+  font-size: var(--font-size-body);
+}
+
+.pnlPercent {
+  font-size: var(--font-size-caption);
+  opacity: 0.8;
+}
+
+.positive .pnlValue,
+.positive .pnlPercent {
+  color: var(--color-positive);
+}
+
+.negative .pnlValue,
+.negative .pnlPercent {
+  color: var(--color-negative);
+}
+
+.sectorCell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.industry {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  line-height: var(--line-height-caption);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  justify-content: flex-end;
+}
+
+.actions button {
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-caption);
+  padding: var(--spacing-xs);
+  min-width: auto;
+  height: auto;
+}
+
+.actions button:hover {
+  color: var(--color-accent);
+}
+
+.actions button:last-child:hover {
+  color: var(--color-negative);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .assetName {
+    max-width: 100px;
+  }
+
+  .industry {
+    max-width: 80px;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .actions button {
+    font-size: 10px;
+    padding: 2px var(--spacing-xs);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .positive .pnlValue,
+  .positive .pnlPercent {
+    font-weight: var(--font-weight-bold);
+  }
+
+  .negative .pnlValue,
+  .negative .pnlPercent {
+    font-weight: var(--font-weight-bold);
+  }
+}

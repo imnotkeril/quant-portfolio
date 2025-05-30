@@ -1,0 +1,86 @@
+/**
+ * AssetForm Styles for Wild Market Capital
+ */
+
+.container {
+  width: 100%;
+  max-width: 600px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  line-height: var(--line-height-h3);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-m);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-s);
+  padding-top: var(--spacing-m);
+  border-top: 1px solid var(--color-divider);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    max-width: 100%;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-s);
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+    gap: var(--spacing-s);
+  }
+
+  .actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .form {
+    gap: var(--spacing-m);
+  }
+
+  .section {
+    gap: var(--spacing-s);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .sectionTitle {
+    border-bottom-width: 2px;
+  }
+
+  .actions {
+    border-top-width: 2px;
+  }
+}

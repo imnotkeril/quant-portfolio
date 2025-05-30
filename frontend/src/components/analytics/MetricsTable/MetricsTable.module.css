@@ -1,0 +1,133 @@
+/**
+ * MetricsTable Styles for Wild Market Capital
+ */
+
+.table {
+  font-family: var(--font-family);
+}
+
+.groupedContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.categoryCard {
+  margin-bottom: 0;
+}
+
+.metricName {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.name {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+}
+
+.description {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.2;
+}
+
+.valueCell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-xs);
+}
+
+.value {
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+  font-family: 'Inter', monospace;
+}
+
+.positive {
+  color: var(--color-positive);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-caption);
+}
+
+.negative {
+  color: var(--color-negative);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-caption);
+}
+
+/* Size variations */
+.small .name {
+  font-size: var(--font-size-caption);
+}
+
+.small .description {
+  font-size: 10px;
+}
+
+.small .value {
+  font-size: var(--font-size-caption);
+}
+
+.large .name {
+  font-size: var(--font-size-h3);
+}
+
+.large .description {
+  font-size: var(--font-size-body);
+}
+
+.large .value {
+  font-size: var(--font-size-h3);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .metricName {
+    gap: 2px;
+  }
+
+  .valueCell {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
+  .description {
+    display: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .positive {
+    font-weight: var(--font-weight-bold);
+  }
+
+  .negative {
+    font-weight: var(--font-weight-bold);
+  }
+
+  .trendPositive {
+  color: var(--color-positive);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-caption);
+}
+
+.trendNegative {
+  color: var(--color-negative);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-caption);
+}
+
+.trendNeutral {
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-caption);
+}
+}

@@ -281,7 +281,7 @@ export const loadOptimizationHistory = () => {
       // This would typically fetch from a backend service
       // For now, we'll use cached optimizations as history
       const state = getState();
-      const cachedOptimizations = Object.values(state.optimization.cachedOptimizations);
+      const cachedOptimizations = Object.values(state.optimization.cachedOptimizations) as OptimizationResponse[];
 
       dispatch(loadOptimizationHistorySuccess(cachedOptimizations));
 

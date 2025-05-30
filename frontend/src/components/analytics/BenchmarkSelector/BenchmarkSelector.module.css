@@ -1,0 +1,68 @@
+/**
+ * BenchmarkSelector Styles for Wild Market Capital
+ */
+
+.container {
+  width: 100%;
+}
+
+.selectorContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.selectWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.select {
+  flex: 1;
+  min-width: 200px;
+}
+
+.clearButton {
+  flex-shrink: 0;
+  padding: var(--spacing-xs);
+  color: var(--color-neutral-gray);
+  transition: color var(--transition-fast);
+}
+
+.clearButton:hover {
+  color: var(--color-negative);
+}
+
+.description {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  line-height: var(--line-height-caption);
+  margin-top: var(--spacing-xs);
+  padding-left: var(--spacing-s);
+  border-left: 2px solid var(--color-divider);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .select {
+    min-width: 150px;
+  }
+
+  .selectWrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .clearButton {
+    align-self: flex-end;
+    margin-top: var(--spacing-xs);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .description {
+    border-left-width: 3px;
+  }
+}
