@@ -1,0 +1,332 @@
+/**
+ * WeightsTable Styles for Wild Market Capital
+ */
+
+.container {
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-m);
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--spacing-s);
+  align-items: center;
+}
+
+/* Summary Section */
+.summary {
+  margin-bottom: var(--spacing-m);
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.summaryRow {
+  display: flex;
+  gap: var(--spacing-l);
+  align-items: center;
+  justify-content: space-around;
+  margin-bottom: var(--spacing-s);
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.summaryLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+}
+
+.summaryValue {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.summaryValue.valid {
+  color: var(--color-positive);
+}
+
+.summaryValue.invalid {
+  color: var(--color-negative);
+}
+
+/* Messages */
+.errorMessage {
+  padding: var(--spacing-s);
+  background-color: rgba(250, 161, 164, 0.1);
+  border: 1px solid var(--color-negative);
+  border-radius: var(--border-radius-s);
+  color: var(--color-negative);
+  font-size: var(--font-size-caption);
+  margin-top: var(--spacing-s);
+}
+
+.warningMessage {
+  padding: var(--spacing-s);
+  background-color: rgba(255, 245, 157, 0.1);
+  border: 1px solid var(--color-neutral-2);
+  border-radius: var(--border-radius-s);
+  color: var(--color-neutral-2);
+  font-size: var(--font-size-caption);
+  margin-top: var(--spacing-s);
+}
+
+/* Table Container */
+.tableContainer {
+  margin: var(--spacing-m) 0;
+}
+
+.weightsTable {
+  font-size: var(--font-size-caption);
+}
+
+/* Table Cell Styles */
+.assetCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ticker {
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+}
+
+.assetName {
+  font-size: var(--font-size-footer);
+  color: var(--color-neutral-gray);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.currentWeight {
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.targetWeight {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semi-bold);
+}
+
+.weightInput {
+  width: 80px;
+}
+
+.weightInput input {
+  text-align: right;
+  font-size: var(--font-size-caption);
+  padding: var(--spacing-xs);
+  height: 32px;
+}
+
+.constraintCell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.value {
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+  font-family: 'Courier New', monospace;
+}
+
+.rebalanceAmount {
+  font-weight: var(--font-weight-semi-bold);
+  font-family: 'Courier New', monospace;
+}
+
+.rebalanceAmount.positive {
+  color: var(--color-positive);
+}
+
+.rebalanceAmount.negative {
+  color: var(--color-negative);
+}
+
+.rebalanceAmount.neutral {
+  color: var(--color-neutral-gray);
+}
+
+/* Mobile Actions */
+.mobileActions {
+  display: none;
+  flex-direction: column;
+  gap: var(--spacing-s);
+  margin-top: var(--spacing-m);
+  padding-top: var(--spacing-m);
+  border-top: 1px solid var(--color-divider);
+}
+
+.mobileActionRow {
+  display: flex;
+  gap: var(--spacing-s);
+}
+
+/* Help Text */
+.helpText {
+  margin-top: var(--spacing-m);
+  padding: var(--spacing-m);
+  background-color: rgba(144, 191, 249, 0.1);
+  border-radius: var(--border-radius-s);
+  border-left: 3px solid var(--color-neutral-1);
+}
+
+.helpText p {
+  margin: 0 0 var(--spacing-s) 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.helpText ul {
+  margin: 0;
+  padding-left: var(--spacing-l);
+  color: var(--color-neutral-gray);
+}
+
+.helpText li {
+  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-caption);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .headerActions {
+    flex-wrap: wrap;
+  }
+
+  .summaryRow {
+    flex-direction: column;
+    gap: var(--spacing-m);
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .headerActions {
+    display: none;
+  }
+
+  .mobileActions {
+    display: flex;
+  }
+
+  .summaryRow {
+    gap: var(--spacing-s);
+  }
+
+  .summaryItem {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: var(--spacing-s);
+    background-color: rgba(42, 46, 57, 0.5);
+    border-radius: var(--border-radius-s);
+  }
+
+  .summaryLabel {
+    font-size: var(--font-size-footer);
+  }
+
+  .summaryValue {
+    font-size: var(--font-size-body);
+  }
+
+  .assetCell {
+    gap: 1px;
+  }
+
+  .ticker {
+    font-size: var(--font-size-caption);
+  }
+
+  .assetName {
+    font-size: 9px;
+  }
+
+  .weightInput {
+    width: 70px;
+  }
+
+  .constraintCell {
+    gap: 2px;
+  }
+
+  .helpText {
+    padding: var(--spacing-s);
+  }
+
+  .helpText p {
+    font-size: var(--font-size-footer);
+  }
+
+  .helpText li {
+    font-size: var(--font-size-footer);
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    font-size: var(--font-size-footer);
+  }
+
+  .weightsTable {
+    font-size: var(--font-size-footer);
+  }
+
+  .mobileActionRow {
+    flex-direction: column;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .summary,
+  .errorMessage,
+  .warningMessage,
+  .helpText {
+    border-width: 2px;
+  }
+
+  .weightInput input {
+    border-width: 2px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .headerActions,
+  .mobileActions,
+  .helpText {
+    display: none;
+  }
+
+  .summary {
+    break-inside: avoid;
+  }
+
+  .tableContainer {
+    break-inside: avoid;
+  }
+}

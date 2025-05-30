@@ -1,0 +1,272 @@
+/**
+ * OptimizationForm Styles for Wild Market Capital
+ */
+
+.container {
+  width: 100%;
+  max-width: 800px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+/* Method Selection */
+.methodSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.label {
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-xs);
+}
+
+.methodSelect {
+  width: 100%;
+}
+
+.methodDescription {
+  padding: var(--spacing-s) var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  line-height: var(--line-height-caption);
+  border-left: 3px solid var(--color-accent);
+}
+
+/* Date Section */
+.dateSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.dateRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-m);
+}
+
+.dateInput {
+  width: 100%;
+}
+
+/* Parameters Section */
+.parametersSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.weightsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-m);
+}
+
+/* Method-specific sections */
+.markowitzSection,
+.riskBudgetSection {
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.2);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-s) 0;
+}
+
+.sectionDescription {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  margin: 0 0 var(--spacing-m) 0;
+  line-height: var(--line-height-caption);
+}
+
+.targetsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-m);
+}
+
+/* Risk Budget */
+.riskBudgetInput {
+  margin-bottom: var(--spacing-s);
+}
+
+.riskBudgetSummary {
+  padding: var(--spacing-s);
+  background-color: rgba(191, 159, 251, 0.1);
+  border-radius: var(--border-radius-s);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.targetText {
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-regular);
+}
+
+/* Portfolio/Tickers Info */
+.portfolioInfo,
+.tickersInfo {
+  padding: var(--spacing-m);
+  background-color: rgba(116, 241, 116, 0.1);
+  border-radius: var(--border-radius-s);
+  border-left: 3px solid var(--color-positive);
+}
+
+.portfolioInfo p,
+.tickersInfo p {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+}
+
+.tickersList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-s);
+}
+
+.tickerTag {
+  display: inline-block;
+  padding: var(--spacing-xs) var(--spacing-s);
+  background-color: var(--color-accent);
+  color: var(--color-text-light);
+  border-radius: var(--border-radius-s);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Error Display */
+.errorText {
+  color: var(--color-negative);
+  font-size: var(--font-size-caption);
+  margin-top: var(--spacing-xs);
+}
+
+.errorAlert {
+  padding: var(--spacing-m);
+  background-color: rgba(250, 161, 164, 0.1);
+  border: 1px solid var(--color-negative);
+  border-radius: var(--border-radius-s);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.errorAlert p {
+  margin: 0;
+  color: var(--color-negative);
+  font-size: var(--font-size-body);
+}
+
+.errorAlert p:first-child {
+  font-weight: var(--font-weight-semi-bold);
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+  margin-top: var(--spacing-m);
+}
+
+/* Advanced Options Modal */
+.advancedOptions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.advancedOptions p {
+  margin: 0;
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+}
+
+.advancedOptions ul {
+  margin: var(--spacing-s) 0;
+  padding-left: var(--spacing-l);
+  color: var(--color-neutral-gray);
+}
+
+.advancedOptions li {
+  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-size-body);
+}
+
+.comingSoon {
+  padding: var(--spacing-m);
+  background-color: rgba(144, 191, 249, 0.1);
+  border-radius: var(--border-radius-s);
+  border-left: 3px solid var(--color-neutral-1);
+  text-align: center;
+}
+
+.comingSoon p {
+  color: var(--color-neutral-1);
+  font-weight: var(--font-weight-medium);
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dateRow,
+  .weightsRow,
+  .targetsRow {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-s);
+  }
+
+  .tickersList {
+    justify-content: center;
+  }
+
+  .actions {
+    gap: var(--spacing-xs);
+  }
+
+  .methodDescription {
+    padding: var(--spacing-s);
+    font-size: 10px;
+  }
+
+  .sectionDescription {
+    font-size: 10px;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .methodDescription,
+  .markowitzSection,
+  .riskBudgetSection {
+    border-width: 2px;
+  }
+
+  .portfolioInfo,
+  .tickersInfo {
+    border-left-width: 4px;
+  }
+
+  .errorAlert {
+    border-width: 2px;
+  }
+}

@@ -1,0 +1,378 @@
+/**
+ * EfficientFrontier Styles for Wild Market Capital
+ */
+
+.container {
+  width: 100%;
+  height: 100%;
+  min-height: 600px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--spacing-s);
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--spacing-l);
+  height: 100%;
+}
+
+.chartSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+  min-width: 0;
+}
+
+.chartContainer {
+  width: 100%;
+  height: 400px;
+  background-color: rgba(13, 16, 21, 0.3);
+  border-radius: var(--border-radius-s);
+  padding: var(--spacing-s);
+}
+
+/* Legend */
+.legendContainer {
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.legendContainer h4 {
+  margin: 0 0 var(--spacing-m) 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.legendGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-s);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  padding: var(--spacing-s);
+  background-color: rgba(42, 46, 57, 0.5);
+  border-radius: var(--border-radius-s);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 1px solid transparent;
+}
+
+.legendItem:hover {
+  background-color: rgba(42, 46, 57, 0.7);
+  border-color: var(--color-accent);
+  transform: translateY(-1px);
+}
+
+.legendSymbol {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legendInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.legendName {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.legendStats {
+  font-size: var(--font-size-footer);
+  color: var(--color-neutral-gray);
+}
+
+.legendSharpe {
+  font-size: var(--font-size-footer);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Weights Panel */
+.weightsPanel {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  padding: var(--spacing-m);
+  border: 1px solid var(--color-divider);
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.weightsTable h4,
+.selectedPointInfo h4 {
+  margin: 0 0 var(--spacing-s) 0;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.weightsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.weightRow {
+  display: grid;
+  grid-template-columns: 60px 50px 1fr;
+  gap: var(--spacing-s);
+  align-items: center;
+  padding: var(--spacing-xs);
+  background-color: rgba(42, 46, 57, 0.5);
+  border-radius: var(--border-radius-xs);
+}
+
+.ticker {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.weight {
+  font-size: var(--font-size-caption);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+  text-align: right;
+}
+
+.weightBar {
+  height: 4px;
+  background-color: var(--color-accent);
+  border-radius: 2px;
+  min-width: 2px;
+  transition: width var(--transition-medium);
+}
+
+/* Selected Point Info */
+.selectedPointInfo {
+  padding: var(--spacing-m);
+  background-color: rgba(191, 159, 251, 0.1);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-accent);
+}
+
+.pointStats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+  margin-bottom: var(--spacing-m);
+}
+
+.statItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.statItem:last-child {
+  border-bottom: none;
+}
+
+.statLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+}
+
+.statValue {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+/* Tooltip */
+.tooltip {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  padding: var(--spacing-s);
+  box-shadow: var(--shadow-medium);
+}
+
+.tooltipTitle {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-accent);
+}
+
+.tooltip p {
+  margin: 0;
+  font-size: var(--font-size-footer);
+  color: var(--color-text-light);
+  line-height: var(--line-height-footer);
+}
+
+.tooltipHint {
+  color: var(--color-neutral-gray) !important;
+  font-style: italic;
+  margin-top: var(--spacing-xs) !important;
+}
+
+/* Loading State */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  gap: var(--spacing-m);
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-divider);
+  border-top: 3px solid var(--color-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading p {
+  margin: 0;
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-body);
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  gap: var(--spacing-s);
+  text-align: center;
+}
+
+.emptyState p {
+  margin: 0;
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-body);
+}
+
+.emptyState p:first-child {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .content {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+
+  .weightsPanel {
+    width: 100%;
+    max-height: 300px;
+  }
+
+  .legendGrid {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .chartContainer {
+    height: 300px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: var(--spacing-s);
+    align-items: stretch;
+  }
+
+  .headerActions {
+    justify-content: center;
+  }
+
+  .legendGrid {
+    flex-direction: column;
+  }
+
+  .legendItem {
+    justify-content: center;
+  }
+
+  .weightRow {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+  }
+
+  .weightBar {
+    grid-column: 1 / -1;
+    margin-top: var(--spacing-xs);
+  }
+
+  .statItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .legendItem,
+  .weightsPanel,
+  .selectedPointInfo {
+    border-width: 2px;
+  }
+
+  .weightBar {
+    height: 6px;
+  }
+
+  .loadingSpinner {
+    border-width: 4px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .legendItem {
+    transform: none;
+  }
+
+  .weightBar {
+    transition: none;
+  }
+
+  .loadingSpinner {
+    animation: none;
+  }
+}

@@ -1,0 +1,427 @@
+/**
+ * OptimizationComparison Styles for Wild Market Capital
+ */
+
+.container {
+  width: 100%;
+  min-height: 600px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-m);
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--spacing-s);
+  align-items: center;
+}
+
+.viewSelect {
+  height: 40px;
+  padding: 0 var(--spacing-m);
+  background-color: var(--input-background);
+  border: 1px solid var(--input-border);
+  border-radius: var(--border-radius-s);
+  color: var(--color-text-light);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  outline: none;
+  min-width: 150px;
+}
+
+.viewSelect:focus {
+  border-color: var(--color-accent);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+/* Quick Comparison Cards */
+.quickComparison {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-m);
+}
+
+.comparisonCard {
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+  transition: all var(--transition-fast);
+}
+
+.comparisonCard:hover {
+  background-color: rgba(42, 46, 57, 0.5);
+  border-color: var(--color-accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-m);
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.colorIndicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cardActions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.cardMetrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-s);
+}
+
+.cardMetric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.cardMetricLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+}
+
+.cardMetricValue {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-accent);
+}
+
+/* Chart Section */
+.chartSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-m);
+}
+
+.chartHeader h4 {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.metricsSelectContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-s);
+  padding: var(--spacing-s);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.metricCheckbox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-caption);
+  color: var(--color-text-light);
+  cursor: pointer;
+  padding: var(--spacing-xs) var(--spacing-s);
+  background-color: rgba(42, 46, 57, 0.5);
+  border-radius: var(--border-radius-s);
+  transition: all var(--transition-fast);
+}
+
+.metricCheckbox:hover {
+  background-color: rgba(42, 46, 57, 0.7);
+}
+
+.metricCheckbox input[type="checkbox"] {
+  margin: 0;
+  accent-color: var(--color-accent);
+}
+
+.chartContainer {
+  background-color: rgba(13, 16, 21, 0.3);
+  border-radius: var(--border-radius-s);
+  padding: var(--spacing-m);
+  border: 1px solid var(--color-divider);
+}
+
+/* Table Section */
+.tableSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.tableSection h4 {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.tableContainer {
+  overflow-x: auto;
+}
+
+.metricName {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.metricValue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.metricValue span {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.metricValue .undefined {
+  color: var(--color-neutral-gray);
+  font-style: italic;
+}
+
+/* Insights Section */
+.insights {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.insights h4 {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.insightsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.insightItem {
+  display: flex;
+  gap: var(--spacing-m);
+  padding: var(--spacing-m);
+  background-color: rgba(144, 191, 249, 0.1);
+  border-radius: var(--border-radius-s);
+  border-left: 3px solid var(--color-neutral-1);
+}
+
+.insightIcon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.insightText {
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  line-height: var(--line-height-body);
+}
+
+/* Empty States */
+.emptyState,
+.singleOptimization {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  gap: var(--spacing-s);
+  text-align: center;
+}
+
+.emptyState p,
+.singleOptimization p {
+  margin: 0;
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-body);
+}
+
+.emptyState p:first-child,
+.singleOptimization p:first-child {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .quickComparison {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .chartHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-s);
+  }
+
+  .metricsSelect {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: var(--spacing-s);
+    align-items: stretch;
+  }
+
+  .headerActions {
+    justify-content: center;
+  }
+
+  .quickComparison {
+    grid-template-columns: 1fr;
+  }
+
+  .cardMetrics {
+    grid-template-columns: 1fr;
+  }
+
+  .cardMetric {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: var(--spacing-s);
+    background-color: rgba(42, 46, 57, 0.5);
+    border-radius: var(--border-radius-s);
+  }
+
+  .chartContainer {
+    padding: var(--spacing-s);
+  }
+
+  .tableContainer {
+    font-size: var(--font-size-caption);
+  }
+
+  .insightItem {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .insightIcon {
+    align-self: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .comparisonCard {
+    padding: var(--spacing-s);
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    gap: var(--spacing-s);
+    align-items: stretch;
+  }
+
+  .cardActions {
+    justify-content: center;
+  }
+
+  .cardMetricValue {
+    font-size: var(--font-size-caption);
+  }
+
+  .tableSection {
+    overflow-x: auto;
+  }
+
+  .metricValue {
+    font-size: var(--font-size-footer);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .comparisonCard,
+  .chartContainer,
+  .insightItem {
+    border-width: 2px;
+  }
+
+  .insightItem {
+    border-left-width: 4px;
+  }
+
+  .colorIndicator {
+    border: 2px solid var(--color-text-light);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .comparisonCard {
+    transform: none;
+    transition: none;
+  }
+
+  .comparisonCard:hover {
+    transform: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .headerActions,
+  .cardActions {
+    display: none;
+  }
+
+  .quickComparison {
+    break-inside: avoid;
+  }
+
+  .chartSection {
+    break-inside: avoid;
+  }
+
+  .tableSection {
+    break-inside: avoid;
+  }
+
+  .insights {
+    break-inside: avoid;
+  }
+}

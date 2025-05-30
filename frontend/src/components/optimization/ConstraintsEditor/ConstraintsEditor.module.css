@@ -1,0 +1,330 @@
+/**
+ * ConstraintsEditor Styles for Wild Market Capital
+ */
+
+.container {
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-m);
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--spacing-s);
+  align-items: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+/* Groups Section */
+.groupsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.groupsSection h4 {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.groupsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.groupItem {
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.groupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-s);
+}
+
+.groupName {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.groupActions {
+  display: flex;
+  gap: var(--spacing-s);
+  align-items: center;
+}
+
+.groupToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  cursor: pointer;
+}
+
+.groupConstraints {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+}
+
+/* Constraints Section */
+.constraintsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.constraintsSection h4 {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+/* Table Cell Styles */
+.enabledCheckbox {
+  cursor: pointer;
+}
+
+.targetValue {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.constraintText {
+  font-family: 'Courier New', monospace;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-accent);
+}
+
+.description {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+/* Summary */
+.summary {
+  padding: var(--spacing-m);
+  background-color: rgba(144, 191, 249, 0.1);
+  border-radius: var(--border-radius-s);
+  border-left: 3px solid var(--color-neutral-1);
+}
+
+.summaryStats {
+  display: flex;
+  justify-content: space-around;
+  gap: var(--spacing-m);
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.statLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+}
+
+.statValue {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-l);
+  gap: var(--spacing-m);
+  text-align: center;
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.emptyState p {
+  margin: 0;
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-body);
+}
+
+.emptyState p:first-child {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+/* Modal Styles */
+.addConstraintModal,
+.addGroupModal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.modalRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.label {
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.select {
+  height: 40px;
+  padding: 0 var(--spacing-m);
+  background-color: var(--input-background);
+  border: 1px solid var(--input-border);
+  border-radius: var(--border-radius-s);
+  color: var(--color-text-light);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.select:focus {
+  border-color: var(--color-accent);
+}
+
+.betweenInputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-s);
+}
+
+.modalActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-s);
+  margin-top: var(--spacing-l);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .summaryStats {
+    flex-direction: column;
+    gap: var(--spacing-s);
+  }
+
+  .statItem {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: var(--spacing-s);
+    background-color: rgba(42, 46, 57, 0.5);
+    border-radius: var(--border-radius-s);
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: var(--spacing-s);
+    align-items: stretch;
+  }
+
+  .headerActions {
+    justify-content: center;
+  }
+
+  .groupHeader {
+    flex-direction: column;
+    gap: var(--spacing-s);
+    align-items: stretch;
+  }
+
+  .groupActions {
+    justify-content: center;
+  }
+
+  .betweenInputs {
+    grid-template-columns: 1fr;
+  }
+
+  .modalActions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .groupItem {
+    padding: var(--spacing-s);
+  }
+
+  .summary {
+    padding: var(--spacing-s);
+  }
+
+  .emptyState {
+    padding: var(--spacing-m);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .groupItem,
+  .summary,
+  .emptyState {
+    border-width: 2px;
+  }
+
+  .summary {
+    border-left-width: 4px;
+  }
+
+  .enabledCheckbox {
+    accent-color: var(--color-accent);
+  }
+}
+
+/* Print styles */
+@media print {
+  .headerActions,
+  .groupActions,
+  .actions {
+    display: none;
+  }
+
+  .groupsSection,
+  .constraintsSection {
+    break-inside: avoid;
+  }
+
+  .summary {
+    break-inside: avoid;
+  }
+}
