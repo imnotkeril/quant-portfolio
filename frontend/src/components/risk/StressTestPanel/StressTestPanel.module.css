@@ -1,0 +1,283 @@
+/**
+ * StressTestPanel Styles for Wild Market Capital
+ */
+
+.container {
+  min-height: 500px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.controlsTitle {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-s) 0;
+}
+
+.scenarioControls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.scenarioSelection {
+  display: flex;
+  gap: var(--spacing-m);
+  align-items: flex-end;
+}
+
+.customControls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.customHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.customShocks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+  padding: var(--spacing-m);
+  background-color: rgba(13, 16, 21, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.shocksHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-s);
+}
+
+.shocksList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.shockItem {
+  display: flex;
+  gap: var(--spacing-s);
+  align-items: center;
+}
+
+.assetInput {
+  flex: 2;
+}
+
+.shockInput {
+  flex: 1;
+  min-width: 100px;
+}
+
+.runCustomButton {
+  align-self: flex-start;
+  margin-top: var(--spacing-s);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-l);
+  color: var(--color-negative);
+  text-align: center;
+  background-color: rgba(250, 161, 164, 0.1);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-negative);
+}
+
+.chartSection,
+.tableSection,
+.summarySection {
+  width: 100%;
+}
+
+.sectionTitle {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-m) 0;
+}
+
+/* Table cell styles */
+.scenarioCell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.scenarioName {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.scenarioDescription {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  opacity: 0.8;
+}
+
+.shockValue {
+  color: var(--color-negative);
+  font-weight: var(--font-weight-medium);
+}
+
+.lossValue {
+  color: var(--color-negative);
+  font-weight: var(--font-weight-semi-bold);
+}
+
+.afterShockValue {
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.recoveryValue {
+  color: var(--color-neutral-2);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Summary section */
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-m);
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.summaryLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  margin-bottom: var(--spacing-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summaryValue {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-light);
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-body);
+  text-align: center;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .controls {
+    padding: var(--spacing-s);
+    gap: var(--spacing-s);
+  }
+
+  .scenarioSelection {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .customShocks {
+    padding: var(--spacing-s);
+  }
+
+  .shockItem {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .assetInput,
+  .shockInput {
+    flex: 1;
+    min-width: auto;
+  }
+
+  .summaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-s);
+  }
+
+  .summaryItem {
+    padding: var(--spacing-s);
+  }
+
+  .summaryValue {
+    font-size: var(--font-size-h3);
+  }
+}
+
+@media (max-width: 480px) {
+  .customHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-s);
+  }
+
+  .shocksHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-s);
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .controls,
+  .customShocks,
+  .summaryItem {
+    border-width: 2px;
+  }
+
+  .error {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .summaryItem {
+    transition: none;
+  }
+}

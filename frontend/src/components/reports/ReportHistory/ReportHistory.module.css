@@ -1,0 +1,312 @@
+/**
+ * ReportHistory Styles for Wild Market Capital
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+  width: 100%;
+}
+
+/* Statistics */
+.statistics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-m);
+}
+
+.statCard {
+  padding: var(--spacing-m);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--spacing-xs);
+}
+
+.statValue {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Filters */
+.filtersCard {
+  width: 100%;
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.filterRow {
+  display: flex;
+  gap: var(--spacing-m);
+  align-items: flex-end;
+}
+
+.filterField {
+  flex: 1;
+  min-width: 200px;
+}
+
+.dateFilter {
+  flex: 2;
+  min-width: 300px;
+}
+
+.filterActions {
+  display: flex;
+  gap: var(--spacing-s);
+  flex-shrink: 0;
+}
+
+/* Table */
+.tableCard {
+  width: 100%;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-s) var(--spacing-m);
+  background-color: rgba(250, 161, 164, 0.1);
+  border: 1px solid var(--color-negative);
+  border-radius: var(--border-radius-s);
+  color: var(--color-negative);
+  font-size: var(--font-size-body);
+  margin-bottom: var(--spacing-m);
+}
+
+.reportType {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.formatCell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--color-text-light);
+}
+
+.formatCell svg {
+  color: var(--color-neutral-gray);
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+}
+
+/* Report Details Modal */
+.reportDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-m);
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-s);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.detailLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detailValue {
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.parametersSection {
+  border-top: 1px solid var(--color-divider);
+  padding-top: var(--spacing-l);
+}
+
+.parametersSection h4 {
+  margin: 0 0 var(--spacing-m) 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.parameters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.parameter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-s);
+  background-color: rgba(42, 46, 57, 0.2);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.paramKey {
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+  text-transform: capitalize;
+}
+
+.paramValue {
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+  text-align: right;
+  word-break: break-word;
+  max-width: 60%;
+}
+
+.detailActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-s);
+  padding-top: var(--spacing-l);
+  border-top: 1px solid var(--color-divider);
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .filterRow {
+    flex-wrap: wrap;
+  }
+
+  .filterField,
+  .dateFilter {
+    min-width: 100%;
+  }
+
+  .filterActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 768px) {
+  .statistics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .parameter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .paramValue {
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .detailActions {
+    justify-content: stretch;
+  }
+
+  .detailActions > * {
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .statistics {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions > * {
+    width: 100%;
+  }
+}
+
+/* Loading states */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Focus improvements */
+.filterField input:focus,
+.filterField select:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .detailItem,
+  .parameter {
+    border-width: 2px;
+  }
+
+  .error {
+    border-width: 2px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .filterActions {
+    display: none;
+  }
+
+  .actions {
+    display: none;
+  }
+
+  .detailActions {
+    display: none;
+  }
+
+  .statistics {
+    break-inside: avoid;
+  }
+
+  .tableCard {
+    break-inside: avoid;
+  }
+}

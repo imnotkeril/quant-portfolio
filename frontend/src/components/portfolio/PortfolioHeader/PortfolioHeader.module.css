@@ -224,7 +224,7 @@
 }
 
 /* High contrast mode */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
   .controlsSection {
     border-top-width: 2px;
   }

@@ -1,0 +1,403 @@
+/**
+ * TimelineView Styles for Wild Market Capital
+ */
+
+.container {
+  width: 100%;
+  height: 600px;
+}
+
+.controls {
+  display: flex;
+  gap: var(--spacing-s);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+  height: 100%;
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+}
+
+.searchFilter {
+  width: 300px;
+}
+
+.tagFilters {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  flex-wrap: wrap;
+}
+
+.filterLabel {
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.tagFilter {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-s);
+  border-radius: var(--border-radius-xs);
+  border: 1px solid var(--color-divider);
+  background-color: rgba(42, 46, 57, 0.3);
+  color: var(--color-text-light);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.tagFilter:hover {
+  transform: scale(1.05);
+  border-color: var(--color-accent);
+}
+
+.tagFilter.selected {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-text-dark);
+}
+
+/* Timeline Container */
+.timelineContainer {
+  position: relative;
+  flex: 1;
+  min-height: 300px;
+  background-color: rgba(13, 16, 21, 0.5);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+  overflow: hidden;
+}
+
+.timeline {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.timeline:active {
+  cursor: grabbing;
+}
+
+.severityLegend text {
+  font-family: var(--font-family);
+  font-size: var(--font-size-caption);
+}
+
+.eventGroup {
+  cursor: pointer;
+}
+
+.eventCircle {
+  transition: all var(--transition-fast);
+}
+
+.eventCircle:hover {
+  r: 6;
+}
+
+.eventLabel {
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.eventLabel:hover {
+  fill: var(--color-accent);
+}
+
+/* Tooltip */
+.tooltip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  padding: var(--spacing-m);
+  box-shadow: var(--shadow-large);
+  z-index: 10;
+  max-width: 300px;
+  pointer-events: none;
+}
+
+.tooltipContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.tooltipTitle {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0;
+}
+
+.tooltipDate {
+  font-size: var(--font-size-caption);
+  color: var(--color-accent);
+  margin: 0;
+}
+
+.tooltipDescription {
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  margin: 0;
+  line-height: var(--line-height-body);
+}
+
+.tooltipTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.tooltipTags > * {
+  font-size: var(--font-size-caption);
+  padding: 2px var(--spacing-xs);
+  border-radius: var(--border-radius-xs);
+  border: 1px solid var(--color-divider);
+  background-color: rgba(42, 46, 57, 0.5);
+  color: var(--color-text-light);
+}
+
+/* Events List */
+.eventsList {
+  border-top: 1px solid var(--color-divider);
+  padding-top: var(--spacing-m);
+}
+
+.eventsList h4 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-m) 0;
+}
+
+.eventsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-m);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.eventCard {
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.eventCard:hover {
+  background-color: rgba(42, 46, 57, 0.5);
+  border-color: var(--color-accent);
+  transform: translateY(-2px);
+}
+
+.eventCard.selected {
+  background-color: rgba(191, 159, 251, 0.1);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.eventCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-s);
+}
+
+.eventCardTitle {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0;
+  flex: 1;
+  line-height: var(--line-height-body);
+}
+
+.eventCardDate {
+  font-size: var(--font-size-caption);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+  margin-left: var(--spacing-s);
+  flex-shrink: 0;
+}
+
+.eventCardDescription {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  margin: 0 0 var(--spacing-s) 0;
+  line-height: var(--line-height-caption);
+}
+
+.eventCardTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  align-items: center;
+}
+
+.eventCardTags > * {
+  font-size: var(--font-size-caption);
+  padding: 2px var(--spacing-xs);
+  border-radius: var(--border-radius-xs);
+  border: 1px solid var(--color-divider);
+  background-color: rgba(42, 46, 57, 0.5);
+  color: var(--color-text-light);
+}
+
+.moreTagsIndicator {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-style: italic;
+}
+
+/* Scrollbar styling for events grid */
+.eventsGrid::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+.eventsGrid::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+.eventsGrid::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--scrollbar-width);
+}
+
+.eventsGrid::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .filters {
+    padding: var(--spacing-s);
+  }
+
+  .searchFilter {
+    width: 100%;
+  }
+
+  .tagFilters {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .eventsGrid {
+    grid-template-columns: 1fr;
+    max-height: 150px;
+  }
+
+  .eventCardHeader {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .eventCardDate {
+    margin-left: 0;
+  }
+
+  .tooltip {
+    max-width: 250px;
+    padding: var(--spacing-s);
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    height: 500px;
+  }
+
+  .timelineContainer {
+    min-height: 200px;
+  }
+
+  .eventsGrid {
+    max-height: 120px;
+  }
+
+  .eventCard {
+    padding: var(--spacing-s);
+  }
+
+  .tooltip {
+    max-width: 200px;
+    left: var(--spacing-s);
+    right: var(--spacing-s);
+    transform: translateY(-50%);
+    width: auto;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .eventCard {
+    border-width: 2px;
+  }
+
+  .eventCard.selected {
+    border-width: 3px;
+  }
+
+  .timeline line {
+    stroke-width: 3px;
+  }
+
+  .tooltip {
+    border-width: 2px;
+  }
+
+  .tagFilter {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .eventCard {
+    transition: none;
+    transform: none;
+  }
+
+  .eventCard:hover {
+    transform: none;
+  }
+
+  .eventCircle,
+  .eventLabel,
+  .tagFilter {
+    transition: none;
+  }
+
+  .tagFilter:hover {
+    transform: none;
+  }
+}

@@ -5,15 +5,22 @@
 import React, { useState, useMemo } from 'react';
 import { Card } from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
-import { Tabs } from '../../common/Tabs/Tabs';
 import { Badge } from '../../common/Badge/Badge';
 import { Modal } from '../../common/Modal/Modal';
 import { PieChart, PieChartDataPoint } from '../../charts/PieChart/PieChart';
-import { WeightsTable, WeightItem } from './WeightsTable/WeightsTable';
 import { OptimizationResponse } from '../../../types/optimization';
 import { formatPercentage, formatNumber } from '../../../utils/formatters';
 import { getChartColor } from '../../../utils/color';
 import styles from './OptimizationResults.module.css';
+import { COLORS } from '../../../constants/colors';
+
+interface WeightItem {
+  ticker: string;
+  currentWeight: number;
+  targetWeight: number;
+  minWeight: number;
+  maxWeight: number;
+}
 
 interface OptimizationResultsProps {
   result: OptimizationResponse | null;
@@ -138,80 +145,119 @@ export const OptimizationResults: React.FC<OptimizationResultsProps> = ({
     return insights;
   }, [result]);
 
+  // Simple tab implementation
+  const renderTabs = () => {
+    const tabs = [
+      { key: 'overview', label: 'Overview' },
+      { key: 'weights', label: 'Asset Weights' },
+      { key: 'metrics', label: 'Performance Metrics' },
+      { key: 'insights', label: 'Insights' },
+    ];
+
+    return (
+      <div className={styles.tabs}>
+        {tabs.map(tab => (
+          <button
+            key={tab.key}
+            className={`${styles.tab} ${activeTab === tab.key ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab(tab.key)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
+  // Render weights table
+  const renderWeightsTable = () => (
+    <div className={styles.weightsTable}>
+      <table>
+        <thead>
+          <tr>
+            <th>Asset</th>
+            <th>Target Weight</th>
+            <th>Allocation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {weightsData.map(item => (
+            <tr key={item.ticker}>
+              <td>{item.ticker}</td>
+              <td>{formatPercentage(item.targetWeight, 2)}</td>
+              <td>
+                <div className={styles.allocationBar}>
+                  <div
+                    className={styles.allocationFill}
+                    style={{ width: `${item.targetWeight * 100}%` }}
+                  />
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
   if (!result) {
     return (
       <Card className={`${styles.container} ${className || ''}`}>
-        <Card.Body>
-          <div className={styles.emptyState}>
-            <p>No optimization results available.</p>
-            <p>Run portfolio optimization to see results here.</p>
-          </div>
-        </Card.Body>
+        <div className={styles.emptyState}>
+          <p>No optimization results available.</p>
+          <p>Run portfolio optimization to see results here.</p>
+        </div>
       </Card>
     );
   }
 
-  const tabs = [
-    { key: 'overview', label: 'Overview' },
-    { key: 'weights', label: 'Asset Weights' },
-    { key: 'metrics', label: 'Performance Metrics' },
-    { key: 'insights', label: 'Insights' },
-  ];
-
   return (
     <Card className={`${styles.container} ${className || ''}`}>
-      <Card.Header>
-        <div className={styles.header}>
-          <div className={styles.titleSection}>
-            <h3>Optimization Results</h3>
-            <Badge variant="primary">
-              {formatMethodName(result.optimizationMethod)}
-            </Badge>
-          </div>
-
-          <div className={styles.headerActions}>
-            <Button
-              variant="outline"
-              size="small"
-              onClick={() => setShowInsights(true)}
-            >
-              View Insights
-            </Button>
-
-            <Button
-              variant="outline"
-              size="small"
-              onClick={() => onCompareOptimization?.(result)}
-            >
-              Compare
-            </Button>
-
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={() => onSaveOptimization?.(result)}
-            >
-              Save
-            </Button>
-
-            <Button
-              variant="primary"
-              size="small"
-              onClick={() => setShowCreateModal(true)}
-            >
-              Create Portfolio
-            </Button>
-          </div>
+      <div className={styles.header}>
+        <div className={styles.titleSection}>
+          <h3>Optimization Results</h3>
+          <Badge size="small">
+            {formatMethodName(result.optimizationMethod)}
+          </Badge>
         </div>
-      </Card.Header>
 
-      <Card.Body>
-        <Tabs
-          activeTab={activeTab}
-          onChange={setActiveTab}
-          tabs={tabs}
-          className={styles.tabs}
-        />
+        <div className={styles.headerActions}>
+          <Button
+            variant="outline"
+            size="small"
+            onClick={() => setShowInsights(true)}
+          >
+            View Insights
+          </Button>
+
+          <Button
+            variant="outline"
+            size="small"
+            onClick={() => onCompareOptimization?.(result)}
+          >
+            Compare
+          </Button>
+
+          <Button
+            variant="secondary"
+            size="small"
+            onClick={() => onSaveOptimization?.(result)}
+          >
+            Save
+          </Button>
+
+          <Button
+            variant="primary"
+            size="small"
+            onClick={() => setShowCreateModal(true)}
+          >
+            Create Portfolio
+          </Button>
+        </div>
+      </div>
+
+      <div className={styles.content}>
+        {renderTabs()}
 
         <div className={styles.tabContent}>
           {activeTab === 'overview' && (
@@ -292,12 +338,7 @@ export const OptimizationResults: React.FC<OptimizationResultsProps> = ({
 
           {activeTab === 'weights' && (
             <div className={styles.weightsTab}>
-              <WeightsTable
-                weights={weightsData}
-                editable={false}
-                showConstraints={false}
-                showRebalancing={false}
-              />
+              {renderWeightsTable()}
             </div>
           )}
 
@@ -308,13 +349,7 @@ export const OptimizationResults: React.FC<OptimizationResultsProps> = ({
                   <div key={index} className={styles.metricCard}>
                     <div className={styles.metricHeader}>
                       <span className={styles.metricLabel}>{metric.label}</span>
-                      <Badge
-                        variant={
-                          metric.status === 'positive' ? 'success' :
-                          metric.status === 'negative' ? 'danger' : 'outline'
-                        }
-                        size="small"
-                      >
+                      <Badge size="small">
                         {metric.status}
                       </Badge>
                     </div>
@@ -339,7 +374,7 @@ export const OptimizationResults: React.FC<OptimizationResultsProps> = ({
             </div>
           )}
         </div>
-      </Card.Body>
+      </div>
 
       {/* Create Portfolio Modal */}
       <Modal

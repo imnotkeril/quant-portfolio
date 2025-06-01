@@ -1,0 +1,283 @@
+/**
+ * VaRAnalysis Styles for Wild Market Capital
+ */
+
+.container {
+  min-height: 400px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-m);
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 150px;
+}
+
+.controlLabel {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-l);
+  color: var(--color-negative);
+  text-align: center;
+  background-color: rgba(250, 161, 164, 0.1);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-negative);
+}
+
+.results {
+  width: 100%;
+}
+
+.resultCard {
+  padding: var(--spacing-l);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-m);
+  border: 1px solid var(--color-divider);
+}
+
+.resultHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-m);
+  padding-bottom: var(--spacing-s);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.resultTitle {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0;
+}
+
+.resultMethod {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.resultGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-m);
+  margin-bottom: var(--spacing-l);
+}
+
+.resultItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-m);
+  background-color: rgba(13, 16, 21, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.resultLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  margin-bottom: var(--spacing-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.resultValue {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-light);
+}
+
+.varValue {
+  color: var(--color-negative);
+}
+
+.interpretation {
+  padding: var(--spacing-m);
+  background-color: rgba(191, 159, 251, 0.1);
+  border-radius: var(--border-radius-s);
+  border-left: 4px solid var(--color-accent);
+}
+
+.interpretationText {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  line-height: 1.5;
+}
+
+.visualization {
+  width: 100%;
+}
+
+.chartTitle {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-m) 0;
+}
+
+.riskInterpretation {
+  width: 100%;
+}
+
+.interpretationTitle {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-m) 0;
+}
+
+.interpretationGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-m);
+}
+
+.interpretationItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.interpretationLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  margin-bottom: var(--spacing-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.interpretationValue {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.lowRisk {
+  color: var(--color-positive);
+}
+
+.mediumRisk {
+  color: var(--color-neutral-2);
+}
+
+.highRisk {
+  color: var(--color-negative);
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-body);
+  text-align: center;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .controls {
+    padding: var(--spacing-s);
+    gap: var(--spacing-s);
+  }
+
+  .controlGroup {
+    min-width: 120px;
+  }
+
+  .resultCard {
+    padding: var(--spacing-m);
+  }
+
+  .resultHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .resultGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-s);
+  }
+
+  .resultItem {
+    padding: var(--spacing-s);
+  }
+
+  .resultValue {
+    font-size: var(--font-size-h3);
+  }
+
+  .interpretationGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-s);
+  }
+}
+
+@media (max-width: 480px) {
+  .controls {
+    flex-direction: column;
+  }
+
+  .controlGroup {
+    min-width: auto;
+  }
+
+  .resultGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .controls,
+  .resultCard,
+  .resultItem,
+  .interpretationItem {
+    border-width: 2px;
+  }
+
+  .interpretation {
+    border-left-width: 6px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .resultItem,
+  .interpretationItem {
+    transition: none;
+  }
+}

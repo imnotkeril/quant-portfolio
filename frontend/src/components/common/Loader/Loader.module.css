@@ -275,7 +275,7 @@
 }
 
 /* High contrast mode */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
   .overlayMask {
     background-color: rgba(0, 0, 0, 0.8);
     backdrop-filter: none;

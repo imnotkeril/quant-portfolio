@@ -1,0 +1,232 @@
+/**
+ * MonteCarloChart Styles for Wild Market Capital
+ */
+
+.container {
+  min-height: 600px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-m);
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 150px;
+  flex: 1;
+}
+
+.controlLabel {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-l);
+  color: var(--color-negative);
+  text-align: center;
+  background-color: rgba(250, 161, 164, 0.1);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-negative);
+}
+
+.summarySection,
+.chartSection,
+.insightsSection {
+  width: 100%;
+}
+
+.sectionTitle {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-m) 0;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--spacing-m);
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+  transition: all var(--transition-fast);
+}
+
+.summaryItem:hover {
+  background-color: rgba(42, 46, 57, 0.5);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 10px rgba(191, 159, 251, 0.2);
+}
+
+.summaryLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  margin-bottom: var(--spacing-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summaryValue {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.chartSection {
+  margin: var(--spacing-m) 0;
+}
+
+.insightsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-m);
+}
+
+.insightCard {
+  padding: var(--spacing-l);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-m);
+  border: 1px solid var(--color-divider);
+  transition: all var(--transition-fast);
+}
+
+.insightCard:hover {
+  background-color: rgba(42, 46, 57, 0.5);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 15px rgba(191, 159, 251, 0.2);
+  transform: translateY(-2px);
+}
+
+.insightTitle {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-accent);
+  margin: 0 0 var(--spacing-s) 0;
+}
+
+.insightValue {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-s);
+}
+
+.insightDescription {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  line-height: 1.4;
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-body);
+  text-align: center;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .controls {
+    padding: var(--spacing-s);
+    gap: var(--spacing-s);
+  }
+
+  .controlGroup {
+    min-width: 120px;
+  }
+
+  .summaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-s);
+  }
+
+  .summaryItem {
+    padding: var(--spacing-s);
+  }
+
+  .summaryValue {
+    font-size: var(--font-size-body);
+  }
+
+  .insightsGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-s);
+  }
+
+  .insightCard {
+    padding: var(--spacing-m);
+  }
+
+  .insightValue {
+    font-size: var(--font-size-h3);
+  }
+}
+
+@media (max-width: 480px) {
+  .controls {
+    flex-direction: column;
+  }
+
+  .controlGroup {
+    min-width: auto;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .controls,
+  .summaryItem,
+  .insightCard {
+    border-width: 2px;
+  }
+
+  .error {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .summaryItem,
+  .insightCard {
+    transition: none;
+  }
+
+  .insightCard:hover {
+    transform: none;
+  }
+}

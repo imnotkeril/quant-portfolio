@@ -189,10 +189,7 @@ export const OptimizationComparison: React.FC<OptimizationComparisonProps> = ({
                 {isUndefined ? 'N/A' : value}
               </span>
               {!isUndefined && (
-                <Badge
-                  size="small"
-                  variant={getBestMetricVariant(record.key, rawValue, comparisonItems.map((_, i) => record[`opt${i}`]))}
-                >
+                <Badge size="small">
                   {getRankText(record.key, rawValue, comparisonItems.map((_, i) => record[`opt${i}`]))}
                 </Badge>
               )}
@@ -208,12 +205,10 @@ export const OptimizationComparison: React.FC<OptimizationComparisonProps> = ({
   if (optimizations.length === 0) {
     return (
       <Card className={`${styles.container} ${className || ''}`}>
-        <Card.Body>
-          <div className={styles.emptyState}>
-            <p>No optimizations to compare.</p>
-            <p>Run multiple optimizations to see comparisons here.</p>
-          </div>
-        </Card.Body>
+        <div className={styles.emptyState}>
+          <p>No optimizations to compare.</p>
+          <p>Run multiple optimizations to see comparisons here.</p>
+        </div>
       </Card>
     );
   }
@@ -221,164 +216,158 @@ export const OptimizationComparison: React.FC<OptimizationComparisonProps> = ({
   if (optimizations.length === 1) {
     return (
       <Card className={`${styles.container} ${className || ''}`}>
-        <Card.Body>
-          <div className={styles.singleOptimization}>
-            <p>Add more optimizations to enable comparison.</p>
-            <p>Currently showing: {formatMethodName(optimizations[0].optimizationMethod)}</p>
-          </div>
-        </Card.Body>
+        <div className={styles.singleOptimization}>
+          <p>Add more optimizations to enable comparison.</p>
+          <p>Currently showing: {formatMethodName(optimizations[0].optimizationMethod)}</p>
+        </div>
       </Card>
     );
   }
 
   return (
     <Card className={`${styles.container} ${className || ''}`}>
-      <Card.Header>
-        <div className={styles.header}>
-          <h3>Optimization Comparison</h3>
-          <div className={styles.headerActions}>
-            <select
-              value={chartView}
-              onChange={(e) => setChartView(e.target.value as 'metrics' | 'weights')}
-              className={styles.viewSelect}
-            >
-              <option value="metrics">Metrics View</option>
-              <option value="weights">Weights View</option>
-            </select>
+      <div className={styles.header}>
+        <h3>Optimization Comparison</h3>
+        <div className={styles.headerActions}>
+          <select
+            value={chartView}
+            onChange={(e) => setChartView(e.target.value as 'metrics' | 'weights')}
+            className={styles.viewSelect}
+          >
+            <option value="metrics">Metrics View</option>
+            <option value="weights">Weights View</option>
+          </select>
+        </div>
+      </div>
+
+      <div className={styles.content}>
+        {/* Quick Comparison Cards */}
+        <div className={styles.quickComparison}>
+          {comparisonItems.map((item, index) => (
+            <div key={item.id} className={styles.comparisonCard}>
+              <div className={styles.cardHeader}>
+                <div className={styles.cardTitle}>
+                  <div
+                    className={styles.colorIndicator}
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span>{item.name}</span>
+                </div>
+                <div className={styles.cardActions}>
+                  <Button
+                    variant="text"
+                    size="small"
+                    onClick={() => onSelectOptimization?.(item.result)}
+                  >
+                    View
+                  </Button>
+                  <Button
+                    variant="text"
+                    size="small"
+                    onClick={() => onRemoveOptimization?.(index)}
+                  >
+                    ×
+                  </Button>
+                </div>
+              </div>
+
+              <div className={styles.cardMetrics}>
+                <div className={styles.cardMetric}>
+                  <span className={styles.cardMetricLabel}>Return</span>
+                  <span className={styles.cardMetricValue}>
+                    {formatPercentage(item.result.expectedReturn, 2)}
+                  </span>
+                </div>
+                <div className={styles.cardMetric}>
+                  <span className={styles.cardMetricLabel}>Risk</span>
+                  <span className={styles.cardMetricValue}>
+                    {formatPercentage(item.result.expectedRisk, 2)}
+                  </span>
+                </div>
+                <div className={styles.cardMetric}>
+                  <span className={styles.cardMetricLabel}>Sharpe</span>
+                  <span className={styles.cardMetricValue}>
+                    {formatNumber(item.result.performanceMetrics?.sharpe_ratio || 0, 3)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Chart Section */}
+        <div className={styles.chartSection}>
+          <div className={styles.chartHeader}>
+            <h4>
+              {chartView === 'metrics' ? 'Metrics Comparison' : 'Weights Comparison'}
+            </h4>
+
+            {chartView === 'metrics' && (
+              <div className={styles.metricsSelectContainer}>
+                {availableMetrics.map(metric => (
+                  <label key={metric.value} className={styles.metricCheckbox}>
+                    <input
+                      type="checkbox"
+                      checked={selectedMetrics.includes(metric.value)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedMetrics([...selectedMetrics, metric.value]);
+                        } else {
+                          setSelectedMetrics(selectedMetrics.filter(m => m !== metric.value));
+                        }
+                      }}
+                    />
+                    <span>{metric.label}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className={styles.chartContainer}>
+            <LineChart
+              data={chartView === 'metrics' ? metricsChartData : weightsComparisonData}
+              series={metricsChartSeries}
+              height={350}
+              showGrid={true}
+              showLegend={true}
+              yAxisFormatter={(value) =>
+                chartView === 'metrics' && (selectedMetrics.includes('expectedReturn') || selectedMetrics.includes('expectedRisk'))
+                  ? `${value}%`
+                  : value.toString()
+              }
+            />
           </div>
         </div>
-      </Card.Header>
 
-      <Card.Body>
-        <div className={styles.content}>
-          {/* Quick Comparison Cards */}
-          <div className={styles.quickComparison}>
-            {comparisonItems.map((item, index) => (
-              <div key={item.id} className={styles.comparisonCard}>
-                <div className={styles.cardHeader}>
-                  <div className={styles.cardTitle}>
-                    <div
-                      className={styles.colorIndicator}
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span>{item.name}</span>
-                  </div>
-                  <div className={styles.cardActions}>
-                    <Button
-                      variant="text"
-                      size="small"
-                      onClick={() => onSelectOptimization?.(item.result)}
-                    >
-                      View
-                    </Button>
-                    <Button
-                      variant="text"
-                      size="small"
-                      onClick={() => onRemoveOptimization?.(index)}
-                    >
-                      ×
-                    </Button>
-                  </div>
-                </div>
+        {/* Detailed Metrics Table */}
+        <div className={styles.tableSection}>
+          <h4>Detailed Metrics Comparison</h4>
+          <div className={styles.tableContainer}>
+            <Table
+              columns={metricsTableColumns}
+              data={metricsTableData}
+              rowKey="key"
+              size="small"
+              bordered
+              pagination={false}
+            />
+          </div>
+        </div>
 
-                <div className={styles.cardMetrics}>
-                  <div className={styles.cardMetric}>
-                    <span className={styles.cardMetricLabel}>Return</span>
-                    <span className={styles.cardMetricValue}>
-                      {formatPercentage(item.result.expectedReturn, 2)}
-                    </span>
-                  </div>
-                  <div className={styles.cardMetric}>
-                    <span className={styles.cardMetricLabel}>Risk</span>
-                    <span className={styles.cardMetricValue}>
-                      {formatPercentage(item.result.expectedRisk, 2)}
-                    </span>
-                  </div>
-                  <div className={styles.cardMetric}>
-                    <span className={styles.cardMetricLabel}>Sharpe</span>
-                    <span className={styles.cardMetricValue}>
-                      {formatNumber(item.result.performanceMetrics?.sharpe_ratio || 0, 3)}
-                    </span>
-                  </div>
-                </div>
+        {/* Summary Insights */}
+        <div className={styles.insights}>
+          <h4>Comparison Insights</h4>
+          <div className={styles.insightsList}>
+            {generateComparisonInsights(comparisonItems).map((insight, index) => (
+              <div key={index} className={styles.insightItem}>
+                <div className={styles.insightIcon}>📊</div>
+                <div className={styles.insightText}>{insight}</div>
               </div>
             ))}
           </div>
-
-          {/* Chart Section */}
-          <div className={styles.chartSection}>
-            <div className={styles.chartHeader}>
-              <h4>
-                {chartView === 'metrics' ? 'Metrics Comparison' : 'Weights Comparison'}
-              </h4>
-
-              {chartView === 'metrics' && (
-                <div className={styles.metricsSelectContainer}>
-                  {availableMetrics.map(metric => (
-                    <label key={metric.value} className={styles.metricCheckbox}>
-                      <input
-                        type="checkbox"
-                        checked={selectedMetrics.includes(metric.value)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedMetrics([...selectedMetrics, metric.value]);
-                          } else {
-                            setSelectedMetrics(selectedMetrics.filter(m => m !== metric.value));
-                          }
-                        }}
-                      />
-                      <span>{metric.label}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className={styles.chartContainer}>
-              <LineChart
-                data={chartView === 'metrics' ? metricsChartData : weightsComparisonData}
-                series={metricsChartSeries}
-                height={350}
-                showGrid={true}
-                showLegend={true}
-                yAxisFormatter={(value) =>
-                  chartView === 'metrics' && (selectedMetrics.includes('expectedReturn') || selectedMetrics.includes('expectedRisk'))
-                    ? `${value}%`
-                    : value.toString()
-                }
-              />
-            </div>
-          </div>
-
-          {/* Detailed Metrics Table */}
-          <div className={styles.tableSection}>
-            <h4>Detailed Metrics Comparison</h4>
-            <div className={styles.tableContainer}>
-              <Table
-                columns={metricsTableColumns}
-                data={metricsTableData}
-                rowKey="key"
-                size="small"
-                bordered
-                pagination={false}
-              />
-            </div>
-          </div>
-
-          {/* Summary Insights */}
-          <div className={styles.insights}>
-            <h4>Comparison Insights</h4>
-            <div className={styles.insightsList}>
-              {generateComparisonInsights(comparisonItems).map((insight, index) => (
-                <div key={index} className={styles.insightItem}>
-                  <div className={styles.insightIcon}>📊</div>
-                  <div className={styles.insightText}>{insight}</div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
-      </Card.Body>
+      </div>
     </Card>
   );
 };

@@ -1,0 +1,190 @@
+/**
+ * ReportGenerator Styles for Wild Market Capital
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-s) var(--spacing-m);
+  background-color: rgba(250, 161, 164, 0.1);
+  border: 1px solid var(--color-negative);
+  border-radius: var(--border-radius-s);
+  color: var(--color-negative);
+  font-size: var(--font-size-body);
+  margin-bottom: var(--spacing-m);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+.section {
+  width: 100%;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-m);
+  margin-bottom: var(--spacing-m);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  margin: var(--spacing-m) 0;
+}
+
+.sectionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-s);
+  margin-top: var(--spacing-s);
+}
+
+.sectionItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  padding: var(--spacing-s);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  background-color: rgba(42, 46, 57, 0.3);
+  transition: background-color var(--transition-fast);
+}
+
+.sectionItem:hover {
+  background-color: rgba(42, 46, 57, 0.5);
+}
+
+.requiredLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-accent);
+  font-style: italic;
+  margin-left: auto;
+}
+
+.templatePreview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.templateInfo h4 {
+  margin: 0 0 var(--spacing-xs) 0;
+  color: var(--color-accent);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+}
+
+.templateInfo p {
+  margin: 0;
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+.templateSections strong {
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+  margin-bottom: var(--spacing-xs);
+  display: block;
+}
+
+.templateSections ul {
+  margin: var(--spacing-xs) 0 0 0;
+  padding-left: var(--spacing-l);
+  color: var(--color-text-light);
+}
+
+.templateSections li {
+  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-size-body);
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--spacing-l);
+  border-top: 1px solid var(--color-divider);
+  margin-top: var(--spacing-l);
+}
+
+.primaryActions {
+  display: flex;
+  gap: var(--spacing-s);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .row {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-s);
+  }
+
+  .sectionsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column;
+    gap: var(--spacing-s);
+  }
+
+  .primaryActions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .primaryActions > * {
+    flex: 1;
+  }
+}
+
+/* Loading state */
+.form:has(.loading) {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Focus improvements */
+.sectionItem:focus-within {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .sectionItem {
+    border-width: 2px;
+  }
+
+  .templatePreview {
+    border-width: 2px;
+  }
+
+  .error {
+    border-width: 2px;
+  }
+}

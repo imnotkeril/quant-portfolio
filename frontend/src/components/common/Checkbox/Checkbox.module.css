@@ -1,0 +1,180 @@
+/**
+ * Checkbox Styles for Wild Market Capital
+ */
+
+.container {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.checkboxWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  position: relative;
+}
+
+.input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.checkbox {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: 2px solid var(--color-divider);
+  border-radius: var(--border-radius-xs);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.checkbox:hover:not(.disabled) {
+  border-color: var(--color-accent);
+}
+
+.input:focus + .checkbox {
+  box-shadow: 0 0 0 2px rgba(191, 159, 251, 0.3);
+}
+
+/* Sizes */
+.small {
+  width: 16px;
+  height: 16px;
+}
+
+.medium {
+  width: 20px;
+  height: 20px;
+}
+
+.large {
+  width: 24px;
+  height: 24px;
+}
+
+/* States */
+.checked {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.checked:hover:not(.disabled) {
+  background-color: var(--color-hover);
+  border-color: var(--color-hover);
+}
+
+.indeterminate {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.indeterminate:hover:not(.disabled) {
+  background-color: var(--color-hover);
+  border-color: var(--color-hover);
+}
+
+.error {
+  border-color: var(--color-negative);
+}
+
+.error:hover:not(.disabled) {
+  border-color: var(--color-negative);
+}
+
+.error.checked {
+  background-color: var(--color-negative);
+  border-color: var(--color-negative);
+}
+
+.success {
+  border-color: var(--color-positive);
+}
+
+.success:hover:not(.disabled) {
+  border-color: var(--color-positive);
+}
+
+.success.checked {
+  background-color: var(--color-positive);
+  border-color: var(--color-positive);
+}
+
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Checkmark */
+.checkmark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-light);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all var(--transition-fast);
+}
+
+.checked .checkmark,
+.indeterminate .checkmark {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Label */
+.label {
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-light);
+  cursor: pointer;
+  user-select: none;
+  line-height: var(--line-height-body);
+}
+
+.disabled .label {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Error text */
+.errorText {
+  font-family: var(--font-family);
+  font-size: var(--font-size-caption);
+  color: var(--color-negative);
+  line-height: var(--line-height-caption);
+}
+
+/* Focus styles for accessibility */
+.input:focus-visible + .checkbox {
+  box-shadow: 0 0 0 2px rgba(191, 159, 251, 0.5);
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .checkbox {
+    border-width: 3px;
+  }
+
+  .checked,
+  .indeterminate {
+    border-width: 3px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .checkbox,
+  .checkmark {
+    transition: none;
+  }
+}

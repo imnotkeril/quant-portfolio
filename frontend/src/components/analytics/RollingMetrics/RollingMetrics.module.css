@@ -190,7 +190,7 @@
 }
 
 /* High contrast mode */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
   .controlsSection,
   .summary,
   .legend {

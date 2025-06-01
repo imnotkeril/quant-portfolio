@@ -61,7 +61,7 @@
 }
 
 /* High contrast mode */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
   .description {
     border-left-width: 3px;
   }

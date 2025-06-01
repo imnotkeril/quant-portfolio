@@ -178,7 +178,7 @@
 }
 
 /* High contrast mode */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
   .header,
   .selectedTags,
   .summary {

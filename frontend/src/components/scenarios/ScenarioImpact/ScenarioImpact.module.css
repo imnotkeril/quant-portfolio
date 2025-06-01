@@ -1,0 +1,321 @@
+/**
+ * ScenarioImpact Styles for Wild Market Capital
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-l);
+  min-height: 200px;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+  padding: var(--spacing-l);
+  color: var(--color-negative);
+  text-align: center;
+}
+
+.error svg {
+  flex-shrink: 0;
+  color: var(--color-negative);
+}
+
+.error h3 {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+}
+
+.error p {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-gray);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-l);
+  gap: var(--spacing-m);
+  color: var(--color-neutral-gray);
+  text-align: center;
+  min-height: 200px;
+}
+
+.emptyState svg {
+  color: var(--color-neutral-gray);
+  opacity: 0.5;
+}
+
+.emptyState h3 {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: var(--font-size-body);
+}
+
+/* Summary Section */
+.summaryCard {
+  background-color: var(--card-background);
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-m);
+  margin-bottom: var(--spacing-l);
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.summaryLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  margin-bottom: var(--spacing-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: var(--font-weight-medium);
+}
+
+.summaryValue {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-light);
+}
+
+.summaryValue.positive {
+  color: var(--color-positive);
+}
+
+.summaryValue.negative {
+  color: var(--color-negative);
+}
+
+/* Vulnerabilities */
+.vulnerabilities {
+  margin-top: var(--spacing-l);
+  padding-top: var(--spacing-l);
+  border-top: 1px solid var(--color-divider);
+}
+
+.vulnerabilities h4 {
+  margin: 0 0 var(--spacing-m) 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.vulnerabilityList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.vulnerabilityItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-s) var(--spacing-m);
+  background-color: rgba(250, 161, 164, 0.1);
+  border-radius: var(--border-radius-s);
+  border-left: 3px solid var(--color-negative);
+}
+
+.vulnerabilityName {
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.vulnerabilityImpact {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-negative);
+}
+
+/* Recommendations */
+.recommendations {
+  margin-top: var(--spacing-l);
+  padding-top: var(--spacing-l);
+  border-top: 1px solid var(--color-divider);
+}
+
+.recommendations h4 {
+  margin: 0 0 var(--spacing-m) 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.recommendationsList {
+  margin: 0;
+  padding-left: var(--spacing-m);
+  list-style: none;
+}
+
+.recommendationsList li {
+  position: relative;
+  padding: var(--spacing-xs) 0;
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  line-height: var(--line-height-body);
+}
+
+.recommendationsList li::before {
+  content: "→";
+  position: absolute;
+  left: -var(--spacing-m);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Charts */
+.chartCard {
+  background-color: var(--card-background);
+}
+
+.impactChart {
+  width: 100%;
+}
+
+.heatmap {
+  width: 100%;
+}
+
+/* Table */
+.tableCard {
+  background-color: var(--card-background);
+}
+
+.impactTable {
+  width: 100%;
+}
+
+.scenarioName {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.impactValue {
+  font-weight: var(--font-weight-bold);
+  text-align: right;
+}
+
+.impactValue.positive {
+  color: var(--color-positive);
+}
+
+.impactValue.negative {
+  color: var(--color-negative);
+}
+
+.assetName {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.assetImpact {
+  font-size: var(--font-size-caption);
+  color: var(--color-negative);
+  font-weight: var(--font-weight-medium);
+}
+
+.recoveryInfo {
+  text-align: center;
+}
+
+.recoveryProbability {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  margin-top: var(--spacing-xs);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-s);
+  }
+
+  .summaryItem {
+    padding: var(--spacing-s);
+  }
+
+  .summaryValue {
+    font-size: var(--font-size-h3);
+  }
+
+  .vulnerabilityItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+    text-align: left;
+  }
+
+  .error {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .container {
+    gap: var(--spacing-s);
+  }
+
+  .vulnerabilities,
+  .recommendations {
+    margin-top: var(--spacing-m);
+    padding-top: var(--spacing-m);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .summaryItem {
+    border-width: 2px;
+  }
+
+  .vulnerabilityItem {
+    border-left-width: 4px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .impactChart,
+  .heatmap {
+    transition: none;
+  }
+}

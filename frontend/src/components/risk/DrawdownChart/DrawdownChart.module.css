@@ -1,0 +1,175 @@
+/**
+ * DrawdownChart Styles for Wild Market Capital
+ */
+
+.container {
+  width: 100%;
+}
+
+.chartSection {
+  width: 100%;
+  margin-bottom: var(--spacing-m);
+}
+
+.summarySection {
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  margin-bottom: var(--spacing-m);
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-m);
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-s);
+}
+
+.summaryLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  margin-bottom: var(--spacing-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summaryValue {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.periodsSection {
+  margin-top: var(--spacing-m);
+}
+
+.periodsTitle {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-m) 0;
+  padding: 0 var(--spacing-m);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.periodsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-body);
+  background-color: var(--color-background);
+}
+
+.periodsTable thead {
+  background-color: rgba(42, 46, 57, 0.5);
+}
+
+.periodsTable th {
+  padding: var(--spacing-s) var(--spacing-m);
+  text-align: left;
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  border-bottom: 1px solid var(--color-divider);
+  white-space: nowrap;
+}
+
+.periodRow {
+  transition: background-color var(--transition-fast);
+}
+
+.periodRow:nth-child(even) {
+  background-color: rgba(42, 46, 57, 0.2);
+}
+
+.periodRow:hover {
+  background-color: rgba(42, 46, 57, 0.4);
+}
+
+.periodCell {
+  padding: var(--spacing-s) var(--spacing-m);
+  color: var(--color-text-light);
+  border-bottom: 1px solid var(--color-divider);
+  white-space: nowrap;
+}
+
+.depthCell {
+  color: var(--color-negative);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-s);
+  }
+
+  .summaryItem {
+    padding: var(--spacing-xs);
+  }
+
+  .summaryLabel {
+    font-size: 10px;
+  }
+
+  .summaryValue {
+    font-size: var(--font-size-body);
+  }
+
+  .periodsTable {
+    font-size: var(--font-size-caption);
+  }
+
+  .periodsTable th,
+  .periodCell {
+    padding: var(--spacing-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tableWrapper {
+    margin: 0 calc(-1 * var(--spacing-m));
+  }
+
+  .periodsTitle {
+    padding: 0;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .tableWrapper {
+    border-width: 2px;
+  }
+
+  .periodsTable th,
+  .periodCell {
+    border-bottom-width: 2px;
+  }
+
+  .summarySection {
+    border: 2px solid var(--color-divider);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .periodRow {
+    transition: none;
+  }
+}

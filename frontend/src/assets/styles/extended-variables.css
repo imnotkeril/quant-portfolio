@@ -1,0 +1,52 @@
+/**
+ * Extended CSS Variables for Wild Market Capital
+ * Additional variables for components
+ */
+
+:root {
+  /* Extended Background Colors */
+  --color-background-10: rgba(42, 46, 57, 0.1);
+  --color-background-20: rgba(42, 46, 57, 0.2);
+  --color-background-30: rgba(42, 46, 57, 0.3);
+  --color-background-40: rgba(42, 46, 57, 0.4);
+
+  /* Extended Divider Colors */
+  --color-divider-10: rgba(42, 46, 57, 0.1);
+  --color-divider-20: rgba(42, 46, 57, 0.2);
+  --color-divider-40: rgba(42, 46, 57, 0.4);
+
+  /* Card Variables */
+  --card-background: rgba(13, 16, 21, 0.8);
+  --card-border: var(--color-divider);
+  --card-border-radius: var(--border-radius-m);
+  --card-padding: var(--spacing-m);
+  --card-header-border: var(--color-divider);
+
+  /* Table Variables */
+  --table-background: var(--card-background);
+  --table-border: var(--color-divider);
+  --table-header-background: rgba(42, 46, 57, 0.5);
+  --table-row-even-background: rgba(42, 46, 57, 0.1);
+  --table-row-hover-background: rgba(42, 46, 57, 0.3);
+
+  /* Input Variables */
+  --input-background: rgba(42, 46, 57, 0.5);
+  --input-border: var(--color-divider);
+  --input-border-focus: var(--color-accent);
+  --input-border-radius: var(--border-radius-s);
+  --input-text: var(--color-text-light);
+  --input-placeholder: var(--color-neutral-gray);
+  --input-height: 40px;
+
+  /* Scrollbar Variables */
+  --scrollbar-width: 8px;
+  --scrollbar-track: rgba(42, 46, 57, 0.3);
+  --scrollbar-thumb: rgba(191, 159, 251, 0.5);
+  --scrollbar-thumb-hover: rgba(191, 159, 251, 0.7);
+
+  /* Z-Index Variables */
+  --z-index-dropdown: 1000;
+  --z-index-modal-backdrop: 1040;
+  --z-index-modal: 1050;
+  --z-index-tooltip: 1070;
+}

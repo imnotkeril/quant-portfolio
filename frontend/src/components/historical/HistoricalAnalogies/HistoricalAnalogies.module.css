@@ -1,0 +1,318 @@
+/**
+ * HistoricalAnalogies Styles for Wild Market Capital
+ */
+
+.container {
+  width: 100%;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+}
+
+.viewToggle {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+}
+
+.sortControls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+}
+
+.sortSelect {
+  padding: var(--spacing-xs) var(--spacing-s);
+  background-color: var(--input-background);
+  border: 1px solid var(--input-border);
+  border-radius: var(--border-radius-s);
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+  outline: none;
+}
+
+.sortSelect:focus {
+  border-color: var(--color-accent);
+}
+
+/* Table Container */
+.tableContainer {
+  width: 100%;
+}
+
+.periodText {
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-accent);
+}
+
+.eventText {
+  color: var(--color-text-light);
+}
+
+.similarityCell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  align-items: center;
+}
+
+.similarityBar {
+  width: 60px;
+  height: 8px;
+  background-color: rgba(42, 46, 57, 0.5);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.similarityFill {
+  height: 100%;
+  background-color: var(--color-accent);
+  transition: width var(--transition-fast);
+}
+
+.similarityText {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.outcomeCell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-s);
+}
+
+.outcomeText {
+  color: var(--color-text-light);
+  flex: 1;
+}
+
+/* Chart Container */
+.chartContainer {
+  width: 100%;
+  min-height: 400px;
+}
+
+/* Detail View */
+.detailView {
+  margin-top: var(--spacing-l);
+}
+
+.detailContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-l);
+}
+
+.detailSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.detailSection h4 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0;
+  border-bottom: 2px solid var(--color-accent);
+  padding-bottom: var(--spacing-xs);
+}
+
+.detailList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.similarityItem,
+.differenceItem,
+.lessonItem,
+.actionItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-s);
+  padding: var(--spacing-s);
+  border-radius: var(--border-radius-s);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+  color: var(--color-text-light);
+}
+
+.similarityItem {
+  background-color: rgba(116, 241, 116, 0.1);
+  border-left: 3px solid var(--color-positive);
+}
+
+.differenceItem {
+  background-color: rgba(250, 161, 164, 0.1);
+  border-left: 3px solid var(--color-negative);
+}
+
+.lessonItem {
+  background-color: rgba(144, 191, 249, 0.1);
+  border-left: 3px solid var(--color-neutral-1);
+}
+
+.actionItem {
+  background-color: rgba(191, 159, 251, 0.1);
+  border-left: 3px solid var(--color-accent);
+}
+
+.similarityIcon,
+.differenceIcon,
+.lessonIcon,
+.actionIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.similarityIcon {
+  color: var(--color-positive);
+}
+
+.differenceIcon {
+  color: var(--color-negative);
+}
+
+.lessonIcon {
+  color: var(--color-neutral-1);
+}
+
+.actionIcon {
+  color: var(--color-accent);
+}
+
+/* Disclaimer */
+.disclaimer {
+  display: flex;
+  gap: var(--spacing-s);
+  padding: var(--spacing-m);
+  background-color: rgba(255, 245, 157, 0.1);
+  border: 1px solid rgba(255, 245, 157, 0.3);
+  border-radius: var(--border-radius-s);
+  margin-top: var(--spacing-l);
+}
+
+.disclaimerIcon {
+  color: var(--color-neutral-2);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.disclaimerContent {
+  flex: 1;
+}
+
+.disclaimerTitle {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-neutral-2);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.disclaimerText {
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  margin: 0;
+  line-height: var(--line-height-body);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .headerActions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-s);
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-s);
+  }
+
+  .detailContent {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-m);
+  }
+
+  .disclaimer {
+    flex-direction: column;
+    gap: var(--spacing-s);
+  }
+
+  .similarityCell {
+    gap: var(--spacing-xs);
+  }
+
+  .outcomeCell {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .viewToggle {
+    width: 100%;
+  }
+
+  .viewToggle button {
+    flex: 1;
+  }
+
+  .tableContainer {
+    overflow-x: auto;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .similarityBar {
+    border: 1px solid var(--color-accent);
+  }
+
+  .similarityItem,
+  .differenceItem,
+  .lessonItem,
+  .actionItem {
+    border-width: 2px;
+    border-style: solid;
+  }
+
+  .disclaimer {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .similarityFill {
+    transition: none;
+  }
+}

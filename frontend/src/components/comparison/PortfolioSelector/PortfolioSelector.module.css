@@ -1,0 +1,398 @@
+/**
+ * PortfolioSelector Styles for Wild Market Capital
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+  width: 100%;
+}
+
+.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-m);
+}
+
+.title h3 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-xs) 0;
+  line-height: var(--line-height-h3);
+}
+
+.selectionCount {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+}
+
+.minWarning {
+  color: var(--color-negative);
+  font-weight: var(--font-weight-medium);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  flex-shrink: 0;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.1);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+}
+
+.searchSection {
+  flex: 1;
+  min-width: 0;
+}
+
+.sortSection {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  flex-shrink: 0;
+}
+
+.sortLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  white-space: nowrap;
+}
+
+.sortButtons {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* Portfolio List */
+.portfolioList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: var(--spacing-xs);
+}
+
+.portfolioList::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+.portfolioList::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+.portfolioList::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--scrollbar-width);
+}
+
+.portfolioList::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Portfolio Card */
+.portfolioCard {
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 1px solid var(--card-border);
+}
+
+.portfolioCard:hover:not(.disabled) {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.portfolioCard.selected {
+  border-color: var(--color-accent);
+  background-color: rgba(191, 159, 251, 0.05);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.portfolioCard.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.portfolioContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.portfolioHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-m);
+}
+
+.portfolioInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-s);
+  flex: 1;
+  min-width: 0;
+}
+
+.portfolioCheckbox {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.portfolioDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.portfolioName {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-xs) 0;
+  line-height: var(--line-height-body);
+}
+
+.portfolioDescription {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  margin: 0;
+  line-height: var(--line-height-caption);
+}
+
+.portfolioValue {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  flex-shrink: 0;
+}
+
+/* Portfolio Metrics */
+.portfolioMetrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing-s);
+  padding: var(--spacing-s);
+  background-color: rgba(42, 46, 57, 0.1);
+  border-radius: var(--border-radius-xs);
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metricLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  line-height: 1;
+}
+
+.metricValue {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  line-height: 1;
+}
+
+.metricValue.positive {
+  color: var(--color-positive);
+}
+
+.metricValue.negative {
+  color: var(--color-negative);
+}
+
+.lastUpdated {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  text-align: right;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-l);
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: var(--spacing-s);
+}
+
+.emptyState p {
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-gray);
+  margin: 0;
+}
+
+/* Selected Summary */
+.selectedSummary {
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.1);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+}
+
+.summaryContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.summaryTitle {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.selectedList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.selectedTag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-s);
+  background-color: var(--color-accent);
+  color: var(--color-text-light);
+  border-radius: var(--border-radius-s);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+}
+
+.removeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  color: var(--color-text-light);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  transition: background-color var(--transition-fast);
+}
+
+.removeButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.removeButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-s);
+  }
+
+  .headerActions {
+    justify-content: flex-end;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-s);
+  }
+
+  .sortSection {
+    justify-content: space-between;
+  }
+
+  .sortButtons {
+    flex-wrap: wrap;
+  }
+
+  .portfolioHeader {
+    flex-direction: column;
+    gap: var(--spacing-s);
+  }
+
+  .portfolioValue {
+    align-self: flex-start;
+  }
+
+  .portfolioMetrics {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+
+  .selectedList {
+    max-height: 100px;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .portfolioMetrics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .sortButtons {
+    justify-content: center;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .portfolioCard {
+    border-width: 2px;
+  }
+
+  .portfolioCard.selected {
+    border-width: 2px;
+  }
+
+  .controls {
+    border-width: 2px;
+  }
+
+  .selectedSummary {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .portfolioCard {
+    transition: none;
+  }
+
+  .removeButton {
+    transition: none;
+  }
+}

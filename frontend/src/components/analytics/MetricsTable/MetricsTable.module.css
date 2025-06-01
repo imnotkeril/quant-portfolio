@@ -104,7 +104,7 @@
 }
 
 /* High contrast mode */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
   .positive {
     font-weight: var(--font-weight-bold);
   }

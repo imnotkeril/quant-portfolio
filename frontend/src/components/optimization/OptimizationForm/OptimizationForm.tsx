@@ -6,7 +6,6 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
 import { Input } from '../../common/Input/Input';
-import { Select } from '../../common/Select/Select';
 import { Modal } from '../../common/Modal/Modal';
 import { useOptimization } from '../../../hooks/useOptimization';
 import {
@@ -15,7 +14,6 @@ import {
   MarkowitzRequest,
   RiskParityRequest
 } from '../../../types/optimization';
-import { validateOptimizationRequest } from '../../../utils/validators';
 import styles from './OptimizationForm.module.css';
 
 interface OptimizationFormProps {
@@ -215,6 +213,29 @@ export const OptimizationForm: React.FC<OptimizationFormProps> = ({
     }
   };
 
+  // Render method selector
+  const renderMethodSelector = () => (
+    <div className={styles.methodSection}>
+      <label className={styles.label}>Optimization Method</label>
+      <select
+        value={method}
+        onChange={(e) => handleMethodChange(e.target.value as OptimizationMethod)}
+        className={styles.methodSelect}
+      >
+        {optimizationMethods.map(m => (
+          <option key={m.value} value={m.value}>
+            {m.label}
+          </option>
+        ))}
+      </select>
+
+      {/* Method description */}
+      <div className={styles.methodDescription}>
+        {optimizationMethods.find(m => m.value === method)?.description}
+      </div>
+    </div>
+  );
+
   // Render risk budget inputs for risk parity
   const renderRiskBudgetInputs = () => {
     if (method !== 'risk_parity') return null;
@@ -266,42 +287,26 @@ export const OptimizationForm: React.FC<OptimizationFormProps> = ({
 
   return (
     <Card className={`${styles.container} ${className || ''}`}>
-      <Card.Header>
+      <div className={styles.header}>
         <h3>Portfolio Optimization</h3>
         {onClose && (
           <Button variant="text" onClick={onClose}>
             ×
           </Button>
         )}
-      </Card.Header>
+      </div>
 
-      <Card.Body>
+      <div className={styles.content}>
         <form onSubmit={handleSubmit} className={styles.form}>
           {/* Optimization Method */}
-          <div className={styles.methodSection}>
-            <label className={styles.label}>Optimization Method</label>
-            <Select
-              value={method}
-              onChange={(value) => handleMethodChange(value as OptimizationMethod)}
-              options={optimizationMethods.map(m => ({
-                value: m.value,
-                label: m.label,
-              }))}
-              className={styles.methodSelect}
-            />
-
-            {/* Method description */}
-            <div className={styles.methodDescription}>
-              {optimizationMethods.find(m => m.value === method)?.description}
-            </div>
-          </div>
+          {renderMethodSelector()}
 
           {/* Date Range */}
           <div className={styles.dateSection}>
             <div className={styles.dateRow}>
               <Input
                 label="Start Date"
-                type="date"
+                type="text"
                 value={formData.startDate}
                 onChange={(e) => handleFieldChange('startDate', e.target.value)}
                 error={formErrors.startDate}
@@ -311,7 +316,7 @@ export const OptimizationForm: React.FC<OptimizationFormProps> = ({
 
               <Input
                 label="End Date"
-                type="date"
+                type="text"
                 value={formData.endDate}
                 onChange={(e) => handleFieldChange('endDate', e.target.value)}
                 error={formErrors.endDate}
@@ -423,7 +428,7 @@ export const OptimizationForm: React.FC<OptimizationFormProps> = ({
           {error && (
             <div className={styles.errorAlert}>
               <p><strong>Optimization Error:</strong></p>
-              <p>{error.message}</p>
+              <p>{typeof error === 'string' ? error : (error as any)?.message || 'Unknown error'}</p>
               <Button variant="text" size="small" onClick={clearError}>
                 Dismiss
               </Button>
@@ -452,7 +457,7 @@ export const OptimizationForm: React.FC<OptimizationFormProps> = ({
             </Button>
           </div>
         </form>
-      </Card.Body>
+      </div>
 
       {/* Advanced Options Modal */}
       <Modal

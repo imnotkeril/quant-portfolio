@@ -3,7 +3,16 @@
  * Interactive visualization of the efficient frontier with key portfolio points
  */
 import React, { useState, useMemo } from 'react';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+import {
+  ScatterChart,
+  Scatter,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
 import { Card } from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
 import { COLORS } from '../../../constants/colors';
@@ -22,6 +31,15 @@ interface EfficientFrontierProps {
   onPortfolioSelect?: (portfolio: any) => void;
   loading?: boolean;
   className?: string;
+}
+
+interface PortfolioPoint {
+  name: string;
+  risk: number;
+  return: number;
+  sharpe: number;
+  weights?: Record<string, number>;
+  color: string;
 }
 
 export const EfficientFrontier: React.FC<EfficientFrontierProps> = ({
@@ -45,20 +63,14 @@ export const EfficientFrontier: React.FC<EfficientFrontierProps> = ({
       sharpe: point.sharpe || 0,
       weights: point.weights,
       index,
-      // Color based on Sharpe ratio
-      color: point.sharpe && point.sharpe > 1
-        ? COLORS.POSITIVE
-        : point.sharpe && point.sharpe > 0.5
-        ? COLORS.ACCENT
-        : COLORS.NEUTRAL_GRAY,
     }));
   }, [data]);
 
   // Key portfolio points
-  const keyPortfolios = useMemo(() => {
+  const keyPortfolios = useMemo((): PortfolioPoint[] => {
     if (!data) return [];
 
-    const portfolios = [];
+    const portfolios: PortfolioPoint[] = [];
 
     // Minimum variance portfolio
     if (data.minVariancePortfolio) {
@@ -69,7 +81,6 @@ export const EfficientFrontier: React.FC<EfficientFrontierProps> = ({
         sharpe: data.minVariancePortfolio.sharpeRatio || 0,
         weights: data.minVariancePortfolio.weights,
         color: COLORS.NEUTRAL_1,
-        symbol: 'triangle',
       });
     }
 
@@ -82,7 +93,6 @@ export const EfficientFrontier: React.FC<EfficientFrontierProps> = ({
         sharpe: data.maxSharpePortfolio.sharpeRatio || 0,
         weights: data.maxSharpePortfolio.weights,
         color: COLORS.POSITIVE,
-        symbol: 'star',
       });
     }
 
@@ -95,7 +105,6 @@ export const EfficientFrontier: React.FC<EfficientFrontierProps> = ({
         sharpe: data.maxReturnPortfolio.sharpeRatio || 0,
         weights: data.maxReturnPortfolio.weights,
         color: COLORS.NEUTRAL_2,
-        symbol: 'diamond',
       });
     }
 
@@ -108,7 +117,6 @@ export const EfficientFrontier: React.FC<EfficientFrontierProps> = ({
         sharpe: data.equalWeightPortfolio.sharpeRatio || 0,
         weights: data.equalWeightPortfolio.weights,
         color: COLORS.NEUTRAL_GRAY,
-        symbol: 'square',
       });
     }
 
@@ -121,21 +129,21 @@ export const EfficientFrontier: React.FC<EfficientFrontierProps> = ({
         sharpe: currentPortfolio.return / currentPortfolio.risk || 0,
         weights: currentPortfolio.weights,
         color: COLORS.NEGATIVE,
-        symbol: 'circle',
       });
     }
 
     return portfolios;
   }, [data, currentPortfolio]);
 
-  // Handle point click
-  const handlePointClick = (point: any) => {
-    if (point && point.payload) {
+  // Handle point click on efficient frontier
+  const handlePointClick = (event: any) => {
+    if (event && event.activePayload && event.activePayload[0]) {
+      const point = event.activePayload[0].payload;
       const frontierPoint: EfficientFrontierPoint = {
-        risk: point.payload.risk / 100,
-        return: point.payload.return / 100,
-        sharpe: point.payload.sharpe,
-        weights: point.payload.weights,
+        risk: point.risk / 100,
+        return: point.return / 100,
+        sharpe: point.sharpe,
+        weights: point.weights,
       };
 
       setSelectedPoint(frontierPoint);
@@ -144,18 +152,20 @@ export const EfficientFrontier: React.FC<EfficientFrontierProps> = ({
   };
 
   // Handle key portfolio selection
-  const handleKeyPortfolioClick = (portfolio: any) => {
-    setSelectedPoint({
+  const handleKeyPortfolioClick = (portfolio: PortfolioPoint) => {
+    const selectedPoint: EfficientFrontierPoint = {
       risk: portfolio.risk / 100,
       return: portfolio.return / 100,
       sharpe: portfolio.sharpe,
       weights: portfolio.weights,
-    });
+    };
+
+    setSelectedPoint(selectedPoint);
     onPortfolioSelect?.(portfolio);
   };
 
   // Custom tooltip
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length > 0) {
       const data = payload[0].payload;
       return (
@@ -201,15 +211,13 @@ export const EfficientFrontier: React.FC<EfficientFrontierProps> = ({
   if (loading) {
     return (
       <Card className={`${styles.container} ${className || ''}`}>
-        <Card.Header>
+        <div className={styles.header}>
           <h3>Efficient Frontier</h3>
-        </Card.Header>
-        <Card.Body>
-          <div className={styles.loading}>
-            <div className={styles.loadingSpinner} />
-            <p>Calculating efficient frontier...</p>
-          </div>
-        </Card.Body>
+        </div>
+        <div className={styles.loading}>
+          <div className={styles.loadingSpinner} />
+          <p>Calculating efficient frontier...</p>
+        </div>
       </Card>
     );
   }
@@ -217,188 +225,184 @@ export const EfficientFrontier: React.FC<EfficientFrontierProps> = ({
   if (!data) {
     return (
       <Card className={`${styles.container} ${className || ''}`}>
-        <Card.Header>
+        <div className={styles.header}>
           <h3>Efficient Frontier</h3>
-        </Card.Header>
-        <Card.Body>
-          <div className={styles.emptyState}>
-            <p>No efficient frontier data available.</p>
-            <p>Run portfolio optimization to generate the efficient frontier.</p>
-          </div>
-        </Card.Body>
+        </div>
+        <div className={styles.emptyState}>
+          <p>No efficient frontier data available.</p>
+          <p>Run portfolio optimization to generate the efficient frontier.</p>
+        </div>
       </Card>
     );
   }
 
   return (
     <Card className={`${styles.container} ${className || ''}`}>
-      <Card.Header>
-        <div className={styles.header}>
-          <h3>Efficient Frontier</h3>
-          <div className={styles.headerActions}>
-            <Button
-              variant={showWeights ? 'primary' : 'outline'}
-              size="small"
-              onClick={() => setShowWeights(!showWeights)}
-              disabled={!selectedPoint}
-            >
-              {showWeights ? 'Hide Weights' : 'Show Weights'}
-            </Button>
-          </div>
+      <div className={styles.header}>
+        <h3>Efficient Frontier</h3>
+        <div className={styles.headerActions}>
+          <Button
+            variant={showWeights ? 'primary' : 'outline'}
+            size="small"
+            onClick={() => setShowWeights(!showWeights)}
+            disabled={!selectedPoint}
+          >
+            {showWeights ? 'Hide Weights' : 'Show Weights'}
+          </Button>
         </div>
-      </Card.Header>
+      </div>
 
-      <Card.Body>
-        <div className={styles.content}>
-          <div className={styles.chartSection}>
-            {/* Chart */}
-            <div className={styles.chartContainer}>
-              <ResponsiveContainer width="100%" height={400}>
-                <ScatterChart
-                  margin={{ top: 20, right: 20, bottom: 40, left: 40 }}
-                >
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke={COLORS.DIVIDER}
-                    opacity={0.3}
-                  />
+      <div className={styles.content}>
+        <div className={styles.chartSection}>
+          {/* Chart */}
+          <div className={styles.chartContainer}>
+            <ResponsiveContainer width="100%" height={400}>
+              <ScatterChart
+                data={chartData}
+                margin={{ top: 20, right: 20, bottom: 40, left: 40 }}
+                onClick={handlePointClick}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke={COLORS.DIVIDER}
+                  opacity={0.3}
+                />
 
-                  <XAxis
-                    type="number"
-                    dataKey="risk"
-                    name="Risk"
-                    unit="%"
-                    tick={{ fill: COLORS.TEXT_LIGHT, fontSize: 12 }}
-                    axisLine={{ stroke: COLORS.DIVIDER }}
-                    tickLine={{ stroke: COLORS.DIVIDER }}
-                    label={{
-                      value: 'Risk (Volatility %)',
-                      position: 'insideBottom',
-                      offset: -10,
-                      style: { textAnchor: 'middle', fill: COLORS.TEXT_LIGHT }
-                    }}
-                  />
+                <XAxis
+                  type="number"
+                  dataKey="risk"
+                  name="Risk"
+                  unit="%"
+                  tick={{ fill: COLORS.TEXT_LIGHT, fontSize: 12 }}
+                  axisLine={{ stroke: COLORS.DIVIDER }}
+                  tickLine={{ stroke: COLORS.DIVIDER }}
+                  label={{
+                    value: 'Risk (Volatility %)',
+                    position: 'insideBottom',
+                    offset: -10,
+                    style: { textAnchor: 'middle', fill: COLORS.TEXT_LIGHT }
+                  }}
+                />
 
-                  <YAxis
-                    type="number"
-                    dataKey="return"
-                    name="Return"
-                    unit="%"
-                    tick={{ fill: COLORS.TEXT_LIGHT, fontSize: 12 }}
-                    axisLine={{ stroke: COLORS.DIVIDER }}
-                    tickLine={{ stroke: COLORS.DIVIDER }}
-                    label={{
-                      value: 'Expected Return %',
-                      angle: -90,
-                      position: 'insideLeft',
-                      style: { textAnchor: 'middle', fill: COLORS.TEXT_LIGHT }
-                    }}
-                  />
+                <YAxis
+                  type="number"
+                  dataKey="return"
+                  name="Return"
+                  unit="%"
+                  tick={{ fill: COLORS.TEXT_LIGHT, fontSize: 12 }}
+                  axisLine={{ stroke: COLORS.DIVIDER }}
+                  tickLine={{ stroke: COLORS.DIVIDER }}
+                  label={{
+                    value: 'Expected Return %',
+                    angle: -90,
+                    position: 'insideLeft',
+                    style: { textAnchor: 'middle', fill: COLORS.TEXT_LIGHT }
+                  }}
+                />
 
-                  <Tooltip content={<CustomTooltip />} />
+                <Tooltip content={<CustomTooltip />} />
 
-                  <Legend />
+                <Legend />
 
-                  {/* Efficient frontier line */}
-                  <Scatter
-                    name="Efficient Frontier"
-                    data={chartData}
-                    fill={COLORS.ACCENT}
-                    onClick={handlePointClick}
-                    line={{ stroke: COLORS.ACCENT, strokeWidth: 2 }}
-                    lineType="fitting"
-                  />
+                {/* Efficient frontier points */}
+                <Scatter
+                  name="Efficient Frontier"
+                  data={chartData}
+                  fill={COLORS.ACCENT}
+                />
 
-                  {/* Key portfolios */}
-                  {keyPortfolios.map((portfolio, index) => (
-                    <Scatter
-                      key={portfolio.name}
-                      name={portfolio.name}
-                      data={[portfolio]}
-                      fill={portfolio.color}
-                      shape={portfolio.symbol}
-                      onClick={() => handleKeyPortfolioClick(portfolio)}
-                    />
-                  ))}
-                </ScatterChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Legend for key portfolios */}
-            <div className={styles.legendContainer}>
-              <h4>Key Portfolios</h4>
-              <div className={styles.legendGrid}>
+                {/* Key portfolios as separate scatter plots */}
                 {keyPortfolios.map((portfolio) => (
-                  <div
+                  <Scatter
                     key={portfolio.name}
-                    className={styles.legendItem}
-                    onClick={() => handleKeyPortfolioClick(portfolio)}
-                  >
-                    <div
-                      className={styles.legendSymbol}
-                      style={{ backgroundColor: portfolio.color }}
-                    />
-                    <div className={styles.legendInfo}>
-                      <span className={styles.legendName}>{portfolio.name}</span>
-                      <span className={styles.legendStats}>
-                        {formatPercentage(portfolio.return / 100, 1)} / {formatPercentage(portfolio.risk / 100, 1)}
-                      </span>
-                      <span className={styles.legendSharpe}>
-                        Sharpe: {portfolio.sharpe.toFixed(3)}
-                      </span>
-                    </div>
-                  </div>
+                    name={portfolio.name}
+                    data={[{
+                      risk: portfolio.risk,
+                      return: portfolio.return,
+                      sharpe: portfolio.sharpe,
+                      weights: portfolio.weights,
+                    }]}
+                    fill={portfolio.color}
+                  />
                 ))}
-              </div>
-            </div>
+              </ScatterChart>
+            </ResponsiveContainer>
           </div>
 
-          {/* Weights panel */}
-          {showWeights && selectedPoint && (
-            <div className={styles.weightsPanel}>
-              {renderWeightsTable()}
-
-              <div className={styles.selectedPointInfo}>
-                <h4>Selected Point</h4>
-                <div className={styles.pointStats}>
-                  <div className={styles.statItem}>
-                    <span className={styles.statLabel}>Expected Return:</span>
-                    <span className={styles.statValue}>
-                      {formatPercentage(selectedPoint.return, 2)}
+          {/* Legend for key portfolios */}
+          <div className={styles.legendContainer}>
+            <h4>Key Portfolios</h4>
+            <div className={styles.legendGrid}>
+              {keyPortfolios.map((portfolio) => (
+                <div
+                  key={portfolio.name}
+                  className={styles.legendItem}
+                  onClick={() => handleKeyPortfolioClick(portfolio)}
+                >
+                  <div
+                    className={styles.legendSymbol}
+                    style={{ backgroundColor: portfolio.color }}
+                  />
+                  <div className={styles.legendInfo}>
+                    <span className={styles.legendName}>{portfolio.name}</span>
+                    <span className={styles.legendStats}>
+                      {formatPercentage(portfolio.return / 100, 1)} / {formatPercentage(portfolio.risk / 100, 1)}
                     </span>
-                  </div>
-                  <div className={styles.statItem}>
-                    <span className={styles.statLabel}>Risk (Volatility):</span>
-                    <span className={styles.statValue}>
-                      {formatPercentage(selectedPoint.risk, 2)}
-                    </span>
-                  </div>
-                  <div className={styles.statItem}>
-                    <span className={styles.statLabel}>Sharpe Ratio:</span>
-                    <span className={styles.statValue}>
-                      {selectedPoint.sharpe?.toFixed(3) || 'N/A'}
+                    <span className={styles.legendSharpe}>
+                      Sharpe: {portfolio.sharpe.toFixed(3)}
                     </span>
                   </div>
                 </div>
-
-                <Button
-                  variant="primary"
-                  size="small"
-                  onClick={() => onPortfolioSelect?.({
-                    risk: selectedPoint.risk,
-                    return: selectedPoint.return,
-                    sharpe: selectedPoint.sharpe,
-                    weights: selectedPoint.weights,
-                  })}
-                  fullWidth
-                >
-                  Use This Portfolio
-                </Button>
-              </div>
+              ))}
             </div>
-          )}
+          </div>
         </div>
-      </Card.Body>
+
+        {/* Weights panel */}
+        {showWeights && selectedPoint && (
+          <div className={styles.weightsPanel}>
+            {renderWeightsTable()}
+
+            <div className={styles.selectedPointInfo}>
+              <h4>Selected Point</h4>
+              <div className={styles.pointStats}>
+                <div className={styles.statItem}>
+                  <span className={styles.statLabel}>Expected Return:</span>
+                  <span className={styles.statValue}>
+                    {formatPercentage(selectedPoint.return, 2)}
+                  </span>
+                </div>
+                <div className={styles.statItem}>
+                  <span className={styles.statLabel}>Risk (Volatility):</span>
+                  <span className={styles.statValue}>
+                    {formatPercentage(selectedPoint.risk, 2)}
+                  </span>
+                </div>
+                <div className={styles.statItem}>
+                  <span className={styles.statLabel}>Sharpe Ratio:</span>
+                  <span className={styles.statValue}>
+                    {selectedPoint.sharpe?.toFixed(3) || 'N/A'}
+                  </span>
+                </div>
+              </div>
+
+              <Button
+                variant="primary"
+                size="small"
+                onClick={() => onPortfolioSelect?.({
+                  risk: selectedPoint.risk,
+                  return: selectedPoint.return,
+                  sharpe: selectedPoint.sharpe,
+                  weights: selectedPoint.weights,
+                })}
+                fullWidth
+              >
+                Use This Portfolio
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
     </Card>
   );
 };

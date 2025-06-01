@@ -397,7 +397,7 @@
 }
 
 /* High contrast mode */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
   .table {
     border: 2px solid var(--table-border);
   }

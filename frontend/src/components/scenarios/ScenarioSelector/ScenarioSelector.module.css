@@ -1,0 +1,294 @@
+/**
+ * ScenarioSelector Styles for Wild Market Capital
+ */
+
+.container {
+  background-color: var(--card-background);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-border-radius);
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-m);
+  border-bottom: 1px solid var(--color-divider);
+  gap: var(--spacing-m);
+}
+
+.searchSection {
+  flex: 1;
+  min-width: 0;
+}
+
+.searchInput {
+  width: 100%;
+}
+
+.actionSection {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  flex-shrink: 0;
+}
+
+.selectedCount {
+  padding: var(--spacing-s) var(--spacing-m);
+  background-color: rgba(191, 159, 251, 0.1);
+  border-bottom: 1px solid var(--color-divider);
+  color: var(--color-accent);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  padding: var(--spacing-s) var(--spacing-m);
+  background-color: rgba(250, 161, 164, 0.1);
+  border-bottom: 1px solid var(--color-divider);
+  color: var(--color-negative);
+  font-size: var(--font-size-caption);
+}
+
+.scenariosContainer {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-l);
+  gap: var(--spacing-s);
+  color: var(--color-neutral-gray);
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(191, 159, 251, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--color-accent);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.scenarioGroup {
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.scenarioGroup:last-child {
+  border-bottom: none;
+}
+
+.groupTitle {
+  padding: var(--spacing-m) var(--spacing-m) var(--spacing-s);
+  margin: 0;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  background-color: rgba(42, 46, 57, 0.3);
+}
+
+.scenariosList {
+  display: flex;
+  flex-direction: column;
+}
+
+.scenarioItem {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-s) var(--spacing-m);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border-bottom: 1px solid rgba(42, 46, 57, 0.5);
+  gap: var(--spacing-s);
+}
+
+.scenarioItem:hover {
+  background-color: rgba(42, 46, 57, 0.5);
+}
+
+.scenarioItem.selected {
+  background-color: rgba(191, 159, 251, 0.1);
+  border-color: var(--color-accent);
+}
+
+.scenarioItem:last-child {
+  border-bottom: none;
+}
+
+.scenarioCheckbox {
+  flex-shrink: 0;
+}
+
+.scenarioCheckbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--color-accent);
+}
+
+.scenarioContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.scenarioName {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  line-height: var(--line-height-body);
+}
+
+.scenarioDescription {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  line-height: var(--line-height-caption);
+  margin-top: var(--spacing-xs);
+}
+
+.scenarioType {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.scenarioActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-l);
+  gap: var(--spacing-m);
+  color: var(--color-neutral-gray);
+  text-align: center;
+}
+
+.emptyState svg {
+  color: var(--color-neutral-gray);
+  opacity: 0.5;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: var(--font-size-body);
+}
+
+/* Modal content */
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+  padding: var(--spacing-m) 0;
+}
+
+.modalInput {
+  width: 100%;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-s);
+  padding-top: var(--spacing-m);
+  border-top: 1px solid var(--color-divider);
+  margin-top: var(--spacing-m);
+}
+
+/* Scrollbar styling */
+.scenariosContainer::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+.scenariosContainer::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+.scenariosContainer::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--scrollbar-width);
+}
+
+.scenariosContainer::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-s);
+  }
+
+  .actionSection {
+    justify-content: flex-end;
+  }
+
+  .scenarioItem {
+    padding: var(--spacing-s);
+  }
+
+  .scenarioName {
+    font-size: var(--font-size-caption);
+  }
+
+  .scenarioDescription {
+    font-size: 10px;
+  }
+
+  .modalFooter {
+    flex-direction: column;
+  }
+
+  .modalFooter > * {
+    width: 100%;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .scenarioItem {
+    border-width: 2px;
+  }
+
+  .scenarioItem.selected {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+
+  .scenarioItem {
+    transition: none;
+  }
+}

@@ -75,7 +75,7 @@
 }
 
 /* High contrast mode */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
   .sectionTitle {
     border-bottom-width: 2px;
   }

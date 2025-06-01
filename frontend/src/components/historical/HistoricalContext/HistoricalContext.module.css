@@ -1,0 +1,343 @@
+/**
+ * HistoricalContext Styles for Wild Market Capital
+ */
+
+.container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+.section {
+  border-bottom: 1px solid var(--color-divider);
+  padding-bottom: var(--spacing-m);
+}
+
+.section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.sectionTitle {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-s) 0;
+}
+
+/* Events List */
+.eventsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.eventItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-s);
+}
+
+.eventMarker {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.eventText {
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+/* Indicators List */
+.indicatorsList {
+  display: grid;
+  gap: var(--spacing-s);
+}
+
+.indicatorItem {
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  padding: var(--spacing-s);
+}
+
+.indicatorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.indicatorName {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+}
+
+.indicatorValues {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.actualValue {
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-accent);
+  font-size: var(--font-size-body);
+}
+
+.normalValue {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+}
+
+/* Impact Grid */
+.impactGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-s);
+}
+
+.impactItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  padding: var(--spacing-s);
+}
+
+.impactSector {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+}
+
+.impactValue {
+  font-weight: var(--font-weight-semi-bold);
+  font-size: var(--font-size-body);
+}
+
+.impactValue.positive {
+  color: var(--color-positive);
+}
+
+.impactValue.negative {
+  color: var(--color-negative);
+}
+
+/* Response List */
+.responseList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.responseItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-s);
+}
+
+.responseMarker {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-neutral-1);
+  margin-top: 7px;
+  flex-shrink: 0;
+}
+
+.responseText {
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+/* Lessons List */
+.lessonsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.lessonItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-s);
+  background-color: rgba(116, 241, 116, 0.1);
+  border-radius: var(--border-radius-s);
+  padding: var(--spacing-s);
+}
+
+.lessonIcon {
+  color: var(--color-positive);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.lessonText {
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+/* Warnings List */
+.warningsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.warningItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-s);
+  background-color: rgba(250, 161, 164, 0.1);
+  border-radius: var(--border-radius-s);
+  padding: var(--spacing-s);
+}
+
+.warningIcon {
+  color: var(--color-negative);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.warningText {
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+/* Asset Performance Grid */
+.assetPerformanceGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-l);
+}
+
+.assetsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.assetBadge {
+  font-size: var(--font-size-caption);
+  padding: var(--spacing-xs) var(--spacing-s);
+  border-radius: var(--border-radius-xs);
+  border: 1px solid var(--color-divider);
+  background-color: rgba(42, 46, 57, 0.3);
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.assetBadge.success {
+  background-color: rgba(116, 241, 116, 0.2);
+  color: var(--color-positive);
+  border-color: var(--color-positive);
+}
+
+.assetBadge.danger {
+  background-color: rgba(250, 161, 164, 0.2);
+  color: var(--color-negative);
+  border-color: var(--color-negative);
+}
+
+/* Parallels List */
+.parallelsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.parallelItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-s);
+  background-color: rgba(191, 159, 251, 0.1);
+  border-radius: var(--border-radius-s);
+  padding: var(--spacing-s);
+}
+
+.parallelIcon {
+  color: var(--color-accent);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.parallelText {
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--spacing-m);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .assetPerformanceGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-m);
+  }
+
+  .impactGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .indicatorHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .indicatorValues {
+    align-items: flex-start;
+  }
+
+  .impactItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .eventMarker,
+  .responseMarker {
+    border: 2px solid var(--color-accent);
+  }
+
+  .lessonItem,
+  .warningItem,
+  .parallelItem {
+    border: 1px solid currentColor;
+  }
+
+  .assetBadge {
+    border-width: 2px;
+  }
+}

@@ -1,0 +1,278 @@
+/**
+ * RiskContribution Styles for Wild Market Capital
+ */
+
+.container {
+  min-height: 500px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-m);
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 140px;
+}
+
+.controlLabel {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-l);
+  color: var(--color-negative);
+  text-align: center;
+  background-color: rgba(250, 161, 164, 0.1);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-negative);
+}
+
+.summarySection,
+.visualizationSection,
+.insightsSection {
+  width: 100%;
+}
+
+.sectionTitle {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-m) 0;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--spacing-m);
+  margin-bottom: var(--spacing-l);
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.summaryLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  margin-bottom: var(--spacing-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summaryValue {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.tableContainer {
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+  overflow: hidden;
+}
+
+.chartContainer {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+/* Table cell styles */
+.assetName {
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.contributionValue {
+  font-weight: var(--font-weight-medium);
+  font-family: 'Courier New', monospace;
+  color: var(--color-accent);
+}
+
+.marginalValue {
+  font-weight: var(--font-weight-medium);
+  font-family: 'Courier New', monospace;
+  color: var(--color-neutral-1);
+}
+
+.weightValue {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.ratioValue {
+  font-weight: var(--font-weight-semi-bold);
+  font-family: 'Courier New', monospace;
+  color: var(--color-text-light);
+}
+
+.highRisk {
+  color: var(--color-negative);
+  background-color: rgba(250, 161, 164, 0.1);
+  padding: 2px 4px;
+  border-radius: var(--border-radius-xs);
+}
+
+.lowRisk {
+  color: var(--color-positive);
+  background-color: rgba(116, 241, 116, 0.1);
+  padding: 2px 4px;
+  border-radius: var(--border-radius-xs);
+}
+
+/* Insights section */
+.insightsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.insightItem {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-s);
+  padding: var(--spacing-m);
+  border-radius: var(--border-radius-s);
+  border-left: 4px solid transparent;
+}
+
+.warning {
+  background-color: rgba(250, 161, 164, 0.1);
+  border-left-color: var(--color-negative);
+}
+
+.positive {
+  background-color: rgba(116, 241, 116, 0.1);
+  border-left-color: var(--color-positive);
+}
+
+.info {
+  background-color: rgba(144, 191, 249, 0.1);
+  border-left-color: var(--color-neutral-1);
+}
+
+.insightIcon {
+  font-size: var(--font-size-body);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.insightText {
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+  line-height: 1.5;
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-body);
+  text-align: center;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .controls {
+    padding: var(--spacing-s);
+    gap: var(--spacing-s);
+  }
+
+  .controlGroup {
+    min-width: 120px;
+  }
+
+  .summaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-s);
+  }
+
+  .summaryItem {
+    padding: var(--spacing-s);
+  }
+
+  .summaryValue {
+    font-size: var(--font-size-body);
+  }
+
+  .chartContainer {
+    padding: var(--spacing-s);
+  }
+
+  .insightItem {
+    padding: var(--spacing-s);
+  }
+}
+
+@media (max-width: 480px) {
+  .controls {
+    flex-direction: column;
+  }
+
+  .controlGroup {
+    min-width: auto;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .controls,
+  .summaryItem,
+  .tableContainer,
+  .chartContainer {
+    border-width: 2px;
+  }
+
+  .error {
+    border-width: 2px;
+  }
+
+  .insightItem {
+    border-left-width: 6px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .summaryItem,
+  .insightItem {
+    transition: none;
+  }
+}

@@ -279,7 +279,7 @@
 }
 
 /* High contrast mode support */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
   .modal {
     border-width: 2px;
   }

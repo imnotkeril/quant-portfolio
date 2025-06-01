@@ -1,0 +1,340 @@
+/**
+ * CorrelationMatrix Styles for Wild Market Capital
+ */
+
+.container {
+  min-height: 500px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-m);
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  min-width: 120px;
+}
+
+.controlLabel {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-l);
+  color: var(--color-negative);
+  text-align: center;
+  background-color: rgba(250, 161, 164, 0.1);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-negative);
+}
+
+.statsSection,
+.visualizationSection,
+.interpretationSection {
+  width: 100%;
+}
+
+.sectionTitle {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-m) 0;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--spacing-m);
+  margin-bottom: var(--spacing-l);
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.statLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  margin-bottom: var(--spacing-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statValue {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.heatmapContainer {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+  overflow-x: auto;
+}
+
+.tableContainer {
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+  overflow: hidden;
+}
+
+/* Table cell styles */
+.assetName {
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.correlationValue {
+  font-weight: var(--font-weight-medium);
+  font-family: 'Courier New', monospace;
+  color: var(--color-text-light);
+}
+
+.highCorrelation {
+  color: var(--color-positive);
+  background-color: rgba(116, 241, 116, 0.1);
+  padding: 2px 4px;
+  border-radius: var(--border-radius-xs);
+}
+
+.perfectCorrelation {
+  color: var(--color-accent);
+  background-color: rgba(191, 159, 251, 0.1);
+  font-weight: var(--font-weight-bold);
+}
+
+.negativeCorrelation {
+  color: var(--color-negative);
+}
+
+/* Interpretation section */
+.interpretationGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+  margin-bottom: var(--spacing-l);
+}
+
+.interpretationItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+  padding: var(--spacing-s);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.colorSample {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--border-radius-xs);
+  flex-shrink: 0;
+}
+
+.strongPositive {
+  background-color: rgba(116, 241, 116, 0.8);
+}
+
+.moderatePositive {
+  background-color: rgba(116, 241, 116, 0.5);
+}
+
+.weakCorrelation {
+  background-color: rgba(209, 212, 220, 0.5);
+}
+
+.moderateNegative {
+  background-color: rgba(250, 161, 164, 0.5);
+}
+
+.strongNegative {
+  background-color: rgba(250, 161, 164, 0.8);
+}
+
+.interpretationText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.interpretationText strong {
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+}
+
+.interpretationText span {
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-caption);
+}
+
+.insightBox {
+  padding: var(--spacing-l);
+  background-color: rgba(191, 159, 251, 0.1);
+  border-radius: var(--border-radius-m);
+  border-left: 4px solid var(--color-accent);
+}
+
+.insightTitle {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-accent);
+  margin: 0 0 var(--spacing-m) 0;
+}
+
+.insightList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.insightList li {
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+  line-height: 1.5;
+}
+
+.warningText {
+  color: var(--color-negative);
+  font-weight: var(--font-weight-medium);
+}
+
+.positiveText {
+  color: var(--color-positive);
+  font-weight: var(--font-weight-medium);
+}
+
+.neutralText {
+  color: var(--color-neutral-2);
+  font-weight: var(--font-weight-medium);
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-body);
+  text-align: center;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .controls {
+    padding: var(--spacing-s);
+    gap: var(--spacing-s);
+  }
+
+  .controlGroup {
+    min-width: 100px;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-s);
+  }
+
+  .statItem {
+    padding: var(--spacing-s);
+  }
+
+  .statValue {
+    font-size: var(--font-size-body);
+  }
+
+  .heatmapContainer {
+    padding: var(--spacing-s);
+  }
+
+  .interpretationItem {
+    padding: var(--spacing-xs);
+    gap: var(--spacing-s);
+  }
+
+  .insightBox {
+    padding: var(--spacing-m);
+  }
+}
+
+@media (max-width: 480px) {
+  .controls {
+    flex-direction: column;
+  }
+
+  .controlGroup {
+    min-width: auto;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .interpretationItem {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .colorSample {
+    align-self: flex-start;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .controls,
+  .statItem,
+  .heatmapContainer,
+  .tableContainer,
+  .interpretationItem,
+  .insightBox {
+    border-width: 2px;
+  }
+
+  .error {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .statItem,
+  .interpretationItem {
+    transition: none;
+  }
+}

@@ -119,7 +119,7 @@
 }
 
 /* High contrast mode */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
   .customRange {
     border-width: 2px;
   }

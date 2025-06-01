@@ -1,0 +1,445 @@
+/**
+ * ScenarioComparison Styles for Wild Market Capital
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-l);
+  gap: var(--spacing-m);
+  color: var(--color-neutral-gray);
+  text-align: center;
+  min-height: 200px;
+}
+
+.emptyState svg {
+  color: var(--color-neutral-gray);
+  opacity: 0.5;
+}
+
+.emptyState h3 {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: var(--font-size-body);
+}
+
+/* Header */
+.headerCard {
+  background-color: var(--card-background);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-m);
+}
+
+.titleSection {
+  flex: 1;
+}
+
+.title {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-gray);
+  line-height: var(--line-height-body);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+  flex-shrink: 0;
+}
+
+.metricSelector,
+.chartTypeSelector {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+}
+
+.metricSelector label,
+.chartTypeSelector label {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.controlSelect {
+  height: 32px;
+  padding: 0 var(--spacing-s);
+  background-color: var(--input-background);
+  border: 1px solid var(--input-border);
+  border-radius: var(--border-radius-s);
+  color: var(--color-text-light);
+  font-size: var(--font-size-caption);
+  font-family: var(--font-family);
+}
+
+.controlSelect:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.controlSelect option {
+  background-color: var(--color-background);
+  color: var(--color-text-light);
+}
+
+/* Summary */
+.summaryCard {
+  background-color: var(--card-background);
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-m);
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.summaryLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  margin-bottom: var(--spacing-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: var(--font-weight-medium);
+}
+
+.summaryValue {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-xs);
+}
+
+.summaryValue.positive {
+  color: var(--color-positive);
+}
+
+.summaryValue.negative {
+  color: var(--color-negative);
+}
+
+.summaryDetail {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-style: italic;
+}
+
+/* Charts */
+.chartCard {
+  background-color: var(--card-background);
+}
+
+.chart {
+  width: 100%;
+}
+
+/* Table */
+.tableCard {
+  background-color: var(--card-background);
+}
+
+.comparisonTable {
+  width: 100%;
+}
+
+.scenarioName {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.impactValue {
+  font-weight: var(--font-weight-bold);
+  text-align: right;
+}
+
+.impactValue.positive {
+  color: var(--color-positive);
+}
+
+.impactValue.negative {
+  color: var(--color-negative);
+}
+
+.assetName {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.assetImpact {
+  font-size: var(--font-size-caption);
+  color: var(--color-negative);
+  font-weight: var(--font-weight-medium);
+}
+
+.riskChanges {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.riskValue {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+}
+
+.riskValue.positive {
+  color: var(--color-positive);
+}
+
+.riskValue.negative {
+  color: var(--color-negative);
+}
+
+.recoveryInfo {
+  text-align: center;
+}
+
+.recoveryProbability {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  margin-top: var(--spacing-xs);
+}
+
+/* Asset Breakdown */
+.assetCard {
+  background-color: var(--card-background);
+}
+
+.assetBreakdown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+.assetGroup {
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.assetTitle {
+  margin: 0 0 var(--spacing-m) 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.assetScenarios {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-s);
+}
+
+.assetScenario {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-s);
+  background-color: var(--color-background);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.assetScenarioName {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.assetScenarioImpact {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+}
+
+.assetScenarioImpact.positive {
+  color: var(--color-positive);
+}
+
+.assetScenarioImpact.negative {
+  color: var(--color-negative);
+}
+
+/* Risk Analysis */
+.riskCard {
+  background-color: var(--card-background);
+}
+
+.riskAnalysis {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.riskMetrics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.riskScenario {
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.riskScenarioName {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-m);
+}
+
+.riskValues {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-m);
+}
+
+.riskItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-s);
+  background-color: var(--color-background);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.riskLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+}
+
+.riskValue {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-s);
+  }
+
+  .metricSelector,
+  .chartTypeSelector {
+    justify-content: space-between;
+  }
+
+  .summaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-s);
+  }
+
+  .summaryItem {
+    padding: var(--spacing-s);
+  }
+
+  .summaryValue {
+    font-size: var(--font-size-h3);
+  }
+
+  .assetScenarios {
+    grid-template-columns: 1fr;
+  }
+
+  .riskValues {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-s);
+  }
+}
+
+@media (max-width: 480px) {
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .container {
+    gap: var(--spacing-s);
+  }
+
+  .assetBreakdown {
+    gap: var(--spacing-m);
+  }
+
+  .riskMetrics {
+    gap: var(--spacing-s);
+  }
+
+  .riskScenario {
+    padding: var(--spacing-s);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .summaryItem {
+    border-width: 2px;
+  }
+
+  .assetGroup,
+  .riskScenario {
+    border-width: 2px;
+  }
+
+  .controlSelect {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .chart {
+    transition: none;
+  }
+}

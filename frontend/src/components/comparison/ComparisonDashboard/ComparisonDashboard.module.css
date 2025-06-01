@@ -1,0 +1,325 @@
+/**
+ * ComparisonTable Styles for Wild Market Capital
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+  width: 100%;
+}
+
+.compact {
+  gap: var(--spacing-s);
+}
+
+/* Table Actions */
+.tableActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--spacing-s);
+}
+
+/* Column Styles */
+.metricColumn {
+  background-color: rgba(42, 46, 57, 0.1);
+  font-weight: var(--font-weight-medium);
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.metricName {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.valueCell {
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-light);
+  font-variant-numeric: tabular-nums;
+}
+
+.valueCell.positive {
+  color: var(--color-positive);
+}
+
+.valueCell.negative {
+  color: var(--color-negative);
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-l);
+  text-align: center;
+  background-color: var(--card-background);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-border-radius);
+  min-height: 200px;
+}
+
+.emptyIcon {
+  font-size: 48px;
+  margin-bottom: var(--spacing-s);
+}
+
+.emptyState p {
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-gray);
+  margin: 0;
+}
+
+/* Display Mode Note */
+.displayModeNote {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-s);
+  background-color: rgba(42, 46, 57, 0.1);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  font-size: var(--font-size-caption);
+}
+
+.noteIcon {
+  flex-shrink: 0;
+  color: var(--color-neutral-1);
+}
+
+.noteText {
+  color: var(--color-neutral-gray);
+  line-height: var(--line-height-caption);
+}
+
+/* Custom table styling overrides */
+.container :global(.table) {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.container :global(.table th) {
+  background-color: var(--table-header-background);
+  border-bottom: 2px solid var(--color-divider);
+  font-weight: var(--font-weight-semi-bold);
+  position: relative;
+}
+
+.container :global(.table th:first-child) {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background-color: var(--table-header-background);
+}
+
+.container :global(.table td) {
+  border-bottom: 1px solid var(--table-border);
+  transition: background-color var(--transition-fast);
+}
+
+.container :global(.table td:first-child) {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background-color: var(--card-background);
+  font-weight: var(--font-weight-medium);
+}
+
+.container :global(.table tr:hover td) {
+  background-color: var(--table-row-hover-background);
+}
+
+.container :global(.table tr:hover td:first-child) {
+  background-color: var(--table-row-hover-background);
+}
+
+/* Highlight differences */
+.container :global(.table td[data-column="difference"]) {
+  font-weight: var(--font-weight-semi-bold);
+  background-color: rgba(191, 159, 251, 0.05);
+}
+
+/* Metric-specific styling */
+.container :global(.table tr[data-metric*="return"]) {
+  /* Return metrics styling */
+}
+
+.container :global(.table tr[data-metric*="risk"]) {
+  /* Risk metrics styling */
+}
+
+.container :global(.table tr[data-metric*="ratio"]) {
+  /* Ratio metrics styling */
+}
+
+/* Compact mode adjustments */
+.compact .container :global(.table th),
+.compact .container :global(.table td) {
+  padding: var(--spacing-xs) var(--spacing-s);
+  font-size: var(--font-size-caption);
+}
+
+.compact .displayModeNote {
+  padding: var(--spacing-xs);
+  font-size: 10px;
+}
+
+/* Scrollable table wrapper */
+.container :global(.tableWrapper) {
+  overflow-x: auto;
+  border: 1px solid var(--table-border);
+  border-radius: var(--border-radius-s);
+}
+
+.container :global(.tableWrapper)::-webkit-scrollbar {
+  height: var(--scrollbar-width);
+}
+
+.container :global(.tableWrapper)::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+.container :global(.tableWrapper)::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--scrollbar-width);
+}
+
+.container :global(.tableWrapper)::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Sort indicators */
+.container :global(.table th.sortable) {
+  cursor: pointer;
+  user-select: none;
+}
+
+.container :global(.table th.sortable:hover) {
+  background-color: rgba(42, 46, 57, 0.8);
+}
+
+.container :global(.table th .sortIcon) {
+  margin-left: var(--spacing-xs);
+  color: var(--color-accent);
+  opacity: 0.7;
+}
+
+.container :global(.table th.sorted .sortIcon) {
+  opacity: 1;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    gap: var(--spacing-s);
+  }
+
+  .tableActions {
+    justify-content: center;
+  }
+
+  .container :global(.table th),
+  .container :global(.table td) {
+    padding: var(--spacing-xs);
+    font-size: var(--font-size-caption);
+  }
+
+  .displayModeNote {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-xs);
+  }
+
+  /* Hide less important columns on mobile */
+  .container :global(.table th:nth-child(n+4)),
+  .container :global(.table td:nth-child(n+4)) {
+    display: none;
+  }
+
+  .compact .container :global(.table th:nth-child(n+3)),
+  .compact .container :global(.table td:nth-child(n+3)) {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .emptyState {
+    padding: var(--spacing-m);
+    min-height: 150px;
+  }
+
+  .emptyIcon {
+    font-size: 32px;
+  }
+
+  .container :global(.table th),
+  .container :global(.table td) {
+    padding: var(--spacing-xs) 6px;
+    font-size: 10px;
+  }
+
+  .metricName {
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .container :global(.table th) {
+    border-bottom-width: 3px;
+  }
+
+  .container :global(.table td) {
+    border-bottom-width: 2px;
+  }
+
+  .container :global(.tableWrapper) {
+    border-width: 2px;
+  }
+
+  .displayModeNote {
+    border-width: 2px;
+  }
+
+  .emptyState {
+    border-width: 2px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .tableActions {
+    display: none;
+  }
+
+  .displayModeNote {
+    break-inside: avoid;
+  }
+
+  .container :global(.table) {
+    break-inside: auto;
+  }
+
+  .container :global(.table tr) {
+    break-inside: avoid;
+    break-after: auto;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .container :global(.table td) {
+    transition: none;
+  }
+
+  .valueCell {
+    transition: none;
+  }
+}

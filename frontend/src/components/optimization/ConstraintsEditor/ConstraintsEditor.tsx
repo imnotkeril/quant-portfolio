@@ -218,7 +218,7 @@ export const ConstraintsEditor: React.FC<ConstraintsEditorProps> = ({
       title: 'Type',
       width: '120px',
       render: (value) => (
-        <Badge variant="outline" size="small">
+        <Badge size="small">
           {constraintTypes.find(t => t.value === value)?.label || value}
         </Badge>
       ),
@@ -289,87 +289,86 @@ export const ConstraintsEditor: React.FC<ConstraintsEditorProps> = ({
       </div>
 
       <div className={styles.content}>
-          {/* Constraint Groups */}
-          {editingGroups.length > 0 && (
-            <div className={styles.groupsSection}>
-              <h4>Constraint Groups</h4>
-              <div className={styles.groupsList}>
-                {editingGroups.map(group => (
-                  <div key={group.id} className={styles.groupItem}>
-                    <div className={styles.groupHeader}>
-                      <span className={styles.groupName}>{group.name}</span>
-                      <div className={styles.groupActions}>
-                        <label className={styles.groupToggle}>
-                          <input
-                            type="checkbox"
-                            checked={group.enabled}
-                            onChange={() => handleToggleGroup(group.id)}
-                          />
-                          <span>Enabled</span>
-                        </label>
-                      </div>
-                    </div>
-                    <div className={styles.groupConstraints}>
-                      {group.constraints.length} constraints
+        {/* Constraint Groups */}
+        {editingGroups.length > 0 && (
+          <div className={styles.groupsSection}>
+            <h4>Constraint Groups</h4>
+            <div className={styles.groupsList}>
+              {editingGroups.map(group => (
+                <div key={group.id} className={styles.groupItem}>
+                  <div className={styles.groupHeader}>
+                    <span className={styles.groupName}>{group.name}</span>
+                    <div className={styles.groupActions}>
+                      <label className={styles.groupToggle}>
+                        <input
+                          type="checkbox"
+                          checked={group.enabled}
+                          onChange={() => handleToggleGroup(group.id)}
+                        />
+                        <span>Enabled</span>
+                      </label>
                     </div>
                   </div>
-                ))}
-              </div>
+                  <div className={styles.groupConstraints}>
+                    {group.constraints.length} constraints
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
-
-          {/* Constraints Table */}
-          <div className={styles.constraintsSection}>
-            <h4>Individual Constraints ({editingConstraints.length})</h4>
-
-            {editingConstraints.length === 0 ? (
-              <div className={styles.emptyState}>
-                <p>No constraints defined.</p>
-                <p>Add constraints to control portfolio optimization.</p>
-                <Button
-                  variant="primary"
-                  onClick={() => setShowAddModal(true)}
-                >
-                  Add First Constraint
-                </Button>
-              </div>
-            ) : (
-              <Table
-                columns={constraintColumns}
-                data={editingConstraints}
-                rowKey="id"
-                size="small"
-                bordered
-                pagination={false}
-              />
-            )}
           </div>
+        )}
 
-          {/* Summary */}
-          {editingConstraints.length > 0 && (
-            <div className={styles.summary}>
-              <div className={styles.summaryStats}>
-                <div className={styles.statItem}>
-                  <span className={styles.statLabel}>Total Constraints:</span>
-                  <span className={styles.statValue}>{editingConstraints.length}</span>
-                </div>
-                <div className={styles.statItem}>
-                  <span className={styles.statLabel}>Enabled:</span>
-                  <span className={styles.statValue}>
-                    {editingConstraints.filter(c => c.enabled).length}
-                  </span>
-                </div>
-                <div className={styles.statItem}>
-                  <span className={styles.statLabel}>Weight Constraints:</span>
-                  <span className={styles.statValue}>
-                    {editingConstraints.filter(c => c.type === 'weight').length}
-                  </span>
-                </div>
-              </div>
+        {/* Constraints Table */}
+        <div className={styles.constraintsSection}>
+          <h4>Individual Constraints ({editingConstraints.length})</h4>
+
+          {editingConstraints.length === 0 ? (
+            <div className={styles.emptyState}>
+              <p>No constraints defined.</p>
+              <p>Add constraints to control portfolio optimization.</p>
+              <Button
+                variant="primary"
+                onClick={() => setShowAddModal(true)}
+              >
+                Add First Constraint
+              </Button>
             </div>
+          ) : (
+            <Table
+              columns={constraintColumns}
+              data={editingConstraints}
+              rowKey="id"
+              size="small"
+              bordered
+              pagination={false}
+            />
           )}
         </div>
-      </Card.Body>
+
+        {/* Summary */}
+        {editingConstraints.length > 0 && (
+          <div className={styles.summary}>
+            <div className={styles.summaryStats}>
+              <div className={styles.statItem}>
+                <span className={styles.statLabel}>Total Constraints:</span>
+                <span className={styles.statValue}>{editingConstraints.length}</span>
+              </div>
+              <div className={styles.statItem}>
+                <span className={styles.statLabel}>Enabled:</span>
+                <span className={styles.statValue}>
+                  {editingConstraints.filter(c => c.enabled).length}
+                </span>
+              </div>
+              <div className={styles.statItem}>
+                <span className={styles.statLabel}>Weight Constraints:</span>
+                <span className={styles.statValue}>
+                  {editingConstraints.filter(c => c.type === 'weight').length}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Add Constraint Modal */}
       <Modal

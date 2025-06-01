@@ -1,0 +1,163 @@
+/**
+ * ComparisonChart Styles for Wild Market Capital
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+  width: 100%;
+}
+
+/* Chart Controls */
+.chartControls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+  flex-wrap: wrap;
+}
+
+.controlGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.controlLabel {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  white-space: nowrap;
+}
+
+/* Chart Info */
+.chartInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-m);
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+}
+
+.portfolioLegend {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.legendColor {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.chartMetrics {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+  flex-shrink: 0;
+}
+
+.metricItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.metricLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+}
+
+.metricValue {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .chartControls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-s);
+  }
+
+  .controlGroup {
+    justify-content: space-between;
+  }
+
+  .chartInfo {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-s);
+  }
+
+  .portfolioLegend {
+    justify-content: center;
+  }
+
+  .chartMetrics {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .portfolioLegend {
+    gap: var(--spacing-s);
+  }
+
+  .chartMetrics {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .controlLabel {
+    font-size: 10px;
+  }
+
+  .legendLabel,
+  .metricLabel,
+  .metricValue {
+    font-size: 10px;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .chartInfo {
+    border-width: 2px;
+  }
+
+  .legendColor {
+    border: 1px solid var(--color-text-light);
+  }
+}
+
+/* Print styles */
+@media print {
+  .chartControls {
+    display: none;
+  }
+
+  .chartInfo {
+    break-inside: avoid;
+  }
+}

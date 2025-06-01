@@ -144,7 +144,7 @@
 }
 
 /* High contrast mode */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
   .selected {
     border-width: 2px;
   }

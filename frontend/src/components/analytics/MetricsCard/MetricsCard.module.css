@@ -225,7 +225,7 @@
 }
 
 /* High contrast mode */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
   .card {
     border-width: 2px;
   }

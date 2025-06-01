@@ -9,7 +9,6 @@ import { Button } from '../../common/Button/Button';
 import { Card } from '../../common/Card/Card';
 import { Badge } from '../../common/Badge/Badge';
 import { formatPercentage, formatCurrency } from '../../../utils/formatters';
-import { validateWeights } from '../../../utils/validators';
 import styles from './WeightsTable.module.css';
 
 export interface WeightItem {
@@ -36,6 +35,36 @@ interface WeightsTableProps {
   onReset?: () => void;
   className?: string;
 }
+
+// Simple weight validation
+const validateWeights = (weights: WeightItem[]) => {
+  const errors: Record<string, string> = {};
+  const totalWeight = weights.reduce((sum, item) => sum + item.targetWeight, 0);
+
+  weights.forEach(item => {
+    if (item.targetWeight < 0) {
+      errors[item.ticker] = 'Weight cannot be negative';
+    }
+    if (item.targetWeight > 1) {
+      errors[item.ticker] = 'Weight cannot exceed 100%';
+    }
+    if (item.minWeight !== undefined && item.targetWeight < item.minWeight) {
+      errors[item.ticker] = `Weight below minimum (${formatPercentage(item.minWeight, 1)})`;
+    }
+    if (item.maxWeight !== undefined && item.targetWeight > item.maxWeight) {
+      errors[item.ticker] = `Weight above maximum (${formatPercentage(item.maxWeight, 1)})`;
+    }
+  });
+
+  if (Math.abs(totalWeight - 1) > 0.001) {
+    errors.general = 'Total weights must sum to 100%';
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+  };
+};
 
 export const WeightsTable: React.FC<WeightsTableProps> = ({
   weights,
@@ -74,10 +103,10 @@ export const WeightsTable: React.FC<WeightsTableProps> = ({
   }, [editingWeights]);
 
   // Handle weight change
-  const handleWeightChange = (ticker: string, newWeight: string) => {
+  const handleWeightChange = (ticker: string, newWeight: number) => {
     if (!editable) return;
 
-    const weight = parseFloat(newWeight) || 0;
+    const weight = newWeight;
     const updatedWeights = editingWeights.map(item => {
       if (item.ticker === ticker) {
         const targetValue = weight * totalValue;
@@ -218,9 +247,9 @@ export const WeightsTable: React.FC<WeightsTableProps> = ({
         return (
           <Input
             type="number"
-            min={0}
-            max={1}
-            step={0.01}
+            min="0"
+            max="100"
+            step="0.01"
             value={(value * 100).toFixed(2)}
             onChange={(e) => handleWeightChange(record.ticker, (parseFloat(e.target.value) || 0) / 100)}
             error={errors[record.ticker]}
@@ -240,17 +269,17 @@ export const WeightsTable: React.FC<WeightsTableProps> = ({
       render: (_, record) => (
         <div className={styles.constraintCell}>
           {record.minWeight !== undefined && (
-            <Badge variant="secondary" size="small">
+            <Badge size="small">
               Min: {formatPercentage(record.minWeight, 1)}
             </Badge>
           )}
           {record.maxWeight !== undefined && (
-            <Badge variant="secondary" size="small">
+            <Badge size="small">
               Max: {formatPercentage(record.maxWeight, 1)}
             </Badge>
           )}
           {record.constraint && (
-            <Badge variant="outline" size="small">
+            <Badge size="small">
               {record.constraint}
             </Badge>
           )}
@@ -269,7 +298,7 @@ export const WeightsTable: React.FC<WeightsTableProps> = ({
         align: 'right',
         render: (value) => (
           <span className={styles.value}>
-            {formatCurrency(value || 0, 0)}
+            {formatCurrency(value || 0, '0')}
           </span>
         ),
       },
@@ -280,7 +309,7 @@ export const WeightsTable: React.FC<WeightsTableProps> = ({
         align: 'right',
         render: (value) => (
           <span className={styles.value}>
-            {formatCurrency(value || 0, 0)}
+            {formatCurrency(value || 0, '0')}
           </span>
         ),
       },
@@ -297,7 +326,7 @@ export const WeightsTable: React.FC<WeightsTableProps> = ({
                 amount > 0 ? styles.positive : amount < 0 ? styles.negative : styles.neutral
               }`}
             >
-              {amount > 0 ? '+' : ''}{formatCurrency(amount, 0)}
+              {amount > 0 ? '+' : ''}{formatCurrency(amount, '0')}
             </span>
           );
         },
@@ -307,49 +336,47 @@ export const WeightsTable: React.FC<WeightsTableProps> = ({
 
   return (
     <Card className={`${styles.container} ${className || ''}`}>
-      <Card.Header>
-        <div className={styles.header}>
-          <h3>Portfolio Weights</h3>
-          {editable && (
-            <div className={styles.headerActions}>
-              <Button
-                variant="outline"
-                size="small"
-                onClick={applyConstraints}
-                disabled={!hasChanges}
-              >
-                Apply Constraints
-              </Button>
-              <Button
-                variant="outline"
-                size="small"
-                onClick={normalizeWeights}
-                disabled={!hasChanges}
-              >
-                Normalize
-              </Button>
-              <Button
-                variant="secondary"
-                size="small"
-                onClick={handleReset}
-                disabled={!hasChanges}
-              >
-                Reset
-              </Button>
-              <Button
-                variant="primary"
-                size="small"
-                onClick={handleSave}
-                disabled={!hasChanges || !totals.targetValid}
-              >
-                Save
-              </Button>
-            </div>
-          )}
-        </div>
-      </Card.Header>
+      <div className={styles.header}>
+        <h3>Portfolio Weights</h3>
+        {editable && (
+          <div className={styles.headerActions}>
+            <Button
+              variant="outline"
+              size="small"
+              onClick={applyConstraints}
+              disabled={!hasChanges}
+            >
+              Apply Constraints
+            </Button>
+            <Button
+              variant="outline"
+              size="small"
+              onClick={normalizeWeights}
+              disabled={!hasChanges}
+            >
+              Normalize
+            </Button>
+            <Button
+              variant="secondary"
+              size="small"
+              onClick={handleReset}
+              disabled={!hasChanges}
+            >
+              Reset
+            </Button>
+            <Button
+              variant="primary"
+              size="small"
+              onClick={handleSave}
+              disabled={!hasChanges || !totals.targetValid}
+            >
+              Save
+            </Button>
+          </div>
+        )}
+      </div>
 
-      <Card.Body>
+      <div className={styles.content}>
         {/* Summary Statistics */}
         <div className={styles.summary}>
           <div className={styles.summaryRow}>
@@ -375,7 +402,7 @@ export const WeightsTable: React.FC<WeightsTableProps> = ({
               <div className={styles.summaryItem}>
                 <span className={styles.summaryLabel}>Total Rebalance:</span>
                 <span className={styles.summaryValue}>
-                  {formatCurrency(totals.rebalance, 0)}
+                  {formatCurrency(totals.rebalance, '0')}
                 </span>
               </div>
             )}
@@ -464,7 +491,7 @@ export const WeightsTable: React.FC<WeightsTableProps> = ({
             </ul>
           </div>
         )}
-      </Card.Body>
+      </div>
     </Card>
   );
 };

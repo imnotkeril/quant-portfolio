@@ -1,0 +1,473 @@
+/**
+ * ScenarioChain Styles for Wild Market Capital
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+/* Header */
+.headerCard {
+  background-color: var(--card-background);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-m);
+}
+
+.titleSection {
+  flex: 1;
+}
+
+.title {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.subtitle {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-gray);
+  line-height: var(--line-height-body);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  margin-top: var(--spacing-m);
+  padding: var(--spacing-s) var(--spacing-m);
+  background-color: rgba(250, 161, 164, 0.1);
+  border: 1px solid var(--color-negative);
+  border-radius: var(--border-radius-s);
+  color: var(--color-negative);
+  font-size: var(--font-size-caption);
+}
+
+/* Table */
+.tableCard {
+  background-color: var(--card-background);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-l);
+  gap: var(--spacing-m);
+  color: var(--color-neutral-gray);
+  text-align: center;
+}
+
+.emptyState svg {
+  color: var(--color-neutral-gray);
+  opacity: 0.5;
+}
+
+.emptyState h3 {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: var(--font-size-body);
+}
+
+.chainsTable {
+  width: 100%;
+}
+
+.chainName {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.chainDescription {
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-caption);
+}
+
+.complexity {
+  font-size: var(--font-size-caption);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+.impactValue {
+  font-weight: var(--font-weight-bold);
+  text-align: right;
+}
+
+.impactValue.positive {
+  color: var(--color-positive);
+}
+
+.impactValue.negative {
+  color: var(--color-negative);
+}
+
+.chainActions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+/* Chain Details */
+.detailsCard {
+  background-color: var(--card-background);
+}
+
+.chainDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+.chainInfo h4 {
+  margin: 0 0 var(--spacing-m) 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-m);
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+}
+
+.infoLabel {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-gray);
+  min-width: 100px;
+}
+
+.infoValue {
+  color: var(--color-text-light);
+}
+
+/* Chain Visualization */
+.chainVisualization h4 {
+  margin: 0 0 var(--spacing-m) 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.eventFlow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  overflow-x: auto;
+  min-height: 80px;
+}
+
+.eventNode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 120px;
+  padding: var(--spacing-s);
+  background-color: var(--color-background);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  text-align: center;
+}
+
+.eventName {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-xs);
+}
+
+.eventType {
+  font-size: 10px;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.eventDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 10px;
+  color: var(--color-neutral-gray);
+}
+
+.eventArrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--color-accent);
+}
+
+.eventProbability {
+  font-size: 10px;
+  color: var(--color-accent);
+  margin-top: 2px;
+  font-weight: var(--font-weight-medium);
+}
+
+/* Modal Content */
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.formInput {
+  width: 100%;
+}
+
+.editInfo {
+  padding: var(--spacing-m);
+  background-color: rgba(191, 159, 251, 0.1);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-accent);
+}
+
+.editInfo p {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-light);
+}
+
+.editInfo p:first-child {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-xs);
+}
+
+/* Events Section */
+.eventsSection {
+  border-top: 1px solid var(--color-divider);
+  padding-top: var(--spacing-l);
+}
+
+.eventsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-m);
+}
+
+.eventsHeader h4 {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.eventsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.eventForm {
+  padding: var(--spacing-m);
+  background-color: rgba(42, 46, 57, 0.3);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+}
+
+.eventFormHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-m);
+  padding-bottom: var(--spacing-s);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.eventFormHeader span {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.eventFormGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: var(--spacing-m);
+}
+
+.eventFormField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.eventFormField label {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.eventSelect,
+.eventInput {
+  height: 36px;
+  padding: 0 var(--spacing-s);
+  background-color: var(--input-background);
+  border: 1px solid var(--input-border);
+  border-radius: var(--border-radius-s);
+  color: var(--color-text-light);
+  font-size: var(--font-size-caption);
+  font-family: var(--font-family);
+}
+
+.eventSelect:focus,
+.eventInput:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.eventSelect option {
+  background-color: var(--color-background);
+  color: var(--color-text-light);
+}
+
+.noEvents {
+  padding: var(--spacing-l);
+  text-align: center;
+  color: var(--color-neutral-gray);
+  font-style: italic;
+}
+
+.noEvents p {
+  margin: 0;
+  font-size: var(--font-size-body);
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-s);
+  padding-top: var(--spacing-m);
+  border-top: 1px solid var(--color-divider);
+  margin-top: var(--spacing-m);
+}
+
+/* Scrollbar styling */
+.eventFlow::-webkit-scrollbar,
+.eventsList::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+.eventFlow::-webkit-scrollbar-track,
+.eventsList::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+.eventFlow::-webkit-scrollbar-thumb,
+.eventsList::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--scrollbar-width);
+}
+
+.eventFlow::-webkit-scrollbar-thumb:hover,
+.eventsList::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .eventFormGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-s);
+  }
+
+  .eventFlow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .eventArrow {
+    transform: rotate(90deg);
+    margin: var(--spacing-s) 0;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .modalFooter {
+    flex-direction: column;
+  }
+
+  .modalFooter > * {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .chainDetails {
+    gap: var(--spacing-m);
+  }
+
+  .eventForm {
+    padding: var(--spacing-s);
+  }
+
+  .eventFormGrid {
+    gap: var(--spacing-xs);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .eventNode {
+    border-width: 2px;
+  }
+
+  .eventForm {
+    border-width: 2px;
+  }
+
+  .eventSelect,
+  .eventInput {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .eventNode,
+  .eventForm {
+    transition: none;
+  }
+}

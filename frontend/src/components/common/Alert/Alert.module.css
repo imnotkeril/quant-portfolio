@@ -240,7 +240,7 @@
 }
 
 /* High contrast mode */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
   .alert {
     border-width: 2px;
   }

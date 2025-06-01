@@ -1,0 +1,253 @@
+/**
+ * ScheduledReports Styles for Wild Market Capital
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+  width: 100%;
+}
+
+/* Statistics */
+.statistics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-m);
+}
+
+.statCard {
+  padding: var(--spacing-m);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--spacing-xs);
+}
+
+.statValue {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Table */
+.tableCard {
+  width: 100%;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-s) var(--spacing-m);
+  background-color: rgba(250, 161, 164, 0.1);
+  border: 1px solid var(--color-negative);
+  border-radius: var(--border-radius-s);
+  color: var(--color-negative);
+  font-size: var(--font-size-body);
+  margin-bottom: var(--spacing-m);
+}
+
+.reportType {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.frequencyCell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--color-text-light);
+}
+
+.frequencyCell svg {
+  color: var(--color-neutral-gray);
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+}
+
+.dangerAction {
+  color: var(--color-negative) !important;
+}
+
+.dangerAction:hover {
+  color: var(--color-negative) !important;
+  background-color: rgba(250, 161, 164, 0.1) !important;
+}
+
+/* Create Form */
+.createForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.formSection h4 {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  border-bottom: 1px solid var(--color-divider);
+  padding-bottom: var(--spacing-s);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-m);
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+}
+
+.checkboxSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+  margin-top: var(--spacing-s);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-s);
+  padding-top: var(--spacing-l);
+  border-top: 1px solid var(--color-divider);
+}
+
+/* Report Details */
+.reportDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-m);
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-s);
+  background-color: rgba(42, 46, 57, 0.3);
+  border-radius: var(--border-radius-s);
+  border: 1px solid var(--color-divider);
+}
+
+.detailLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detailValue {
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.detailActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-s);
+  padding-top: var(--spacing-l);
+  border-top: 1px solid var(--color-divider);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .statistics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions > * {
+    width: 100%;
+  }
+
+  .formActions,
+  .detailActions {
+    flex-direction: column;
+  }
+
+  .formActions > *,
+  .detailActions > * {
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .statistics {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Loading states */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Focus improvements */
+.formField input:focus,
+.formField select:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .detailItem {
+    border-width: 2px;
+  }
+
+  .error {
+    border-width: 2px;
+  }
+
+  .formSection h4 {
+    border-bottom-width: 2px;
+  }
+}

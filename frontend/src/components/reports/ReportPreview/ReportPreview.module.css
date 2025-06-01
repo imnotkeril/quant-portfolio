@@ -1,0 +1,270 @@
+/**
+ * ReportPreview Styles for Wild Market Capital
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  max-height: 800px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: var(--spacing-l) 0 var(--spacing-m) 0;
+  border-bottom: 1px solid var(--color-divider);
+  margin-bottom: var(--spacing-l);
+}
+
+.reportInfo {
+  flex: 1;
+}
+
+.reportTitle {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  line-height: var(--line-height-h2);
+}
+
+.reportMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--spacing-s);
+  flex-shrink: 0;
+}
+
+.content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.tabs {
+  height: 100%;
+}
+
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-l);
+  padding: var(--spacing-m) 0;
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* Overview tab */
+.summaryGrid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: var(--spacing-l);
+  margin-bottom: var(--spacing-l);
+}
+
+.summaryCard {
+  height: fit-content;
+}
+
+.summaryStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-m);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.statLabel {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+}
+
+.statValue {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.chartCard {
+  height: fit-content;
+}
+
+.performanceCard {
+  grid-column: 1 / -1;
+}
+
+/* Metrics tab */
+.metricsCard {
+  width: 100%;
+}
+
+.positive {
+  color: var(--color-positive);
+}
+
+.negative {
+  color: var(--color-negative);
+}
+
+.neutral {
+  color: var(--color-text-light);
+}
+
+/* Holdings tab */
+.holdingsCard {
+  width: 100%;
+}
+
+/* Charts tab */
+.chartsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-l);
+}
+
+/* Print styles */
+@media print {
+  .container {
+    height: auto;
+    max-height: none;
+  }
+
+  .header {
+    padding: 0 0 var(--spacing-m) 0;
+  }
+
+  .headerActions {
+    display: none;
+  }
+
+  .content {
+    overflow: visible;
+  }
+
+  .tabContent {
+    height: auto;
+    overflow: visible;
+    page-break-inside: avoid;
+  }
+
+  .summaryGrid,
+  .chartsGrid {
+    break-inside: avoid;
+  }
+
+  .chartCard,
+  .metricsCard,
+  .holdingsCard,
+  .performanceCard {
+    break-inside: avoid;
+    margin-bottom: var(--spacing-l);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .summaryGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-m);
+  }
+
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: var(--spacing-m);
+    align-items: stretch;
+  }
+
+  .headerActions {
+    justify-content: stretch;
+  }
+
+  .headerActions > * {
+    flex: 1;
+  }
+
+  .summaryStats {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-s);
+  }
+
+  .reportMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .tabContent {
+    padding: var(--spacing-s) 0;
+  }
+}
+
+/* Loading state */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--color-neutral-gray);
+  gap: var(--spacing-s);
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(191, 159, 251, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--color-accent);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Focus improvements */
+.headerActions button:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .header {
+    border-bottom-width: 2px;
+  }
+
+  .stat {
+    border: 1px solid var(--color-divider);
+    padding: var(--spacing-s);
+    border-radius: var(--border-radius-s);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}
