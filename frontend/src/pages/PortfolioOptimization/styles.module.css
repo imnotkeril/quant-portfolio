@@ -1,0 +1,435 @@
+/**
+ * Portfolio Optimization Page Styles
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  gap: 1rem;
+}
+
+.content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+/* Loading and error states */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: var(--color-text-secondary);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border);
+  border-top: 3px solid var(--color-primary-500);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.notFound {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.notFound h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.notFound p {
+  margin-bottom: 2rem;
+}
+
+/* Optimization Panel (Left) */
+.optimizationPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  height: 100%;
+  overflow-y: auto;
+  background-color: var(--color-background-subtle);
+}
+
+.controlsCard {
+  padding: 1.5rem;
+}
+
+.cardTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  color: var(--color-text-primary);
+}
+
+.settingsGrid {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.setting {
+  display: flex;
+  flex-direction: column;
+}
+
+.advancedToggle {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.advancedSettings {
+  border-top: 1px solid var(--color-border);
+  padding-top: 1.5rem;
+  margin-top: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: var(--color-text-primary);
+}
+
+.assetConstraints {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.assetConstraint {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--color-background-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.assetSymbol {
+  font-weight: 700;
+  color: var(--color-primary-600);
+  font-family: 'JetBrains Mono', monospace;
+  min-width: 60px;
+}
+
+.constraintInputs {
+  display: flex;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.optimizationActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.error {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--color-error-50);
+  border: 1px solid var(--color-error-200);
+  border-radius: 8px;
+  color: var(--color-error-700);
+  font-size: 0.875rem;
+}
+
+/* Method description card */
+.methodCard {
+  padding: 1.5rem;
+}
+
+.methodDescription h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-primary-600);
+  margin: 0 0 0.5rem 0;
+}
+
+.methodDescription p {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.methodDescription ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: var(--color-text-secondary);
+}
+
+.methodDescription li {
+  margin-bottom: 0.25rem;
+  line-height: 1.5;
+}
+
+/* Results Panel (Top Right) */
+.resultsPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.weightsCard {
+  padding: 1.5rem;
+  flex: 1;
+}
+
+.noResults {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: var(--color-text-secondary);
+  padding: 2rem;
+}
+
+.noResultsIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.noResults h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.noResults p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* Efficient Frontier Panel (Bottom Right) */
+.frontierPanel {
+  padding: 1rem;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.frontierCard {
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.frontierCard .cardTitle {
+  margin-bottom: 1rem;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .content {
+    flex-direction: column;
+  }
+
+  .optimizationPanel {
+    height: auto;
+    max-height: 50vh;
+  }
+
+  .resultsPanel,
+  .frontierPanel {
+    height: auto;
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    gap: 0.75rem;
+  }
+
+  .optimizationPanel,
+  .resultsPanel,
+  .frontierPanel {
+    padding: 0.75rem;
+  }
+
+  .controlsCard,
+  .methodCard,
+  .weightsCard,
+  .frontierCard {
+    padding: 1rem;
+  }
+
+  .settingsGrid {
+    gap: 0.75rem;
+  }
+
+  .assetConstraint {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .assetSymbol {
+    min-width: auto;
+  }
+
+  .constraintInputs {
+    justify-content: center;
+  }
+
+  .optimizationActions {
+    gap: 0.5rem;
+  }
+
+  .methodDescription h4 {
+    font-size: 0.9rem;
+  }
+
+  .methodDescription p,
+  .methodDescription li {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .optimizationPanel,
+  .resultsPanel,
+  .frontierPanel {
+    padding: 0.5rem;
+  }
+
+  .controlsCard,
+  .methodCard,
+  .weightsCard,
+  .frontierCard {
+    padding: 0.75rem;
+  }
+
+  .cardTitle {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .sectionTitle {
+    font-size: 0.9rem;
+  }
+
+  .constraintInputs {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .noResults {
+    padding: 1rem;
+  }
+
+  .noResultsIcon {
+    font-size: 2rem;
+  }
+
+  .noResults h3 {
+    font-size: 1rem;
+  }
+}
+
+/* Split pane overrides */
+.content .SplitPane {
+  position: relative !important;
+}
+
+.content .Resizer {
+  background: var(--color-border);
+  opacity: 0.5;
+  z-index: 1;
+  box-sizing: border-box;
+  background-clip: padding-box;
+}
+
+.content .Resizer:hover {
+  transition: all 0.2s ease;
+  opacity: 1;
+}
+
+.content .Resizer.horizontal {
+  height: 11px;
+  margin: -5px 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  cursor: row-resize;
+  width: 100%;
+}
+
+.content .Resizer.vertical {
+  width: 11px;
+  margin: 0 -5px;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  cursor: col-resize;
+}
+
+.content .Resizer.disabled {
+  cursor: not-allowed;
+}
+
+.content .Resizer.disabled:hover {
+  border-color: transparent;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .optimizationPanel {
+    background-color: var(--color-background-secondary);
+  }
+
+  .assetConstraint {
+    background-color: var(--color-background-primary);
+  }
+
+  .content .Resizer {
+    background: var(--color-border-dark);
+  }
+}
+
+/* Print styles */
+@media print {
+  .optimizationPanel {
+    display: none;
+  }
+
+  .content {
+    flex-direction: column;
+  }
+
+  .resultsPanel,
+  .frontierPanel {
+    height: auto;
+    page-break-inside: avoid;
+  }
+}
