@@ -1,8 +1,9 @@
 /* Fixed Dashboard.module.css - Wild Market Capital */
 .dashboard {
-  padding: var(--spacing-l);
+  padding: 24px;
   min-height: 100%;
   background-color: var(--color-background);
+  box-sizing: border-box;
 }
 
 .welcomeCard {

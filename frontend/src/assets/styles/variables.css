@@ -172,3 +172,14 @@
   --info-border: rgba(144, 191, 249, 0.3);
   --info-text: var(--color-neutral-1);
 }
+
+:root {
+  --sidebar-width: 280px;
+  --sidebar-width-collapsed: 80px;
+  --header-height: 64px;
+
+  /* Z-index system */
+  --z-index-sidebar: 1000;
+  --z-index-header: 10;
+  --z-index-overlay: 999;
+}
