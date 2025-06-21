@@ -7,6 +7,176 @@ import { RootState } from '../rootReducer';
 // Base selector
 export const selectHistoricalState = (state: RootState) => state.historical;
 
+// Добавить к существующим селекторам в historical/selectors.ts
+
+// Historical Analogies selector
+export const selectHistoricalAnalogies = createSelector(
+  selectAnalogiesData,
+  selectCurrentScenarioKey,
+  (analogiesData, currentKey) => {
+    return currentKey ? analogiesData[currentKey] : null;
+  }
+);
+
+// Historical Context selector
+export const selectHistoricalContext = createSelector(
+  selectContextData,
+  selectCurrentScenarioKey,
+  (contextData, currentKey) => {
+    return currentKey ? contextData[currentKey] : null;
+  }
+);
+
+// Pattern Matches selector
+export const selectPatternMatches = createSelector(
+  selectSimilarityData,
+  selectCurrentScenarioKey,
+  (similarityData, currentKey) => {
+    return currentKey ? similarityData[currentKey] : null;
+  }
+);
+
+// Current scenario key selector
+export const selectCurrentScenarioKey = createSelector(
+  selectHistoricalState,
+  (state) => state.currentScenarioKey
+);
+
+// Selected analogies selector
+export const selectSelectedAnalogies = createSelector(
+  selectHistoricalState,
+  (state) => state.selectedAnalogies
+);
+
+// Selected time range selector
+export const selectSelectedTimeRange = createSelector(
+  selectHistoricalState,
+  (state) => state.selectedTimeRange
+);
+
+// View mode selector
+export const selectViewMode = createSelector(
+  selectHistoricalState,
+  (state) => state.viewMode
+);
+
+// Comparison mode selector
+export const selectComparisonMode = createSelector(
+  selectHistoricalState,
+  (state) => state.comparisonMode
+);
+
+// Analysis params selector
+export const selectAnalysisParams = createSelector(
+  selectHistoricalState,
+  (state) => state.analysisParams
+);
+
+// Current market data selector
+export const selectCurrentMarketData = createSelector(
+  selectHistoricalState,
+  (state) => state.currentMarketData
+);
+
+// Events array selector
+export const selectEventsArray = createSelector(
+  selectHistoricalEvents,
+  (events) => Object.values(events)
+);
+
+// Regimes array selector
+export const selectRegimesArray = createSelector(
+  selectMarketRegimes,
+  (regimes) => Object.values(regimes)
+);
+
+// Context by scenario selector
+export const selectContextByScenario = (scenarioKey: string) => createSelector(
+  selectContextData,
+  (contextData) => contextData[scenarioKey]
+);
+
+// Analogies by key selector
+export const selectAnalogiesByKey = (key: string) => createSelector(
+  selectAnalogiesData,
+  (analogiesData) => analogiesData[key]
+);
+
+// Similarity by key selector
+export const selectSimilarityByKey = (key: string) => createSelector(
+  selectSimilarityData,
+  (similarityData) => similarityData[key]
+);
+
+// Top analogies selector
+export const selectTopAnalogies = createSelector(
+  selectHistoricalAnalogies,
+  selectAnalysisParams,
+  (analogies, params) => {
+    if (!analogies || !analogies.analogies) return [];
+
+    return analogies.analogies
+      .filter(analogy => analogy.similarity >= params.similarityThreshold)
+      .slice(0, params.maxAnalogies);
+  }
+);
+
+// Current scenario context selector
+export const selectCurrentScenarioContext = createSelector(
+  selectHistoricalContext,
+  selectCurrentScenarioKey,
+  (context, key) => {
+    return key && context ? context : null;
+  }
+);
+
+// Historical summary selector
+export const selectHistoricalSummary = createSelector(
+  selectHistoricalAnalogies,
+  selectHistoricalContext,
+  (analogies, context) => {
+    return {
+      analogies: analogies?.analogies?.length || 0,
+      averageSimilarity: analogies?.analogies?.reduce((sum, a) => sum + a.similarity, 0) / (analogies?.analogies?.length || 1) || 0,
+      contextEvents: context?.events?.length || 0,
+      keyLessons: context?.lessonsLearned?.length || 0,
+    };
+  }
+);
+
+// Loading states
+export const selectAnyHistoricalLoading = createSelector(
+  selectScenariosLoading,
+  selectContextLoading,
+  selectAnalogiesLoading,
+  selectSimilarityLoading,
+  (scenarios, context, analogies, similarity) =>
+    scenarios || context || analogies || similarity
+);
+
+// Error states
+export const selectAnyHistoricalError = createSelector(
+  selectScenariosError,
+  selectContextError,
+  selectAnalogiesError,
+  selectSimilarityError,
+  (scenarios, context, analogies, similarity) =>
+    scenarios || context || analogies || similarity
+);
+
+export const selectHistoricalErrors = createSelector(
+  selectScenariosError,
+  selectContextError,
+  selectAnalogiesError,
+  selectSimilarityError,
+  (scenarios, context, analogies, similarity) => ({
+    scenarios,
+    context,
+    analogies,
+    similarity,
+  })
+);
+
 // Scenarios selectors
 export const selectScenarios = createSelector(
   selectHistoricalState,

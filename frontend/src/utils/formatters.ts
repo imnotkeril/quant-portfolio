@@ -1,8 +1,19 @@
 /**
- * Utility functions for formatting data for display
+ * Utility functions for formatting data
  */
-
 import { formatDistanceToNow } from 'date-fns';
+
+/**
+ * Format a number with specified decimal places
+ */
+export const formatNumber = (value: number, decimals: number = 2): string => {
+  if (isNaN(value)) return '0';
+
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(value);
+};
 
 /**
  * Format a number as currency
@@ -10,13 +21,15 @@ import { formatDistanceToNow } from 'date-fns';
 export const formatCurrency = (
   value: number,
   currency: string = 'USD',
-  locale: string = 'en-US'
+  decimals: number = 2
 ): string => {
-  return new Intl.NumberFormat(locale, {
+  if (isNaN(value)) return '$0.00';
+
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   }).format(value);
 };
 
@@ -25,70 +38,39 @@ export const formatCurrency = (
  */
 export const formatPercentage = (
   value: number,
-  precision: number = 2,
-  locale: string = 'en-US'
+  decimals: number = 2
 ): string => {
-  return new Intl.NumberFormat(locale, {
+  if (isNaN(value)) return '0%';
+
+  return new Intl.NumberFormat('en-US', {
     style: 'percent',
-    minimumFractionDigits: precision,
-    maximumFractionDigits: precision,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   }).format(value);
 };
 
 /**
- * Format a number with specified precision
- */
-export const formatNumber = (
-  value: number,
-  precision: number = 2,
-  locale: string = 'en-US'
-): string => {
-  return new Intl.NumberFormat(locale, {
-    minimumFractionDigits: precision,
-    maximumFractionDigits: precision,
-  }).format(value);
-};
-
-/**
- * Format large numbers with abbreviations (K, M, B, T)
+ * Format large numbers with suffixes (K, M, B, T)
  */
 export const formatLargeNumber = (
   value: number,
-  precision: number = 1,
-  locale: string = 'en-US'
+  decimals: number = 1
 ): string => {
-  const absValue = Math.abs(value);
+  if (isNaN(value)) return '0';
 
-  if (absValue >= 1e12) {
-    return (value / 1e12).toLocaleString(locale, {
-      minimumFractionDigits: precision,
-      maximumFractionDigits: precision,
-    }) + 'T';
-  } else if (absValue >= 1e9) {
-    return (value / 1e9).toLocaleString(locale, {
-      minimumFractionDigits: precision,
-      maximumFractionDigits: precision,
-    }) + 'B';
-  } else if (absValue >= 1e6) {
-    return (value / 1e6).toLocaleString(locale, {
-      minimumFractionDigits: precision,
-      maximumFractionDigits: precision,
-    }) + 'M';
-  } else if (absValue >= 1e3) {
-    return (value / 1e3).toLocaleString(locale, {
-      minimumFractionDigits: precision,
-      maximumFractionDigits: precision,
-    }) + 'K';
+  const suffixes = ['', 'K', 'M', 'B', 'T'];
+  const suffixNum = Math.floor(Math.log10(Math.abs(value)) / 3);
+  const shortValue = parseFloat((value / Math.pow(1000, suffixNum)).toFixed(decimals));
+
+  if (shortValue % 1 !== 0) {
+    return shortValue + suffixes[suffixNum];
   }
 
-  return value.toLocaleString(locale, {
-    minimumFractionDigits: precision,
-    maximumFractionDigits: precision,
-  });
+  return shortValue + suffixes[suffixNum];
 };
 
 /**
- * Format a date with various options
+ * Format a date in various formats
  */
 export const formatDate = (
   date: string | Date,
@@ -275,6 +257,7 @@ export const formatBasisPoints = (value: number): string => {
   return `${formatNumber(value * 10000, 0)} bps`;
 };
 
+/**
  * Format file size (alias for formatBytes)
  */
 export const formatFileSize = formatBytes;

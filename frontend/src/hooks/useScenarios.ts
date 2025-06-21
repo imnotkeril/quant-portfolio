@@ -1,25 +1,23 @@
-// src/hooks/useHistorical.ts
+// src/hooks/useScenarios.ts
 import { useState } from 'react';
 
-export const useHistorical = () => {
+export const useScenarios = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   return {
     loading,
     error,
-    analogies: [],
-    patterns: [],
-    loadAnalogies: () => {},
-    loadPatterns: () => {},
-    findHistoricalAnalogies: (params: any) => {
+    scenarios: [],
+    results: [],
+    runScenario: (params: any) => {
       setLoading(true);
       // Mock implementation
       setTimeout(() => {
         setLoading(false);
       }, 1000);
     },
-    loadHistoricalContext: (params: any) => {
+    loadScenarios: () => {
       setLoading(true);
       // Mock implementation
       setTimeout(() => {
