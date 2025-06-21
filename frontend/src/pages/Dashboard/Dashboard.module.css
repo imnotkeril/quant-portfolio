@@ -1,394 +1,400 @@
-/**
- * Dashboard Page Styles
- */
-
-.container {
-  display: flex;
-  flex-direction: column;
+/* src/pages/Dashboard/styles.module.css */
+.dashboard {
   min-height: 100vh;
-  background-color: var(--color-background-subtle);
+  background-color: var(--color-background);
+  padding: var(--spacing-l);
+  color: var(--color-text-light);
 }
 
-/* Header */
 .header {
-  background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-700) 100%);
-  color: white;
-  padding: 2rem 0;
-  margin-bottom: 2rem;
-  border-radius: 0 0 1rem 1rem;
-}
-
-.headerContent {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
+  margin-bottom: var(--spacing-xl);
 }
 
 .title {
-  font-size: 2.5rem;
-  font-weight: 700;
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-light);
   margin: 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.headerActions {
+.welcomeSection {
+  margin-bottom: var(--spacing-xl);
   display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.timeframeSelect {
-  min-width: 140px;
-}
-
-/* Loading state */
-.loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  min-height: 400px;
-  color: var(--color-text-secondary);
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--color-border);
-  border-top: 3px solid var(--color-primary-500);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Welcome card */
 .welcomeCard {
-  margin-bottom: 2rem;
-  background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-accent-50) 100%);
-  border: 1px solid var(--color-primary-200);
-}
-
-.welcomeContent {
+  background: var(--gradient-card);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-l);
+  padding: var(--spacing-xxl);
   text-align: center;
-  padding: 2rem;
-}
-
-.welcomeContent h2 {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: var(--color-primary-700);
-  margin-bottom: 0.75rem;
-}
-
-.welcomeContent p {
-  color: var(--color-text-secondary);
-  font-size: 1.1rem;
-  margin-bottom: 2rem;
   max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(10px);
+}
+
+.welcomeTitle {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+  margin-bottom: var(--spacing-m);
+}
+
+.welcomeText {
+  font-size: var(--font-size-h3);
+  color: var(--color-neutral-gray);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-xl);
 }
 
 .welcomeActions {
   display: flex;
-  gap: 1rem;
+  gap: var(--spacing-m);
   justify-content: center;
   flex-wrap: wrap;
 }
 
-/* Main content layout */
+.primaryButton {
+  background: var(--gradient-primary);
+  color: var(--color-text-dark);
+  border: none;
+  border-radius: var(--border-radius-m);
+  padding: var(--spacing-m) var(--spacing-l);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  box-shadow: var(--shadow-medium);
+}
+
+.primaryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-large);
+  filter: brightness(1.1);
+}
+
+.secondaryButton {
+  background: transparent;
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--border-radius-m);
+  padding: var(--spacing-m) var(--spacing-l);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-medium);
+}
+
+.secondaryButton:hover {
+  background: var(--color-accent);
+  color: var(--color-text-dark);
+  transform: translateY(-2px);
+}
+
 .content {
   display: grid;
-  grid-template-columns: 400px 1fr;
-  gap: 2rem;
-  max-width: 1200px;
+  grid-template-columns: 1fr 400px;
+  gap: var(--spacing-xl);
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1.5rem;
-  flex: 1;
 }
 
-.leftColumn {
+.leftPanel {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--spacing-xl);
 }
 
-.rightColumn {
+.rightPanel {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--spacing-xl);
 }
 
-/* Card styles */
-.portfoliosCard,
-.actionsCard,
-.performanceCard,
-.marketCard {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--color-border);
-  overflow: hidden;
+.section {
+  background: var(--gradient-card);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-l);
+  padding: var(--spacing-l);
+  backdrop-filter: blur(10px);
 }
 
-.cardHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-background-subtle);
+.sectionTitle {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-m);
 }
 
-.cardTitle {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0;
-  color: var(--color-text-primary);
+.portfolioGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-m);
 }
 
-/* Portfolios section */
 .emptyState {
-  padding: 3rem 1.5rem;
+  grid-column: 1 / -1;
   text-align: center;
-  color: var(--color-text-secondary);
+  padding: var(--spacing-xxl);
+  color: var(--color-neutral-gray);
 }
 
 .emptyIcon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  font-size: 48px;
+  margin-bottom: var(--spacing-m);
   opacity: 0.5;
 }
 
-.emptyState p {
-  margin-bottom: 1.5rem;
-  font-size: 1.1rem;
+.emptyText {
+  font-size: var(--font-size-h3);
+  margin-bottom: var(--spacing-l);
 }
 
-.portfoliosList {
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+.createButton {
+  background: var(--gradient-primary);
+  color: var(--color-text-dark);
+  border: none;
+  border-radius: var(--border-radius-m);
+  padding: var(--spacing-m) var(--spacing-l);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-medium);
 }
 
-/* Quick actions */
-.actionsGrid {
-  padding: 1rem;
+.createButton:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.portfolioCard {
+  background: linear-gradient(135deg, rgba(42, 46, 57, 0.4) 0%, rgba(42, 46, 57, 0.2) 100%);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-l);
+  padding: var(--spacing-l);
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  position: relative;
+  overflow: hidden;
+}
+
+.portfolioCard:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow);
+}
+
+.portfolioCard.selected {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-glow);
+}
+
+.portfolioCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient-primary);
+  transform: scaleX(0);
+  transition: transform var(--transition-medium);
+}
+
+.portfolioCard:hover::before,
+.portfolioCard.selected::before {
+  transform: scaleX(1);
+}
+
+.portfolioHeader {
+  margin-bottom: var(--spacing-m);
+}
+
+.portfolioName {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  margin: 0;
+}
+
+.portfolioValue {
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-s);
+}
+
+.portfolioChange {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+}
+
+.positive {
+  color: var(--color-positive);
+}
+
+.negative {
+  color: var(--color-negative);
+}
+
+.actionGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-m);
 }
 
-.actionButton {
+.actionCard {
+  background: linear-gradient(135deg, rgba(42, 46, 57, 0.3) 0%, rgba(42, 46, 57, 0.1) 100%);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-l);
+  padding: var(--spacing-l);
+  cursor: pointer;
+  transition: all var(--transition-medium);
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: white;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-  min-height: 80px;
+  gap: var(--spacing-m);
 }
 
-.actionButton:hover:not(:disabled) {
-  border-color: var(--color-primary-300);
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
-  transform: translateY(-1px);
-}
-
-.actionButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.actionCard:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(191, 159, 251, 0.1) 0%, rgba(42, 46, 57, 0.2) 100%);
 }
 
 .actionIcon {
-  font-size: 1.5rem;
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--border-radius-circle);
+  background: var(--gradient-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-primary-50);
-  border-radius: 6px;
+  font-size: 18px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-dark);
+  flex-shrink: 0;
 }
 
-.actionContent {
+.actionText {
   flex: 1;
-  min-width: 0;
 }
 
 .actionTitle {
-  font-size: 0.875rem;
-  font-weight: 600;
-  margin: 0 0 0.25rem 0;
-  color: var(--color-text-primary);
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  margin-bottom: 2px;
 }
 
-.actionDescription {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
-  margin: 0;
-  line-height: 1.4;
+.actionDesc {
+  font-size: var(--font-size-caption);
+  color: var(--color-neutral-gray);
 }
 
-/* Performance section */
-.metricsGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--color-border);
+.marketOverview {
+  background: var(--gradient-card);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-l);
+  padding: var(--spacing-l);
+  backdrop-filter: blur(10px);
 }
 
-.metricsLoading {
-  padding: 2rem;
-  text-align: center;
-  color: var(--color-text-secondary);
-}
-
-.chartContainer {
-  padding: 1.5rem;
-}
-
-/* Market summary */
-.marketGrid {
-  padding: 1rem;
+.marketCards {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--spacing-m);
 }
 
-.marketItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem;
-  border-radius: 6px;
-  background-color: var(--color-background-subtle);
+.marketCard {
+  background: linear-gradient(135deg, rgba(42, 46, 57, 0.4) 0%, rgba(42, 46, 57, 0.2) 100%);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-m);
+  padding: var(--spacing-m);
+  transition: all var(--transition-medium);
+}
+
+.marketCard:hover {
+  border-color: var(--color-accent);
+  background: linear-gradient(135deg, rgba(191, 159, 251, 0.1) 0%, rgba(42, 46, 57, 0.3) 100%);
 }
 
 .marketName {
-  font-weight: 500;
-  color: var(--color-text-primary);
-  min-width: 80px;
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-gray);
+  margin-bottom: 4px;
 }
 
 .marketValue {
-  font-weight: 600;
-  color: var(--color-text-primary);
-  flex: 1;
-  text-align: center;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-light);
+  margin-bottom: 4px;
 }
 
 .marketChange {
-  font-size: 0.875rem;
-  font-weight: 500;
-  text-align: right;
-  min-width: 120px;
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
 }
 
-.marketChange.positive {
-  color: var(--color-success-600);
+.chartSection {
+  background: var(--gradient-card);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-l);
+  padding: var(--spacing-l);
+  backdrop-filter: blur(10px);
 }
 
-.marketChange.negative {
-  color: var(--color-error-600);
+.chartContainer {
+  margin-top: var(--spacing-m);
+  border-radius: var(--border-radius-m);
+  overflow: hidden;
 }
 
-/* Responsive design */
-@media (max-width: 1024px) {
+/* Responsive Design */
+@media (max-width: 1200px) {
   .content {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: var(--spacing-l);
   }
 
-  .leftColumn {
-    order: 2;
-  }
-
-  .rightColumn {
-    order: 1;
-  }
-
-  .actionsGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .headerContent {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-
-  .headerActions {
-    width: 100%;
-    justify-content: center;
+  .rightPanel {
+    order: -1;
   }
 }
 
 @media (max-width: 768px) {
-  .content {
-    padding: 0 1rem;
+  .dashboard {
+    padding: var(--spacing-m);
   }
 
-  .title {
-    font-size: 2rem;
-  }
-
-  .metricsGrid {
+  .portfolioGrid {
     grid-template-columns: 1fr;
-    gap: 0.75rem;
   }
 
-  .marketItem {
-    flex-direction: column;
-    gap: 0.5rem;
-    text-align: center;
-  }
-
-  .marketName,
-  .marketValue,
-  .marketChange {
-    min-width: auto;
-    text-align: center;
+  .actionGrid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .welcomeActions {
     flex-direction: column;
-    align-items: center;
+  }
+
+  .welcomeCard {
+    padding: var(--spacing-l);
   }
 }
 
 @media (max-width: 480px) {
-  .headerContent {
-    padding: 0 1rem;
+  .actionGrid {
+    grid-template-columns: 1fr;
   }
 
-  .content {
-    padding: 0 0.75rem;
+  .actionCard {
+    padding: var(--spacing-m);
   }
 
-  .actionButton {
-    flex-direction: column;
-    text-align: center;
-    gap: 0.75rem;
-    min-height: 100px;
-  }
-
-  .actionIcon {
-    margin: 0 auto;
+  .portfolioCard {
+    padding: var(--spacing-m);
   }
 }

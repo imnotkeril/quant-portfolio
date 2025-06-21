@@ -20,6 +20,9 @@ import {
   ReportGeneration,
 } from './pages';
 
+// Import Analytics page
+import Analytics from './pages/Analytics';
+
 // Error pages (to be implemented)
 const NotFound = React.lazy(() => import('./pages/NotFound/NotFound'));
 
@@ -92,7 +95,7 @@ const AppRoutes: React.FC = () => {
         <Route path={ROUTES.PORTFOLIO.EDIT} element={<ComingSoon pageName="Portfolio Edit" />} />
 
         {/* Analytics Routes */}
-        <Route path={ROUTES.ANALYTICS.ROOT} element={<ComingSoon pageName="Analytics Dashboard" />} />
+        <Route path={ROUTES.ANALYTICS.ROOT} element={<Analytics />} />
         <Route path={ROUTES.ANALYTICS.PERFORMANCE} element={<ComingSoon pageName="Performance Analytics" />} />
         <Route path={ROUTES.ANALYTICS.ATTRIBUTION} element={<ComingSoon pageName="Attribution Analysis" />} />
 

@@ -1,363 +1,246 @@
-/**
- * Dashboard Page
- * Main dashboard with portfolio overview and key metrics
- */
+// src/pages/Dashboard/index.tsx
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { PageContainer } from '../../components/layout/PageContainer/PageContainer';
-import Card from '../../components/common/Card/Card';
-import { Button } from '../../components/common/Button/Button';
-import { Select } from '../../components/common/Select/Select';
-import { PortfolioCard } from '../../components/portfolio/PortfolioCard/PortfolioCard';
-import { MetricsCard } from '../../components/analytics/MetricsCard/MetricsCard';
-import { LineChart } from '../../components/charts/LineChart/LineChart';
-import { PerformancePanel } from '../../components/analytics/PerformancePanel/PerformancePanel';
-import { usePortfolios } from '../../hooks/usePortfolios';
-import { useAnalytics } from '../../hooks/useAnalytics';
-import {
-  selectPortfolios,
-  selectPortfoliosLoading,
-  selectSelectedPortfolioId
-} from '../../store/portfolio/selectors';
-import {
-  selectPerformanceMetrics,
-  selectCumulativeReturns
-} from '../../store/analytics/selectors';
-import { setSelectedPortfolio } from '../../store/portfolio/reducer';
-import { formatCurrency, formatPercentage } from '../../utils/formatters';
-import { ROUTES } from '../../constants/routes';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import styles from './Dashboard.module.css';
 
+interface Portfolio {
+  id: string;
+  name: string;
+  value: number;
+  change: number;
+  changePercent: number;
+  assets: number;
+}
+
 const Dashboard: React.FC = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  // Hooks
-  const portfolios = usePortfolios();
-  const analytics = useAnalytics();
-
-  // Selectors
-  const portfoliosList = useSelector(selectPortfolios);
-  const portfoliosLoading = useSelector(selectPortfoliosLoading);
-  const selectedPortfolioId = useSelector(selectSelectedPortfolioId);
-  const performanceMetrics = useSelector(selectPerformanceMetrics);
-  const cumulativeReturns = useSelector(selectCumulativeReturns);
-
-  // Local state
-  const [selectedTimeframe, setSelectedTimeframe] = useState('1Y');
-  const [showWelcome, setShowWelcome] = useState(true);
-
-  // Load portfolios on mount
-  useEffect(() => {
-    portfolios.loadPortfolios();
-  }, []);
-
-  // Auto-select first portfolio if none selected
-  useEffect(() => {
-    if (portfoliosList.length > 0 && !selectedPortfolioId) {
-      dispatch(setSelectedPortfolio(portfoliosList[0].id));
+  const [portfolios] = useState<Portfolio[]>([
+    {
+      id: '1',
+      name: 'S&P 500',
+      value: 4558.87,
+      change: 81.23,
+      changePercent: 1.81
+    },
+    {
+      id: '2',
+      name: 'NASDAQ',
+      value: 15848.0,
+      change: 233.45,
+      changePercent: 1.50
+    },
+    {
+      id: '3',
+      name: 'Dow Jones',
+      value: 34786.45,
+      change: 156.78,
+      changePercent: 0.45
+    },
+    {
+      id: '4',
+      name: 'VIX',
+      value: 18.42,
+      change: -0.67,
+      changePercent: -3.50
     }
-  }, [portfoliosList, selectedPortfolioId, dispatch]);
+  ]);
 
-  // Load analytics for selected portfolio
-  useEffect(() => {
-    if (selectedPortfolioId) {
-      const { startDate, endDate } = analytics.getDefaultDateRange(selectedTimeframe);
-      analytics.calculatePerformanceMetrics({
-        portfolioId: selectedPortfolioId,
-        startDate,
-        endDate,
-      });
-    }
-  }, [selectedPortfolioId, selectedTimeframe, analytics]);
+  const [selectedPortfolio, setSelectedPortfolio] = useState<string | null>(null);
+
+  const performanceData = [
+    { name: 'Jan', portfolio: 4000, benchmark: 3000 },
+    { name: 'Feb', portfolio: 3000, benchmark: 2000 },
+    { name: 'Mar', portfolio: 5000, benchmark: 4000 },
+    { name: 'Apr', portfolio: 4500, benchmark: 3800 },
+    { name: 'May', portfolio: 6000, benchmark: 5000 },
+    { name: 'Jun', portfolio: 8000, benchmark: 6000 },
+  ];
 
   const handleCreatePortfolio = () => {
-    navigate(ROUTES.PORTFOLIO.CREATE);
+    navigate('/portfolio/create');
   };
 
-  const handlePortfolioSelect = (portfolioId: string) => {
-    dispatch(setSelectedPortfolio(portfolioId));
+  const handleExploreDemo = () => {
+    navigate('/analytics');
   };
 
-  const handlePortfolioAnalyze = (portfolioId: string) => {
-    navigate(ROUTES.PORTFOLIO.ANALYSIS.replace(':id', portfolioId));
+  const handlePortfolioClick = (portfolioId: string) => {
+    setSelectedPortfolio(portfolioId);
   };
-
-  const handleOptimizePortfolio = (portfolioId: string) => {
-    navigate(ROUTES.OPTIMIZATION.ROOT.replace(':id', portfolioId));
-  };
-
-  const handleViewAllPortfolios = () => {
-    navigate(ROUTES.PORTFOLIO.LIST);
-  };
-
-  const selectedPortfolio = portfoliosList.find(p => p.id === selectedPortfolioId);
-
-  // Timeframe options
-  const timeframeOptions = [
-    { value: '1M', label: '1 Month' },
-    { value: '3M', label: '3 Months' },
-    { value: '6M', label: '6 Months' },
-    { value: '1Y', label: '1 Year' },
-    { value: '2Y', label: '2 Years' },
-    { value: '5Y', label: '5 Years' },
-    { value: 'ALL', label: 'All Time' },
-  ];
-
-  // Quick actions data
-  const quickActions = [
-    {
-      title: 'Create Portfolio',
-      description: 'Build a new investment portfolio',
-      icon: 'plus',
-      onClick: handleCreatePortfolio,
-      variant: 'primary' as const,
-    },
-    {
-      title: 'Analyze Performance',
-      description: 'Deep dive into portfolio analytics',
-      icon: 'analytics',
-      onClick: () => selectedPortfolioId && handlePortfolioAnalyze(selectedPortfolioId),
-      disabled: !selectedPortfolioId,
-    },
-    {
-      title: 'Optimize Portfolio',
-      description: 'Find optimal asset allocation',
-      icon: 'optimization',
-      onClick: () => selectedPortfolioId && handleOptimizePortfolio(selectedPortfolioId),
-      disabled: !selectedPortfolioId,
-    },
-    {
-      title: 'Risk Analysis',
-      description: 'Assess portfolio risk metrics',
-      icon: 'risk',
-      onClick: () => navigate(ROUTES.RISK.ROOT),
-    },
-  ];
-
-  // Market summary data (placeholder - would come from API)
-  const marketSummary = [
-    { name: 'S&P 500', value: 4456.67, change: 1.23, changePercent: 0.028 },
-    { name: 'NASDAQ', value: 13845.12, change: -23.45, changePercent: -0.17 },
-    { name: 'Dow Jones', value: 34789.45, change: 156.78, changePercent: 0.45 },
-    { name: 'VIX', value: 18.45, change: -0.67, changePercent: -3.5 },
-  ];
-
-  if (portfoliosLoading) {
-    return (
-      <PageContainer>
-        <div className={styles.loading}>
-          <div className={styles.spinner} />
-          <p>Loading dashboard...</p>
-        </div>
-      </PageContainer>
-    );
-  }
 
   return (
-    <PageContainer>
-      <div className={styles.container}>
-        {/* Header */}
-        <div className={styles.header}>
-          <div className={styles.headerContent}>
-            <h1 className={styles.title}>Portfolio Dashboard</h1>
-            <div className={styles.headerActions}>
-              <Select
-                value={selectedTimeframe}
-                onChange={setSelectedTimeframe}
-                options={timeframeOptions}
-                className={styles.timeframeSelect}
-              />
-              <Button onClick={handleCreatePortfolio} variant="primary">
-                Create Portfolio
-              </Button>
-            </div>
-          </div>
+    <div className={styles.dashboard}>
+      {/* Header Section */}
+      <div className={styles.header}>
+        <div className={styles.welcome}>
+          <h1 className={styles.title}>Portfolio Dashboard</h1>
         </div>
+      </div>
 
-        {/* Welcome message for new users */}
-        {showWelcome && portfoliosList.length === 0 && (
-          <Card className={styles.welcomeCard}>
-            <div className={styles.welcomeContent}>
-              <h2>Welcome to Portfolio Management</h2>
-              <p>
-                Get started by creating your first investment portfolio.
-                Analyze performance, optimize allocations, and manage risk with our comprehensive tools.
-              </p>
-              <div className={styles.welcomeActions}>
-                <Button onClick={handleCreatePortfolio} variant="primary" size="large">
-                  Create Your First Portfolio
-                </Button>
-                <Button
-                  onClick={() => setShowWelcome(false)}
-                  variant="secondary"
-                  size="large"
-                >
-                  Explore Demo
-                </Button>
-              </div>
-            </div>
-          </Card>
-        )}
-
-        {/* Main content */}
-        <div className={styles.content}>
-          {/* Left column */}
-          <div className={styles.leftColumn}>
-            {/* Portfolios section */}
-            <Card className={styles.portfoliosCard}>
-              <div className={styles.cardHeader}>
-                <h2 className={styles.cardTitle}>Your Portfolios</h2>
-                <Button onClick={handleViewAllPortfolios} variant="ghost" size="small">
-                  View All
-                </Button>
-              </div>
-
-              {portfoliosList.length === 0 ? (
-                <div className={styles.emptyState}>
-                  <div className={styles.emptyIcon}>📊</div>
-                  <p>No portfolios yet</p>
-                  <Button onClick={handleCreatePortfolio} variant="primary" size="small">
-                    Create Portfolio
-                  </Button>
-                </div>
-              ) : (
-                <div className={styles.portfoliosList}>
-                  {portfoliosList.slice(0, 3).map((portfolio) => (
-                    <PortfolioCard
-                      key={portfolio.id}
-                      portfolio={portfolio}
-                      selected={portfolio.id === selectedPortfolioId}
-                      onSelect={() => handlePortfolioSelect(portfolio.id)}
-                      onAnalyze={() => handlePortfolioAnalyze(portfolio.id)}
-                      compact
-                    />
-                  ))}
-                </div>
-              )}
-            </Card>
-
-            {/* Quick actions */}
-            <Card className={styles.actionsCard}>
-              <h2 className={styles.cardTitle}>Quick Actions</h2>
-              <div className={styles.actionsGrid}>
-                {quickActions.map((action, index) => (
-                  <button
-                    key={index}
-                    className={styles.actionButton}
-                    onClick={action.onClick}
-                    disabled={action.disabled}
-                  >
-                    <div className={styles.actionIcon}>
-                      {action.icon === 'plus' && '➕'}
-                      {action.icon === 'analytics' && '📊'}
-                      {action.icon === 'optimization' && '⚡'}
-                      {action.icon === 'risk' && '🛡️'}
-                    </div>
-                    <div className={styles.actionContent}>
-                      <h3 className={styles.actionTitle}>{action.title}</h3>
-                      <p className={styles.actionDescription}>{action.description}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </Card>
-          </div>
-
-          {/* Right column */}
-          <div className={styles.rightColumn}>
-            {/* Performance overview */}
-            {selectedPortfolio && (
-              <Card className={styles.performanceCard}>
-                <div className={styles.cardHeader}>
-                  <h2 className={styles.cardTitle}>
-                    Performance Overview - {selectedPortfolio.name}
-                  </h2>
-                </div>
-
-                {performanceMetrics ? (
-                  <div className={styles.metricsGrid}>
-                    <MetricsCard
-                      title="Total Return"
-                      value={performanceMetrics.totalReturn}
-                      type="percentage"
-                      trend={performanceMetrics.totalReturn > 0 ? 'up' : 'down'}
-                      precision={2}
-                    />
-                    <MetricsCard
-                      title="Annualized Return"
-                      value={performanceMetrics.annualizedReturn}
-                      type="percentage"
-                      trend={performanceMetrics.annualizedReturn > 0 ? 'up' : 'down'}
-                      precision={2}
-                    />
-                    <MetricsCard
-                      title="Volatility"
-                      value={performanceMetrics.volatility}
-                      type="percentage"
-                      precision={2}
-                    />
-                    <MetricsCard
-                      title="Sharpe Ratio"
-                      value={performanceMetrics.sharpeRatio}
-                      type="number"
-                      precision={2}
-                    />
-                  </div>
-                ) : (
-                  <div className={styles.metricsLoading}>
-                    Loading performance metrics...
-                  </div>
-                )}
-
-                {/* Performance chart */}
-                {cumulativeReturns && (
-                  <div className={styles.chartContainer}>
-                    <LineChart
-                      data={cumulativeReturns.map(point => ({
-                        date: point.date,
-                        portfolio: point.cumulativeReturn * 100,
-                        benchmark: point.benchmarkCumulativeReturn ?
-                          point.benchmarkCumulativeReturn * 100 : undefined,
-                      }))}
-                      xAxisKey="date"
-                      lines={[
-                        { key: 'portfolio', name: 'Portfolio', color: '#2563eb' },
-                        { key: 'benchmark', name: 'Benchmark', color: '#64748b' },
-                      ]}
-                      height={300}
-                      formatY={(value) => `${value.toFixed(1)}%`}
-                    />
-                  </div>
-                )}
-              </Card>
-            )}
-
-            {/* Market summary */}
-            <Card className={styles.marketCard}>
-              <h2 className={styles.cardTitle}>Market Summary</h2>
-              <div className={styles.marketGrid}>
-                {marketSummary.map((market, index) => (
-                  <div key={index} className={styles.marketItem}>
-                    <div className={styles.marketName}>{market.name}</div>
-                    <div className={styles.marketValue}>
-                      {formatCurrency(market.value)}
-                    </div>
-                    <div className={`${styles.marketChange} ${
-                      market.change >= 0 ? styles.positive : styles.negative
-                    }`}>
-                      {market.change >= 0 ? '+' : ''}
-                      {formatCurrency(market.change)} ({formatPercentage(market.changePercent)})
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
+      {/* Welcome Section */}
+      <div className={styles.welcomeSection}>
+        <div className={styles.welcomeCard}>
+          <h2 className={styles.welcomeTitle}>Welcome to Portfolio Management</h2>
+          <p className={styles.welcomeText}>
+            Discover advanced portfolio analysis, enhance your portfolio
+            performance, optimize allocations, and manage risk with our
+            comprehensive tools.
+          </p>
+          <div className={styles.welcomeActions}>
+            <button className={styles.primaryButton} onClick={handleCreatePortfolio}>
+              Create Your First Portfolio
+            </button>
+            <button className={styles.secondaryButton} onClick={handleExploreDemo}>
+              Explore Demo
+            </button>
           </div>
         </div>
       </div>
-    </PageContainer>
+
+      {/* Content Grid */}
+      <div className={styles.content}>
+        {/* Left Panel - Portfolios */}
+        <div className={styles.leftPanel}>
+          <div className={styles.section}>
+            <h3 className={styles.sectionTitle}>Your Portfolios</h3>
+            <div className={styles.portfolioGrid}>
+              {portfolios.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <div className={styles.emptyIcon}>📊</div>
+                  <p className={styles.emptyText}>No portfolios yet</p>
+                  <button className={styles.createButton} onClick={handleCreatePortfolio}>
+                    Create Portfolio
+                  </button>
+                </div>
+              ) : (
+                portfolios.map((portfolio) => (
+                  <div
+                    key={portfolio.id}
+                    className={`${styles.portfolioCard} ${selectedPortfolio === portfolio.id ? styles.selected : ''}`}
+                    onClick={() => handlePortfolioClick(portfolio.id)}
+                  >
+                    <div className={styles.portfolioHeader}>
+                      <h4 className={styles.portfolioName}>{portfolio.name}</h4>
+                    </div>
+                    <div className={styles.portfolioValue}>
+                      ${portfolio.value.toLocaleString()}
+                    </div>
+                    <div className={styles.portfolioChange}>
+                      <span className={portfolio.change >= 0 ? styles.positive : styles.negative}>
+                        {portfolio.change >= 0 ? '+' : ''}
+                        ${Math.abs(portfolio.change).toFixed(2)} ({portfolio.changePercent}%)
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Action Cards */}
+          <div className={styles.actionGrid}>
+            <div className={styles.actionCard} onClick={handleCreatePortfolio}>
+              <div className={styles.actionIcon}>+</div>
+              <div className={styles.actionText}>
+                <div className={styles.actionTitle}>Create Portfolio</div>
+                <div className={styles.actionDesc}>Build new portfolio</div>
+              </div>
+            </div>
+
+            <div className={styles.actionCard}>
+              <div className={styles.actionIcon}>📈</div>
+              <div className={styles.actionText}>
+                <div className={styles.actionTitle}>Market Analysis</div>
+                <div className={styles.actionDesc}>View market insights</div>
+              </div>
+            </div>
+
+            <div className={styles.actionCard}>
+              <div className={styles.actionIcon}>⚖️</div>
+              <div className={styles.actionText}>
+                <div className={styles.actionTitle}>Risk Assessment</div>
+                <div className={styles.actionDesc}>Analyze portfolio risk</div>
+              </div>
+            </div>
+
+            <div className={styles.actionCard}>
+              <div className={styles.actionIcon}>📊</div>
+              <div className={styles.actionText}>
+                <div className={styles.actionTitle}>Performance</div>
+                <div className={styles.actionDesc}>Track performance</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel - Market Overview */}
+        <div className={styles.rightPanel}>
+          <div className={styles.marketOverview}>
+            <h3 className={styles.sectionTitle}>Market Overview</h3>
+            <div className={styles.marketCards}>
+              {portfolios.map((portfolio) => (
+                <div key={portfolio.id} className={styles.marketCard}>
+                  <div className={styles.marketName}>{portfolio.name}</div>
+                  <div className={styles.marketValue}>
+                    ${portfolio.value.toLocaleString()}
+                  </div>
+                  <div className={`${styles.marketChange} ${portfolio.change >= 0 ? styles.positive : styles.negative}`}>
+                    {portfolio.change >= 0 ? '+' : ''}${Math.abs(portfolio.change).toFixed(2)} ({portfolio.changePercent}%)
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Performance Chart */}
+          {selectedPortfolio && (
+            <div className={styles.chartSection}>
+              <h3 className={styles.sectionTitle}>Portfolio Performance</h3>
+              <div className={styles.chartContainer}>
+                <ResponsiveContainer width="100%" height={200}>
+                  <LineChart data={performanceData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#2A2E39" />
+                    <XAxis
+                      dataKey="name"
+                      stroke="#D1D4DC"
+                      fontSize={10}
+                    />
+                    <YAxis
+                      stroke="#D1D4DC"
+                      fontSize={10}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1A1E2A',
+                        border: '1px solid #2A2E39',
+                        borderRadius: '8px',
+                        color: '#FFFFFF'
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="portfolio"
+                      stroke="#BF9FFB"
+                      strokeWidth={2}
+                      dot={{ fill: '#BF9FFB', strokeWidth: 2, r: 4 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="benchmark"
+                      stroke="#90BFF9"
+                      strokeWidth={2}
+                      strokeDasharray="5 5"
+                      dot={{ fill: '#90BFF9', strokeWidth: 2, r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 

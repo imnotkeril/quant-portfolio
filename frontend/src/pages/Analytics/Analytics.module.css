@@ -1,0 +1,508 @@
+/* src/pages/Analytics/Analytics.module.css */
+.analytics {
+  padding: var(--spacing-l);
+  min-height: 100vh;
+  background-color: var(--color-background);
+  color: var(--color-text-light);
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  gap: var(--spacing-l);
+}
+
+.loadingSpinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(191, 159, 251, 0.2);
+  border-top: 3px solid var(--color-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingText {
+  font-size: var(--font-size-h3);
+  color: var(--color-neutral-gray);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-xl);
+  gap: var(--spacing-l);
+}
+
+.titleSection {
+  flex: 1;
+}
+
+.pageTitle {
+  font-size: 28px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-s) 0;
+}
+
+.subtitle {
+  font-size: var(--font-size-h3);
+  color: var(--color-neutral-gray);
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.timeframeSelector {
+  display: flex;
+  gap: 4px;
+  background: rgba(42, 46, 57, 0.4);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-m);
+  padding: 4px;
+}
+
+.timeframeButton {
+  padding: var(--spacing-s) var(--spacing-m);
+  background: transparent;
+  border: none;
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--border-radius-s);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.timeframeButton:hover {
+  color: var(--color-text-light);
+  background: rgba(191, 159, 251, 0.1);
+}
+
+.timeframeButton.active {
+  background: var(--gradient-primary);
+  color: var(--color-text-dark);
+}
+
+.metricsNav {
+  display: flex;
+  gap: var(--spacing-m);
+  margin-bottom: var(--spacing-xl);
+  overflow-x: auto;
+  padding-bottom: var(--spacing-s);
+}
+
+.metricButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  padding: var(--spacing-m) var(--spacing-l);
+  background: linear-gradient(135deg, rgba(42, 46, 57, 0.4) 0%, rgba(42, 46, 57, 0.2) 100%);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-l);
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+}
+
+.metricButton:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text-light);
+  transform: translateY(-2px);
+}
+
+.metricButton.active {
+  background: linear-gradient(135deg, rgba(191, 159, 251, 0.2) 0%, rgba(191, 159, 251, 0.1) 100%);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  box-shadow: var(--shadow-glow);
+}
+
+.metricIcon {
+  font-size: 18px;
+}
+
+.metricLabel {
+  font-weight: var(--font-weight-medium);
+}
+
+.content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Card Styles */
+.chartCard,
+.riskMetricsCard,
+.volumeCard,
+.pieChartCard,
+.allocationListCard,
+.holdingsCard {
+  background: var(--gradient-card);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-l);
+  padding: var(--spacing-l);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-card);
+}
+
+.cardHeader {
+  margin-bottom: var(--spacing-l);
+}
+
+.cardTitle {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-s) 0;
+}
+
+.cardSubtitle {
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-gray);
+  margin: 0;
+}
+
+.chartContainer {
+  margin-top: var(--spacing-m);
+}
+
+/* Performance Section */
+.performanceSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-l);
+}
+
+.statCard {
+  background: linear-gradient(135deg, rgba(42, 46, 57, 0.4) 0%, rgba(42, 46, 57, 0.2) 100%);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-l);
+  padding: var(--spacing-l);
+  text-align: center;
+  transition: all var(--transition-medium);
+}
+
+.statCard:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow);
+}
+
+.statLabel {
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-gray);
+  margin-bottom: var(--spacing-s);
+}
+
+.statValue {
+  font-size: 24px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-s);
+}
+
+.statChange {
+  font-size: var(--font-size-caption);
+  color: var(--color-positive);
+}
+
+/* Risk Section */
+.riskSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.riskGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+}
+
+.riskMetrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-l);
+}
+
+.riskMetric {
+  text-align: center;
+  padding: var(--spacing-m);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-m);
+  background: rgba(42, 46, 57, 0.2);
+}
+
+.metricName {
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-gray);
+  margin-bottom: var(--spacing-s);
+}
+
+.metricValue {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-light);
+}
+
+.metricValue.positive {
+  color: var(--color-positive);
+}
+
+.metricValue.negative {
+  color: var(--color-negative);
+}
+
+/* Allocation Section */
+.allocationSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.allocationGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+}
+
+.allocationList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-m);
+}
+
+.allocationItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.allocationHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+}
+
+.allocationColor {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--border-radius-circle);
+  flex-shrink: 0;
+}
+
+.allocationName {
+  flex: 1;
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.allocationPercent {
+  font-size: var(--font-size-body);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semi-bold);
+}
+
+.allocationBar {
+  height: 6px;
+  background: rgba(42, 46, 57, 0.5);
+  border-radius: var(--border-radius-xs);
+  overflow: hidden;
+}
+
+.allocationFill {
+  height: 100%;
+  border-radius: var(--border-radius-xs);
+  transition: width var(--transition-medium);
+}
+
+/* Holdings Section */
+.holdingsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.holdingsTable {
+  border-radius: var(--border-radius-m);
+  overflow: hidden;
+  border: 1px solid var(--color-divider);
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 80px 1fr 80px 80px 100px;
+  background: rgba(42, 46, 57, 0.6);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.headerCell {
+  padding: var(--spacing-m);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-neutral-gray);
+  text-align: left;
+}
+
+.tableBody {
+  display: flex;
+  flex-direction: column;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 80px 1fr 80px 80px 100px;
+  border-bottom: 1px solid var(--color-divider);
+  transition: background-color var(--transition-fast);
+}
+
+.tableRow:hover {
+  background: rgba(191, 159, 251, 0.05);
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.cell {
+  padding: var(--spacing-m);
+  display: flex;
+  align-items: center;
+}
+
+.symbol {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+  font-family: 'Courier New', monospace;
+}
+
+.companyName {
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+}
+
+.weight {
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.return {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+}
+
+.return.positive {
+  color: var(--color-positive);
+}
+
+.return.negative {
+  color: var(--color-negative);
+}
+
+.price {
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+  font-family: 'Courier New', monospace;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .riskGrid,
+  .allocationGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .analytics {
+    padding: var(--spacing-m);
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-m);
+  }
+
+  .metricsNav {
+    gap: var(--spacing-s);
+  }
+
+  .metricButton {
+    padding: var(--spacing-s) var(--spacing-m);
+    font-size: var(--font-size-caption);
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .riskMetrics {
+    grid-template-columns: 1fr;
+  }
+
+  .tableHeader,
+  .tableRow {
+    grid-template-columns: 60px 1fr 60px 70px 80px;
+  }
+
+  .headerCell,
+  .cell {
+    padding: var(--spacing-s);
+    font-size: var(--font-size-caption);
+  }
+}
+
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .timeframeSelector {
+    flex-wrap: wrap;
+  }
+
+  .metricsNav {
+    flex-wrap: wrap;
+  }
+
+  .tableHeader,
+  .tableRow {
+    grid-template-columns: 50px 1fr 50px;
+  }
+
+  .cell:nth-child(4),
+  .cell:nth-child(5),
+  .headerCell:nth-child(4),
+  .headerCell:nth-child(5) {
+    display: none;
+  }
+}
