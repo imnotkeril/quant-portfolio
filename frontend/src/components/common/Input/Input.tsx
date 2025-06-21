@@ -1,188 +1,198 @@
-/**
- * Input Component
- * Universal input component with validation states and icons
- */
-import React, { forwardRef, useState, useId } from 'react';
+import React, { forwardRef, useState } from 'react';
 import classNames from 'classnames';
 import styles from './Input.module.css';
 
-export type InputType = 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
-export type InputSize = 'small' | 'medium' | 'large';
+export type InputType =
+  | 'text'
+  | 'password'
+  | 'email'
+  | 'number'
+  | 'tel'
+  | 'url'
+  | 'search'
+  | 'date'
+  | 'datetime-local'
+  | 'time'
+  | 'month'
+  | 'week';
 
-interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'> {
-  type?: InputType;
-  size?: InputSize;
+export interface InputProps {
   label?: string;
   placeholder?: string;
-  value?: string;
-  defaultValue?: string;
-  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
-  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
+  value?: string | number;
+  defaultValue?: string | number;
+  type?: InputType;
   disabled?: boolean;
-  readOnly?: boolean;
-  error?: string | boolean;
-  success?: boolean;
-  helperText?: string;
-  icon?: React.ReactNode;
-  iconPosition?: 'left' | 'right';
-  className?: string;
-  fullWidth?: boolean;
   required?: boolean;
+  readOnly?: boolean;
   autoFocus?: boolean;
   autoComplete?: string;
+  className?: string;
+  error?: string;
+  help?: string;
+  size?: 'small' | 'medium' | 'large';
+  variant?: 'default' | 'filled' | 'outlined';
+  prefix?: React.ReactNode;
+  suffix?: React.ReactNode;
+  min?: string | number;
+  max?: string | number;
+  step?: string | number;
+  maxLength?: number;
+  minLength?: number;
+  pattern?: string;
+  multiple?: boolean;
+  multiline?: boolean; // ДОБАВЛЕНО: поддержка textarea
+  rows?: number; // ДОБАВЛЕНО: количество строк для textarea
+  onChange?: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onFocus?: (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onKeyUp?: (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   'data-testid'?: string;
 }
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(({
-  type = 'text',
-  size = 'medium',
-  label,
-  placeholder,
-  value,
-  defaultValue,
-  onChange,
-  onBlur,
-  onFocus,
-  disabled = false,
-  readOnly = false,
-  error,
-  success = false,
-  helperText,
-  icon,
-  iconPosition = 'left',
-  className,
-  fullWidth = false,
-  required = false,
-  autoFocus = false,
-  autoComplete,
-  'data-testid': testId,
-  id: providedId,
-  ...props
-}, ref) => {
-  const generatedId = useId();
-  const inputId = providedId || generatedId;
-  const [isFocused, setIsFocused] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-
-  const hasError = !!error;
-  const errorMessage = typeof error === 'string' ? error : '';
-
-  const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
-    setIsFocused(true);
-    onFocus?.(event);
-  };
-
-  const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
-    setIsFocused(false);
-    onBlur?.(event);
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const inputType = type === 'password' && showPassword ? 'text' : type;
-
-  const containerClasses = classNames(
-    styles.container,
+const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
+  (
     {
-      [styles.fullWidth]: fullWidth,
-      [styles.disabled]: disabled,
-      [styles.focused]: isFocused,
-      [styles.error]: hasError,
-      [styles.success]: success && !hasError,
+      label,
+      placeholder,
+      value,
+      defaultValue,
+      type = 'text',
+      disabled = false,
+      required = false,
+      readOnly = false,
+      autoFocus = false,
+      autoComplete,
+      className,
+      error,
+      help,
+      size = 'medium',
+      variant = 'default',
+      prefix,
+      suffix,
+      min,
+      max,
+      step,
+      maxLength,
+      minLength,
+      pattern,
+      multiple = false,
+      multiline = false,
+      rows = 3,
+      onChange,
+      onFocus,
+      onBlur,
+      onKeyDown,
+      onKeyUp,
+      'data-testid': testId,
     },
-    className
-  );
+    ref
+  ) => {
+    const [isFocused, setIsFocused] = useState(false);
+    const hasValue = value !== undefined && value !== null && value !== '';
 
-  const inputWrapperClasses = classNames(
-    styles.inputWrapper,
-    styles[size],
-    {
-      [styles.hasIconLeft]: icon && iconPosition === 'left',
-      [styles.hasIconRight]: icon && iconPosition === 'right' || type === 'password',
-      [styles.disabled]: disabled,
-      [styles.readOnly]: readOnly,
-      [styles.error]: hasError,
-      [styles.success]: success && !hasError,
-    }
-  );
+    const containerClasses = classNames(
+      styles.inputContainer,
+      styles[`size-${size}`],
+      styles[`variant-${variant}`],
+      {
+        [styles.focused]: isFocused,
+        [styles.disabled]: disabled,
+        [styles.error]: !!error,
+        [styles.hasValue]: hasValue,
+        [styles.hasPrefix]: !!prefix,
+        [styles.hasSuffix]: !!suffix,
+        [styles.multiline]: multiline,
+      },
+      className
+    );
 
-  const inputClasses = classNames(styles.input);
+    const inputClasses = classNames(styles.input, {
+      [styles.withPrefix]: !!prefix,
+      [styles.withSuffix]: !!suffix,
+    });
 
-  return (
-    <div className={containerClasses}>
-      {label && (
-        <label htmlFor={inputId} className={styles.label}>
-          {label}
-          {required && <span className={styles.required}>*</span>}
-        </label>
-      )}
+    const handleFocus = (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setIsFocused(true);
+      if (onFocus) {
+        onFocus(event);
+      }
+    };
 
-      <div className={inputWrapperClasses}>
-        {icon && iconPosition === 'left' && (
-          <div className={styles.iconLeft}>{icon}</div>
-        )}
+    const handleBlur = (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setIsFocused(false);
+      if (onBlur) {
+        onBlur(event);
+      }
+    };
 
+    const commonProps = {
+      placeholder,
+      value,
+      defaultValue,
+      disabled,
+      required,
+      readOnly,
+      autoFocus,
+      autoComplete,
+      maxLength,
+      minLength,
+      className: inputClasses,
+      onChange,
+      onFocus: handleFocus,
+      onBlur: handleBlur,
+      onKeyDown,
+      onKeyUp,
+      'data-testid': testId,
+    };
+
+    const renderInput = () => {
+      if (multiline) {
+        return (
+          <textarea
+            ref={ref as React.Ref<HTMLTextAreaElement>}
+            rows={rows}
+            {...commonProps}
+          />
+        );
+      }
+
+      return (
         <input
-          ref={ref}
-          id={inputId}
-          type={inputType}
-          className={inputClasses}
-          placeholder={placeholder}
-          value={value}
-          defaultValue={defaultValue}
-          onChange={onChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          disabled={disabled}
-          readOnly={readOnly}
-          required={required}
-          autoFocus={autoFocus}
-          autoComplete={autoComplete}
-          data-testid={testId}
-          {...props}
+          ref={ref as React.Ref<HTMLInputElement>}
+          type={type}
+          min={min}
+          max={max}
+          step={step}
+          pattern={pattern}
+          multiple={multiple}
+          {...commonProps}
         />
+      );
+    };
 
-        {type === 'password' && (
-          <button
-            type="button"
-            className={styles.passwordToggle}
-            onClick={togglePasswordVisibility}
-            tabIndex={-1}
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
-          >
-            {showPassword ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                <line x1="1" y1="1" x2="23" y2="23"/>
-              </svg>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-            )}
-          </button>
+    return (
+      <div className={containerClasses}>
+        {label && (
+          <label className={styles.label}>
+            {label}
+            {required && <span className={styles.required}>*</span>}
+          </label>
         )}
 
-        {icon && iconPosition === 'right' && type !== 'password' && (
-          <div className={styles.iconRight}>{icon}</div>
-        )}
-      </div>
-
-      {(errorMessage || helperText) && (
-        <div className={classNames(
-          styles.helperText,
-          { [styles.errorText]: hasError }
-        )}>
-          {errorMessage || helperText}
+        <div className={styles.inputWrapper}>
+          {prefix && <div className={styles.prefix}>{prefix}</div>}
+          {renderInput()}
+          {suffix && <div className={styles.suffix}>{suffix}</div>}
         </div>
-      )}
-    </div>
-  );
-});
+
+        {error && <div className={styles.errorMessage}>{error}</div>}
+        {help && !error && <div className={styles.helpMessage}>{help}</div>}
+      </div>
+    );
+  }
+);
 
 Input.displayName = 'Input';
 

@@ -228,6 +228,22 @@ export interface ScheduledReport {
   createdAt: string;
 }
 
+export interface PortfolioCreateRequest {
+  name: string;
+  description?: string;
+  type: string;
+  benchmarkSymbol?: string;
+  assets: Asset[];
+  tags?: string[];
+}
+
+export enum PortfolioType {
+  CONSERVATIVE = 'conservative',
+  MODERATE = 'moderate',
+  AGGRESSIVE = 'aggressive',
+  CUSTOM = 'custom'
+}
+
 /**
  * API Report Response
  */

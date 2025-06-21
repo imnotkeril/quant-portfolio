@@ -1,13 +1,11 @@
 /**
- * Utility functions for formatting data
+ * Utility functions for formatting data for display
  */
+
+import { formatDistanceToNow } from 'date-fns';
 
 /**
  * Format a number as currency
- * @param value Number to format
- * @param currency Currency code (default: USD)
- * @param locale Locale for formatting (default: en-US)
- * @returns Formatted currency string
  */
 export const formatCurrency = (
   value: number,
@@ -18,191 +16,261 @@ export const formatCurrency = (
     style: 'currency',
     currency,
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   }).format(value);
 };
 
 /**
  * Format a number as percentage
- * @param value Number to format (e.g., 0.1234 for 12.34%)
- * @param decimals Number of decimal places (default: 2)
- * @param locale Locale for formatting (default: en-US)
- * @returns Formatted percentage string
  */
 export const formatPercentage = (
   value: number,
-  decimals: number = 2,
+  precision: number = 2,
   locale: string = 'en-US'
 ): string => {
   return new Intl.NumberFormat(locale, {
     style: 'percent',
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals
+    minimumFractionDigits: precision,
+    maximumFractionDigits: precision,
   }).format(value);
 };
 
 /**
- * Format a number with thousand separators
- * @param value Number to format
- * @param decimals Number of decimal places (default: 2)
- * @param locale Locale for formatting (default: en-US)
- * @returns Formatted number string
+ * Format a number with specified precision
  */
 export const formatNumber = (
   value: number,
-  decimals: number = 2,
+  precision: number = 2,
   locale: string = 'en-US'
 ): string => {
   return new Intl.NumberFormat(locale, {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals
+    minimumFractionDigits: precision,
+    maximumFractionDigits: precision,
   }).format(value);
 };
 
 /**
- * Format a date to a string
- * @param date Date to format (Date object or ISO string)
- * @param format Format type (default: 'short')
- * @param locale Locale for formatting (default: en-US)
- * @returns Formatted date string
+ * Format large numbers with abbreviations (K, M, B, T)
+ */
+export const formatLargeNumber = (
+  value: number,
+  precision: number = 1,
+  locale: string = 'en-US'
+): string => {
+  const absValue = Math.abs(value);
+
+  if (absValue >= 1e12) {
+    return (value / 1e12).toLocaleString(locale, {
+      minimumFractionDigits: precision,
+      maximumFractionDigits: precision,
+    }) + 'T';
+  } else if (absValue >= 1e9) {
+    return (value / 1e9).toLocaleString(locale, {
+      minimumFractionDigits: precision,
+      maximumFractionDigits: precision,
+    }) + 'B';
+  } else if (absValue >= 1e6) {
+    return (value / 1e6).toLocaleString(locale, {
+      minimumFractionDigits: precision,
+      maximumFractionDigits: precision,
+    }) + 'M';
+  } else if (absValue >= 1e3) {
+    return (value / 1e3).toLocaleString(locale, {
+      minimumFractionDigits: precision,
+      maximumFractionDigits: precision,
+    }) + 'K';
+  }
+
+  return value.toLocaleString(locale, {
+    minimumFractionDigits: precision,
+    maximumFractionDigits: precision,
+  });
+};
+
+/**
+ * Format a date with various options
  */
 export const formatDate = (
-  date: Date | string,
-  format: 'short' | 'medium' | 'long' | 'full' = 'short',
+  date: string | Date,
+  format: 'short' | 'medium' | 'long' | 'full' | 'relative' | 'input' = 'medium',
   locale: string = 'en-US'
 ): string => {
-  if (!date) return '';
-
   const dateObj = typeof date === 'string' ? new Date(date) : date;
 
-  return new Intl.DateTimeFormat(locale, {
-    dateStyle: format
-  }).format(dateObj);
+  if (isNaN(dateObj.getTime())) {
+    return 'Invalid Date';
+  }
+
+  switch (format) {
+    case 'input':
+      return dateObj.toISOString().split('T')[0];
+    case 'relative':
+      return formatDistanceToNow(dateObj, { addSuffix: true });
+    case 'short':
+      return dateObj.toLocaleDateString(locale, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    case 'medium':
+      return dateObj.toLocaleDateString(locale, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    case 'long':
+      return dateObj.toLocaleDateString(locale, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    case 'full':
+      return dateObj.toLocaleDateString(locale, {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+    default:
+      return dateObj.toLocaleDateString(locale);
+  }
 };
 
 /**
- * Format a timestamp to a date and time string
- * @param timestamp Timestamp to format (Date object or ISO string)
- * @param format Format type (default: 'short')
- * @param locale Locale for formatting (default: en-US)
- * @returns Formatted date and time string
+ * Format a date and time
  */
 export const formatDateTime = (
-  timestamp: Date | string,
-  format: 'short' | 'medium' | 'long' | 'full' = 'short',
+  date: string | Date,
+  includeSeconds: boolean = false,
   locale: string = 'en-US'
 ): string => {
-  if (!timestamp) return '';
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
 
-  const dateObj = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+  if (isNaN(dateObj.getTime())) {
+    return 'Invalid Date';
+  }
 
-  return new Intl.DateTimeFormat(locale, {
-    dateStyle: format,
-    timeStyle: format
-  }).format(dateObj);
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  };
+
+  if (includeSeconds) {
+    options.second = '2-digit';
+  }
+
+  return dateObj.toLocaleDateString(locale, options);
 };
 
 /**
- * Format a file size
- * @param bytes Size in bytes
- * @param decimals Number of decimal places (default: 2)
- * @returns Formatted file size (e.g., "1.25 MB")
+ * Format a time duration in seconds to human readable format
  */
-export const formatFileSize = (bytes: number, decimals: number = 2): string => {
+export const formatDuration = (seconds: number): string => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m ${remainingSeconds}s`;
+  } else if (minutes > 0) {
+    return `${minutes}m ${remainingSeconds}s`;
+  } else {
+    return `${remainingSeconds}s`;
+  }
+};
+
+/**
+ * Format bytes to human readable format
+ */
+export const formatBytes = (bytes: number, decimals: number = 2): string => {
   if (bytes === 0) return '0 Bytes';
 
   const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(decimals))} ${sizes[i]}`;
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
 
 /**
- * Format a duration in milliseconds to a human-readable string
- * @param ms Duration in milliseconds
- * @returns Formatted duration string (e.g., "2h 30m 15s")
+ * Format phone number
  */
-export const formatDuration = (ms: number): string => {
-  if (ms < 0) return 'Invalid duration';
-  if (ms === 0) return '0s';
+export const formatPhoneNumber = (phoneNumber: string): string => {
+  const cleaned = phoneNumber.replace(/\D/g, '');
 
-  const seconds = Math.floor((ms / 1000) % 60);
-  const minutes = Math.floor((ms / (1000 * 60)) % 60);
-  const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
-  const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+  if (cleaned.length === 10) {
+    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+  } else if (cleaned.length === 11 && cleaned[0] === '1') {
+    return `+1 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
+  }
 
-  const parts: string[] = [];
-  if (days > 0) parts.push(`${days}d`);
-  if (hours > 0) parts.push(`${hours}h`);
-  if (minutes > 0) parts.push(`${minutes}m`);
-  if (seconds > 0 || parts.length === 0) parts.push(`${seconds}s`);
-
-  return parts.join(' ');
+  return phoneNumber;
 };
 
 /**
- * Truncate text to specified length with ellipsis if needed
- * @param text Text to truncate
- * @param maxLength Maximum length (default: 50)
- * @param ellipsis Ellipsis string (default: "...")
- * @returns Truncated text
+ * Truncate text with ellipsis
  */
-export const truncateText = (
-  text: string,
-  maxLength: number = 50,
-  ellipsis: string = '...'
-): string => {
-  if (!text) return '';
-  if (text.length <= maxLength) return text;
+export const truncateText = (text: string, maxLength: number): string => {
+  if (text.length <= maxLength) {
+    return text;
+  }
 
-  return `${text.substring(0, maxLength - ellipsis.length)}${ellipsis}`;
+  return text.slice(0, maxLength - 3) + '...';
 };
 
 /**
- * Format asset ticker to display with proper formatting
- * @param ticker Asset ticker
- * @returns Formatted ticker
+ * Format a risk score to descriptive text
  */
-export const formatTicker = (ticker: string): string => {
-  if (!ticker) return '';
-
-  // Typically tickers are uppercase
-  return ticker.toUpperCase();
+export const formatRiskLevel = (score: number): string => {
+  if (score <= 2) return 'Very Low';
+  if (score <= 4) return 'Low';
+  if (score <= 6) return 'Medium';
+  if (score <= 8) return 'High';
+  return 'Very High';
 };
 
 /**
- * Format financial metric name to display name
- * @param metricName Technical metric name
- * @returns Human-readable metric name
+ * Format portfolio weight as percentage
  */
-export const formatMetricName = (metricName: string): string => {
-  if (!metricName) return '';
-
-  // Replace underscores with spaces and capitalize each word
-  return metricName
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+export const formatWeight = (weight: number): string => {
+  return formatPercentage(weight / 100, 1);
 };
 
 /**
- * Format risk level to display name and optionally add color code
- * @param riskLevel Risk level value
- * @param includeColor Whether to include color code
- * @returns Formatted risk level with optional color
+ * Format change in value with + or - sign
  */
-export const formatRiskLevel = (
-  riskLevel: string,
-  includeColor: boolean = false
-): string | { text: string; color: string } => {
-  const levels: Record<string, { text: string; color: string }> = {
-    'low': { text: 'Low', color: '#74F174' },
-    'medium': { text: 'Medium', color: '#FFF59D' },
-    'high': { text: 'High', color: '#FAA1A4' },
-    'very_high': { text: 'Very High', color: '#FF6B6B' }
-  };
+export const formatChange = (value: number, isPercentage: boolean = false): string => {
+  const sign = value >= 0 ? '+' : '';
+  const formatted = isPercentage ? formatPercentage(Math.abs(value)) : formatNumber(Math.abs(value));
+  return `${sign}${value >= 0 ? '' : '-'}${formatted}`;
+};
 
-  const level = levels[riskLevel.toLowerCase()] || { text: 'Unknown', color: '#D1D4DC' };
+/**
+ * Format market cap
+ */
+export const formatMarketCap = (value: number): string => {
+  return formatLargeNumber(value, 2);
+};
 
-  return includeColor ? level : level.text;
+/**
+ * Format ratio (like Sharpe ratio)
+ */
+export const formatRatio = (value: number, precision: number = 3): string => {
+  return formatNumber(value, precision);
+};
+
+/**
+ * Format basis points
+ */
+export const formatBasisPoints = (value: number): string => {
+  return `${formatNumber(value * 10000, 0)} bps`;
 };

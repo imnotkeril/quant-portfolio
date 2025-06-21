@@ -1,150 +1,73 @@
-/**
- * Badge Component
- * Small status descriptors for UI elements
- */
 import React from 'react';
 import classNames from 'classnames';
 import styles from './Badge.module.css';
 
-export type BadgeStatus = 'success' | 'processing' | 'error' | 'warning' | 'default';
-export type BadgeSize = 'small' | 'default';
-
-interface BadgeProps {
-  children?: React.ReactNode;
-  count?: React.ReactNode;
-  dot?: boolean;
-  showZero?: boolean;
-  overflowCount?: number;
-  offset?: [number, number];
-  size?: BadgeSize;
-  status?: BadgeStatus;
-  color?: string;
-  text?: React.ReactNode;
-  title?: string;
+export interface BadgeProps {
+  children: React.ReactNode;
+  variant?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'neutral' | 'outline';
+  size?: 'small' | 'medium' | 'large';
   className?: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  rounded?: boolean;
+  dot?: boolean;
+  icon?: React.ReactNode;
   'data-testid'?: string;
 }
 
-export const Badge: React.FC<BadgeProps> = ({
+const Badge: React.FC<BadgeProps> = ({
   children,
-  count,
-  dot = false,
-  showZero = false,
-  overflowCount = 99,
-  offset,
-  size = 'default',
-  status,
-  color,
-  text,
-  title,
+  variant = 'neutral',
+  size = 'medium',
   className,
+  onClick,
+  disabled = false,
+  rounded = false,
+  dot = false,
+  icon,
   'data-testid': testId,
 }) => {
-  // Determine if badge should be shown
-  const shouldShowBadge = () => {
-    if (dot) return true;
-    if (count === undefined || count === null) return false;
-    if (typeof count === 'number') {
-      return count > 0 || (count === 0 && showZero);
-    }
-    return true;
-  };
-
-  // Format count display
-  const getDisplayCount = () => {
-    if (dot) return null;
-    if (typeof count === 'number') {
-      if (count === 0 && !showZero) return null;
-      return count > overflowCount ? `${overflowCount}+` : count.toString();
-    }
-    return count;
-  };
-
-  // Get badge classes
-  const getBadgeClasses = () => {
-    return classNames(
-      styles.badge,
-      styles[size],
-      {
-        [styles.dot]: dot,
-        [styles.standalone]: !children,
-        [styles[`status${status?.charAt(0).toUpperCase()}${status?.slice(1)}`]]: status && !color,
-      }
-    );
-  };
-
-  // Get badge style
-  const getBadgeStyle = (): React.CSSProperties => {
-    const style: React.CSSProperties = {};
-
-    if (color) {
-      style.backgroundColor = color;
-      style.borderColor = color;
-    }
-
-    if (offset && children) {
-      style.transform = `translate(${offset[0]}px, ${offset[1]}px)`;
-    }
-
-    return style;
-  };
-
-  const displayCount = getDisplayCount();
-  const showBadge = shouldShowBadge();
-
-  // Render standalone badge (without children)
-  if (!children) {
-    if (status && !count && !dot) {
-      // Status badge with text
-      return (
-        <span
-          className={classNames(
-            styles.statusBadge,
-            styles[`status${status.charAt(0).toUpperCase()}${status.slice(1)}`],
-            className
-          )}
-          title={title}
-          data-testid={testId}
-        >
-          <span className={styles.statusDot} />
-          {text && <span className={styles.statusText}>{text}</span>}
-        </span>
-      );
-    }
-
-    // Count or dot badge without wrapper
-    if (showBadge) {
-      return (
-        <span
-          className={classNames(getBadgeClasses(), className)}
-          style={getBadgeStyle()}
-          title={title}
-          data-testid={testId}
-        >
-          {!dot && displayCount}
-        </span>
-      );
-    }
-
-    return null;
-  }
-
-  // Render badge with children
-  const containerClasses = classNames(
-    styles.container,
+  const badgeClasses = classNames(
+    styles.badge,
+    styles[`variant-${variant}`],
+    styles[`size-${size}`],
+    {
+      [styles.clickable]: !!onClick && !disabled,
+      [styles.disabled]: disabled,
+      [styles.rounded]: rounded,
+      [styles.dot]: dot,
+      [styles.withIcon]: !!icon,
+    },
     className
   );
 
+  const handleClick = () => {
+    if (onClick && !disabled) {
+      onClick();
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (onClick && !disabled && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault();
+      onClick();
+    }
+  };
+
   return (
-    <span className={containerClasses} data-testid={testId}>
-      {children}
-      {showBadge && (
-        <span
-          className={getBadgeClasses()}
-          style={getBadgeStyle()}
-          title={title}
-        >
-          {!dot && displayCount}
+    <span
+      className={badgeClasses}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick && !disabled ? 0 : undefined}
+      aria-disabled={disabled}
+      data-testid={testId}
+    >
+      {icon && <span className={styles.icon}>{icon}</span>}
+      {!dot && (
+        <span className={styles.content}>
+          {children}
         </span>
       )}
     </span>

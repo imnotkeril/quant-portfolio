@@ -1,161 +1,181 @@
-/**
- * Card Component
- * Universal card container with header, body, and footer sections
- */
 import React from 'react';
 import classNames from 'classnames';
 import styles from './Card.module.css';
 
-export type CardSize = 'small' | 'medium' | 'large';
-
-interface CardProps {
-  children: React.ReactNode;
-  title?: string;
-  extra?: React.ReactNode;
-  size?: CardSize;
-  bordered?: boolean;
-  hoverable?: boolean;
-  loading?: boolean;
+// Base Card Props
+export interface CardProps {
+  children?: React.ReactNode;
   className?: string;
-  bodyClassName?: string;
-  headerClassName?: string;
-  footerClassName?: string;
-  onClick?: (event: React.MouseEvent<HTMLDivElement>) => void;
+  size?: 'small' | 'medium' | 'large';
+  variant?: 'default' | 'outlined' | 'elevated' | 'flat';
+  padding?: 'none' | 'small' | 'medium' | 'large';
+  loading?: boolean;
+  hover?: boolean;
+  onClick?: () => void;
   'data-testid'?: string;
 }
 
-interface CardHeaderProps {
-  children: React.ReactNode;
-  extra?: React.ReactNode;
-  className?: string;
-}
-
-interface CardBodyProps {
+// Card Header Props
+export interface CardHeaderProps {
   children: React.ReactNode;
   className?: string;
+  actions?: React.ReactNode;
+  avatar?: React.ReactNode;
+  title?: string;
+  subtitle?: string;
 }
 
-interface CardFooterProps {
+// Card Body Props
+export interface CardBodyProps {
   children: React.ReactNode;
   className?: string;
+  scrollable?: boolean;
+  maxHeight?: string | number;
 }
 
-export const CardHeader: React.FC<CardHeaderProps> = ({
+// Card Footer Props
+export interface CardFooterProps {
+  children: React.ReactNode;
+  className?: string;
+  align?: 'left' | 'center' | 'right' | 'space-between';
+}
+
+// Card Header Component
+const CardHeader: React.FC<CardHeaderProps> = ({
   children,
-  extra,
   className,
-}) => (
-  <div className={classNames(styles.header, className)}>
-    <div className={styles.headerContent}>
+  actions,
+  avatar,
+  title,
+  subtitle,
+}) => {
+  return (
+    <div className={classNames(styles.cardHeader, className)}>
+      {avatar && <div className={styles.headerAvatar}>{avatar}</div>}
+
+      <div className={styles.headerContent}>
+        {title && <h3 className={styles.headerTitle}>{title}</h3>}
+        {subtitle && <p className={styles.headerSubtitle}>{subtitle}</p>}
+        {!title && !subtitle && children}
+      </div>
+
+      {actions && <div className={styles.headerActions}>{actions}</div>}
+    </div>
+  );
+};
+
+// Card Body Component
+const CardBody: React.FC<CardBodyProps> = ({
+  children,
+  className,
+  scrollable = false,
+  maxHeight,
+}) => {
+  const bodyStyles = {
+    ...(maxHeight && { maxHeight: typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight }),
+  };
+
+  return (
+    <div
+      className={classNames(
+        styles.cardBody,
+        {
+          [styles.scrollable]: scrollable,
+        },
+        className
+      )}
+      style={bodyStyles}
+    >
       {children}
     </div>
-    {extra && (
-      <div className={styles.headerExtra}>
-        {extra}
-      </div>
-    )}
-  </div>
-);
+  );
+};
 
-export const CardBody: React.FC<CardBodyProps> = ({
+// Card Footer Component
+const CardFooter: React.FC<CardFooterProps> = ({
   children,
   className,
-}) => (
-  <div className={classNames(styles.body, className)}>
-    {children}
-  </div>
-);
+  align = 'left',
+}) => {
+  return (
+    <div
+      className={classNames(
+        styles.cardFooter,
+        styles[`align-${align}`],
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+};
 
-export const CardFooter: React.FC<CardFooterProps> = ({
+// Main Card Component
+const Card: React.FC<CardProps> = ({
   children,
   className,
-}) => (
-  <div className={classNames(styles.footer, className)}>
-    {children}
-  </div>
-);
-
-export const Card: React.FC<CardProps> = ({
-  children,
-  title,
-  extra,
   size = 'medium',
-  bordered = true,
-  hoverable = false,
+  variant = 'default',
+  padding = 'medium',
   loading = false,
-  className,
-  bodyClassName,
-  headerClassName,
-  footerClassName,
+  hover = false,
   onClick,
   'data-testid': testId,
 }) => {
   const cardClasses = classNames(
     styles.card,
-    styles[size],
+    styles[`size-${size}`],
+    styles[`variant-${variant}`],
+    styles[`padding-${padding}`],
     {
-      [styles.bordered]: bordered,
-      [styles.hoverable]: hoverable,
-      [styles.clickable]: !!onClick,
       [styles.loading]: loading,
+      [styles.hover]: hover,
+      [styles.clickable]: !!onClick,
     },
     className
   );
 
-  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (loading) return;
-    onClick?.(event);
-  };
-
-  const renderChildren = () => {
-    if (loading) {
-      return (
-        <div className={styles.loadingContainer}>
-          <div className={styles.spinner} />
-          <span className={styles.loadingText}>Loading...</span>
-        </div>
-      );
-    }
-
-    // Check if children contains CardHeader/CardBody/CardFooter components
-    const hasCardComponents = React.Children.toArray(children).some(child =>
-      React.isValidElement(child) &&
-      (child.type === CardHeader || child.type === CardBody || child.type === CardFooter)
-    );
-
-    if (hasCardComponents) {
-      return children;
-    }
-
-    // If no card components, wrap in CardBody and add header if title provided
+  if (loading) {
     return (
-      <>
-        {(title || extra) && (
-          <CardHeader extra={extra} className={headerClassName}>
-            {title}
-          </CardHeader>
-        )}
-        <CardBody className={bodyClassName}>
-          {children}
-        </CardBody>
-      </>
+      <div className={cardClasses} data-testid={testId}>
+        <div className={styles.loadingOverlay}>
+          <div className={styles.loadingSpinner} />
+        </div>
+      </div>
     );
-  };
+  }
 
   return (
     <div
       className={cardClasses}
-      onClick={handleClick}
+      onClick={onClick}
       data-testid={testId}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      } : undefined}
     >
-      {renderChildren()}
+      {children}
     </div>
   );
 };
 
-// Add static properties for compound component pattern
-Card.Header = CardHeader;
-Card.Body = CardBody;
-Card.Footer = CardFooter;
+// Define the compound component interface
+interface CardComponent extends React.FC<CardProps> {
+  Header: typeof CardHeader;
+  Body: typeof CardBody;
+  Footer: typeof CardFooter;
+}
 
-export default Card;
+// Create the compound component
+const CardWithSubComponents = Card as CardComponent;
+CardWithSubComponents.Header = CardHeader;
+CardWithSubComponents.Body = CardBody;
+CardWithSubComponents.Footer = CardFooter;
+
+export { CardHeader, CardBody, CardFooter };
+export default CardWithSubComponents;

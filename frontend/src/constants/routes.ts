@@ -5,7 +5,7 @@
 export const ROUTES = {
   // Public routes
   HOME: '/',
-  
+
   // Portfolio routes
   PORTFOLIO: {
     ROOT: '/portfolio',
@@ -14,54 +14,59 @@ export const ROUTES = {
     DETAILS: '/portfolio/:id',
     EDIT: '/portfolio/:id/edit',
     ANALYZE: '/portfolio/:id/analyze',
+    ANALYSIS: '/portfolio/:id/analysis',
     DETAILED_PATH: (id: string) => `/portfolio/${id}`,
     EDIT_PATH: (id: string) => `/portfolio/${id}/edit`,
     ANALYZE_PATH: (id: string) => `/portfolio/${id}/analyze`,
   },
-  
+
   // Analytics routes
   ANALYTICS: {
     ROOT: '/analytics',
     PERFORMANCE: '/analytics/performance/:id',
     RISK: '/analytics/risk/:id',
     ENHANCED: '/analytics/enhanced/:id',
+    ATTRIBUTION: '/analytics/attribution/:id', // ДОБАВЛЕНО: недостающий маршрут
     PERFORMANCE_PATH: (id: string) => `/analytics/performance/${id}`,
     RISK_PATH: (id: string) => `/analytics/risk/${id}`,
     ENHANCED_PATH: (id: string) => `/analytics/enhanced/${id}`,
   },
-  
+
   // Optimization routes
   OPTIMIZATION: {
     ROOT: '/optimization',
     BASIC: '/optimization/basic/:id',
     ADVANCED: '/optimization/advanced/:id',
     EFFICIENT_FRONTIER: '/optimization/efficient-frontier/:id',
+    COMPARISON: '/optimization/comparison', // ДОБАВЛЕНО: недостающий маршрут
     BASIC_PATH: (id: string) => `/optimization/basic/${id}`,
     ADVANCED_PATH: (id: string) => `/optimization/advanced/${id}`,
     EFFICIENT_FRONTIER_PATH: (id: string) => `/optimization/efficient-frontier/${id}`,
   },
-  
+
   // Risk management routes
   RISK: {
     ROOT: '/risk',
     ASSESSMENT: '/risk/assessment/:id',
     STRESS_TEST: '/risk/stress-test/:id',
     MONTE_CARLO: '/risk/monte-carlo/:id',
+    VAR: '/risk/var/:id', // ДОБАВЛЕНО: недостающий маршрут
     ASSESSMENT_PATH: (id: string) => `/risk/assessment/${id}`,
     STRESS_TEST_PATH: (id: string) => `/risk/stress-test/${id}`,
     MONTE_CARLO_PATH: (id: string) => `/risk/monte-carlo/${id}`,
   },
-  
+
   // Scenario analysis routes
   SCENARIOS: {
     ROOT: '/scenarios',
     CREATE: '/scenarios/create',
     DETAILS: '/scenarios/:id',
     SIMULATION: '/scenarios/simulation/:id',
+    HISTORICAL: '/scenarios/historical', // ДОБАВЛЕНО: недостающий маршрут
     DETAILS_PATH: (id: string) => `/scenarios/${id}`,
     SIMULATION_PATH: (id: string) => `/scenarios/simulation/${id}`,
   },
-  
+
   // Historical analysis routes
   HISTORICAL: {
     ROOT: '/historical',
@@ -76,6 +81,8 @@ export const ROUTES = {
     CREATE: '/comparison/create',
     RESULTS: '/comparison/results',
     DETAILS: '/comparison/:id',
+    PERFORMANCE: '/comparison/performance', // ДОБАВЛЕНО: недостающий маршрут
+    RISK: '/comparison/risk', // ДОБАВЛЕНО: недостающий маршрут
     DETAILS_PATH: (id: string) => `/comparison/${id}`,
   },
 
