@@ -1,103 +1,62 @@
-/* src/pages/Dashboard/styles.module.css */
+/* Fixed Dashboard.module.css - Wild Market Capital */
 .dashboard {
   padding: var(--spacing-l);
-  background-color: transparent; /* Убираем фон, он уже есть в layout */
-  color: var(--color-text-light);
-}
-
-.welcomeSection {
-  margin-bottom: var(--spacing-xl);
-  display: flex;
-  justify-content: center;
+  min-height: 100%;
+  background-color: var(--color-background);
 }
 
 .welcomeCard {
   background: var(--gradient-card);
   border: 1px solid var(--color-divider);
   border-radius: var(--border-radius-l);
-  padding: var(--spacing-xxl);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
   text-align: center;
-  max-width: 600px;
-  box-shadow: var(--shadow-card);
   backdrop-filter: blur(10px);
 }
 
 .welcomeTitle {
-  font-size: var(--font-size-h2);
+  font-size: var(--font-size-h1);
   font-weight: var(--font-weight-bold);
-  color: var(--color-accent);
-  margin-bottom: var(--spacing-m);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-s) 0;
 }
 
-.welcomeText {
-  font-size: var(--font-size-h3);
+.welcomeSubtitle {
+  font-size: var(--font-size-body);
   color: var(--color-neutral-gray);
+  margin: 0 0 var(--spacing-l) 0;
   line-height: 1.6;
-  margin-bottom: var(--spacing-xl);
 }
 
 .welcomeActions {
   display: flex;
-  gap: var(--spacing-m);
   justify-content: center;
-  flex-wrap: wrap;
+  gap: var(--spacing-m);
 }
 
-.primaryButton {
-  background: var(--gradient-primary);
-  color: var(--color-text-dark);
-  border: none;
-  border-radius: var(--border-radius-m);
-  padding: var(--spacing-m) var(--spacing-l);
-  font-size: var(--font-size-h3);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: all var(--transition-medium);
-  box-shadow: var(--shadow-medium);
-}
-
-.primaryButton:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-large);
-  filter: brightness(1.1);
-}
-
-.secondaryButton {
-  background: transparent;
-  color: var(--color-accent);
-  border: 1px solid var(--color-accent);
-  border-radius: var(--border-radius-m);
-  padding: var(--spacing-m) var(--spacing-l);
-  font-size: var(--font-size-h3);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: all var(--transition-medium);
-}
-
-.secondaryButton:hover {
-  background: var(--color-accent);
-  color: var(--color-text-dark);
-  transform: translateY(-2px);
-}
-
+/* Fixed content layout */
 .content {
   display: grid;
-  grid-template-columns: 1fr 400px;
+  grid-template-columns: 2fr 1fr;
   gap: var(--spacing-xl);
   max-width: 1400px;
   margin: 0 auto;
+  align-items: start; /* Prevent stretching */
 }
 
 .leftPanel {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xl);
+  min-width: 0; /* Prevent overflow */
 }
 
 .rightPanel {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xl);
+  min-width: 0; /* Prevent overflow */
 }
 
 .section {
@@ -106,19 +65,22 @@
   border-radius: var(--border-radius-l);
   padding: var(--spacing-l);
   backdrop-filter: blur(10px);
+  position: relative; /* Ensure proper stacking */
 }
 
 .sectionTitle {
   font-size: var(--font-size-h3);
   font-weight: var(--font-weight-semi-bold);
   color: var(--color-text-light);
-  margin-bottom: var(--spacing-m);
+  margin: 0 0 var(--spacing-m) 0;
 }
 
+/* Fixed portfolio grid */
 .portfolioGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--spacing-m);
+  margin-top: var(--spacing-m);
 }
 
 .emptyState {
@@ -156,6 +118,7 @@
   filter: brightness(1.1);
 }
 
+/* Fixed portfolio cards */
 .portfolioCard {
   background: linear-gradient(135deg, rgba(42, 46, 57, 0.4) 0%, rgba(42, 46, 57, 0.2) 100%);
   border: 1px solid var(--color-divider);
@@ -165,6 +128,10 @@
   transition: all var(--transition-medium);
   position: relative;
   overflow: hidden;
+  min-height: 120px; /* Prevent collapsed cards */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .portfolioCard:hover {
@@ -203,7 +170,8 @@
   font-size: var(--font-size-h3);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-light);
-  margin: 0;
+  margin: 0 0 var(--spacing-xs) 0;
+  line-height: 1.2;
 }
 
 .portfolioValue {
@@ -211,11 +179,13 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-text-light);
   margin-bottom: var(--spacing-s);
+  line-height: 1.2;
 }
 
 .portfolioChange {
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-medium);
+  line-height: 1.2;
 }
 
 .positive {
@@ -226,10 +196,12 @@
   color: var(--color-negative);
 }
 
+/* Fixed action grid */
 .actionGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--spacing-m);
+  margin-top: var(--spacing-m);
 }
 
 .actionCard {
@@ -242,6 +214,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-m);
+  min-height: 80px; /* Consistent height */
 }
 
 .actionCard:hover {
@@ -266,20 +239,25 @@
 
 .actionText {
   flex: 1;
+  min-width: 0; /* Prevent text overflow */
 }
 
 .actionTitle {
   font-size: var(--font-size-h3);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-light);
-  margin-bottom: 2px;
+  margin: 0 0 2px 0;
+  line-height: 1.2;
 }
 
 .actionDesc {
   font-size: var(--font-size-caption);
   color: var(--color-neutral-gray);
+  margin: 0;
+  line-height: 1.3;
 }
 
+/* Fixed market overview */
 .marketOverview {
   background: var(--gradient-card);
   border: 1px solid var(--color-divider);
@@ -292,6 +270,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-m);
+  margin-top: var(--spacing-m);
 }
 
 .marketCard {
@@ -300,6 +279,10 @@
   border-radius: var(--border-radius-m);
   padding: var(--spacing-m);
   transition: all var(--transition-medium);
+  min-height: 70px; /* Consistent height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .marketCard:hover {
@@ -310,19 +293,23 @@
 .marketName {
   font-size: var(--font-size-body);
   color: var(--color-neutral-gray);
-  margin-bottom: 4px;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
 }
 
 .marketValue {
   font-size: var(--font-size-h3);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-light);
-  margin-bottom: 4px;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
 }
 
 .marketChange {
   font-size: var(--font-size-caption);
   font-weight: var(--font-weight-medium);
+  margin: 0;
+  line-height: 1.2;
 }
 
 .chartSection {
@@ -337,9 +324,11 @@
   margin-top: var(--spacing-m);
   border-radius: var(--border-radius-m);
   overflow: hidden;
+  min-height: 300px; /* Prevent collapsed charts */
+  position: relative;
 }
 
-/* Responsive Design */
+/* Fixed responsive design */
 @media (max-width: 1200px) {
   .content {
     grid-template-columns: 1fr;
@@ -349,6 +338,10 @@
   .rightPanel {
     order: -1;
   }
+
+  .portfolioGrid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
 }
 
 @media (max-width: 768px) {
@@ -356,33 +349,81 @@
     padding: var(--spacing-m);
   }
 
+  .content {
+    gap: var(--spacing-m);
+  }
+
   .portfolioGrid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-s);
   }
 
   .actionGrid {
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-s);
   }
 
   .welcomeActions {
     flex-direction: column;
+    align-items: center;
   }
 
   .welcomeCard {
     padding: var(--spacing-l);
   }
+
+  .section {
+    padding: var(--spacing-m);
+  }
 }
 
 @media (max-width: 480px) {
+  .dashboard {
+    padding: var(--spacing-s);
+  }
+
   .actionGrid {
     grid-template-columns: 1fr;
   }
 
   .actionCard {
     padding: var(--spacing-m);
+    min-height: 60px;
   }
 
   .portfolioCard {
     padding: var(--spacing-m);
+    min-height: 100px;
   }
+
+  .welcomeCard {
+    padding: var(--spacing-m);
+  }
+
+  .welcomeTitle {
+    font-size: var(--font-size-h2);
+  }
+}
+
+/* Ensure proper stacking and prevent overlaps */
+.section,
+.portfolioCard,
+.actionCard,
+.marketCard {
+  position: relative;
+  z-index: 1;
+}
+
+/* Fix any potential flex/grid overflow issues */
+* {
+  box-sizing: border-box;
+}
+
+.content > * {
+  min-width: 0;
+}
+
+.portfolioGrid > *,
+.actionGrid > * {
+  min-width: 0;
 }

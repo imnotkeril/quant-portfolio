@@ -1,35 +1,39 @@
-/**
- * Index CSS - Entry point styles
- * This file is imported by index.tsx and serves as the main entry point for styles
- */
+/* FIXED frontend/src/index.css - Entry Point Styles */
 
-/* Import all global styles */
+/* Import all global styles in correct order */
 @import './assets/styles/variables.css';
 @import './assets/styles/reset.css';
 @import './assets/styles/global.css';
 
-/* Base body and html styles */
+/* Base HTML and body styles - FIXED */
 html {
   font-size: 100%;
-  overflow-x: hidden;
+  height: 100%;
   scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
+  padding: 0;
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-background);
   color: var(--color-text-light);
+  height: 100%;
+  width: 100%;
   overflow-x: hidden;
 }
 
-/* Root container */
+/* CRITICAL FIX: Root container */
 #root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-background);
+  position: relative;
+  overflow: hidden;
 }
 
 /* Code elements */
@@ -37,33 +41,15 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-/* Focus visible styles for accessibility */
-*:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
+/* Remove any default margins/padding from React root */
+* {
+  box-sizing: border-box;
 }
 
-/* Selection styles */
-::selection {
-  background-color: var(--color-accent);
-  color: var(--color-text-dark);
-}
-
-/* Scrollbar styles */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-divider);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-neutral-gray);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent);
+/* Ensure proper text rendering */
+body, input, textarea, button, select {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
