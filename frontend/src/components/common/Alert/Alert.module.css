@@ -1,187 +1,32 @@
-/**
- * Alert Styles for Wild Market Capital
- */
-
+/* src/components/common/Alert/Alert.module.css */
 .alert {
-  position: relative;
   display: flex;
   align-items: flex-start;
-  padding: var(--spacing-m);
-  border-radius: var(--border-radius-m);
-  border: 1px solid transparent;
+  padding: var(--spacing-s) var(--spacing-m);
+  border-radius: var(--border-radius-s);
+  border: 1px solid;
   font-family: var(--font-family);
   font-size: var(--font-size-body);
   line-height: var(--line-height-body);
-  transition: all var(--transition-medium);
-  overflow: hidden;
-}
-
-.alert.closing {
-  opacity: 0;
-  transform: translateY(-8px);
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  margin-bottom: 0;
-}
-
-/* Alert types */
-.info {
-  background-color: rgba(144, 191, 249, 0.1);
-  border-color: var(--color-neutral-1);
-  color: var(--color-text-light);
-}
-
-.success {
-  background-color: rgba(116, 241, 116, 0.1);
-  border-color: var(--color-positive);
-  color: var(--color-text-light);
-}
-
-.warning {
-  background-color: rgba(255, 245, 157, 0.1);
-  border-color: var(--color-neutral-2);
-  color: var(--color-text-light);
-}
-
-.error {
-  background-color: rgba(250, 161, 164, 0.1);
-  border-color: var(--color-negative);
-  color: var(--color-text-light);
-}
-
-/* Banner style */
-.banner {
-  border-radius: 0;
-  border-left: none;
-  border-right: none;
-  border-top: none;
-  border-bottom-width: 2px;
-  padding: var(--spacing-s) var(--spacing-m);
-}
-
-/* Icon */
-.icon {
-  flex-shrink: 0;
-  margin-right: var(--spacing-s);
-  margin-top: 2px;
-  display: flex;
-  align-items: center;
-}
-
-.info .icon {
-  color: var(--color-neutral-1);
-}
-
-.success .icon {
-  color: var(--color-positive);
-}
-
-.warning .icon {
-  color: var(--color-neutral-2);
-}
-
-.error .icon {
-  color: var(--color-negative);
-}
-
-/* Content */
-.content {
-  flex: 1;
-  min-width: 0;
-}
-
-.message {
-  font-weight: var(--font-weight-medium);
-  margin: 0;
-}
-
-.description {
-  margin-top: var(--spacing-xs);
-  color: var(--color-neutral-gray);
-  font-size: var(--font-size-caption);
-  line-height: var(--line-height-caption);
-}
-
-.withDescription .message {
-  font-weight: var(--font-weight-semi-bold);
-  margin-bottom: var(--spacing-xs);
-}
-
-/* Action */
-.action {
-  flex-shrink: 0;
-  margin-left: var(--spacing-s);
-  margin-top: -2px;
-}
-
-/* Close button */
-.closeButton {
-  position: absolute;
-  top: var(--spacing-s);
-  right: var(--spacing-s);
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  color: var(--color-neutral-gray);
-  cursor: pointer;
-  border-radius: var(--border-radius-xs);
+  position: relative;
+  word-wrap: break-word;
+  animation: alertSlideIn 0.2s ease-out;
   transition: all var(--transition-fast);
-  padding: 0;
 }
 
-.closeButton:hover {
-  color: var(--color-text-light);
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.closeButton:active {
-  transform: scale(0.95);
-}
-
-.closable {
-  padding-right: calc(var(--spacing-m) + 32px);
-}
-
-.banner.closable {
-  padding-right: calc(var(--spacing-m) + 32px);
-}
-
-/* Adjustments for icons */
-.withIcon .content {
-  margin-left: 0;
-}
-
-.withIcon.closable {
-  padding-right: calc(var(--spacing-m) + 32px);
-}
-
-/* Banner with icon adjustments */
-.banner .icon {
-  margin-top: 0;
-}
-
-.banner .closeButton {
-  top: var(--spacing-xs);
-  right: var(--spacing-s);
-}
-
-/* Animation keyframes */
 @keyframes alertSlideIn {
   from {
     opacity: 0;
     transform: translateY(-8px);
-    max-height: 0;
   }
   to {
     opacity: 1;
     transform: translateY(0);
-    max-height: 200px;
   }
+}
+
+.alert.closing {
+  animation: alertSlideOut 0.2s ease-in;
 }
 
 @keyframes alertSlideOut {
@@ -194,75 +39,313 @@
     opacity: 0;
     transform: translateY(-8px);
     max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: 0;
   }
 }
 
-.alert {
-  animation: alertSlideIn var(--transition-medium) ease-out;
+/* Alert types */
+.alert.success {
+  background-color: rgba(116, 241, 116, 0.1);
+  border-color: var(--color-positive);
+  color: var(--color-positive);
 }
 
-.closing {
-  animation: alertSlideOut var(--transition-medium) ease-in;
+.alert.info {
+  background-color: rgba(144, 191, 249, 0.1);
+  border-color: var(--color-neutral-1);
+  color: var(--color-neutral-1);
 }
 
-/* Responsive adjustments */
+.alert.warning {
+  background-color: rgba(255, 245, 157, 0.1);
+  border-color: var(--color-neutral-2);
+  color: var(--color-neutral-2);
+}
+
+.alert.error {
+  background-color: rgba(250, 161, 164, 0.1);
+  border-color: var(--color-negative);
+  color: var(--color-negative);
+}
+
+/* Banner style */
+.alert.banner {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  padding: var(--spacing-m) var(--spacing-l);
+}
+
+/* With icon */
+.alert.withIcon {
+  padding-left: var(--spacing-l);
+}
+
+.alertIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--spacing-s);
+  flex-shrink: 0;
+  margin-top: 1px; /* Align with text baseline */
+}
+
+.alert.withDescription .alertIcon {
+  margin-top: 2px; /* Align with title when description present */
+}
+
+/* Content */
+.alertContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.alertMessage {
+  font-weight: var(--font-weight-medium);
+  margin: 0;
+  color: inherit;
+}
+
+.alert.withDescription .alertMessage {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  margin-bottom: var(--spacing-xs);
+}
+
+.alertDescription {
+  margin: 0;
+  color: var(--color-text-light);
+  opacity: 0.8;
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-caption);
+  margin-top: var(--spacing-xs);
+}
+
+/* Action */
+.alertAction {
+  margin-left: var(--spacing-m);
+  flex-shrink: 0;
+}
+
+/* Close button */
+.alert.closable {
+  padding-right: var(--spacing-xl);
+}
+
+.alertCloseIcon {
+  position: absolute;
+  top: var(--spacing-s);
+  right: var(--spacing-s);
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  border-radius: var(--border-radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  opacity: 0.6;
+}
+
+.alertCloseIcon:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.alertCloseIcon:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
+.alert.withDescription .alertCloseIcon {
+  top: var(--spacing-m);
+}
+
+/* Type-specific icon colors */
+.alert.success .alertIcon {
+  color: var(--color-positive);
+}
+
+.alert.info .alertIcon {
+  color: var(--color-neutral-1);
+}
+
+.alert.warning .alertIcon {
+  color: var(--color-neutral-2);
+}
+
+.alert.error .alertIcon {
+  color: var(--color-negative);
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
   .alert {
+    padding: var(--spacing-m);
+    border-radius: var(--border-radius-s);
+  }
+
+  .alert.withIcon {
+    padding-left: var(--spacing-m);
+  }
+
+  .alert.closable {
+    padding-right: var(--spacing-xl);
+  }
+
+  .alertIcon {
+    margin-right: var(--spacing-s);
+  }
+
+  .alertAction {
+    margin-left: var(--spacing-s);
+    margin-top: var(--spacing-s);
+  }
+
+  .alert.withDescription {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .alert.withDescription .alertContent {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .alert.withDescription .alertAction {
+    margin-left: 0;
+    margin-top: var(--spacing-s);
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .alert {
     padding: var(--spacing-s);
+    font-size: var(--font-size-caption);
   }
 
-  .banner {
-    padding: var(--spacing-xs) var(--spacing-s);
+  .alertMessage {
+    font-size: var(--font-size-body);
   }
 
-  .closable {
-    padding-right: calc(var(--spacing-s) + 28px);
+  .alert.withDescription .alertMessage {
+    font-size: var(--font-size-body);
   }
 
-  .banner.closable {
-    padding-right: calc(var(--spacing-s) + 28px);
+  .alertDescription {
+    font-size: var(--font-size-caption);
   }
 
-  .closeButton {
-    top: var(--spacing-xs);
-    right: var(--spacing-xs);
+  .alertCloseIcon {
     width: 20px;
     height: 20px;
+    top: 4px;
+    right: 4px;
   }
 
-  .icon {
-    margin-right: var(--spacing-xs);
+  .alert.withDescription .alertCloseIcon {
+    top: var(--spacing-s);
   }
 
-  .action {
-    margin-left: var(--spacing-xs);
+  .alertIcon {
+    width: 14px;
+    height: 14px;
   }
 }
 
 /* High contrast mode */
-@media (prefers-contrast: more) {
+@media (prefers-contrast: high) {
   .alert {
     border-width: 2px;
   }
 
-  .message {
-    font-weight: var(--font-weight-semi-bold);
+  .alert.success {
+    background-color: rgba(116, 241, 116, 0.2);
+    color: var(--color-positive);
   }
 
-  .description {
-    color: var(--color-text-light);
+  .alert.info {
+    background-color: rgba(144, 191, 249, 0.2);
+    color: var(--color-neutral-1);
+  }
+
+  .alert.warning {
+    background-color: rgba(255, 245, 157, 0.2);
+    color: var(--color-neutral-2);
+  }
+
+  .alert.error {
+    background-color: rgba(250, 161, 164, 0.2);
+    color: var(--color-negative);
+  }
+
+  .alertDescription {
+    color: inherit;
+    opacity: 1;
   }
 }
 
-/* Reduced motion support */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .alert,
-  .closing {
+  .alert {
     animation: none;
     transition: none;
   }
 
-  .closeButton:active {
-    transform: none;
+  .alert.closing {
+    animation: none;
+    opacity: 0;
   }
+
+  .alertCloseIcon {
+    transition: none;
+  }
+}
+
+/* Dark theme adjustments */
+@media (prefers-color-scheme: dark) {
+  .alertDescription {
+    color: var(--color-text-light);
+  }
+}
+
+/* Print styles */
+@media print {
+  .alert {
+    background: transparent !important;
+    color: black !important;
+    border: 1px solid black !important;
+  }
+
+  .alertCloseIcon {
+    display: none;
+  }
+}
+
+/* Focus management */
+.alert:focus-within .alertCloseIcon {
+  opacity: 1;
+}
+
+/* Multiple alerts spacing */
+.alert + .alert {
+  margin-top: var(--spacing-s);
+}
+
+/* Nested content support */
+.alert .alert {
+  margin-top: var(--spacing-s);
+  border-radius: var(--border-radius-xs);
+}
+
+/* Loading state for actions */
+.alertAction button[aria-busy="true"] {
+  pointer-events: none;
+  opacity: 0.6;
 }

@@ -1,8 +1,4 @@
-/**
- * Input Component Export
- */
-import InputComponent from './Input';
-
-// Export the main component as both named and default
-export const Input = InputComponent;
-export default InputComponent;
+// src/components/common/Input/index.ts
+export { Input } from './Input';
+export type { InputSize, InputStatus, InputRef } from './Input';
+export { Input as default } from './Input';

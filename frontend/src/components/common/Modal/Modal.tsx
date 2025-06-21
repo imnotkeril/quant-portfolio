@@ -1,180 +1,293 @@
-/**
- * Modal Component
- * Universal modal dialog with different sizes and variants
- */
-import React, { useEffect, useRef } from 'react';
+// src/components/common/Modal/Modal.tsx
+import React, { useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import classNames from 'classnames';
-import { useClickOutside } from '../../../hooks/useClickOutside';
+import { Button } from '../Button/Button';
 import styles from './Modal.module.css';
 
-export type ModalSize = 'small' | 'medium' | 'large' | 'xlarge' | 'fullscreen';
-export type ModalVariant = 'default' | 'confirm' | 'side';
-
 interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title?: string;
-  size?: ModalSize;
-  variant?: ModalVariant;
+  open: boolean;
+  title?: React.ReactNode;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  closeOnBackdropClick?: boolean;
-  closeOnEscape?: boolean;
-  showCloseButton?: boolean;
+  onCancel?: () => void;
+  onOk?: () => void;
+  okText?: string;
+  cancelText?: string;
+  confirmLoading?: boolean;
+  destroyOnClose?: boolean;
+  maskClosable?: boolean;
+  keyboard?: boolean;
+  centered?: boolean;
+  width?: string | number;
+  height?: string | number;
+  zIndex?: number;
   className?: string;
-  backdropClassName?: string;
-  contentClassName?: string;
-  'data-testid'?: string;
+  bodyStyle?: React.CSSProperties;
+  maskStyle?: React.CSSProperties;
+  wrapClassName?: string;
+  getContainer?: HTMLElement | (() => HTMLElement) | string | false;
+  forceRender?: boolean;
+  focusTriggerAfterClose?: boolean;
+  modalRender?: (node: React.ReactNode) => React.ReactNode;
+  closeIcon?: React.ReactNode;
+  closable?: boolean;
+  afterClose?: () => void;
+  afterOpenChange?: (open: boolean) => void;
 }
 
 export const Modal: React.FC<ModalProps> = ({
-  isOpen,
-  onClose,
+  open,
   title,
-  size = 'medium',
-  variant = 'default',
   children,
   footer,
-  closeOnBackdropClick = true,
-  closeOnEscape = true,
-  showCloseButton = true,
+  onCancel,
+  onOk,
+  okText = 'OK',
+  cancelText = 'Cancel',
+  confirmLoading = false,
+  destroyOnClose = false,
+  maskClosable = true,
+  keyboard = true,
+  centered = false,
+  width = 520,
+  height,
+  zIndex = 1000,
   className,
-  backdropClassName,
-  contentClassName,
-  'data-testid': testId,
+  bodyStyle,
+  maskStyle,
+  wrapClassName,
+  getContainer,
+  forceRender = false,
+  focusTriggerAfterClose = true,
+  modalRender,
+  closeIcon,
+  closable = true,
+  afterClose,
+  afterOpenChange,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
-  const backdropRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
-
-  // Handle click outside modal content
-  useClickOutside(modalRef, () => {
-    if (closeOnBackdropClick) {
-      onClose();
-    }
-  }, isOpen);
+  const modalContentRef = useRef<HTMLDivElement>(null);
 
   // Handle escape key
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (keyboard && e.key === 'Escape' && open) {
+      onCancel?.();
+    }
+  }, [keyboard, open, onCancel]);
+
+  // Handle mask click
+  const handleMaskClick = useCallback((e: React.MouseEvent) => {
+    if (maskClosable && e.target === e.currentTarget) {
+      onCancel?.();
+    }
+  }, [maskClosable, onCancel]);
+
+  // Focus management
   useEffect(() => {
-    if (!isOpen || !closeOnEscape) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, closeOnEscape, onClose]);
-
-  // Handle focus management
-  useEffect(() => {
-    if (isOpen) {
-      // Store the currently focused element
+    if (open) {
       previousActiveElement.current = document.activeElement as HTMLElement;
 
-      // Prevent body scroll
-      document.body.style.overflow = 'hidden';
-
-      // Focus the modal
+      // Focus the modal content
       setTimeout(() => {
-        modalRef.current?.focus();
-      }, 0);
-    } else {
-      // Restore body scroll
-      document.body.style.overflow = '';
+        if (modalContentRef.current) {
+          const focusableElement = modalContentRef.current.querySelector(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          ) as HTMLElement;
 
-      // Restore focus to previous element
-      if (previousActiveElement.current) {
+          if (focusableElement) {
+            focusableElement.focus();
+          } else {
+            modalContentRef.current.focus();
+          }
+        }
+      }, 100);
+    } else {
+      // Return focus to previous element
+      if (focusTriggerAfterClose && previousActiveElement.current) {
         previousActiveElement.current.focus();
       }
     }
+  }, [open, focusTriggerAfterClose]);
 
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+  // Keyboard event listener
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
 
-  if (!isOpen) return null;
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [open]);
 
-  const backdropClasses = classNames(
-    styles.backdrop,
-    styles[variant],
-    {
-      [styles.show]: isOpen,
-    },
-    backdropClassName
+  // After open change callback
+  useEffect(() => {
+    afterOpenChange?.(open);
+  }, [open, afterOpenChange]);
+
+  // After close callback
+  useEffect(() => {
+    if (!open) {
+      const timer = setTimeout(() => {
+        afterClose?.();
+      }, 200); // Animation duration
+      return () => clearTimeout(timer);
+    }
+  }, [open, afterClose]);
+
+  // Focus trap
+  const handleTabKey = useCallback((e: KeyboardEvent) => {
+    if (!modalContentRef.current || e.key !== 'Tab') return;
+
+    const focusableElements = modalContentRef.current.querySelectorAll(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+    ) as NodeListOf<HTMLElement>;
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    if (e.shiftKey) {
+      if (document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement.focus();
+      }
+    } else {
+      if (document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      document.addEventListener('keydown', handleTabKey);
+      return () => document.removeEventListener('keydown', handleTabKey);
+    }
+  }, [open, handleTabKey]);
+
+  // Default footer
+  const defaultFooter = footer !== null && (
+    <div className={styles.footer}>
+      {onCancel && (
+        <Button
+          variant="outline"
+          onClick={onCancel}
+          disabled={confirmLoading}
+        >
+          {cancelText}
+        </Button>
+      )}
+      {onOk && (
+        <Button
+          variant="primary"
+          onClick={onOk}
+          loading={confirmLoading}
+          disabled={confirmLoading}
+        >
+          {okText}
+        </Button>
+      )}
+    </div>
   );
 
-  const modalClasses = classNames(
-    styles.modal,
-    styles[size],
-    styles[variant],
-    className
-  );
+  // Don't render if not open and not forceRender
+  if (!open && !forceRender) {
+    if (destroyOnClose) {
+      return null;
+    }
+  }
 
-  const contentClasses = classNames(
-    styles.content,
-    contentClassName
-  );
+  // Get container element
+  const getContainerElement = (): HTMLElement => {
+    if (getContainer === false) {
+      return modalRef.current?.parentElement || document.body;
+    }
+    if (typeof getContainer === 'string') {
+      return document.querySelector(getContainer) || document.body;
+    }
+    if (typeof getContainer === 'function') {
+      return getContainer();
+    }
+    if (getContainer instanceof HTMLElement) {
+      return getContainer;
+    }
+    return document.body;
+  };
 
   const modalContent = (
     <div
-      ref={backdropRef}
-      className={backdropClasses}
-      data-testid={testId}
+      ref={modalRef}
+      className={classNames(
+        styles.modalRoot,
+        {
+          [styles.hidden]: !open,
+          [styles.centered]: centered,
+        },
+        wrapClassName
+      )}
+      style={{ zIndex, ...maskStyle }}
+      onClick={handleMaskClick}
+      role="presentation"
     >
-      <div
-        ref={modalRef}
-        className={modalClasses}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={title ? 'modal-title' : undefined}
-        tabIndex={-1}
-      >
-        <div className={contentClasses}>
-          {(title || showCloseButton) && (
-            <div className={styles.header}>
-              {title && (
-                <h2 id="modal-title" className={styles.title}>
-                  {title}
-                </h2>
+      <div className={styles.modalWrap}>
+        <div
+          ref={modalContentRef}
+          className={classNames(styles.modal, className)}
+          style={{
+            width: typeof width === 'number' ? `${width}px` : width,
+            height: typeof height === 'number' ? `${height}px` : height,
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={title ? 'modal-title' : undefined}
+          tabIndex={-1}
+        >
+          {closable && (
+            <button
+              type="button"
+              className={styles.closeButton}
+              onClick={onCancel}
+              aria-label="Close modal"
+            >
+              {closeIcon || (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
               )}
+            </button>
+          )}
 
-              {showCloseButton && (
-                <button
-                  type="button"
-                  className={styles.closeButton}
-                  onClick={onClose}
-                  aria-label="Close modal"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                  </svg>
-                </button>
-              )}
+          {title && (
+            <div className={styles.header}>
+              <div id="modal-title" className={styles.title}>
+                {title}
+              </div>
             </div>
           )}
 
-          <div className={styles.body}>
+          <div
+            className={styles.body}
+            style={bodyStyle}
+          >
             {children}
           </div>
 
-          {footer && (
-            <div className={styles.footer}>
-              {footer}
-            </div>
-          )}
+          {(footer !== null) && (footer || defaultFooter)}
         </div>
       </div>
     </div>
   );
 
-  // Render modal in portal
-  return createPortal(modalContent, document.body);
-};
+  const renderModal = modalRender ? modalRender(modalContent) : modalContent;
 
-export default Modal;
+  return createPortal(renderModal, getContainerElement());
+};

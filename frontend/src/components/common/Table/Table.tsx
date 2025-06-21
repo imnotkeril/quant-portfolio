@@ -1,37 +1,42 @@
-/**
- * Table Component
- * Universal data table with sorting, filtering, and pagination
- */
-import React, { useState, useMemo } from 'react';
+// src/components/common/Table/Table.tsx
+import React, { useState, useMemo, useCallback } from 'react';
 import classNames from 'classnames';
+import { Pagination } from '../Pagination/Pagination';
 import styles from './Table.module.css';
 
-export type TableColumnAlign = 'left' | 'center' | 'right';
-export type TableSortDirection = 'asc' | 'desc';
-
-export interface TableColumn<T = any> {
+export interface TableColumn<T> {
   key: string;
   title: string;
   dataIndex?: keyof T;
   render?: (value: any, record: T, index: number) => React.ReactNode;
-  width?: string | number;
-  minWidth?: string | number;
-  align?: TableColumnAlign;
+  width?: string;
+  align?: 'left' | 'center' | 'right';
   sortable?: boolean;
   filterable?: boolean;
-  fixed?: 'left' | 'right';
   className?: string;
 }
 
-export interface TableSortState {
-  key: string;
-  direction: TableSortDirection;
+export interface RowSelection<T> {
+  selectedRowKeys?: (string | number)[];
+  onChange?: (selectedRowKeys: (string | number)[], selectedRows: T[]) => void;
+  onSelect?: (record: T, selected: boolean, selectedRows: T[], nativeEvent: Event) => void;
+  onSelectAll?: (selected: boolean, selectedRows: T[], changeRows: T[]) => void;
+  getCheckboxProps?: (record: T) => { disabled?: boolean; name?: string };
 }
 
-export interface TablePaginationConfig {
-  current: number;
-  pageSize: number;
-  total: number;
+export interface Expandable<T> {
+  expandedRowKeys?: (string | number)[];
+  defaultExpandedRowKeys?: (string | number)[];
+  expandedRowRender?: (record: T, index: number, indent: number, expanded: boolean) => React.ReactNode;
+  expandRowByClick?: boolean;
+  onExpand?: (expanded: boolean, record: T) => void;
+  onExpandedRowsChange?: (expandedRows: (string | number)[]) => void;
+}
+
+export interface PaginationConfig {
+  current?: number;
+  pageSize?: number;
+  total?: number;
   showSizeChanger?: boolean;
   showQuickJumper?: boolean;
   showTotal?: (total: number, range: [number, number]) => React.ReactNode;
@@ -39,496 +44,422 @@ export interface TablePaginationConfig {
   onShowSizeChange?: (current: number, size: number) => void;
 }
 
-interface TableProps<T = any> {
-  columns: TableColumn<T>[];
+interface TableProps<T> {
   data: T[];
-  rowKey: keyof T | ((record: T, index: number) => string);
+  columns: TableColumn<T>[];
+  rowKey: keyof T | ((record: T) => string | number);
   loading?: boolean;
-  pagination?: TablePaginationConfig | false;
-  sortState?: TableSortState;
-  onSort?: (key: string, direction: TableSortDirection) => void;
-  onRowClick?: (record: T, index: number, event: React.MouseEvent) => void;
-  onRowDoubleClick?: (record: T, index: number, event: React.MouseEvent) => void;
-  rowSelection?: {
-    selectedRowKeys?: string[];
-    onChange?: (selectedRowKeys: string[], selectedRows: T[]) => void;
-    onSelect?: (record: T, selected: boolean, selectedRows: T[]) => void;
-    onSelectAll?: (selected: boolean, selectedRows: T[], changeRows: T[]) => void;
-  };
-  expandable?: {
-    expandedRowKeys?: string[];
-    onExpand?: (expanded: boolean, record: T) => void;
-    expandedRowRender?: (record: T, index: number) => React.ReactNode;
-  };
-  scroll?: {
-    x?: string | number;
-    y?: string | number;
-  };
+  pagination?: PaginationConfig | false;
+  rowSelection?: RowSelection<T>;
+  expandable?: Expandable<T>;
+  onRowClick?: (record: T, index: number, event: React.MouseEvent<HTMLTableRowElement>) => void;
+  onRowDoubleClick?: (record: T, index: number, event: React.MouseEvent<HTMLTableRowElement>) => void;
+  className?: string;
   size?: 'small' | 'middle' | 'large';
   bordered?: boolean;
   showHeader?: boolean;
-  sticky?: boolean;
+  title?: () => React.ReactNode;
+  footer?: () => React.ReactNode;
+  scroll?: {
+    x?: string | number | true;
+    y?: string | number;
+  };
+  sortDirections?: ('ascend' | 'descend')[];
+  defaultSortOrder?: 'ascend' | 'descend';
   emptyText?: React.ReactNode;
-  className?: string;
-  'data-testid'?: string;
 }
 
 export function Table<T extends Record<string, any>>({
-  columns,
   data,
+  columns,
   rowKey,
   loading = false,
   pagination,
-  sortState,
-  onSort,
-  onRowClick,
-  onRowDoubleClick,
   rowSelection,
   expandable,
-  scroll,
+  onRowClick,
+  onRowDoubleClick,
+  className,
   size = 'middle',
   bordered = false,
   showHeader = true,
-  sticky = false,
+  title,
+  footer,
+  scroll,
   emptyText = 'No data',
-  className,
-  'data-testid': testId,
 }: TableProps<T>) {
-  const [hoveredRowKey, setHoveredRowKey] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(pagination ? pagination.pageSize : 10);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<(string | number)[]>(
+    rowSelection?.selectedRowKeys || []
+  );
+  const [expandedRowKeys, setExpandedRowKeys] = useState<(string | number)[]>(
+    expandable?.expandedRowKeys || expandable?.defaultExpandedRowKeys || []
+  );
+  const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null);
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [hoveredRowKey, setHoveredRowKey] = useState<string | number | null>(null);
 
-  // Get row key
-  const getRowKey = (record: T, index: number): string => {
+  // Get row key for record
+  const getRowKey = useCallback((record: T, index: number): string | number => {
     if (typeof rowKey === 'function') {
-      return rowKey(record, index);
+      return rowKey(record);
     }
-    return String(record[rowKey]);
-  };
-
-  // Handle sorting
-  const handleSort = (column: TableColumn<T>) => {
-    if (!column.sortable || !onSort) return;
-
-    const key = column.key;
-    let direction: TableSortDirection = 'asc';
-
-    if (sortState?.key === key) {
-      direction = sortState.direction === 'asc' ? 'desc' : 'asc';
-    }
-
-    onSort(key, direction);
-  };
+    return record[rowKey] || index;
+  }, [rowKey]);
 
   // Handle row selection
-  const handleRowSelect = (record: T, selected: boolean) => {
-    if (!rowSelection?.onChange) return;
-
+  const handleRowSelect = useCallback((record: T, selected: boolean) => {
     const recordKey = getRowKey(record, 0);
-    const currentSelectedKeys = rowSelection.selectedRowKeys || [];
+    let newSelectedKeys: (string | number)[];
 
-    let newSelectedKeys: string[];
     if (selected) {
-      newSelectedKeys = [...currentSelectedKeys, recordKey];
+      newSelectedKeys = [...selectedRowKeys, recordKey];
     } else {
-      newSelectedKeys = currentSelectedKeys.filter(key => key !== recordKey);
+      newSelectedKeys = selectedRowKeys.filter(key => key !== recordKey);
     }
 
-    const selectedRows = data.filter((item, index) =>
-      newSelectedKeys.includes(getRowKey(item, index))
-    );
+    setSelectedRowKeys(newSelectedKeys);
 
-    rowSelection.onChange(newSelectedKeys, selectedRows);
-    rowSelection.onSelect?.(record, selected, selectedRows);
-  };
+    if (rowSelection?.onChange) {
+      const selectedRows = data.filter(item =>
+        newSelectedKeys.includes(getRowKey(item, 0))
+      );
+      rowSelection.onChange(newSelectedKeys, selectedRows);
+    }
+
+    if (rowSelection?.onSelect) {
+      const selectedRows = data.filter(item =>
+        newSelectedKeys.includes(getRowKey(item, 0))
+      );
+      rowSelection.onSelect(record, selected, selectedRows, {} as Event);
+    }
+  }, [selectedRowKeys, data, getRowKey, rowSelection]);
 
   // Handle select all
-  const handleSelectAll = (selected: boolean) => {
-    if (!rowSelection?.onChange) return;
+  const handleSelectAll = useCallback((selected: boolean) => {
+    let newSelectedKeys: (string | number)[];
 
-    const allRowKeys = data.map((record, index) => getRowKey(record, index));
-    const newSelectedKeys = selected ? allRowKeys : [];
-    const selectedRows = selected ? data : [];
+    if (selected) {
+      newSelectedKeys = data.map((record, index) => getRowKey(record, index));
+    } else {
+      newSelectedKeys = [];
+    }
 
-    rowSelection.onChange(newSelectedKeys, selectedRows);
-    rowSelection.onSelectAll?.(selected, selectedRows, data);
-  };
+    setSelectedRowKeys(newSelectedKeys);
 
-  // Handle row expansion
-  const handleRowExpand = (record: T, expanded: boolean) => {
-    expandable?.onExpand?.(expanded, record);
-  };
+    if (rowSelection?.onChange) {
+      const selectedRows = selected ? data : [];
+      rowSelection.onChange(newSelectedKeys, selectedRows);
+    }
 
-  // Calculate pagination
-  const paginationConfig = useMemo(() => {
-    if (!pagination) return null;
+    if (rowSelection?.onSelectAll) {
+      const selectedRows = selected ? data : [];
+      const changeRows = selected ? data : data.filter(item =>
+        selectedRowKeys.includes(getRowKey(item, 0))
+      );
+      rowSelection.onSelectAll(selected, selectedRows, changeRows);
+    }
+  }, [data, getRowKey, rowSelection, selectedRowKeys]);
 
-    const current = pagination.current || currentPage;
-    const size = pagination.pageSize || pageSize;
-    const total = pagination.total || data.length;
+  // Handle row expand
+  const handleRowExpand = useCallback((record: T, expanded: boolean) => {
+    const recordKey = getRowKey(record, 0);
+    let newExpandedKeys: (string | number)[];
 
-    return {
-      current,
-      pageSize: size,
-      total,
-      showSizeChanger: pagination.showSizeChanger,
-      showQuickJumper: pagination.showQuickJumper,
-      showTotal: pagination.showTotal,
-    };
-  }, [pagination, currentPage, pageSize, data.length]);
+    if (expanded) {
+      newExpandedKeys = [...expandedRowKeys, recordKey];
+    } else {
+      newExpandedKeys = expandedRowKeys.filter(key => key !== recordKey);
+    }
 
-  // Get display data (with pagination if enabled)
-  const displayData = useMemo(() => {
-    if (!paginationConfig) return data;
+    setExpandedRowKeys(newExpandedKeys);
 
-    const { current, pageSize: size } = paginationConfig;
-    const start = (current - 1) * size;
-    const end = start + size;
+    if (expandable?.onExpand) {
+      expandable.onExpand(expanded, record);
+    }
 
-    return data.slice(start, end);
-  }, [data, paginationConfig]);
+    if (expandable?.onExpandedRowsChange) {
+      expandable.onExpandedRowsChange(newExpandedKeys);
+    }
+  }, [expandedRowKeys, getRowKey, expandable]);
 
-  // Handle pagination change
-  const handlePaginationChange = (page: number, size: number) => {
-    setCurrentPage(page);
-    setPageSize(size);
-    pagination?.onChange?.(page, size);
-  };
+  // Handle column sort
+  const handleSort = useCallback((column: TableColumn<T>) => {
+    if (!column.sortable) return;
+
+    let newSortOrder: 'ascend' | 'descend' | null = 'ascend';
+
+    if (sortColumn === column.key) {
+      if (sortOrder === 'ascend') {
+        newSortOrder = 'descend';
+      } else if (sortOrder === 'descend') {
+        newSortOrder = null;
+      }
+    }
+
+    setSortColumn(newSortOrder ? column.key : null);
+    setSortOrder(newSortOrder);
+  }, [sortColumn, sortOrder]);
+
+  // Sort data
+  const sortedData = useMemo(() => {
+    if (!sortColumn || !sortOrder) return data;
+
+    const column = columns.find(col => col.key === sortColumn);
+    if (!column || !column.dataIndex) return data;
+
+    return [...data].sort((a, b) => {
+      const aValue = a[column.dataIndex!];
+      const bValue = b[column.dataIndex!];
+
+      let result = 0;
+      if (aValue < bValue) result = -1;
+      if (aValue > bValue) result = 1;
+
+      return sortOrder === 'descend' ? -result : result;
+    });
+  }, [data, sortColumn, sortOrder, columns]);
 
   // Check if all rows are selected
-  const isAllSelected = useMemo(() => {
-    if (!rowSelection?.selectedRowKeys || data.length === 0) return false;
-    return data.every((record, index) =>
-      rowSelection.selectedRowKeys!.includes(getRowKey(record, index))
-    );
-  }, [rowSelection?.selectedRowKeys, data, getRowKey]);
-
-  // Check if some rows are selected (for indeterminate state)
-  const isSomeSelected = useMemo(() => {
-    if (!rowSelection?.selectedRowKeys || data.length === 0) return false;
-    const selectedCount = data.filter((record, index) =>
-      rowSelection.selectedRowKeys!.includes(getRowKey(record, index))
-    ).length;
-    return selectedCount > 0 && selectedCount < data.length;
-  }, [rowSelection?.selectedRowKeys, data, getRowKey]);
-
-  const tableClasses = classNames(
-    styles.table,
-    styles[size],
-    {
-      [styles.bordered]: bordered,
-      [styles.sticky]: sticky,
-    },
-    className
-  );
-
-  const containerClasses = classNames(
-    styles.container,
-    {
-      [styles.loading]: loading,
-    }
-  );
+  const isAllSelected = data.length > 0 && selectedRowKeys.length === data.length;
+  const isIndeterminate = selectedRowKeys.length > 0 && selectedRowKeys.length < data.length;
 
   if (loading) {
     return (
-      <div className={containerClasses} data-testid={testId}>
-        <div className={styles.loadingOverlay}>
-          <div className={styles.spinner} />
-          <span>Loading...</span>
-        </div>
+      <div className={styles.loading}>
+        <div className={styles.loadingSpinner}></div>
+        <span>Loading...</span>
+      </div>
+    );
+  }
+
+  if (data.length === 0) {
+    return (
+      <div className={styles.empty}>
+        {emptyText}
       </div>
     );
   }
 
   return (
-    <div className={containerClasses} data-testid={testId}>
+    <div className={classNames(styles.tableContainer, className)}>
+      {title && (
+        <div className={styles.tableTitle}>
+          {title()}
+        </div>
+      )}
+
       <div
-        className={styles.tableWrapper}
-        style={{
-          overflowX: scroll?.x ? 'auto' : undefined,
-          overflowY: scroll?.y ? 'auto' : undefined,
-          maxHeight: scroll?.y,
-        }}
+        className={classNames(styles.tableWrapper, {
+          [styles.bordered]: bordered,
+        })}
+        style={scroll ? { overflowX: 'auto', maxWidth: scroll.x } : undefined}
       >
         <table
-          className={tableClasses}
-          style={{ minWidth: scroll?.x }}
+          className={classNames(styles.table, styles[size])}
+          style={scroll?.y ? { maxHeight: scroll.y } : undefined}
         >
           {showHeader && (
             <thead className={styles.thead}>
-              <tr>
+              <tr className={styles.headerRow}>
                 {rowSelection && (
-                  <th className={styles.selectionColumn}>
+                  <th className={styles.selectionCell}>
                     <input
                       type="checkbox"
                       checked={isAllSelected}
                       ref={input => {
-                        if (input) input.indeterminate = isSomeSelected;
+                        if (input) input.indeterminate = isIndeterminate;
                       }}
                       onChange={(e) => handleSelectAll(e.target.checked)}
+                      aria-label="Select all rows"
                     />
                   </th>
                 )}
 
                 {expandable && (
-                  <th className={styles.expandColumn} />
+                  <th className={styles.expandCell} aria-label="Expand controls"></th>
                 )}
 
-                {columns.map((column) => {
-                  const isSorted = sortState?.key === column.key;
-                  const sortDirection = isSorted ? sortState.direction : undefined;
-
-                  return (
-                    <th
-                      key={column.key}
-                      className={classNames(
-                        styles.th,
-                        {
-                          [styles.sortable]: column.sortable,
-                          [styles.sorted]: isSorted,
-                          [`${styles.align}${column.align || 'left'}`]: true,
-                        },
-                        column.className
+                {columns.map((column) => (
+                  <th
+                    key={column.key}
+                    className={classNames(
+                      styles.th,
+                      {
+                        [styles.sortable]: column.sortable,
+                        [styles.sorted]: sortColumn === column.key,
+                        [`${styles.align}${column.align || 'left'}`]: true,
+                      },
+                      column.className
+                    )}
+                    style={column.width ? { width: column.width } : undefined}
+                    onClick={() => column.sortable && handleSort(column)}
+                    role={column.sortable ? 'button' : undefined}
+                    tabIndex={column.sortable ? 0 : undefined}
+                    onKeyDown={(e) => {
+                      if (column.sortable && (e.key === 'Enter' || e.key === ' ')) {
+                        e.preventDefault();
+                        handleSort(column);
+                      }
+                    }}
+                    aria-sort={
+                      sortColumn === column.key
+                        ? sortOrder === 'ascend' ? 'ascending' : 'descending'
+                        : column.sortable ? 'none' : undefined
+                    }
+                  >
+                    <div className={styles.headerContent}>
+                      <span>{column.title}</span>
+                      {column.sortable && (
+                        <span className={classNames(styles.sortIcon, {
+                          [styles.sortAscend]: sortColumn === column.key && sortOrder === 'ascend',
+                          [styles.sortDescend]: sortColumn === column.key && sortOrder === 'descend',
+                        })}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="18,15 12,9 6,15" />
+                          </svg>
+                        </span>
                       )}
-                      style={{
-                        width: column.width,
-                        minWidth: column.minWidth,
-                      }}
-                      onClick={() => handleSort(column)}
-                    >
-                      <div className={styles.headerContent}>
-                        <span className={styles.headerText}>{column.title}</span>
-                        {column.sortable && (
-                          <span className={classNames(
-                            styles.sortIcon,
-                            {
-                              [styles.sortAsc]: sortDirection === 'asc',
-                              [styles.sortDesc]: sortDirection === 'desc',
-                            }
-                          )}>
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <polyline points="6,15 12,9 18,15" />
-                            </svg>
-                          </span>
-                        )}
-                      </div>
-                    </th>
-                  );
-                })}
+                    </div>
+                  </th>
+                ))}
               </tr>
             </thead>
           )}
 
           <tbody className={styles.tbody}>
-            {displayData.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={
-                    columns.length +
-                    (rowSelection ? 1 : 0) +
-                    (expandable ? 1 : 0)
-                  }
-                  className={styles.emptyCell}
-                >
-                  {emptyText}
-                </td>
-              </tr>
-            ) : (
-              displayData.map((record, index) => {
-                const recordKey = getRowKey(record, index);
-                const isSelected = rowSelection?.selectedRowKeys?.includes(recordKey) || false;
-                const isExpanded = expandable?.expandedRowKeys?.includes(recordKey) || false;
-                const isHovered = hoveredRowKey === recordKey;
+            {sortedData.map((record, index) => {
+              const recordKey = getRowKey(record, index);
+              const isSelected = selectedRowKeys.includes(recordKey);
+              const isExpanded = expandedRowKeys.includes(recordKey);
+              const isHovered = hoveredRowKey === recordKey;
 
-                return (
-                  <React.Fragment key={recordKey}>
-                    <tr
-                      className={classNames(
-                        styles.tr,
-                        {
-                          [styles.selected]: isSelected,
-                          [styles.hovered]: isHovered,
-                          [styles.clickable]: !!onRowClick,
-                        }
-                      )}
-                      onClick={(e) => onRowClick?.(record, index, e)}
-                      onDoubleClick={(e) => onRowDoubleClick?.(record, index, e)}
-                      onMouseEnter={() => setHoveredRowKey(recordKey)}
-                      onMouseLeave={() => setHoveredRowKey(null)}
-                    >
-                      {rowSelection && (
-                        <td className={styles.selectionCell}>
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={(e) => handleRowSelect(record, e.target.checked)}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        </td>
-                      )}
-
-                      {expandable && (
-                        <td className={styles.expandCell}>
-                          <button
-                            type="button"
-                            className={classNames(
-                              styles.expandButton,
-                              { [styles.expanded]: isExpanded }
-                            )}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRowExpand(record, !isExpanded);
-                            }}
-                          >
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <polyline points="9,18 15,12 9,6" />
-                            </svg>
-                          </button>
-                        </td>
-                      )}
-
-                      {columns.map((column) => {
-                        const value = column.dataIndex ? record[column.dataIndex] : undefined;
-                        const cellContent = column.render
-                          ? column.render(value, record, index)
-                          : value;
-
-                        return (
-                          <td
-                            key={column.key}
-                            className={classNames(
-                              styles.td,
-                              {
-                                [`${styles.align}${column.align || 'left'}`]: true,
-                              },
-                              column.className
-                            )}
-                          >
-                            {cellContent}
-                          </td>
-                        );
-                      })}
-                    </tr>
-
-                    {expandable?.expandedRowRender && isExpanded && (
-                      <tr className={styles.expandedRow}>
-                        <td
-                          colSpan={
-                            columns.length +
-                            (rowSelection ? 1 : 0) +
-                            (expandable ? 1 : 0)
-                          }
-                          className={styles.expandedCell}
-                        >
-                          {expandable.expandedRowRender(record, index)}
-                        </td>
-                      </tr>
+              return (
+                <React.Fragment key={recordKey}>
+                  <tr
+                    className={classNames(
+                      styles.tr,
+                      {
+                        [styles.selected]: isSelected,
+                        [styles.hovered]: isHovered,
+                        [styles.clickable]: !!onRowClick,
+                      }
                     )}
-                  </React.Fragment>
-                );
-              })
-            )}
+                    onClick={(e) => {
+                      if (expandable?.expandRowByClick) {
+                        handleRowExpand(record, !isExpanded);
+                      }
+                      onRowClick?.(record, index, e);
+                    }}
+                    onDoubleClick={(e) => onRowDoubleClick?.(record, index, e)}
+                    onMouseEnter={() => setHoveredRowKey(recordKey)}
+                    onMouseLeave={() => setHoveredRowKey(null)}
+                    role={onRowClick ? 'button' : undefined}
+                    tabIndex={onRowClick ? 0 : undefined}
+                    onKeyDown={(e) => {
+                      if (onRowClick && (e.key === 'Enter' || e.key === ' ')) {
+                        e.preventDefault();
+                        onRowClick(record, index, e as any);
+                      }
+                    }}
+                  >
+                    {rowSelection && (
+                      <td className={styles.selectionCell}>
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => handleRowSelect(record, e.target.checked)}
+                          onClick={(e) => e.stopPropagation()}
+                          {...(rowSelection.getCheckboxProps?.(record) || {})}
+                        />
+                      </td>
+                    )}
+
+                    {expandable && (
+                      <td className={styles.expandCell}>
+                        <button
+                          type="button"
+                          className={classNames(
+                            styles.expandButton,
+                            { [styles.expanded]: isExpanded }
+                          )}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRowExpand(record, !isExpanded);
+                          }}
+                          aria-expanded={isExpanded}
+                          aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="9,18 15,12 9,6" />
+                          </svg>
+                        </button>
+                      </td>
+                    )}
+
+                    {columns.map((column) => {
+                      const value = column.dataIndex ? record[column.dataIndex] : undefined;
+                      const cellContent = column.render
+                        ? column.render(value, record, index)
+                        : value;
+
+                      return (
+                        <td
+                          key={column.key}
+                          className={classNames(
+                            styles.td,
+                            {
+                              [`${styles.align}${column.align || 'left'}`]: true,
+                            },
+                            column.className
+                          )}
+                        >
+                          {cellContent}
+                        </td>
+                      );
+                    })}
+                  </tr>
+
+                  {expandable?.expandedRowRender && isExpanded && (
+                    <tr className={styles.expandedRow}>
+                      <td
+                        colSpan={
+                          columns.length +
+                          (rowSelection ? 1 : 0) +
+                          (expandable ? 1 : 0)
+                        }
+                        className={styles.expandedCell}
+                      >
+                        {expandable.expandedRowRender(record, index, 0, true)}
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
-      {paginationConfig && paginationConfig.total > 0 && (
+      {footer && (
+        <div className={styles.tableFooter}>
+          {footer()}
+        </div>
+      )}
+
+      {pagination && pagination !== false && (
         <div className={styles.pagination}>
-          <TablePagination
-            {...paginationConfig}
-            onChange={handlePaginationChange}
-            onShowSizeChange={(current, size) => {
-              setPageSize(size);
-              pagination?.onShowSizeChange?.(current, size);
-            }}
+          <Pagination
+            current={pagination.current || 1}
+            pageSize={pagination.pageSize || 10}
+            total={pagination.total || data.length}
+            showSizeChanger={pagination.showSizeChanger}
+            showQuickJumper={pagination.showQuickJumper}
+            showTotal={pagination.showTotal}
+            onChange={pagination.onChange}
+            onShowSizeChange={pagination.onShowSizeChange}
           />
         </div>
       )}
     </div>
   );
 }
-
-// Simple pagination component for the table
-const TablePagination: React.FC<{
-  current: number;
-  pageSize: number;
-  total: number;
-  showSizeChanger?: boolean;
-  showQuickJumper?: boolean;
-  showTotal?: (total: number, range: [number, number]) => React.ReactNode;
-  onChange: (page: number, size: number) => void;
-  onShowSizeChange?: (current: number, size: number) => void;
-}> = ({
-  current,
-  pageSize,
-  total,
-  showSizeChanger,
-  showTotal,
-  onChange,
-  onShowSizeChange,
-}) => {
-  const totalPages = Math.ceil(total / pageSize);
-  const startIndex = (current - 1) * pageSize + 1;
-  const endIndex = Math.min(current * pageSize, total);
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      onChange(page, pageSize);
-    }
-  };
-
-  const handleSizeChange = (newSize: number) => {
-    const newPage = Math.ceil((startIndex - 1) / newSize) + 1;
-    onChange(newPage, newSize);
-    onShowSizeChange?.(newPage, newSize);
-  };
-
-  return (
-    <div className={styles.paginationContainer}>
-      {showTotal && (
-        <div className={styles.paginationTotal}>
-          {showTotal(total, [startIndex, endIndex])}
-        </div>
-      )}
-
-      <div className={styles.paginationControls}>
-        <button
-          className={styles.pageButton}
-          disabled={current <= 1}
-          onClick={() => handlePageChange(current - 1)}
-        >
-          Previous
-        </button>
-
-        <span className={styles.pageInfo}>
-          {current} / {totalPages}
-        </span>
-
-        <button
-          className={styles.pageButton}
-          disabled={current >= totalPages}
-          onClick={() => handlePageChange(current + 1)}
-        >
-          Next
-        </button>
-      </div>
-
-      {showSizeChanger && (
-        <div className={styles.sizeChanger}>
-          <select
-            value={pageSize}
-            onChange={(e) => handleSizeChange(Number(e.target.value))}
-            className={styles.sizeSelect}
-          >
-            <option value={10}>10 / page</option>
-            <option value={20}>20 / page</option>
-            <option value={50}>50 / page</option>
-            <option value={100}>100 / page</option>
-          </select>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default Table;

@@ -1,10 +1,4 @@
-/**
- * Tooltip Component Export
- */
-export {
-  Tooltip,
-  type TooltipPlacement,
-  type TooltipTrigger
-} from './Tooltip';
-export type { default as TooltipProps } from './Tooltip';
-export { default } from './Tooltip';
+// src/components/common/Tooltip/index.ts
+export { Tooltip } from './Tooltip';
+export type { TooltipPlacement, TooltipTrigger } from './Tooltip';
+export { Tooltip as default } from './Tooltip';

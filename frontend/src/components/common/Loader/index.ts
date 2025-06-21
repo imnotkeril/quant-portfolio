@@ -1,6 +1,4 @@
-/**
- * Loader Component Export
- */
-export { Loader, type LoaderType, type LoaderSize } from './Loader';
-export type { default as LoaderProps } from './Loader';
-export { default } from './Loader';
+// src/components/common/Loader/index.ts
+export { Loader } from './Loader';
+export type { LoaderSize, LoaderType } from './Loader';
+export { Loader as default } from './Loader';

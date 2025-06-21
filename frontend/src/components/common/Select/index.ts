@@ -1,6 +1,4 @@
-/**
- * Select Component Export
- */
-export { Select, type SelectOption, type SelectSize } from './Select';
-export type { default as SelectProps } from './Select';
-export { default } from './Select';
+// src/components/common/Select/index.ts
+export { Select } from './Select';
+export type { SelectOption } from './Select';
+export { Select as default } from './Select';

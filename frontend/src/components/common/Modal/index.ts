@@ -1,6 +1,3 @@
-/**
- * Modal Component Export
- */
-export { Modal, type ModalSize, type ModalVariant } from './Modal';
-export type { default as ModalProps } from './Modal';
-export { default } from './Modal';
+// src/components/common/Modal/index.ts
+export { Modal } from './Modal';
+export { Modal as default } from './Modal';

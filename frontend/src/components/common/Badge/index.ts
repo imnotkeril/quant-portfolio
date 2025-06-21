@@ -1,8 +1,4 @@
-/**
- * Badge Component Export
- */
-import BadgeComponent from './Badge';
-
-// Export the main component as both named and default
-export const Badge = BadgeComponent;
-export default BadgeComponent;
+// src/components/common/Badge/index.ts
+export { Badge } from './Badge';
+export type { BadgeStatus, BadgeSize } from './Badge';
+export { Badge as default } from './Badge';

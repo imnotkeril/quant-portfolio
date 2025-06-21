@@ -1,345 +1,287 @@
-/**
- * Pagination Styles for Wild Market Capital
- */
-
+/* src/components/common/Pagination/Pagination.module.css */
 .pagination {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--spacing-m);
   font-family: var(--font-family);
-  user-select: none;
-}
-
-.disabled {
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-/* Sizes */
-.small {
-  font-size: var(--font-size-caption);
-}
-
-.small .pageButton,
-.small .prevButton,
-.small .nextButton {
-  height: 24px;
-  padding: 0 var(--spacing-xs);
-  font-size: var(--font-size-caption);
-}
-
-.small .jumpInput {
-  height: 24px;
-  width: 40px;
-}
-
-.default {
   font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  flex-wrap: wrap;
 }
 
-.default .pageButton,
-.default .prevButton,
-.default .nextButton {
-  height: 32px;
-  padding: 0 var(--spacing-s);
-  font-size: var(--font-size-body);
+.pagination.small {
+  font-size: var(--font-size-caption);
+  gap: var(--spacing-s);
 }
 
-.default .jumpInput {
-  height: 32px;
-  width: 50px;
-}
-
-.large {
-  font-size: var(--font-size-h3);
-}
-
-.large .pageButton,
-.large .prevButton,
-.large .nextButton {
-  height: 40px;
-  padding: 0 var(--spacing-m);
-  font-size: var(--font-size-h3);
-}
-
-.large .jumpInput {
-  height: 40px;
-  width: 60px;
-}
-
-/* Total display */
+/* Total info */
 .total {
   color: var(--color-neutral-gray);
-  font-size: inherit;
+  font-size: var(--font-size-caption);
+  white-space: nowrap;
 }
 
-/* Pages container */
-.pages {
+/* Pagination controls */
+.paginationControls {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
 }
 
-/* Buttons */
-.pageButton,
-.prevButton,
-.nextButton {
-  display: inline-flex;
+.pageNumbers {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* Page buttons */
+.pageButton {
+  display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-background);
+  min-width: 32px;
+  height: 32px;
+  padding: 0 var(--spacing-s);
   border: 1px solid var(--color-divider);
-  border-radius: var(--border-radius-s);
+  background-color: transparent;
   color: var(--color-text-light);
+  font-family: var(--font-family);
+  font-size: inherit;
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--border-radius-s);
   cursor: pointer;
   transition: all var(--transition-fast);
-  gap: var(--spacing-xs);
-  font-family: inherit;
-  font-size: inherit;
-  outline: none;
+  user-select: none;
 }
 
-.pageButton:hover:not(:disabled),
-.prevButton:hover:not(:disabled),
-.nextButton:hover:not(:disabled) {
+.pageButton:hover:not(.disabled) {
   border-color: var(--color-accent);
   color: var(--color-accent);
+  background-color: rgba(191, 159, 251, 0.1);
 }
 
-.pageButton:active:not(:disabled),
-.prevButton:active:not(:disabled),
-.nextButton:active:not(:disabled) {
-  transform: translateY(1px);
-}
-
-.pageButton:focus-visible,
-.prevButton:focus-visible,
-.nextButton:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-accent);
-}
-
-.pageButton:disabled,
-.prevButton:disabled,
-.nextButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.pageButton:focus:not(.disabled) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
 }
 
 .pageButton.active {
-  background-color: var(--color-accent);
   border-color: var(--color-accent);
-  color: var(--color-text-light);
+  background-color: var(--color-accent);
+  color: var(--color-text-dark);
 }
 
 .pageButton.active:hover {
   background-color: var(--color-hover);
   border-color: var(--color-hover);
-  color: var(--color-text-light);
 }
 
-/* Navigation button text */
-.prevText,
-.nextText {
-  display: inline;
+.pageButton.disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+  color: var(--color-disabled);
+  border-color: var(--color-divider);
+}
+
+/* Previous/Next buttons */
+.prevButton,
+.nextButton {
+  padding: 0;
+  width: 32px;
 }
 
 /* Ellipsis */
 .ellipsis {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-  padding: 0 var(--spacing-xs);
-  color: var(--color-neutral-gray);
-  font-size: inherit;
-  letter-spacing: 2px;
-}
-
-/* Simple pagination */
-.simple {
   display: flex;
   align-items: center;
-  gap: var(--spacing-s);
-}
-
-.pageInfo {
-  color: var(--color-text-light);
-  font-size: inherit;
-  min-width: 60px;
-  text-align: center;
-}
-
-.simple .prevButton,
-.simple .nextButton {
-  padding: 0 var(--spacing-xs);
+  justify-content: center;
   min-width: 32px;
+  height: 32px;
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+  user-select: none;
 }
 
 /* Size changer */
 .sizeChanger {
   display: flex;
   align-items: center;
+  gap: var(--spacing-s);
+  white-space: nowrap;
+}
+
+.sizeLabel {
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-caption);
 }
 
 .sizeSelect {
-  background-color: var(--color-background);
-  border: 1px solid var(--color-divider);
-  border-radius: var(--border-radius-s);
-  color: var(--color-text-light);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: inherit;
-  height: 32px;
-  padding: 0 var(--spacing-s);
-  outline: none;
-  transition: border-color var(--transition-fast);
-}
-
-.sizeSelect:hover:not(:disabled) {
-  border-color: var(--color-accent);
-}
-
-.sizeSelect:focus {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 1px var(--color-accent);
+  min-width: 80px;
 }
 
 /* Quick jumper */
 .quickJumper {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  color: var(--color-text-light);
-  font-size: inherit;
+  gap: var(--spacing-s);
+  white-space: nowrap;
 }
 
-.jumpInput {
-  background-color: var(--color-background);
+.jumperLabel {
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-caption);
+}
+
+.jumperInput {
+  width: 60px;
+  height: 32px;
+  padding: 0 var(--spacing-s);
   border: 1px solid var(--color-divider);
-  border-radius: var(--border-radius-s);
+  background-color: rgba(42, 46, 57, 0.5);
   color: var(--color-text-light);
-  font-family: inherit;
-  font-size: inherit;
+  font-family: var(--font-family);
+  font-size: var(--font-size-caption);
+  border-radius: var(--border-radius-s);
   text-align: center;
+  transition: all var(--transition-fast);
+}
+
+.jumperInput:focus {
+  border-color: var(--color-accent);
   outline: none;
-  transition: border-color var(--transition-fast);
-}
-
-.jumpInput:hover:not(:disabled) {
-  border-color: var(--color-accent);
-}
-
-.jumpInput:focus {
-  border-color: var(--color-accent);
   box-shadow: 0 0 0 1px var(--color-accent);
 }
 
-.jumpInput::placeholder {
+.jumperInput:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+  background-color: rgba(42, 46, 57, 0.2);
+}
+
+.jumperInput::placeholder {
   color: var(--color-neutral-gray);
 }
 
-/* Responsive behavior */
-.responsive {
-  flex-wrap: wrap;
+/* Small size adjustments */
+.small .pageButton {
+  min-width: 28px;
+  height: 28px;
+  font-size: var(--font-size-caption);
 }
 
+.small .prevButton,
+.small .nextButton {
+  width: 28px;
+}
+
+.small .ellipsis {
+  min-width: 28px;
+  height: 28px;
+}
+
+.small .jumperInput {
+  width: 50px;
+  height: 28px;
+}
+
+.small .sizeSelect {
+  min-width: 70px;
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
   .pagination {
+    flex-direction: column;
+    align-items: stretch;
     gap: var(--spacing-s);
-    flex-wrap: wrap;
+  }
+
+  .paginationControls {
     justify-content: center;
   }
 
   .total {
-    order: 3;
-    width: 100%;
     text-align: center;
-    margin-top: var(--spacing-xs);
-  }
-
-  .pages {
-    order: 1;
-    gap: 2px;
+    order: -1;
   }
 
   .sizeChanger,
   .quickJumper {
-    order: 2;
+    justify-content: center;
   }
 
-  .prevText,
-  .nextText {
+  /* Hide less important elements on very small screens */
+  .ellipsis {
     display: none;
+  }
+
+  .pageNumbers {
+    gap: 2px;
   }
 
   .pageButton {
-    min-width: 32px;
-  }
-
-  /* Hide some page numbers on mobile */
-  .pages .pageButton:not(.active) {
-    display: none;
-  }
-
-  .pages .pageButton.active,
-  .pages .pageButton:first-of-type,
-  .pages .pageButton:last-of-type {
-    display: inline-flex;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 4px;
+    font-size: var(--font-size-caption);
   }
 }
 
 @media (max-width: 480px) {
-  .pagination:not(.simple) {
-    gap: var(--spacing-xs);
-  }
-
-  .pages {
-    gap: 1px;
-  }
-
-  .pageButton,
-  .prevButton,
-  .nextButton {
-    min-width: 28px;
-    height: 28px;
-    padding: 0;
+  .pagination {
     font-size: var(--font-size-caption);
   }
 
-  .ellipsis {
-    height: 28px;
-    padding: 0 2px;
+  .sizeChanger {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .quickJumper {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* Show only essential page numbers on mobile */
+  .pageNumbers {
+    max-width: 200px;
+    overflow: hidden;
   }
 }
 
 /* High contrast mode */
-@media (prefers-contrast: more) {
-  .pageButton,
-  .prevButton,
-  .nextButton,
-  .sizeSelect,
-  .jumpInput {
+@media (prefers-contrast: high) {
+  .pageButton {
     border-width: 2px;
   }
 
   .pageButton.active {
-    font-weight: var(--font-weight-semi-bold);
+    border-color: var(--color-text-light);
+    background-color: var(--color-text-light);
+    color: var(--color-background);
+  }
+
+  .jumperInput {
+    border-width: 2px;
   }
 }
 
-/* Reduced motion support */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .pageButton,
-  .prevButton,
-  .nextButton,
-  .sizeSelect,
-  .jumpInput {
+  .jumperInput {
     transition: none;
   }
+}
 
-  .pageButton:active:not(:disabled),
-  .prevButton:active:not(:disabled),
-  .nextButton:active:not(:disabled) {
-    transform: none;
-  }
+/* Focus visible for better accessibility */
+.pageButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.jumperInput:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }

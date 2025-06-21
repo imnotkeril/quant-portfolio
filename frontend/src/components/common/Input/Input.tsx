@@ -1,199 +1,315 @@
-import React, { forwardRef, useState } from 'react';
+// src/components/common/Input/Input.tsx - COMPLETE IMPLEMENTATION
+import React, { useState, useRef, useImperativeHandle, forwardRef } from 'react';
 import classNames from 'classnames';
 import styles from './Input.module.css';
 
-export type InputType =
-  | 'text'
-  | 'password'
-  | 'email'
-  | 'number'
-  | 'tel'
-  | 'url'
-  | 'search'
-  | 'date'
-  | 'datetime-local'
-  | 'time'
-  | 'month'
-  | 'week';
+export type InputSize = 'small' | 'middle' | 'large';
+export type InputStatus = 'error' | 'warning' | 'success';
 
-export interface InputProps {
-  label?: string;
+interface InputProps {
+  type?: 'text' | 'password' | 'email' | 'number' | 'tel' | 'url' | 'search';
+  size?: InputSize;
   placeholder?: string;
-  value?: string | number;
-  defaultValue?: string | number;
-  type?: InputType;
+  value?: string;
+  defaultValue?: string;
   disabled?: boolean;
-  required?: boolean;
   readOnly?: boolean;
-  autoFocus?: boolean;
-  autoComplete?: string;
-  className?: string;
-  error?: string;
-  help?: string;
-  size?: 'small' | 'medium' | 'large';
-  variant?: 'default' | 'filled' | 'outlined';
-  prefix?: React.ReactNode;
-  suffix?: React.ReactNode;
-  min?: string | number;
-  max?: string | number;
-  step?: string | number;
   maxLength?: number;
   minLength?: number;
-  pattern?: string;
-  multiple?: boolean;
-  multiline?: boolean; // ДОБАВЛЕНО: поддержка textarea
-  rows?: number; // ДОБАВЛЕНО: количество строк для textarea
-  onChange?: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  onFocus?: (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  onBlur?: (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  onKeyUp?: (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  autoComplete?: string;
+  autoFocus?: boolean;
+  allowClear?: boolean;
+  prefix?: React.ReactNode;
+  suffix?: React.ReactNode;
+  addonBefore?: React.ReactNode;
+  addonAfter?: React.ReactNode;
+  status?: InputStatus;
+  bordered?: boolean;
+  showCount?: boolean;
+  count?: {
+    show?: boolean;
+    max?: number;
+    strategy?: (value: string) => number;
+    exceedFormatter?: (value: string, config: { max: number }) => string;
+  };
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onPressEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onKeyUp?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onClear?: () => void;
+  className?: string;
+  style?: React.CSSProperties;
+  id?: string;
+  name?: string;
+  required?: boolean;
+  'aria-label'?: string;
+  'aria-describedby'?: string;
   'data-testid'?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  pattern?: string;
+  title?: string;
+  inputMode?: 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
 }
 
-const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputProps>(
-  (
-    {
-      label,
-      placeholder,
-      value,
-      defaultValue,
-      type = 'text',
-      disabled = false,
-      required = false,
-      readOnly = false,
-      autoFocus = false,
-      autoComplete,
-      className,
-      error,
-      help,
-      size = 'medium',
-      variant = 'default',
-      prefix,
-      suffix,
-      min,
-      max,
-      step,
-      maxLength,
-      minLength,
-      pattern,
-      multiple = false,
-      multiline = false,
-      rows = 3,
-      onChange,
-      onFocus,
-      onBlur,
-      onKeyDown,
-      onKeyUp,
-      'data-testid': testId,
+export interface InputRef {
+  focus: () => void;
+  blur: () => void;
+  select: () => void;
+  setSelectionRange: (start: number, end: number) => void;
+  input: HTMLInputElement | null;
+}
+
+export const Input = forwardRef<InputRef, InputProps>(({
+  type = 'text',
+  size = 'middle',
+  placeholder,
+  value,
+  defaultValue,
+  disabled = false,
+  readOnly = false,
+  maxLength,
+  minLength,
+  autoComplete,
+  autoFocus = false,
+  allowClear = false,
+  prefix,
+  suffix,
+  addonBefore,
+  addonAfter,
+  status,
+  bordered = true,
+  showCount = false,
+  count,
+  onChange,
+  onBlur,
+  onFocus,
+  onPressEnter,
+  onKeyDown,
+  onKeyUp,
+  onClear,
+  className,
+  style,
+  id,
+  name,
+  required = false,
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
+  'data-testid': dataTestId,
+  min,
+  max,
+  step,
+  pattern,
+  title,
+  inputMode,
+}, ref) => {
+  const [internalValue, setInternalValue] = useState(defaultValue || '');
+  const [focused, setFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const currentValue = value !== undefined ? value : internalValue;
+  const isControlled = value !== undefined;
+
+  // Expose ref methods
+  useImperativeHandle(ref, () => ({
+    focus: () => inputRef.current?.focus(),
+    blur: () => inputRef.current?.blur(),
+    select: () => inputRef.current?.select(),
+    setSelectionRange: (start: number, end: number) => {
+      inputRef.current?.setSelectionRange(start, end);
     },
-    ref
-  ) => {
-    const [isFocused, setIsFocused] = useState(false);
-    const hasValue = value !== undefined && value !== null && value !== '';
+    input: inputRef.current,
+  }));
 
-    const containerClasses = classNames(
-      styles.inputContainer,
-      styles[`size-${size}`],
-      styles[`variant-${variant}`],
-      {
-        [styles.focused]: isFocused,
-        [styles.disabled]: disabled,
-        [styles.error]: !!error,
-        [styles.hasValue]: hasValue,
-        [styles.hasPrefix]: !!prefix,
-        [styles.hasSuffix]: !!suffix,
-        [styles.multiline]: multiline,
-      },
-      className
-    );
+  // Calculate character count
+  const getCharacterCount = (): number => {
+    if (count?.strategy) {
+      return count.strategy(currentValue);
+    }
+    return currentValue.length;
+  };
 
-    const inputClasses = classNames(styles.input, {
-      [styles.withPrefix]: !!prefix,
-      [styles.withSuffix]: !!suffix,
-    });
+  const characterCount = getCharacterCount();
+  const maxCount = count?.max || maxLength;
+  const isExceeded = maxCount !== undefined && characterCount > maxCount;
 
-    const handleFocus = (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setIsFocused(true);
-      if (onFocus) {
-        onFocus(event);
-      }
-    };
+  // Handle input change
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
 
-    const handleBlur = (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setIsFocused(false);
-      if (onBlur) {
-        onBlur(event);
-      }
-    };
+    if (!isControlled) {
+      setInternalValue(newValue);
+    }
 
-    const commonProps = {
-      placeholder,
-      value,
-      defaultValue,
-      disabled,
-      required,
-      readOnly,
-      autoFocus,
-      autoComplete,
-      maxLength,
-      minLength,
-      className: inputClasses,
-      onChange,
-      onFocus: handleFocus,
-      onBlur: handleBlur,
-      onKeyDown,
-      onKeyUp,
-      'data-testid': testId,
-    };
+    onChange?.(e);
+  };
 
-    const renderInput = () => {
-      if (multiline) {
-        return (
-          <textarea
-            ref={ref as React.Ref<HTMLTextAreaElement>}
-            rows={rows}
-            {...commonProps}
-          />
-        );
-      }
+  // Handle focus
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    setFocused(true);
+    onFocus?.(e);
+  };
 
-      return (
-        <input
-          ref={ref as React.Ref<HTMLInputElement>}
-          type={type}
-          min={min}
-          max={max}
-          step={step}
-          pattern={pattern}
-          multiple={multiple}
-          {...commonProps}
-        />
-      );
-    };
+  // Handle blur
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setFocused(false);
+    onBlur?.(e);
+  };
 
-    return (
-      <div className={containerClasses}>
-        {label && (
-          <label className={styles.label}>
-            {label}
-            {required && <span className={styles.required}>*</span>}
-          </label>
-        )}
+  // Handle key events
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      onPressEnter?.(e);
+    }
+    onKeyDown?.(e);
+  };
 
-        <div className={styles.inputWrapper}>
-          {prefix && <div className={styles.prefix}>{prefix}</div>}
-          {renderInput()}
-          {suffix && <div className={styles.suffix}>{suffix}</div>}
-        </div>
+  // Handle clear
+  const handleClear = () => {
+    if (!isControlled) {
+      setInternalValue('');
+    }
 
-        {error && <div className={styles.errorMessage}>{error}</div>}
-        {help && !error && <div className={styles.helpMessage}>{help}</div>}
+    // Create synthetic event for onChange
+    const syntheticEvent = {
+      target: { value: '' },
+      currentTarget: { value: '' },
+    } as React.ChangeEvent<HTMLInputElement>;
+
+    onChange?.(syntheticEvent);
+    onClear?.();
+    inputRef.current?.focus();
+  };
+
+  // Show clear button
+  const showClearButton = allowClear && currentValue && !disabled && !readOnly;
+
+  // Count display
+  const countFormatter = count?.exceedFormatter;
+  const displayCount = isExceeded && countFormatter
+    ? countFormatter(currentValue, { max: maxCount! })
+    : `${characterCount}${maxCount !== undefined ? `/${maxCount}` : ''}`;
+
+  // Build class names
+  const wrapperClasses = classNames(
+    styles.inputWrapper,
+    styles[size],
+    {
+      [styles.focused]: focused,
+      [styles.disabled]: disabled,
+      [styles.readOnly]: readOnly,
+      [styles.bordered]: bordered,
+      [styles.hasPrefix]: !!prefix,
+      [styles.hasSuffix]: !!suffix || showClearButton,
+      [styles.hasAddonBefore]: !!addonBefore,
+      [styles.hasAddonAfter]: !!addonAfter,
+      [styles.error]: status === 'error',
+      [styles.warning]: status === 'warning',
+      [styles.success]: status === 'success',
+      [styles.exceeded]: isExceeded,
+    },
+    className
+  );
+
+  const inputElement = (
+    <input
+      ref={inputRef}
+      type={type}
+      className={styles.input}
+      placeholder={placeholder}
+      value={currentValue}
+      disabled={disabled}
+      readOnly={readOnly}
+      maxLength={maxLength}
+      minLength={minLength}
+      autoComplete={autoComplete}
+      autoFocus={autoFocus}
+      onChange={handleChange}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+      onKeyUp={onKeyUp}
+      id={id}
+      name={name}
+      required={required}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
+      data-testid={dataTestId}
+      min={min}
+      max={max}
+      step={step}
+      pattern={pattern}
+      title={title}
+      inputMode={inputMode}
+    />
+  );
+
+  const inputWithAffixes = (
+    <div className={styles.inputInner}>
+      {prefix && (
+        <span className={styles.inputPrefix}>
+          {prefix}
+        </span>
+      )}
+
+      {inputElement}
+
+      {(suffix || showClearButton) && (
+        <span className={styles.inputSuffix}>
+          {showClearButton && (
+            <button
+              type="button"
+              className={styles.clearButton}
+              onClick={handleClear}
+              aria-label="Clear input"
+              tabIndex={-1}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          )}
+          {suffix}
+        </span>
+      )}
+    </div>
+  );
+
+  const inputWithAddons = (
+    <>
+      {addonBefore && (
+        <span className={styles.inputAddonBefore}>
+          {addonBefore}
+        </span>
+      )}
+
+      {inputWithAffixes}
+
+      {addonAfter && (
+        <span className={styles.inputAddonAfter}>
+          {addonAfter}
+        </span>
+      )}
+    </>
+  );
+
+  return (
+    <div className={styles.inputContainer} style={style}>
+      <div className={wrapperClasses}>
+        {inputWithAddons}
       </div>
-    );
-  }
-);
 
-Input.displayName = 'Input';
-
-export default Input;
+      {(showCount || count?.show) && (
+        <div className={classNames(styles.inputCount, {
+          [styles.countExceeded]: isExceeded,
+        })}>
+          {displayCount}
+        </div>
+      )}
+    </div>
+  );
+});

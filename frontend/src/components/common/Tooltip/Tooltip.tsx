@@ -1,69 +1,66 @@
-/**
- * Tooltip Component
- * Floating tooltip with various placement options
- */
-import React, { useState, useRef, useEffect, cloneElement } from 'react';
+// src/components/common/Tooltip/Tooltip.tsx
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import classNames from 'classnames';
 import styles from './Tooltip.module.css';
 
 export type TooltipPlacement =
-  | 'top'
-  | 'topLeft'
-  | 'topRight'
-  | 'bottom'
-  | 'bottomLeft'
-  | 'bottomRight'
-  | 'left'
-  | 'leftTop'
-  | 'leftBottom'
-  | 'right'
-  | 'rightTop'
-  | 'rightBottom';
+  | 'top' | 'topLeft' | 'topRight'
+  | 'bottom' | 'bottomLeft' | 'bottomRight'
+  | 'left' | 'leftTop' | 'leftBottom'
+  | 'right' | 'rightTop' | 'rightBottom';
 
 export type TooltipTrigger = 'hover' | 'focus' | 'click' | 'contextMenu';
 
 interface TooltipProps {
-  children: React.ReactElement;
-  title?: React.ReactNode;
+  title: React.ReactNode;
   placement?: TooltipPlacement;
   trigger?: TooltipTrigger | TooltipTrigger[];
   visible?: boolean;
+  defaultVisible?: boolean;
   onVisibleChange?: (visible: boolean) => void;
-  mouseEnterDelay?: number;
-  mouseLeaveDelay?: number;
   overlayClassName?: string;
   overlayStyle?: React.CSSProperties;
+  overlayInnerStyle?: React.CSSProperties;
   color?: string;
-  arrow?: boolean;
-  destroyTooltipOnHide?: boolean;
+  mouseEnterDelay?: number;
+  mouseLeaveDelay?: number;
   getPopupContainer?: () => HTMLElement;
+  autoAdjustOverflow?: boolean;
+  arrowPointAtCenter?: boolean;
+  destroyTooltipOnHide?: boolean;
+  align?: {
+    points?: string[];
+    offset?: number[];
+    targetOffset?: number[];
+  };
+  children: React.ReactElement;
   className?: string;
-  'data-testid'?: string;
 }
 
 export const Tooltip: React.FC<TooltipProps> = ({
-  children,
   title,
   placement = 'top',
   trigger = 'hover',
   visible,
+  defaultVisible = false,
   onVisibleChange,
-  mouseEnterDelay = 100,
-  mouseLeaveDelay = 100,
   overlayClassName,
   overlayStyle,
+  overlayInnerStyle,
   color,
-  arrow = true,
-  destroyTooltipOnHide = false,
+  mouseEnterDelay = 100,
+  mouseLeaveDelay = 100,
   getPopupContainer,
+  autoAdjustOverflow = true,
+  arrowPointAtCenter = false,
+  destroyTooltipOnHide = false,
+  align,
+  children,
   className,
-  'data-testid': testId,
 }) => {
-  const [internalVisible, setInternalVisible] = useState(false);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
-  const [mounted, setMounted] = useState(false);
-
+  const [internalVisible, setInternalVisible] = useState(defaultVisible);
+  const [position, setPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const enterTimeoutRef = useRef<NodeJS.Timeout>();
@@ -72,12 +69,184 @@ export const Tooltip: React.FC<TooltipProps> = ({
   const isVisible = visible !== undefined ? visible : internalVisible;
   const triggers = Array.isArray(trigger) ? trigger : [trigger];
 
-  // Mount effect
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // Calculate position based on placement
+  const calculatePosition = useCallback(() => {
+    if (!triggerRef.current || !tooltipRef.current) return;
 
-  // Clear timeouts on unmount
+    const triggerRect = triggerRef.current.getBoundingClientRect();
+    const tooltipRect = tooltipRef.current.getBoundingClientRect();
+    const viewport = {
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
+
+    let top = 0;
+    let left = 0;
+    const gap = 8; // Distance between trigger and tooltip
+
+    // Calculate base position
+    switch (placement) {
+      case 'top':
+        top = triggerRect.top - tooltipRect.height - gap;
+        left = triggerRect.left + (triggerRect.width - tooltipRect.width) / 2;
+        break;
+      case 'topLeft':
+        top = triggerRect.top - tooltipRect.height - gap;
+        left = triggerRect.left;
+        break;
+      case 'topRight':
+        top = triggerRect.top - tooltipRect.height - gap;
+        left = triggerRect.right - tooltipRect.width;
+        break;
+      case 'bottom':
+        top = triggerRect.bottom + gap;
+        left = triggerRect.left + (triggerRect.width - tooltipRect.width) / 2;
+        break;
+      case 'bottomLeft':
+        top = triggerRect.bottom + gap;
+        left = triggerRect.left;
+        break;
+      case 'bottomRight':
+        top = triggerRect.bottom + gap;
+        left = triggerRect.right - tooltipRect.width;
+        break;
+      case 'left':
+        top = triggerRect.top + (triggerRect.height - tooltipRect.height) / 2;
+        left = triggerRect.left - tooltipRect.width - gap;
+        break;
+      case 'leftTop':
+        top = triggerRect.top;
+        left = triggerRect.left - tooltipRect.width - gap;
+        break;
+      case 'leftBottom':
+        top = triggerRect.bottom - tooltipRect.height;
+        left = triggerRect.left - tooltipRect.width - gap;
+        break;
+      case 'right':
+        top = triggerRect.top + (triggerRect.height - tooltipRect.height) / 2;
+        left = triggerRect.right + gap;
+        break;
+      case 'rightTop':
+        top = triggerRect.top;
+        left = triggerRect.right + gap;
+        break;
+      case 'rightBottom':
+        top = triggerRect.bottom - tooltipRect.height;
+        left = triggerRect.right + gap;
+        break;
+    }
+
+    // Auto adjust overflow
+    if (autoAdjustOverflow) {
+      if (left < 8) left = 8;
+      if (left + tooltipRect.width > viewport.width - 8) {
+        left = viewport.width - tooltipRect.width - 8;
+      }
+      if (top < 8) top = 8;
+      if (top + tooltipRect.height > viewport.height - 8) {
+        top = Math.max(8, triggerRect.top - tooltipRect.height - gap);
+      }
+    }
+
+    // Apply custom align offset
+    if (align?.offset) {
+      left += align.offset[0] || 0;
+      top += align.offset[1] || 0;
+    }
+
+    setPosition({ top, left });
+  }, [placement, autoAdjustOverflow, align]);
+
+  // Handle visibility change
+  const handleVisibleChange = useCallback((newVisible: boolean) => {
+    if (visible === undefined) {
+      setInternalVisible(newVisible);
+    }
+    onVisibleChange?.(newVisible);
+  }, [visible, onVisibleChange]);
+
+  // Show tooltip with delay
+  const showTooltip = useCallback(() => {
+    if (leaveTimeoutRef.current) {
+      clearTimeout(leaveTimeoutRef.current);
+      leaveTimeoutRef.current = undefined;
+    }
+
+    if (!isVisible) {
+      enterTimeoutRef.current = setTimeout(() => {
+        handleVisibleChange(true);
+      }, mouseEnterDelay);
+    }
+  }, [isVisible, mouseEnterDelay, handleVisibleChange]);
+
+  // Hide tooltip with delay
+  const hideTooltip = useCallback(() => {
+    if (enterTimeoutRef.current) {
+      clearTimeout(enterTimeoutRef.current);
+      enterTimeoutRef.current = undefined;
+    }
+
+    if (isVisible) {
+      leaveTimeoutRef.current = setTimeout(() => {
+        handleVisibleChange(false);
+      }, mouseLeaveDelay);
+    }
+  }, [isVisible, mouseLeaveDelay, handleVisibleChange]);
+
+  // Immediate show/hide for click trigger
+  const toggleTooltip = useCallback(() => {
+    handleVisibleChange(!isVisible);
+  }, [isVisible, handleVisibleChange]);
+
+  // Handle context menu
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setPosition({ top: e.clientY, left: e.clientX });
+    handleVisibleChange(true);
+  }, [handleVisibleChange]);
+
+  // Keyboard handlers
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Escape' && isVisible) {
+      handleVisibleChange(false);
+    }
+  }, [isVisible, handleVisibleChange]);
+
+  // Click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        tooltipRef.current &&
+        !tooltipRef.current.contains(event.target as Node) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(event.target as Node)
+      ) {
+        handleVisibleChange(false);
+      }
+    };
+
+    if (isVisible && triggers.includes('click')) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isVisible, triggers, handleVisibleChange]);
+
+  // Calculate position when visible
+  useEffect(() => {
+    if (isVisible) {
+      // Use setTimeout to ensure DOM is updated
+      setTimeout(calculatePosition, 0);
+      window.addEventListener('resize', calculatePosition);
+      window.addEventListener('scroll', calculatePosition, true);
+
+      return () => {
+        window.removeEventListener('resize', calculatePosition);
+        window.removeEventListener('scroll', calculatePosition, true);
+      };
+    }
+  }, [isVisible, calculatePosition]);
+
+  // Cleanup timeouts
   useEffect(() => {
     return () => {
       if (enterTimeoutRef.current) {
@@ -89,238 +258,117 @@ export const Tooltip: React.FC<TooltipProps> = ({
     };
   }, []);
 
-  // Update position when visible
-  useEffect(() => {
-    if (isVisible && triggerRef.current && tooltipRef.current) {
-      updatePosition();
-    }
-  }, [isVisible, title, placement]);
-
-  const updatePosition = () => {
-    if (!triggerRef.current || !tooltipRef.current) return;
-
-    const triggerRect = triggerRef.current.getBoundingClientRect();
-    const tooltipRect = tooltipRef.current.getBoundingClientRect();
-    const scrollX = window.pageXOffset;
-    const scrollY = window.pageYOffset;
-
-    let top = 0;
-    let left = 0;
-
-    switch (placement) {
-      case 'top':
-        top = triggerRect.top + scrollY - tooltipRect.height - 8;
-        left = triggerRect.left + scrollX + (triggerRect.width - tooltipRect.width) / 2;
-        break;
-      case 'topLeft':
-        top = triggerRect.top + scrollY - tooltipRect.height - 8;
-        left = triggerRect.left + scrollX;
-        break;
-      case 'topRight':
-        top = triggerRect.top + scrollY - tooltipRect.height - 8;
-        left = triggerRect.right + scrollX - tooltipRect.width;
-        break;
-      case 'bottom':
-        top = triggerRect.bottom + scrollY + 8;
-        left = triggerRect.left + scrollX + (triggerRect.width - tooltipRect.width) / 2;
-        break;
-      case 'bottomLeft':
-        top = triggerRect.bottom + scrollY + 8;
-        left = triggerRect.left + scrollX;
-        break;
-      case 'bottomRight':
-        top = triggerRect.bottom + scrollY + 8;
-        left = triggerRect.right + scrollX - tooltipRect.width;
-        break;
-      case 'left':
-        top = triggerRect.top + scrollY + (triggerRect.height - tooltipRect.height) / 2;
-        left = triggerRect.left + scrollX - tooltipRect.width - 8;
-        break;
-      case 'leftTop':
-        top = triggerRect.top + scrollY;
-        left = triggerRect.left + scrollX - tooltipRect.width - 8;
-        break;
-      case 'leftBottom':
-        top = triggerRect.bottom + scrollY - tooltipRect.height;
-        left = triggerRect.left + scrollX - tooltipRect.width - 8;
-        break;
-      case 'right':
-        top = triggerRect.top + scrollY + (triggerRect.height - tooltipRect.height) / 2;
-        left = triggerRect.right + scrollX + 8;
-        break;
-      case 'rightTop':
-        top = triggerRect.top + scrollY;
-        left = triggerRect.right + scrollX + 8;
-        break;
-      case 'rightBottom':
-        top = triggerRect.bottom + scrollY - tooltipRect.height;
-        left = triggerRect.right + scrollX + 8;
-        break;
-    }
-
-    // Keep tooltip within viewport
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    if (left < 0) left = 8;
-    if (left + tooltipRect.width > viewportWidth) {
-      left = viewportWidth - tooltipRect.width - 8;
-    }
-    if (top < scrollY) top = scrollY + 8;
-    if (top + tooltipRect.height > scrollY + viewportHeight) {
-      top = scrollY + viewportHeight - tooltipRect.height - 8;
-    }
-
-    setPosition({ top, left });
-  };
-
-  const handleVisibleChange = (newVisible: boolean) => {
-    if (visible === undefined) {
-      setInternalVisible(newVisible);
-    }
-    onVisibleChange?.(newVisible);
-  };
-
-  const handleMouseEnter = () => {
-    if (!triggers.includes('hover')) return;
-
-    if (leaveTimeoutRef.current) {
-      clearTimeout(leaveTimeoutRef.current);
-      leaveTimeoutRef.current = undefined;
-    }
-
-    if (!isVisible) {
-      enterTimeoutRef.current = setTimeout(() => {
-        handleVisibleChange(true);
-      }, mouseEnterDelay);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (!triggers.includes('hover')) return;
-
-    if (enterTimeoutRef.current) {
-      clearTimeout(enterTimeoutRef.current);
-      enterTimeoutRef.current = undefined;
-    }
-
-    if (isVisible) {
-      leaveTimeoutRef.current = setTimeout(() => {
-        handleVisibleChange(false);
-      }, mouseLeaveDelay);
-    }
-  };
-
-  const handleClick = (event: React.MouseEvent) => {
-    if (!triggers.includes('click')) return;
-
-    event.preventDefault();
-    handleVisibleChange(!isVisible);
-  };
-
-  const handleFocus = () => {
-    if (!triggers.includes('focus')) return;
-    handleVisibleChange(true);
-  };
-
-  const handleBlur = () => {
-    if (!triggers.includes('focus')) return;
-    handleVisibleChange(false);
-  };
-
-  const handleContextMenu = (event: React.MouseEvent) => {
-    if (!triggers.includes('contextMenu')) return;
-
-    event.preventDefault();
-    handleVisibleChange(true);
-  };
-
   // Don't render if no title
   if (!title) {
     return children;
   }
 
-  const tooltipClasses = classNames(
-    styles.tooltip,
-    styles[placement],
-    {
-      [styles.visible]: isVisible,
-      [styles.withArrow]: arrow,
-    },
-    overlayClassName
-  );
-
-  const tooltipStyle: React.CSSProperties = {
-    ...overlayStyle,
-    top: position.top,
-    left: position.left,
-    backgroundColor: color,
-    zIndex: 1000,
+  // Get container element
+  const getContainer = (): HTMLElement => {
+    if (getPopupContainer) {
+      return getPopupContainer();
+    }
+    return document.body;
   };
 
-  // Clone trigger element and add event handlers
-  const triggerElement = cloneElement(children, {
-    ref: (node: HTMLElement) => {
-      triggerRef.current = node;
+  // Create trigger event handlers
+  const triggerProps: any = {};
 
-      // Handle existing ref
-      if (typeof children.ref === 'function') {
-        children.ref(node);
-      } else if (children.ref) {
-        (children.ref as React.MutableRefObject<HTMLElement>).current = node;
-      }
-    },
-    className: classNames(children.props.className, className),
-    onMouseEnter: (e: React.MouseEvent) => {
+  if (triggers.includes('hover')) {
+    triggerProps.onMouseEnter = (e: React.MouseEvent) => {
       children.props.onMouseEnter?.(e);
-      handleMouseEnter();
-    },
-    onMouseLeave: (e: React.MouseEvent) => {
+      showTooltip();
+    };
+    triggerProps.onMouseLeave = (e: React.MouseEvent) => {
       children.props.onMouseLeave?.(e);
-      handleMouseLeave();
-    },
-    onClick: (e: React.MouseEvent) => {
-      children.props.onClick?.(e);
-      handleClick(e);
-    },
-    onFocus: (e: React.FocusEvent) => {
+      hideTooltip();
+    };
+  }
+
+  if (triggers.includes('focus')) {
+    triggerProps.onFocus = (e: React.FocusEvent) => {
       children.props.onFocus?.(e);
-      handleFocus();
-    },
-    onBlur: (e: React.FocusEvent) => {
+      showTooltip();
+    };
+    triggerProps.onBlur = (e: React.FocusEvent) => {
       children.props.onBlur?.(e);
-      handleBlur();
-    },
-    onContextMenu: (e: React.MouseEvent) => {
+      hideTooltip();
+    };
+  }
+
+  if (triggers.includes('click')) {
+    triggerProps.onClick = (e: React.MouseEvent) => {
+      children.props.onClick?.(e);
+      toggleTooltip();
+    };
+  }
+
+  if (triggers.includes('contextMenu')) {
+    triggerProps.onContextMenu = (e: React.MouseEvent) => {
       children.props.onContextMenu?.(e);
       handleContextMenu(e);
-    },
+    };
+  }
+
+  triggerProps.onKeyDown = (e: React.KeyboardEvent) => {
+    children.props.onKeyDown?.(e);
+    handleKeyDown(e);
+  };
+
+  // Clone trigger element with event handlers
+  const triggerElement = React.cloneElement(children, {
+    ...triggerProps,
+    ref: triggerRef,
+    className: classNames(children.props.className, className),
   });
 
-  const tooltipElement = (
+  const tooltipContent = (
     <div
       ref={tooltipRef}
-      className={tooltipClasses}
-      style={tooltipStyle}
-      data-testid={testId}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      className={classNames(
+        styles.tooltip,
+        styles[placement.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)],
+        {
+          [styles.visible]: isVisible,
+        },
+        overlayClassName
+      )}
+      style={{
+        position: 'fixed',
+        top: position.top,
+        left: position.left,
+        zIndex: 1060,
+        ...overlayStyle,
+      }}
+      onMouseEnter={triggers.includes('hover') ? showTooltip : undefined}
+      onMouseLeave={triggers.includes('hover') ? hideTooltip : undefined}
+      role="tooltip"
+      aria-hidden={!isVisible}
     >
-      {arrow && <div className={styles.arrow} />}
-      <div className={styles.content}>
+      <div
+        className={styles.tooltipContent}
+        style={{
+          backgroundColor: color,
+          ...overlayInnerStyle,
+        }}
+      >
         {title}
       </div>
+      <div
+        className={classNames(
+          styles.tooltipArrow,
+          styles[`arrow-${placement.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`]
+        )}
+        style={color ? { borderColor: `transparent transparent ${color} transparent` } : {}}
+      />
     </div>
   );
-
-  const container = getPopupContainer ? getPopupContainer() : document.body;
 
   return (
     <>
       {triggerElement}
-      {mounted && (isVisible || !destroyTooltipOnHide) && createPortal(tooltipElement, container)}
+      {isVisible && !destroyTooltipOnHide && createPortal(tooltipContent, getContainer())}
+      {isVisible && destroyTooltipOnHide && createPortal(tooltipContent, getContainer())}
     </>
   );
 };
-
-export default Tooltip;

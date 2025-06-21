@@ -1,189 +1,155 @@
-/**
- * Tabs Styles for Wild Market Capital
- */
-
+/* src/components/common/Tabs/Tabs.module.css */
 .tabs {
   display: flex;
   font-family: var(--font-family);
+  color: var(--color-text-light);
 }
 
-/* Tab positions */
-.top {
+.tabs.top {
   flex-direction: column;
 }
 
-.bottom {
+.tabs.bottom {
   flex-direction: column-reverse;
 }
 
-.left {
+.tabs.left {
   flex-direction: row;
 }
 
-.right {
+.tabs.right {
   flex-direction: row-reverse;
 }
 
-/* Tab bar */
+.tabs.vertical {
+  height: 100%;
+}
+
+/* Tab Bar */
 .tabBar {
   position: relative;
   display: flex;
+  align-items: center;
   flex-shrink: 0;
 }
 
-.topTabBar,
-.bottomTabBar {
-  border-bottom: 1px solid var(--color-divider);
+.top .tabBar,
+.bottom .tabBar {
+  border-radius: 2px;
+  animation: spin 1s linear infinite;
+  margin-left: auto;
 }
 
-.bottomTabBar {
-  border-bottom: none;
-  border-top: 1px solid var(--color-divider);
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}bottom: 1px solid var(--color-divider);
 }
 
-.leftTabBar,
-.rightTabBar {
+.left .tabBar,
+.right .tabBar {
   flex-direction: column;
   border-right: 1px solid var(--color-divider);
   min-width: 120px;
 }
 
-.rightTabBar {
+.bottom .tabBar {
+  border-bottom: none;
+  border-top: 1px solid var(--color-divider);
+}
+
+.right .tabBar {
   border-right: none;
   border-left: 1px solid var(--color-divider);
 }
 
-.cardType {
-  border: none;
-}
-
-.centered .tabNav {
-  justify-content: center;
-}
-
-/* Tab navigation */
+/* Tab Navigation */
 .tabNav {
+  position: relative;
   display: flex;
   align-items: center;
   flex: 1;
-  overflow: hidden;
+  min-width: 0;
 }
 
-.leftTabBar .tabNav,
-.rightTabBar .tabNav {
+.vertical .tabNav {
   flex-direction: column;
   align-items: stretch;
 }
 
-/* Individual tab */
+/* Tab List */
+.tabList {
+  display: flex;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.vertical .tabList {
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.centered .tabList {
+  justify-content: center;
+}
+
+/* Individual Tab */
 .tab {
   position: relative;
   display: flex;
   align-items: center;
+  padding: var(--spacing-s) var(--spacing-m);
   cursor: pointer;
   transition: all var(--transition-fast);
+  white-space: nowrap;
   user-select: none;
-  outline: none;
   border: none;
-  background: none;
+  background: transparent;
+  color: var(--color-neutral-gray);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  min-height: 40px;
+}
+
+.tab:hover:not(.disabled) {
+  color: var(--color-accent);
 }
 
 .tab:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-accent);
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+.tab.active {
+  color: var(--color-accent);
+}
+
+.tab.disabled {
+  color: var(--color-disabled);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.tab.closable {
+  padding-right: var(--spacing-s);
 }
 
 /* Tab sizes */
-.small .tab {
-  padding: var(--spacing-xs) var(--spacing-s);
+.tab.small {
+  padding: 4px var(--spacing-s);
   font-size: var(--font-size-caption);
+  min-height: 32px;
 }
 
-.middle .tab {
-  padding: var(--spacing-s) var(--spacing-m);
-  font-size: var(--font-size-body);
-}
-
-.large .tab {
+.tab.large {
   padding: var(--spacing-m) var(--spacing-l);
   font-size: var(--font-size-h3);
-}
-
-/* Tab types */
-.line .tab {
-  color: var(--color-neutral-gray);
-  border-bottom: 2px solid transparent;
-}
-
-.line .tab:hover:not(.disabled) {
-  color: var(--color-text-light);
-}
-
-.line .tab.active {
-  color: var(--color-accent);
-  border-bottom-color: var(--color-accent);
-}
-
-.card .tab,
-.editableCard .tab {
-  background-color: var(--color-background-20);
-  border: 1px solid var(--color-divider);
-  border-bottom: none;
-  border-radius: var(--border-radius-s) var(--border-radius-s) 0 0;
-  margin-right: 2px;
-}
-
-.card .tab:hover:not(.disabled),
-.editableCard .tab:hover:not(.disabled) {
-  background-color: var(--color-background-40);
-}
-
-.card .tab.active,
-.editableCard .tab.active {
-  background-color: var(--color-background);
-  border-bottom: 1px solid var(--color-background);
-  color: var(--color-accent);
-}
-
-/* Bottom positioned card tabs */
-.bottom.card .tab,
-.bottom.editableCard .tab {
-  border-top: none;
-  border-bottom: 1px solid var(--color-divider);
-  border-radius: 0 0 var(--border-radius-s) var(--border-radius-s);
-}
-
-.bottom.card .tab.active,
-.bottom.editableCard .tab.active {
-  border-top: 1px solid var(--color-background);
-  border-bottom: none;
-}
-
-/* Left/Right positioned tabs */
-.left .tab,
-.right .tab {
-  justify-content: flex-start;
-  width: 100%;
-  text-align: left;
-}
-
-.left.line .tab {
-  border-bottom: none;
-  border-right: 2px solid transparent;
-}
-
-.left.line .tab.active {
-  border-right-color: var(--color-accent);
-  border-bottom-color: transparent;
-}
-
-.right.line .tab {
-  border-bottom: none;
-  border-left: 2px solid transparent;
-}
-
-.right.line .tab.active {
-  border-left-color: var(--color-accent);
-  border-bottom-color: transparent;
+  min-height: 48px;
 }
 
 /* Tab content */
@@ -191,228 +157,471 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  flex: 1;
-  min-width: 0;
 }
 
-.tabIcon {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.tabLabel {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tabClose {
+/* Tab close button */
+.tabCloseButton {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 16px;
   height: 16px;
-  background: none;
+  margin-left: var(--spacing-xs);
   border: none;
+  background: transparent;
   color: var(--color-neutral-gray);
   cursor: pointer;
   border-radius: var(--border-radius-xs);
   transition: all var(--transition-fast);
-  padding: 0;
-  margin-left: var(--spacing-xs);
+  opacity: 0.7;
 }
 
-.tabClose:hover {
-  background-color: var(--color-divider-20);
-  color: var(--color-negative);
+.tabCloseButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-light);
+  opacity: 1;
 }
 
-/* Disabled tab */
-.tab.disabled {
+.tab:not(:hover) .tabCloseButton {
   opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
 }
 
-/* Add tab button */
-.addTab {
+/* Add button */
+.addButton {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
-  background: none;
-  border: 1px solid var(--color-divider);
-  border-radius: var(--border-radius-s);
+  margin-left: var(--spacing-s);
+  border: 1px dashed var(--color-divider);
+  background: transparent;
+  color: var(--color-neutral-gray);
+  cursor: pointer;
+  border-radius: var(--border-radius-xs);
+  transition: all var(--transition-fast);
+}
+
+.addButton:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background-color: rgba(191, 159, 251, 0.05);
+}
+
+.addButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+/* Scroll buttons */
+.scrollButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(42, 46, 57, 0.8);
   color: var(--color-neutral-gray);
   cursor: pointer;
   transition: all var(--transition-fast);
-  margin-left: var(--spacing-xs);
+  z-index: 2;
 }
 
-.addTab:hover {
-  background-color: var(--color-background-20);
+.scrollButton:hover {
+  background-color: rgba(191, 159, 251, 0.1);
   color: var(--color-accent);
-  border-color: var(--color-accent);
 }
 
-/* Indicator for line type */
-.indicator {
+.scrollButton:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.scrollPrev {
+  border-radius: var(--border-radius-s) 0 0 var(--border-radius-s);
+}
+
+.scrollNext {
+  border-radius: 0 var(--border-radius-s) var(--border-radius-s) 0;
+}
+
+.vertical .scrollPrev {
+  border-radius: var(--border-radius-s) var(--border-radius-s) 0 0;
+}
+
+.vertical .scrollNext {
+  border-radius: 0 0 var(--border-radius-s) var(--border-radius-s);
+}
+
+/* Ink bar (line type) */
+.inkBar {
   position: absolute;
   background-color: var(--color-accent);
-  transition: all var(--transition-medium);
   pointer-events: none;
+  z-index: 1;
 }
 
-.topTabBar .indicator,
-.bottomTabBar .indicator {
+.top .inkBar,
+.bottom .inkBar {
+  bottom: 0;
   height: 2px;
-  bottom: -1px;
+  transition: left var(--transition-medium), width var(--transition-medium);
 }
 
-.bottomTabBar .indicator {
+.bottom .inkBar {
   bottom: auto;
-  top: -1px;
+  top: 0;
 }
 
-.leftTabBar .indicator {
+.left .inkBar,
+.right .inkBar {
+  right: 0;
   width: 2px;
-  right: -1px;
+  transition: top var(--transition-medium), height var(--transition-medium);
 }
 
-.rightTabBar .indicator {
-  width: 2px;
-  left: -1px;
+.right .inkBar {
+  right: auto;
+  left: 0;
 }
 
-/* Tab panes container */
+.inkBar.animated {
+  transition-duration: var(--transition-medium);
+}
+
+/* Card type */
+.tabs.card .tab {
+  background-color: rgba(42, 46, 57, 0.3);
+  border: 1px solid var(--color-divider);
+  border-bottom: none;
+  margin-right: 2px;
+  border-radius: var(--border-radius-s) var(--border-radius-s) 0 0;
+}
+
+.tabs.card .tab.active {
+  background-color: var(--color-background);
+  border-bottom-color: var(--color-background);
+  z-index: 1;
+}
+
+.tabs.card .tab:hover:not(.disabled):not(.active) {
+  background-color: rgba(191, 159, 251, 0.05);
+}
+
+/* Editable card type */
+.tabs.editableCard .tab {
+  background-color: rgba(42, 46, 57, 0.3);
+  border: 1px solid var(--color-divider);
+  border-bottom: none;
+  margin-right: 2px;
+  border-radius: var(--border-radius-s) var(--border-radius-s) 0 0;
+  padding-right: var(--spacing-s);
+}
+
+.tabs.editableCard .tab.active {
+  background-color: var(--color-background);
+  border-bottom-color: var(--color-background);
+  z-index: 1;
+}
+
+.tabs.editableCard .tab:hover:not(.disabled):not(.active) {
+  background-color: rgba(191, 159, 251, 0.05);
+}
+
+/* Tab Bar Extra Content */
+.tabBarExtraContent,
+.tabBarExtraLeft,
+.tabBarExtraRight {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.tabBarExtraLeft {
+  margin-right: var(--spacing-m);
+}
+
+.tabBarExtraRight {
+  margin-left: var(--spacing-m);
+}
+
+.vertical .tabBarExtraContent,
+.vertical .tabBarExtraLeft,
+.vertical .tabBarExtraRight {
+  margin: var(--spacing-s) 0;
+}
+
+/* Tab Content */
 .tabContent {
   flex: 1;
-  position: relative;
-  overflow: hidden;
+  padding: var(--spacing-l);
+  min-height: 0;
+  overflow: auto;
 }
 
-.topContent,
-.bottomContent {
-  width: 100%;
+.vertical .tabContent {
+  padding: var(--spacing-m);
 }
 
-.leftContent,
-.rightContent {
-  height: 100%;
-  flex: 1;
-}
-
-/* Individual tab pane */
+/* Tab Pane */
 .tabPane {
-  width: 100%;
   height: 100%;
+  outline: none;
 }
 
 .tabPane.hidden {
   display: none;
 }
 
-.animated .tabPane {
-  transition: opacity var(--transition-medium);
+.tabPane.animated {
+  animation: tabPaneFadeIn 0.3s ease-in-out;
 }
 
-.animated .tabPane.hidden {
-  opacity: 0;
-  pointer-events: none;
+@keyframes tabPaneFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.animated .tabPane.active {
-  opacity: 1;
+.vertical .tabPane.animated {
+  animation: tabPaneFadeInVertical 0.3s ease-in-out;
 }
 
-/* Responsive behavior */
+@keyframes tabPaneFadeInVertical {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
-  .left,
-  .right {
+  .tab {
+    padding: var(--spacing-s);
+    font-size: var(--font-size-caption);
+    min-height: 44px;
+  }
+
+  .tab.small {
+    padding: 4px var(--spacing-xs);
+    min-height: 40px;
+  }
+
+  .tab.large {
+    padding: var(--spacing-s) var(--spacing-m);
+    min-height: 48px;
+  }
+
+  .tabContent {
+    padding: var(--spacing-m);
+  }
+
+  .addButton {
+    width: 28px;
+    height: 28px;
+  }
+
+  .scrollButton {
+    width: 28px;
+    height: 28px;
+  }
+
+  .tabBarExtraLeft {
+    margin-right: var(--spacing-s);
+  }
+
+  .tabBarExtraRight {
+    margin-left: var(--spacing-s);
+  }
+}
+
+@media (max-width: 480px) {
+  .tabs.left,
+  .tabs.right {
     flex-direction: column;
   }
 
-  .leftTabBar,
-  .rightTabBar {
+  .left .tabBar,
+  .right .tabBar {
     flex-direction: row;
-    min-width: auto;
-    border: none;
+    border-right: none;
     border-bottom: 1px solid var(--color-divider);
+    min-width: auto;
   }
 
-  .leftTabBar .tabNav,
-  .rightTabBar .tabNav {
+  .left .tabList,
+  .right .tabList {
     flex-direction: row;
     overflow-x: auto;
     overflow-y: hidden;
   }
 
-  .left.line .tab,
-  .right.line .tab {
-    border-right: none;
-    border-left: none;
-    border-bottom: 2px solid transparent;
+  .tab {
+    padding: var(--spacing-xs) var(--spacing-s);
+    min-width: 80px;
+    justify-content: center;
   }
 
-  .left.line .tab.active,
-  .right.line .tab.active {
-    border-right: none;
-    border-left: none;
-    border-bottom-color: var(--color-accent);
+  .tabContent {
+    padding: var(--spacing-s);
   }
 
-  .leftTabBar .indicator,
-  .rightTabBar .indicator {
-    width: auto;
-    height: 2px;
-    bottom: -1px;
-    right: auto;
-    left: auto;
+  /* Hide scroll buttons on mobile */
+  .scrollButton {
+    display: none;
   }
-}
 
-/* Scrollable tab navigation */
-.tabNav::-webkit-scrollbar {
-  height: 2px;
-}
-
-.tabNav::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.tabNav::-webkit-scrollbar-thumb {
-  background: var(--color-divider);
-  border-radius: 1px;
-}
-
-.tabNav::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent);
+  /* Hide close buttons on mobile */
+  .tabCloseButton {
+    display: none;
+  }
 }
 
 /* High contrast mode */
-@media (prefers-contrast: more) {
+@media (prefers-contrast: high) {
   .tab {
-    border-width: 2px;
+    border: 1px solid transparent;
   }
 
-  .indicator {
+  .tab:hover:not(.disabled) {
+    border-color: var(--color-text-light);
+  }
+
+  .tab.active {
+    border-color: var(--color-accent);
+    background-color: rgba(191, 159, 251, 0.1);
+  }
+
+  .inkBar {
     height: 3px;
   }
 
-  .leftTabBar .indicator,
-  .rightTabBar .indicator {
+  .left .inkBar,
+  .right .inkBar {
     width: 3px;
-    height: auto;
+  }
+
+  .tabs.card .tab,
+  .tabs.editableCard .tab {
+    border-width: 2px;
   }
 }
 
-/* Reduced motion support */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .tab,
-  .indicator,
-  .tabPane {
+  .inkBar,
+  .tabCloseButton,
+  .addButton,
+  .scrollButton {
     transition: none;
   }
+
+  .inkBar.animated {
+    transition: none;
+  }
+
+  .tabPane.animated {
+    animation: none;
+  }
 }
+
+/* Dark theme adjustments */
+@media (prefers-color-scheme: dark) {
+  .tabs.card .tab.active,
+  .tabs.editableCard .tab.active {
+    background-color: var(--color-background);
+  }
+
+  .scrollButton {
+    background: rgba(13, 16, 21, 0.8);
+  }
+}
+
+/* Print styles */
+@media print {
+  .scrollButton,
+  .addButton,
+  .tabCloseButton {
+    display: none;
+  }
+
+  .tab {
+    background: white !important;
+    color: black !important;
+    border-color: black !important;
+  }
+
+  .inkBar {
+    background: black !important;
+  }
+}
+
+/* RTL support */
+[dir="rtl"] .tab {
+  margin-left: 2px;
+  margin-right: 0;
+}
+
+[dir="rtl"] .tabCloseButton {
+  margin-left: 0;
+  margin-right: var(--spacing-xs);
+}
+
+[dir="rtl"] .addButton {
+  margin-left: 0;
+  margin-right: var(--spacing-s);
+}
+
+[dir="rtl"] .tabBarExtraLeft {
+  margin-left: var(--spacing-m);
+  margin-right: 0;
+}
+
+[dir="rtl"] .tabBarExtraRight {
+  margin-left: 0;
+  margin-right: var(--spacing-m);
+}
+
+/* Custom scrollbar for tab list */
+.tabList::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.tabList::-webkit-scrollbar-track {
+  background: rgba(42, 46, 57, 0.3);
+}
+
+.tabList::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border-radius: 2px;
+}
+
+.tabList::-webkit-scrollbar-thumb:hover {
+  background: var(--color-hover);
+}
+
+/* Loading state */
+.tab[aria-busy="true"] {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.tab[aria-busy="true"]::after {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--color-accent);
+  border-top: 1px solid transparent;
+  border-

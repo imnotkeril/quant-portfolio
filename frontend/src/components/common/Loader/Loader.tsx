@@ -1,161 +1,153 @@
-/**
- * Loader Component
- * Various loading indicators and spinners
- */
+// src/components/common/Loader/Loader.tsx
 import React from 'react';
 import classNames from 'classnames';
 import styles from './Loader.module.css';
 
-export type LoaderType = 'spinner' | 'dots' | 'pulse' | 'bars' | 'ring';
-export type LoaderSize = 'small' | 'medium' | 'large';
+export type LoaderSize = 'small' | 'default' | 'large';
+export type LoaderType = 'spinner' | 'dots' | 'pulse' | 'bars';
 
 interface LoaderProps {
-  type?: LoaderType;
+  spinning?: boolean;
   size?: LoaderSize;
-  color?: string;
-  loading?: boolean;
-  text?: React.ReactNode;
-  tip?: string;
+  type?: LoaderType;
+  tip?: React.ReactNode;
+  delay?: number;
+  indicator?: React.ReactNode;
   children?: React.ReactNode;
-  overlay?: boolean;
   className?: string;
   style?: React.CSSProperties;
-  'data-testid'?: string;
+  wrapperClassName?: string;
 }
 
+const SpinnerIcon: React.FC<{ size: LoaderSize }> = ({ size }) => (
+  <svg
+    className={classNames(styles.spinnerIcon, styles[size])}
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeWidth="2"
+      fill="none"
+      strokeDasharray="31.416"
+      strokeDashoffset="31.416"
+      className={styles.spinnerCircle}
+    />
+  </svg>
+);
+
+const DotsIcon: React.FC<{ size: LoaderSize }> = ({ size }) => (
+  <div className={classNames(styles.dotsContainer, styles[size])}>
+    <div className={classNames(styles.dot, styles.dot1)} />
+    <div className={classNames(styles.dot, styles.dot2)} />
+    <div className={classNames(styles.dot, styles.dot3)} />
+  </div>
+);
+
+const PulseIcon: React.FC<{ size: LoaderSize }> = ({ size }) => (
+  <div className={classNames(styles.pulseContainer, styles[size])}>
+    <div className={styles.pulseCircle} />
+  </div>
+);
+
+const BarsIcon: React.FC<{ size: LoaderSize }> = ({ size }) => (
+  <div className={classNames(styles.barsContainer, styles[size])}>
+    <div className={classNames(styles.bar, styles.bar1)} />
+    <div className={classNames(styles.bar, styles.bar2)} />
+    <div className={classNames(styles.bar, styles.bar3)} />
+    <div className={classNames(styles.bar, styles.bar4)} />
+  </div>
+);
+
+const LoaderIcon: React.FC<{ type: LoaderType; size: LoaderSize }> = ({ type, size }) => {
+  switch (type) {
+    case 'dots':
+      return <DotsIcon size={size} />;
+    case 'pulse':
+      return <PulseIcon size={size} />;
+    case 'bars':
+      return <BarsIcon size={size} />;
+    case 'spinner':
+    default:
+      return <SpinnerIcon size={size} />;
+  }
+};
+
 export const Loader: React.FC<LoaderProps> = ({
+  spinning = true,
+  size = 'default',
   type = 'spinner',
-  size = 'medium',
-  color,
-  loading = true,
-  text,
   tip,
+  delay = 0,
+  indicator,
   children,
-  overlay = false,
   className,
   style,
-  'data-testid': testId,
+  wrapperClassName,
 }) => {
-  if (!loading && !children) {
-    return null;
-  }
+  const [shouldShow, setShouldShow] = React.useState(delay === 0);
 
-  const renderLoader = () => {
-    const loaderClasses = classNames(
-      styles.loader,
-      styles[type],
-      styles[size],
-      className
-    );
+  React.useEffect(() => {
+    if (delay > 0 && spinning) {
+      const timer = setTimeout(() => {
+        setShouldShow(true);
+      }, delay);
 
-    const loaderStyle: React.CSSProperties = {
-      ...style,
-      ...(color && { color }),
-    };
-
-    switch (type) {
-      case 'spinner':
-        return (
-          <div className={loaderClasses} style={loaderStyle}>
-            <div className={styles.spinner} />
-          </div>
-        );
-
-      case 'dots':
-        return (
-          <div className={loaderClasses} style={loaderStyle}>
-            <div className={styles.dot} />
-            <div className={styles.dot} />
-            <div className={styles.dot} />
-          </div>
-        );
-
-      case 'pulse':
-        return (
-          <div className={loaderClasses} style={loaderStyle}>
-            <div className={styles.pulse} />
-          </div>
-        );
-
-      case 'bars':
-        return (
-          <div className={loaderClasses} style={loaderStyle}>
-            <div className={styles.bar} />
-            <div className={styles.bar} />
-            <div className={styles.bar} />
-            <div className={styles.bar} />
-            <div className={styles.bar} />
-          </div>
-        );
-
-      case 'ring':
-        return (
-          <div className={loaderClasses} style={loaderStyle}>
-            <div className={styles.ring}>
-              <div />
-              <div />
-              <div />
-              <div />
-            </div>
-          </div>
-        );
-
-      default:
-        return (
-          <div className={loaderClasses} style={loaderStyle}>
-            <div className={styles.spinner} />
-          </div>
-        );
+      return () => clearTimeout(timer);
+    } else {
+      setShouldShow(spinning);
     }
-  };
+  }, [spinning, delay]);
 
-  const renderContent = () => {
-    const loader = renderLoader();
-
-    if (text || tip) {
-      return (
-        <div className={styles.loadingContainer}>
-          {loader}
-          {(text || tip) && (
-            <div className={styles.loadingText}>
-              {text || tip}
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    return loader;
-  };
-
-  // Render overlay loader
-  if (children) {
-    const containerClasses = classNames(
-      styles.container,
-      {
-        [styles.loading]: loading,
-        [styles.overlay]: overlay,
-      }
-    );
-
-    return (
-      <div className={containerClasses} data-testid={testId}>
-        {children}
-        {loading && (
-          <div className={styles.overlayMask}>
-            {renderContent()}
+  const renderLoader = () => (
+    <div
+      className={classNames(
+        styles.loader,
+        styles[size],
+        className
+      )}
+      style={style}
+      role="status"
+      aria-live="polite"
+      aria-label={tip ? String(tip) : 'Loading'}
+    >
+      <div className={styles.loaderContent}>
+        {indicator || <LoaderIcon type={type} size={size} />}
+        {tip && (
+          <div className={styles.loaderTip}>
+            {tip}
           </div>
         )}
       </div>
-    );
+    </div>
+  );
+
+  // If no children, render just the loader
+  if (!children) {
+    return shouldShow && spinning ? renderLoader() : null;
   }
 
-  // Render standalone loader
+  // If has children, render as overlay
   return (
-    <div className={styles.standalone} data-testid={testId}>
-      {renderContent()}
+    <div
+      className={classNames(
+        styles.loaderWrapper,
+        {
+          [styles.spinning]: shouldShow && spinning,
+        },
+        wrapperClassName
+      )}
+    >
+      {children}
+      {shouldShow && spinning && (
+        <div className={styles.loaderOverlay}>
+          {renderLoader()}
+        </div>
+      )}
     </div>
   );
 };
-
-export default Loader;

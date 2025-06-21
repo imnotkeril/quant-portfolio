@@ -1,399 +1,421 @@
-/**
- * Select Component
- * Custom select dropdown with search and multi-select capabilities
- */
-import React, { useState, useRef, useEffect, useId } from 'react';
+// src/components/common/Select/Select.tsx
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import classNames from 'classnames';
-import { useClickOutside } from '../../../hooks/useClickOutside';
 import styles from './Select.module.css';
 
 export interface SelectOption {
   value: string | number;
   label: string;
   disabled?: boolean;
-  description?: string;
-  icon?: React.ReactNode;
+  group?: string;
 }
 
-export type SelectSize = 'small' | 'medium' | 'large';
-
 interface SelectProps {
-  options: SelectOption[];
-  value?: string | number | (string | number)[];
-  defaultValue?: string | number | (string | number)[];
-  onChange?: (value: string | number | (string | number)[]) => void;
+  value?: string | number;
+  defaultValue?: string | number;
   placeholder?: string;
-  size?: SelectSize;
+  options: SelectOption[];
+  onChange?: (value: string | number, option: SelectOption) => void;
+  onSelect?: (value: string | number, option: SelectOption) => void;
+  onBlur?: (e: React.FocusEvent<HTMLDivElement>) => void;
+  onFocus?: (e: React.FocusEvent<HTMLDivElement>) => void;
   disabled?: boolean;
-  error?: string | boolean;
-  success?: boolean;
-  helperText?: string;
-  label?: string;
-  required?: boolean;
-  multiple?: boolean;
-  searchable?: boolean;
-  clearable?: boolean;
   loading?: boolean;
+  allowClear?: boolean;
+  showSearch?: boolean;
+  filterOption?: boolean | ((input: string, option: SelectOption) => boolean);
+  notFoundContent?: React.ReactNode;
+  size?: 'small' | 'middle' | 'large';
+  bordered?: boolean;
   className?: string;
-  fullWidth?: boolean;
-  maxHeight?: number;
-  'data-testid'?: string;
-  id?: string;
+  dropdownClassName?: string;
+  style?: React.CSSProperties;
+  popupMatchSelectWidth?: boolean;
+  maxTagCount?: number;
+  mode?: 'multiple' | 'tags';
+  tagRender?: (props: { label: string; value: string | number; onClose: () => void }) => React.ReactNode;
+  suffixIcon?: React.ReactNode;
+  clearIcon?: React.ReactNode;
+  removeIcon?: React.ReactNode;
+  dropdownRender?: (menu: React.ReactElement) => React.ReactElement;
+  autoClearSearchValue?: boolean;
+  defaultActiveFirstOption?: boolean;
+  listHeight?: number;
+  virtual?: boolean;
 }
 
 export const Select: React.FC<SelectProps> = ({
-  options,
   value,
   defaultValue,
+  placeholder = 'Please select',
+  options = [],
   onChange,
-  placeholder = 'Select option...',
-  size = 'medium',
+  onSelect,
+  onBlur,
+  onFocus,
   disabled = false,
-  error,
-  success = false,
-  helperText,
-  label,
-  required = false,
-  multiple = false,
-  searchable = false,
-  clearable = false,
   loading = false,
+  allowClear = false,
+  showSearch = false,
+  filterOption = true,
+  notFoundContent = 'No data',
+  size = 'middle',
+  bordered = true,
   className,
-  fullWidth = false,
-  maxHeight = 200,
-  'data-testid': testId,
-  id: providedId,
+  dropdownClassName,
+  style,
+  popupMatchSelectWidth = true,
+  mode,
+  suffixIcon,
+  clearIcon,
+  listHeight = 256,
+  virtual = true,
 }) => {
-  const generatedId = useId();
-  const selectId = providedId || generatedId;
-
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchValue, setSearchValue] = useState('');
   const [internalValue, setInternalValue] = useState<string | number | (string | number)[]>(
-    value !== undefined ? value : defaultValue || (multiple ? [] : '')
+    value !== undefined ? value : defaultValue || (mode ? [] : '')
   );
+  const [focusedIndex, setFocusedIndex] = useState(-1);
 
   const selectRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const hasError = !!error;
-  const errorMessage = typeof error === 'string' ? error : '';
-
-  // Close dropdown when clicking outside
-  useClickOutside(selectRef, () => {
-    setIsOpen(false);
-    setSearchTerm('');
-  });
-
-  // Focus search input when dropdown opens
-  useEffect(() => {
-    if (isOpen && searchable && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  }, [isOpen, searchable]);
-
-  // Update internal value when external value changes
-  useEffect(() => {
-    if (value !== undefined) {
-      setInternalValue(value);
-    }
-  }, [value]);
-
+  const isMultiple = mode === 'multiple' || mode === 'tags';
   const currentValue = value !== undefined ? value : internalValue;
 
-  // Filter options based on search term
-  const filteredOptions = searchTerm
-    ? options.filter(option =>
-        option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        option.description?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : options;
+  // Filter options based on search
+  const filteredOptions = React.useMemo(() => {
+    if (!showSearch || !searchValue) return options;
 
-  // Get selected options for display
-  const getSelectedOptions = (): SelectOption[] => {
-    if (multiple && Array.isArray(currentValue)) {
-      return options.filter(option => currentValue.includes(option.value));
+    return options.filter(option => {
+      if (typeof filterOption === 'function') {
+        return filterOption(searchValue, option);
+      }
+      if (filterOption === false) return true;
+
+      return option.label.toLowerCase().includes(searchValue.toLowerCase());
+    });
+  }, [options, searchValue, showSearch, filterOption]);
+
+  // Get display value
+  const getDisplayValue = useCallback(() => {
+    if (isMultiple) {
+      const values = Array.isArray(currentValue) ? currentValue : [];
+      return values.map(val => {
+        const option = options.find(opt => opt.value === val);
+        return option ? option.label : val;
+      });
     }
-    const selectedOption = options.find(option => option.value === currentValue);
-    return selectedOption ? [selectedOption] : [];
-  };
 
-  const selectedOptions = getSelectedOptions();
+    const option = options.find(opt => opt.value === currentValue);
+    return option ? option.label : '';
+  }, [currentValue, options, isMultiple]);
 
-  // Handle option selection
-  const handleOptionSelect = (option: SelectOption) => {
+  // Handle option select
+  const handleSelect = useCallback((option: SelectOption) => {
     if (option.disabled) return;
 
     let newValue: string | number | (string | number)[];
 
-    if (multiple) {
-      const currentArray = Array.isArray(currentValue) ? currentValue : [];
-      if (currentArray.includes(option.value)) {
-        newValue = currentArray.filter(v => v !== option.value);
+    if (isMultiple) {
+      const values = Array.isArray(currentValue) ? currentValue : [];
+      if (values.includes(option.value)) {
+        newValue = values.filter(val => val !== option.value);
       } else {
-        newValue = [...currentArray, option.value];
+        newValue = [...values, option.value];
       }
     } else {
       newValue = option.value;
       setIsOpen(false);
-      setSearchTerm('');
+      setSearchValue('');
     }
 
     if (value === undefined) {
       setInternalValue(newValue);
     }
-    onChange?.(newValue);
-  };
+
+    onChange?.(newValue as any, option);
+    onSelect?.(option.value, option);
+  }, [currentValue, isMultiple, value, onChange, onSelect]);
 
   // Handle clear
-  const handleClear = (e: React.MouseEvent) => {
+  const handleClear = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    const newValue = multiple ? [] : '';
+    const newValue = isMultiple ? [] : '';
+
     if (value === undefined) {
       setInternalValue(newValue);
     }
-    onChange?.(newValue);
-  };
 
-  // Handle dropdown toggle
-  const handleToggle = () => {
-    if (disabled) return;
-    setIsOpen(!isOpen);
-    if (!isOpen) {
-      setSearchTerm('');
+    onChange?.(newValue as any, {} as SelectOption);
+    setSearchValue('');
+  }, [isMultiple, value, onChange]);
+
+  // Handle remove tag (for multiple mode)
+  const handleRemoveTag = useCallback((tagValue: string | number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isMultiple) return;
+
+    const values = Array.isArray(currentValue) ? currentValue : [];
+    const newValue = values.filter(val => val !== tagValue);
+
+    if (value === undefined) {
+      setInternalValue(newValue);
     }
-  };
+
+    const option = options.find(opt => opt.value === tagValue);
+    onChange?.(newValue as any, option || {} as SelectOption);
+  }, [currentValue, isMultiple, value, options, onChange]);
 
   // Handle keyboard navigation
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (disabled) return;
 
     switch (e.key) {
       case 'Enter':
-      case ' ':
-        if (!isOpen) {
-          e.preventDefault();
+        e.preventDefault();
+        if (isOpen && focusedIndex >= 0 && filteredOptions[focusedIndex]) {
+          handleSelect(filteredOptions[focusedIndex]);
+        } else if (!isOpen) {
           setIsOpen(true);
         }
         break;
+
       case 'Escape':
-        if (isOpen) {
-          e.preventDefault();
-          setIsOpen(false);
-          setSearchTerm('');
-        }
+        setIsOpen(false);
+        setSearchValue('');
+        setFocusedIndex(-1);
         break;
+
       case 'ArrowDown':
+        e.preventDefault();
         if (!isOpen) {
-          e.preventDefault();
           setIsOpen(true);
+        } else {
+          setFocusedIndex(prev =>
+            prev < filteredOptions.length - 1 ? prev + 1 : prev
+          );
         }
         break;
+
       case 'ArrowUp':
+        e.preventDefault();
         if (isOpen) {
-          e.preventDefault();
-          // Could implement option navigation here
+          setFocusedIndex(prev => prev > 0 ? prev - 1 : prev);
+        }
+        break;
+
+      case 'Backspace':
+        if (isMultiple && !searchValue && Array.isArray(currentValue) && currentValue.length > 0) {
+          const lastValue = currentValue[currentValue.length - 1];
+          handleRemoveTag(lastValue, e as any);
         }
         break;
     }
-  };
+  }, [disabled, isOpen, focusedIndex, filteredOptions, handleSelect, isMultiple, searchValue, currentValue, handleRemoveTag]);
 
-  const containerClasses = classNames(
-    styles.container,
-    {
-      [styles.fullWidth]: fullWidth,
-      [styles.disabled]: disabled,
-      [styles.error]: hasError,
-      [styles.success]: success && !hasError,
-    },
-    className
-  );
+  // Click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        setSearchValue('');
+        setFocusedIndex(-1);
+      }
+    };
 
-  const selectClasses = classNames(
-    styles.select,
-    styles[size],
-    {
-      [styles.open]: isOpen,
-      [styles.disabled]: disabled,
-      [styles.error]: hasError,
-      [styles.success]: success && !hasError,
-      [styles.hasValue]: selectedOptions.length > 0,
-    }
-  );
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-  const dropdownClasses = classNames(
-    styles.dropdown,
-    {
-      [styles.open]: isOpen,
-    }
+  // Reset focused index when options change
+  useEffect(() => {
+    setFocusedIndex(-1);
+  }, [filteredOptions]);
+
+  const displayValue = getDisplayValue();
+  const showClear = allowClear && !disabled && (
+    isMultiple ? Array.isArray(currentValue) && currentValue.length > 0 : currentValue
   );
 
   return (
-    <div className={containerClasses}>
-      {label && (
-        <label htmlFor={selectId} className={styles.label}>
-          {label}
-          {required && <span className={styles.required}>*</span>}
-        </label>
+    <div
+      ref={selectRef}
+      className={classNames(
+        styles.select,
+        styles[size],
+        {
+          [styles.open]: isOpen,
+          [styles.disabled]: disabled,
+          [styles.bordered]: bordered,
+          [styles.multiple]: isMultiple,
+          [styles.focused]: isOpen,
+        },
+        className
       )}
+      style={style}
+      onClick={() => !disabled && setIsOpen(!isOpen)}
+      onKeyDown={handleKeyDown}
+      onBlur={onBlur}
+      onFocus={onFocus}
+      tabIndex={disabled ? -1 : 0}
+      role="combobox"
+      aria-expanded={isOpen}
+      aria-haspopup="listbox"
+      aria-disabled={disabled}
+    >
+      <div className={styles.selector}>
+        <div className={styles.selectionContainer}>
+          {isMultiple ? (
+            <div className={styles.selectionOverflow}>
+              {Array.isArray(displayValue) && displayValue.map((label, index) => {
+                const tagValue = Array.isArray(currentValue) ? currentValue[index] : '';
+                return (
+                  <span key={tagValue} className={styles.selectionItem}>
+                    <span className={styles.selectionItemContent}>{label}</span>
+                    <button
+                      type="button"
+                      className={styles.selectionItemRemove}
+                      onClick={(e) => handleRemoveTag(tagValue, e)}
+                      aria-label={`Remove ${label}`}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  </span>
+                );
+              })}
 
-      <div
-        ref={selectRef}
-        className={selectClasses}
-        onClick={handleToggle}
-        onKeyDown={handleKeyDown}
-        tabIndex={disabled ? -1 : 0}
-        role="combobox"
-        aria-expanded={isOpen}
-        aria-haspopup="listbox"
-        aria-labelledby={label ? `${selectId}-label` : undefined}
-        data-testid={testId}
-      >
-        <div className={styles.valueContainer}>
-          {selectedOptions.length === 0 ? (
-            <span className={styles.placeholder}>{placeholder}</span>
-          ) : multiple ? (
-            <div className={styles.multiValue}>
-              {selectedOptions.slice(0, 2).map(option => (
-                <span key={option.value} className={styles.tag}>
-                  {option.icon && <span className={styles.tagIcon}>{option.icon}</span>}
-                  {option.label}
-                  <button
-                    type="button"
-                    className={styles.tagRemove}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOptionSelect(option);
-                    }}
-                    aria-label={`Remove ${option.label}`}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-              {selectedOptions.length > 2 && (
-                <span className={styles.moreCount}>
-                  +{selectedOptions.length - 2} more
-                </span>
+              {showSearch && (
+                <div className={styles.selectionSearch}>
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    className={styles.selectionSearchInput}
+                    disabled={disabled}
+                    style={{ width: Math.max(searchValue.length * 8 + 20, 20) }}
+                  />
+                </div>
               )}
             </div>
           ) : (
-            <div className={styles.singleValue}>
-              {selectedOptions[0].icon && (
-                <span className={styles.valueIcon}>{selectedOptions[0].icon}</span>
+            <>
+              {showSearch && isOpen ? (
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  className={styles.selectionSearchInput}
+                  placeholder={displayValue || placeholder}
+                  disabled={disabled}
+                  autoFocus
+                />
+              ) : (
+                <span className={styles.selectionText}>
+                  {displayValue || <span className={styles.placeholder}>{placeholder}</span>}
+                </span>
               )}
-              {selectedOptions[0].label}
-            </div>
+            </>
           )}
         </div>
 
-        <div className={styles.indicators}>
+        <div className={styles.selectionActions}>
           {loading && (
-            <div className={styles.loadingSpinner} />
+            <span className={styles.loadingIcon}>
+              <svg className={styles.spinner} width="14" height="14" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" strokeDasharray="31.416" strokeDashoffset="31.416">
+                  <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
+                  <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
+                </circle>
+              </svg>
+            </span>
           )}
 
-          {clearable && selectedOptions.length > 0 && !loading && (
+          {showClear && (
             <button
               type="button"
-              className={styles.clearButton}
+              className={styles.clearIcon}
               onClick={handleClear}
               aria-label="Clear selection"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
+              {clearIcon || (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              )}
             </button>
           )}
 
-          <div className={styles.dropdownIndicator}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="6,9 12,15 18,9"/>
-            </svg>
-          </div>
-        </div>
-
-        <div className={dropdownClasses} style={{ maxHeight }}>
-          {searchable && (
-            <div className={styles.searchContainer}>
-              <input
-                ref={searchInputRef}
-                type="text"
-                className={styles.searchInput}
-                placeholder="Search options..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
-          )}
-
-          <div className={styles.optionsList} role="listbox">
-            {filteredOptions.length === 0 ? (
-              <div className={styles.noOptions}>
-                {searchTerm ? 'No options found' : 'No options available'}
-              </div>
-            ) : (
-              filteredOptions.map(option => {
-                const isSelected = multiple
-                  ? Array.isArray(currentValue) && currentValue.includes(option.value)
-                  : currentValue === option.value;
-
-                return (
-                  <div
-                    key={option.value}
-                    className={classNames(
-                      styles.option,
-                      {
-                        [styles.selected]: isSelected,
-                        [styles.disabled]: option.disabled,
-                      }
-                    )}
-                    onClick={() => handleOptionSelect(option)}
-                    role="option"
-                    aria-selected={isSelected}
-                  >
-                    {multiple && (
-                      <div className={styles.checkbox}>
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          readOnly
-                          tabIndex={-1}
-                        />
-                      </div>
-                    )}
-
-                    {option.icon && (
-                      <span className={styles.optionIcon}>{option.icon}</span>
-                    )}
-
-                    <div className={styles.optionContent}>
-                      <div className={styles.optionLabel}>{option.label}</div>
-                      {option.description && (
-                        <div className={styles.optionDescription}>
-                          {option.description}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })
+          <span className={classNames(styles.arrow, { [styles.open]: isOpen })}>
+            {suffixIcon || (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="6,9 12,15 18,9" />
+              </svg>
             )}
-          </div>
+          </span>
         </div>
       </div>
 
-      {(errorMessage || helperText) && (
-        <div className={classNames(
-          styles.helperText,
-          { [styles.errorText]: hasError }
-        )}>
-          {errorMessage || helperText}
+      {isOpen && (
+        <div
+          ref={dropdownRef}
+          className={classNames(styles.dropdown, dropdownClassName)}
+          style={{
+            width: popupMatchSelectWidth ? '100%' : 'auto',
+            maxHeight: listHeight,
+          }}
+        >
+          <div className={styles.dropdownInner}>
+            {filteredOptions.length > 0 ? (
+              <ul className={styles.optionList} role="listbox">
+                {filteredOptions.map((option, index) => (
+                  <li
+                    key={option.value}
+                    className={classNames(styles.option, {
+                      [styles.optionSelected]: isMultiple
+                        ? Array.isArray(currentValue) && currentValue.includes(option.value)
+                        : currentValue === option.value,
+                      [styles.optionDisabled]: option.disabled,
+                      [styles.optionFocused]: index === focusedIndex,
+                    })}
+                    onClick={() => handleSelect(option)}
+                    role="option"
+                    aria-selected={
+                      isMultiple
+                        ? Array.isArray(currentValue) && currentValue.includes(option.value)
+                        : currentValue === option.value
+                    }
+                    aria-disabled={option.disabled}
+                  >
+                    <div className={styles.optionContent}>
+                      <span className={styles.optionLabel}>{option.label}</span>
+                      {isMultiple && Array.isArray(currentValue) && currentValue.includes(option.value) && (
+                        <span className={styles.optionCheck}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="20,6 9,17 4,12" />
+                          </svg>
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className={styles.notFound}>
+                {notFoundContent}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
   );
 };
-
-export default Select;

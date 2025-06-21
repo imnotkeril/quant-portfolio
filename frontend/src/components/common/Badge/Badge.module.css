@@ -1,56 +1,106 @@
-/**
- * Badge Styles for Wild Market Capital
- */
-
-.container {
+/* src/components/common/Badge/Badge.module.css */
+.badgeWrapper {
   position: relative;
   display: inline-block;
+  line-height: 1;
 }
 
 .badge {
   position: absolute;
   top: 0;
   right: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-family);
+  transform: translate(50%, -50%);
+  transform-origin: 100% 0%;
+  z-index: 10;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  color: var(--color-text-dark);
   font-weight: var(--font-weight-medium);
-  line-height: 1;
+  font-size: var(--font-size-caption);
+  font-family: var(--font-family);
+  line-height: 20px;
   white-space: nowrap;
   text-align: center;
   background-color: var(--color-negative);
-  color: var(--color-text-light);
-  border: 2px solid var(--color-background);
-  border-radius: 50px;
+  border-radius: 10px;
+  border: 1px solid var(--color-background);
   box-shadow: 0 0 0 1px var(--color-background);
-  transform: translate(50%, -50%);
-  transform-origin: 100% 0%;
+  animation: badgeZoomIn 0.15s ease-out;
 }
 
-.badge.standalone {
-  position: static;
-  transform: none;
-  margin: 0;
+@keyframes badgeZoomIn {
+  from {
+    opacity: 0;
+    transform: translate(50%, -50%) scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: translate(50%, -50%) scale(1);
+  }
 }
 
-/* Sizes */
-.small {
-  min-width: 12px;
-  height: 12px;
-  padding: 0 4px;
-  font-size: 10px;
-}
-
-.default {
+.badge.small {
   min-width: 16px;
   height: 16px;
-  padding: 0 6px;
-  font-size: var(--font-size-caption);
+  padding: 0 4px;
+  font-size: 10px;
+  line-height: 16px;
+  border-radius: 8px;
 }
 
-/* Dot badge */
-.dot {
+.badge.dot {
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  padding: 0;
+  border-radius: 50%;
+  background-color: var(--color-negative);
+}
+
+.badge.small.dot {
+  width: 6px;
+  height: 6px;
+  min-width: 6px;
+}
+
+.badge.multiple {
+  padding: 0 4px;
+}
+
+.badge.small.multiple {
+  padding: 0 3px;
+}
+
+/* Standalone badge */
+.badgeStandalone {
+  display: inline-block;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  color: var(--color-text-dark);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-caption);
+  font-family: var(--font-family);
+  line-height: 20px;
+  white-space: nowrap;
+  text-align: center;
+  background-color: var(--color-negative);
+  border-radius: 10px;
+  border: 1px solid transparent;
+  vertical-align: middle;
+}
+
+.badgeStandalone.small {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+  line-height: 16px;
+  border-radius: 8px;
+}
+
+.badgeStandalone.dot {
   width: 8px;
   height: 8px;
   min-width: 8px;
@@ -58,133 +108,288 @@
   border-radius: 50%;
 }
 
-.dot.small {
+.badgeStandalone.small.dot {
   width: 6px;
   height: 6px;
   min-width: 6px;
 }
 
-/* Status badges */
-.statusSuccess {
-  background-color: var(--color-positive);
-  color: var(--color-text-dark);
+.badgeStandalone.multiple {
+  padding: 0 4px;
 }
 
-.statusProcessing {
-  background-color: var(--color-accent);
-  color: var(--color-text-light);
+.badgeStandalone.small.multiple {
+  padding: 0 3px;
 }
 
-.statusError {
-  background-color: var(--color-negative);
-  color: var(--color-text-light);
-}
-
-.statusWarning {
-  background-color: var(--color-neutral-2);
-  color: var(--color-text-dark);
-}
-
-.statusDefault {
-  background-color: var(--color-neutral-gray);
-  color: var(--color-text-dark);
-}
-
-/* Status badge with text */
-.statusBadge {
+/* Status badge */
+.badgeStatus {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-xs);
   font-family: var(--font-family);
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-regular);
-  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+  line-height: 1;
 }
 
-.statusDot {
-  width: 6px;
-  height: 6px;
+.badgeStatus.small {
+  font-size: var(--font-size-caption);
+  gap: 4px;
+}
+
+.badgeStatus::before {
+  content: '';
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-.statusSuccess .statusDot {
+.badgeStatus.small::before {
+  width: 6px;
+  height: 6px;
+}
+
+.badgeStatusText {
+  color: var(--color-text-light);
+}
+
+/* Status colors */
+.success {
+  background-color: var(--color-positive);
+  border-color: var(--color-positive);
+}
+
+.badgeStatus.success::before {
   background-color: var(--color-positive);
 }
 
-.statusProcessing .statusDot {
-  background-color: var(--color-accent);
+.processing {
+  background-color: var(--color-neutral-1);
+  border-color: var(--color-neutral-1);
 }
 
-.statusError .statusDot {
-  background-color: var(--color-negative);
+.badgeStatus.processing::before {
+  background-color: var(--color-neutral-1);
+  animation: processingPulse 1.2s ease-in-out infinite;
 }
 
-.statusWarning .statusDot {
-  background-color: var(--color-neutral-2);
-}
-
-.statusDefault .statusDot {
-  background-color: var(--color-neutral-gray);
-}
-
-.statusText {
-  line-height: 1;
-}
-
-/* Processing animation */
-.statusProcessing .statusDot {
-  animation: processing 1.5s infinite ease-in-out;
-}
-
-@keyframes processing {
+@keyframes processingPulse {
   0%, 100% {
     opacity: 1;
-    transform: scale(1);
   }
   50% {
     opacity: 0.5;
-    transform: scale(1.2);
   }
 }
 
-/* Hover effects for interactive badges */
-.container:hover .badge {
-  transform: translate(50%, -50%) scale(1.1);
-  transition: transform var(--transition-fast);
+.default {
+  background-color: var(--color-neutral-gray);
+  border-color: var(--color-neutral-gray);
 }
 
-.standalone:hover {
-  transform: scale(1.05);
-  transition: transform var(--transition-fast);
+.badgeStatus.default::before {
+  background-color: var(--color-neutral-gray);
+}
+
+.error {
+  background-color: var(--color-negative);
+  border-color: var(--color-negative);
+}
+
+.badgeStatus.error::before {
+  background-color: var(--color-negative);
+}
+
+.warning {
+  background-color: var(--color-neutral-2);
+  border-color: var(--color-neutral-2);
+  color: var(--color-text-dark);
+}
+
+.badgeStatus.warning::before {
+  background-color: var(--color-neutral-2);
+}
+
+/* Positioned variations */
+.badge.success,
+.badge.processing,
+.badge.default,
+.badge.error,
+.badge.warning,
+.badgeStandalone.success,
+.badgeStandalone.processing,
+.badgeStandalone.default,
+.badgeStandalone.error,
+.badgeStandalone.warning {
+  /* Colors already defined above */
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .badge {
+    min-width: 18px;
+    height: 18px;
+    font-size: 9px;
+    line-height: 18px;
+    border-radius: 9px;
+  }
+
+  .badge.small {
+    min-width: 14px;
+    height: 14px;
+    font-size: 8px;
+    line-height: 14px;
+    border-radius: 7px;
+  }
+
+  .badge.dot {
+    width: 6px;
+    height: 6px;
+    min-width: 6px;
+  }
+
+  .badge.small.dot {
+    width: 4px;
+    height: 4px;
+    min-width: 4px;
+  }
+
+  .badgeStandalone {
+    min-width: 18px;
+    height: 18px;
+    font-size: 9px;
+    line-height: 18px;
+    border-radius: 9px;
+  }
+
+  .badgeStandalone.small {
+    min-width: 14px;
+    height: 14px;
+    font-size: 8px;
+    line-height: 14px;
+    border-radius: 7px;
+  }
+
+  .badgeStatus {
+    font-size: var(--font-size-caption);
+  }
+
+  .badgeStatus.small {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .badge,
+  .badgeStandalone {
+    transform: scale(0.9);
+  }
+
+  .badge {
+    transform: translate(50%, -50%) scale(0.9);
+  }
 }
 
 /* High contrast mode */
-@media (prefers-contrast: more) {
-  .badge {
-    border-width: 3px;
+@media (prefers-contrast: high) {
+  .badge,
+  .badgeStandalone {
+    border-width: 2px;
+    border-color: var(--color-background) !important;
     box-shadow: 0 0 0 2px var(--color-background);
   }
 
-  .statusBadge {
-    font-weight: var(--font-weight-semi-bold);
+  .success {
+    background-color: #4caf50;
+  }
+
+  .error {
+    background-color: #f44336;
+  }
+
+  .warning {
+    background-color: #ff9800;
+    color: var(--color-background);
+  }
+
+  .processing {
+    background-color: #2196f3;
+  }
+
+  .default {
+    background-color: #757575;
   }
 }
 
-/* Reduced motion support */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .statusProcessing .statusDot {
+  .badge {
     animation: none;
   }
 
-  .container:hover .badge,
-  .standalone:hover {
-    transform: none;
-    transition: none;
+  .badgeStatus.processing::before {
+    animation: none;
+    opacity: 1;
   }
 }
 
-/* Custom positioning utilities */
-.badge[style*="transform: translate("] {
-  /* Custom offset styles will override default positioning */
+/* RTL support */
+[dir="rtl"] .badge {
+  right: auto;
+  left: 0;
+  transform: translate(-50%, -50%);
+  transform-origin: 0% 0%;
+}
+
+/* Focus states for interactive badges */
+.badgeWrapper:focus .badge,
+.badgeStandalone:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+/* Custom badge colors */
+.badge[style*="background-color"],
+.badgeStandalone[style*="background-color"] {
+  color: var(--color-text-dark);
+}
+
+.badge[style*="background-color"]:not([style*="color"]),
+.badgeStandalone[style*="background-color"]:not([style*="color"]) {
+  color: white;
+}
+
+/* Zero state styling */
+.badge[title="0"],
+.badgeStandalone[title="0"] {
+  opacity: 0.7;
+}
+
+/* Large numbers optimization */
+.badge.multiple[title*="+"],
+.badgeStandalone.multiple[title*="+"] {
+  font-size: 8px;
+  padding: 0 2px;
+}
+
+.badge.small.multiple[title*="+"],
+.badgeStandalone.small.multiple[title*="+"] {
+  font-size: 7px;
+  padding: 0 1px;
+}
+
+/* Print styles */
+@media print {
+  .badge,
+  .badgeStandalone,
+  .badgeStatus {
+    background: transparent !important;
+    color: black !important;
+    border: 1px solid black !important;
+  }
+
+  .badgeStatus::before {
+    background: black !important;
+  }
 }

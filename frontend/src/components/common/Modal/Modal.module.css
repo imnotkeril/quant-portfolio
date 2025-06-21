@@ -1,310 +1,326 @@
-/**
- * Modal Styles for Wild Market Capital
- */
-
-.backdrop {
+/* src/components/common/Modal/Modal.module.css */
+.modalRoot {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(13, 16, 21, 0.8);
-  backdrop-filter: blur(5px);
-  z-index: var(--z-index-modal-backdrop);
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity var(--transition-medium), visibility var(--transition-medium);
-  padding: var(--spacing-m);
+  padding: var(--spacing-l);
+  overflow-y: auto;
+  z-index: var(--z-modal);
+  animation: fadeIn 0.2s ease-out;
 }
 
-.backdrop.show {
-  opacity: 1;
-  visibility: visible;
+.modalRoot.hidden {
+  display: none;
+}
+
+.modalRoot.centered {
+  align-items: center;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modalWrap {
+  position: relative;
+  top: var(--spacing-xxl);
+  animation: slideIn 0.3s ease-out;
+}
+
+.centered .modalWrap {
+  top: 0;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .modal {
   position: relative;
-  background-color: var(--color-background);
+  background-color: rgba(42, 46, 57, 0.95);
   border: 1px solid var(--color-divider);
   border-radius: var(--border-radius-m);
   box-shadow: var(--shadow-large);
-  max-width: 90vw;
-  max-height: 90vh;
+  backdrop-filter: blur(8px);
   display: flex;
   flex-direction: column;
-  opacity: 0;
-  transform: scale(0.95) translateY(20px);
-  transition: opacity var(--transition-medium), transform var(--transition-medium);
-  outline: none;
+  max-height: calc(100vh - 2 * var(--spacing-l));
   overflow: hidden;
+  margin: 0 auto;
 }
 
-.backdrop.show .modal {
-  opacity: 1;
-  transform: scale(1) translateY(0);
-}
-
-/* Modal Sizes */
-.small {
-  width: 400px;
-}
-
-.medium {
-  width: 600px;
-}
-
-.large {
-  width: 800px;
-}
-
-.xlarge {
-  width: 1000px;
-}
-
-.fullscreen {
-  width: 100vw;
-  height: 100vh;
-  max-width: 100vw;
-  max-height: 100vh;
-  border-radius: 0;
-  margin: 0;
-}
-
-/* Modal Variants */
-.side {
-  position: fixed;
-  top: 0;
-  right: 0;
-  height: 100vh;
-  max-height: 100vh;
-  width: 400px;
-  max-width: 90vw;
-  margin: 0;
-  border-radius: 0;
-  transform: translateX(100%);
-  transition: transform var(--transition-medium);
-}
-
-.side.show {
-  transform: translateX(0);
-}
-
-.backdrop.side {
-  justify-content: flex-end;
-  align-items: stretch;
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
-
+/* Header */
 .header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--spacing-m);
+  padding: var(--spacing-l) var(--spacing-l) 0;
   border-bottom: 1px solid var(--color-divider);
-  background-color: var(--color-background);
   flex-shrink: 0;
 }
 
 .title {
-  margin: 0;
+  font-family: var(--font-family);
   font-size: var(--font-size-h2);
   font-weight: var(--font-weight-semi-bold);
-  color: var(--color-text-light);
   line-height: var(--line-height-h2);
+  color: var(--color-text-light);
+  margin: 0;
+  padding-bottom: var(--spacing-m);
 }
 
+/* Close button */
 .closeButton {
+  position: absolute;
+  top: var(--spacing-m);
+  right: var(--spacing-m);
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--color-neutral-gray);
+  cursor: pointer;
+  border-radius: var(--border-radius-s);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: none;
-  border: none;
-  border-radius: var(--border-radius-s);
-  color: var(--color-neutral-gray);
-  cursor: pointer;
   transition: all var(--transition-fast);
-  padding: 0;
+  z-index: 1;
 }
 
 .closeButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
   color: var(--color-text-light);
-  background-color: var(--color-divider-20);
 }
 
-.closeButton:active {
-  background-color: var(--color-divider-40);
-  transform: scale(0.95);
+.closeButton:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
 }
 
+/* Body */
 .body {
-  flex: 1;
-  padding: var(--spacing-m);
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.footer {
-  flex-shrink: 0;
-  padding: var(--spacing-m);
-  border-top: 1px solid var(--color-divider);
-  background-color: var(--color-background);
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: var(--spacing-s);
-}
-
-/* Confirm Modal Variant */
-.confirm .body {
-  text-align: center;
   padding: var(--spacing-l);
+  flex: 1;
+  overflow-y: auto;
+  color: var(--color-text-light);
+  font-family: var(--font-family);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
 }
 
-.confirm .title {
-  text-align: center;
-  margin-bottom: var(--spacing-s);
-}
-
-/* Animation keyframes */
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes modalFadeOut {
-  from {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: scale(0.95) translateY(20px);
-  }
-}
-
-@keyframes sideSlideIn {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes sideSlideOut {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(100%);
-  }
-}
-
-/* Scrollbar styling for modal body */
 .body::-webkit-scrollbar {
-  width: var(--scrollbar-width);
+  width: 6px;
 }
 
 .body::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
+  background: rgba(42, 46, 57, 0.3);
+  border-radius: 3px;
 }
 
 .body::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
-  border-radius: var(--scrollbar-width);
+  background: var(--color-accent);
+  border-radius: 3px;
 }
 
 .body::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover);
+  background: var(--color-hover);
 }
 
-/* Responsive behavior */
+/* Footer */
+.footer {
+  padding: var(--spacing-m) var(--spacing-l) var(--spacing-l);
+  border-top: 1px solid var(--color-divider);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-s);
+  flex-shrink: 0;
+  background-color: rgba(42, 46, 57, 0.7);
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
-  .backdrop {
+  .modalRoot {
     padding: var(--spacing-s);
+    align-items: flex-end;
   }
 
-  .modal:not(.side):not(.fullscreen) {
+  .modalWrap {
+    top: 0;
     width: 100%;
-    max-width: 100%;
+  }
+
+  .modal {
+    width: 100% !important;
+    height: auto;
+    max-height: 90vh;
+    border-radius: var(--border-radius-m) var(--border-radius-m) 0 0;
     margin: 0;
   }
 
-  .small,
-  .medium,
-  .large,
-  .xlarge {
-    width: 100%;
-  }
-
-  .side {
-    width: 100%;
-    max-width: 100%;
-  }
-
   .header {
-    padding: var(--spacing-s) var(--spacing-m);
+    padding: var(--spacing-m) var(--spacing-m) 0;
   }
 
   .body {
-    padding: var(--spacing-s) var(--spacing-m);
+    padding: var(--spacing-m);
   }
 
   .footer {
-    padding: var(--spacing-s) var(--spacing-m);
-    flex-direction: column;
-    gap: var(--spacing-xs);
+    padding: var(--spacing-s) var(--spacing-m) var(--spacing-m);
+    flex-direction: column-reverse;
+    gap: var(--spacing-s);
   }
 
-  .footer > * {
+  .footer button {
     width: 100%;
+  }
+
+  .closeButton {
+    top: var(--spacing-s);
+    right: var(--spacing-s);
+  }
+
+  .title {
+    font-size: var(--font-size-h3);
+    padding-right: var(--spacing-xl);
   }
 }
 
-/* High contrast mode support */
-@media (prefers-contrast: more) {
+@media (max-width: 480px) {
+  .modalRoot {
+    padding: 0;
+  }
+
   .modal {
-    border-width: 2px;
+    width: 100% !important;
+    height: 100vh !important;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .body {
+    padding: var(--spacing-s);
   }
 
   .header {
-    border-bottom-width: 2px;
+    padding: var(--spacing-s) var(--spacing-s) 0;
   }
 
   .footer {
-    border-top-width: 2px;
+    padding: var(--spacing-s);
+  }
+
+  .title {
+    font-size: var(--font-size-body);
+    font-weight: var(--font-weight-semi-bold);
   }
 }
 
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .backdrop,
+/* High contrast mode */
+@media (prefers-contrast: high) {
   .modal {
-    transition: none;
+    border-width: 2px;
+    background-color: var(--color-background);
   }
 
-  .backdrop.show .modal {
-    transform: none;
+  .closeButton {
+    border: 1px solid var(--color-text-light);
   }
 
-  .side {
+  .header,
+  .footer {
+    border-color: var(--color-text-light);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .modalRoot {
+    animation: none;
+  }
+
+  .modalWrap {
+    animation: none;
+  }
+
+  .closeButton {
     transition: none;
   }
+}
+
+/* Focus management */
+.modal:focus {
+  outline: none;
+}
+
+/* Dark theme specific adjustments */
+@media (prefers-color-scheme: dark) {
+  .modalRoot {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+
+  .modal {
+    background-color: rgba(13, 16, 21, 0.98);
+    border-color: var(--color-divider);
+  }
+}
+
+/* Animation variants for different screen sizes */
+@media (max-width: 768px) {
+  @keyframes slideIn {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
+
+/* Loading state for buttons in footer */
+.footer button[aria-busy="true"] {
+  pointer-events: none;
+}
+
+/* Ensure proper stacking order */
+.modal * {
+  box-sizing: border-box;
+}
+
+/* Handle long content in title */
+.title {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Improve accessibility for screen readers */
+.modal[aria-hidden="true"] {
+  display: none;
+}
+
+/* Custom scrollbar for modal body */
+.body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) rgba(42, 46, 57, 0.3);
 }

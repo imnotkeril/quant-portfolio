@@ -1,288 +1,225 @@
-/**
- * Pagination Component
- * Navigate through pages of content with various display options
- */
-import React from 'react';
+// src/components/common/Pagination/Pagination.tsx
+import React, { useMemo, useCallback } from 'react';
 import classNames from 'classnames';
+import { Select } from '../Select/Select';
 import styles from './Pagination.module.css';
 
-export type PaginationSize = 'small' | 'default' | 'large';
-
 interface PaginationProps {
-  current?: number;
+  current: number;
   total: number;
-  pageSize?: number;
-  size?: PaginationSize;
-  disabled?: boolean;
-  hideOnSinglePage?: boolean;
+  pageSize: number;
   showSizeChanger?: boolean;
   showQuickJumper?: boolean;
   showTotal?: (total: number, range: [number, number]) => React.ReactNode;
-  showLessItems?: boolean;
-  simple?: boolean;
-  responsive?: boolean;
   onChange?: (page: number, pageSize: number) => void;
   onShowSizeChange?: (current: number, size: number) => void;
-  pageSizeOptions?: string[];
   className?: string;
-  style?: React.CSSProperties;
-  'data-testid'?: string;
+  size?: 'small' | 'default';
+  disabled?: boolean;
+  hideOnSinglePage?: boolean;
+  pageSizeOptions?: string[];
+  showLessItems?: boolean;
 }
 
+const defaultPageSizeOptions = ['10', '20', '50', '100'];
+
 export const Pagination: React.FC<PaginationProps> = ({
-  current = 1,
+  current,
   total,
-  pageSize = 10,
-  size = 'default',
-  disabled = false,
-  hideOnSinglePage = false,
+  pageSize,
   showSizeChanger = false,
   showQuickJumper = false,
   showTotal,
-  showLessItems = false,
-  simple = false,
-  responsive = false,
   onChange,
   onShowSizeChange,
-  pageSizeOptions = ['10', '20', '50', '100'],
   className,
-  style,
-  'data-testid': testId,
+  size = 'default',
+  disabled = false,
+  hideOnSinglePage = false,
+  pageSizeOptions = defaultPageSizeOptions,
+  showLessItems = false,
 }) => {
-  const totalPages = Math.ceil(total / pageSize);
-  const startIndex = (current - 1) * pageSize + 1;
-  const endIndex = Math.min(current * pageSize, total);
+  const totalPages = useMemo(() => Math.ceil(total / pageSize), [total, pageSize]);
 
-  // Don't render if should hide on single page
-  if (hideOnSinglePage && totalPages <= 1) {
-    return null;
-  }
+  const startIndex = useMemo(() => (current - 1) * pageSize + 1, [current, pageSize]);
+  const endIndex = useMemo(() => Math.min(current * pageSize, total), [current, pageSize, total]);
 
-  const handlePageChange = (page: number) => {
-    if (disabled || page === current || page < 1 || page > totalPages) {
-      return;
-    }
-    onChange?.(page, pageSize);
-  };
-
-  const handleSizeChange = (newSize: number) => {
-    if (disabled) return;
-
-    const newTotalPages = Math.ceil(total / newSize);
-    let newPage = current;
-
-    // Adjust current page if it exceeds new total pages
-    if (current > newTotalPages) {
-      newPage = newTotalPages;
-    }
-
-    onChange?.(newPage, newSize);
-    onShowSizeChange?.(newPage, newSize);
-  };
-
-  const handleQuickJump = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      const target = event.target as HTMLInputElement;
-      const page = parseInt(target.value, 10);
-
-      if (!isNaN(page)) {
-        handlePageChange(Math.max(1, Math.min(page, totalPages)));
-        target.value = '';
-      }
-    }
-  };
-
-  const getPageNumbers = (): (number | string)[] => {
+  // Generate page numbers to show
+  const pageNumbers = useMemo(() => {
     const pages: (number | string)[] = [];
     const maxVisible = showLessItems ? 5 : 7;
 
     if (totalPages <= maxVisible) {
-      // Show all pages if total is small
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Always show first page
-      pages.push(1);
+      const half = Math.floor(maxVisible / 2);
+      let start = Math.max(1, current - half);
+      let end = Math.min(totalPages, start + maxVisible - 1);
 
-      let startPage = Math.max(2, current - 2);
-      let endPage = Math.min(totalPages - 1, current + 2);
-
-      // Adjust range to show more pages around current
-      if (current <= 3) {
-        endPage = Math.min(totalPages - 1, 5);
-      } else if (current >= totalPages - 2) {
-        startPage = Math.max(2, totalPages - 4);
+      if (end - start < maxVisible - 1) {
+        start = Math.max(1, end - maxVisible + 1);
       }
 
-      // Add ellipsis after first page if needed
-      if (startPage > 2) {
-        pages.push('...');
+      if (start > 1) {
+        pages.push(1);
+        if (start > 2) {
+          pages.push('...');
+        }
       }
 
-      // Add middle pages
-      for (let i = startPage; i <= endPage; i++) {
+      for (let i = start; i <= end; i++) {
         pages.push(i);
       }
 
-      // Add ellipsis before last page if needed
-      if (endPage < totalPages - 1) {
-        pages.push('...');
-      }
-
-      // Always show last page
-      if (totalPages > 1) {
+      if (end < totalPages) {
+        if (end < totalPages - 1) {
+          pages.push('...');
+        }
         pages.push(totalPages);
       }
     }
 
     return pages;
-  };
+  }, [current, totalPages, showLessItems]);
 
-  const renderSimplePagination = () => (
-    <div className={styles.simple}>
-      <button
-        className={styles.prevButton}
-        onClick={() => handlePageChange(current - 1)}
-        disabled={disabled || current <= 1}
-        aria-label="Previous page"
-      >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <polyline points="15,18 9,12 15,6" />
-        </svg>
-      </button>
+  const handlePageChange = useCallback((page: number) => {
+    if (page < 1 || page > totalPages || page === current || disabled) {
+      return;
+    }
+    onChange?.(page, pageSize);
+  }, [current, totalPages, pageSize, onChange, disabled]);
 
-      <span className={styles.pageInfo}>
-        {current} / {totalPages}
-      </span>
+  const handleSizeChange = useCallback((size: string) => {
+    const newSize = parseInt(size, 10);
+    if (newSize !== pageSize && !disabled) {
+      onShowSizeChange?.(current, newSize);
+    }
+  }, [current, pageSize, onShowSizeChange, disabled]);
 
-      <button
-        className={styles.nextButton}
-        onClick={() => handlePageChange(current + 1)}
-        disabled={disabled || current >= totalPages}
-        aria-label="Next page"
-      >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <polyline points="9,18 15,12 9,6" />
-        </svg>
-      </button>
-    </div>
-  );
-
-  const renderPageNumbers = () => {
-    const pages = getPageNumbers();
-
-    return pages.map((page, index) => {
-      if (page === '...') {
-        return (
-          <span key={`ellipsis-${index}`} className={styles.ellipsis}>
-            •••
-          </span>
-        );
+  const handleQuickJump = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      const target = e.target as HTMLInputElement;
+      const page = parseInt(target.value, 10);
+      if (page && page >= 1 && page <= totalPages) {
+        handlePageChange(page);
+        target.value = '';
       }
+    }
+  }, [handlePageChange, totalPages]);
 
-      const pageNumber = page as number;
-      const isActive = pageNumber === current;
-
-      return (
-        <button
-          key={pageNumber}
-          className={classNames(styles.pageButton, {
-            [styles.active]: isActive,
-          })}
-          onClick={() => handlePageChange(pageNumber)}
-          disabled={disabled}
-          aria-label={`Go to page ${pageNumber}`}
-          aria-current={isActive ? 'page' : undefined}
-        >
-          {pageNumber}
-        </button>
-      );
-    });
-  };
-
-  const paginationClasses = classNames(
-    styles.pagination,
-    styles[size],
-    {
-      [styles.disabled]: disabled,
-      [styles.simple]: simple,
-      [styles.responsive]: responsive,
-    },
-    className
-  );
+  // Hide if only one page and hideOnSinglePage is true
+  if (hideOnSinglePage && totalPages <= 1) {
+    return null;
+  }
 
   return (
-    <div className={paginationClasses} style={style} data-testid={testId}>
+    <div className={classNames(styles.pagination, styles[size], className)}>
       {showTotal && (
         <div className={styles.total}>
           {showTotal(total, [startIndex, endIndex])}
         </div>
       )}
 
-      {simple ? renderSimplePagination() : (
-        <div className={styles.pages}>
-          <button
-            className={styles.prevButton}
-            onClick={() => handlePageChange(current - 1)}
-            disabled={disabled || current <= 1}
-            aria-label="Previous page"
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="15,18 9,12 15,6" />
-            </svg>
-            <span className={styles.prevText}>Previous</span>
-          </button>
+      <div className={styles.paginationControls}>
+        {/* Previous button */}
+        <button
+          type="button"
+          className={classNames(styles.pageButton, styles.prevButton, {
+            [styles.disabled]: current <= 1 || disabled,
+          })}
+          onClick={() => handlePageChange(current - 1)}
+          disabled={current <= 1 || disabled}
+          aria-label="Previous page"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="15,18 9,12 15,6" />
+          </svg>
+        </button>
 
-          {renderPageNumbers()}
+        {/* Page numbers */}
+        <div className={styles.pageNumbers}>
+          {pageNumbers.map((page, index) => {
+            if (page === '...') {
+              return (
+                <span key={`ellipsis-${index}`} className={styles.ellipsis}>
+                  ...
+                </span>
+              );
+            }
 
-          <button
-            className={styles.nextButton}
-            onClick={() => handlePageChange(current + 1)}
-            disabled={disabled || current >= totalPages}
-            aria-label="Next page"
-          >
-            <span className={styles.nextText}>Next</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="9,18 15,12 9,6" />
-            </svg>
-          </button>
+            const pageNum = page as number;
+            return (
+              <button
+                key={pageNum}
+                type="button"
+                className={classNames(styles.pageButton, {
+                  [styles.active]: pageNum === current,
+                  [styles.disabled]: disabled,
+                })}
+                onClick={() => handlePageChange(pageNum)}
+                disabled={disabled}
+                aria-label={`Page ${pageNum}`}
+                aria-current={pageNum === current ? 'page' : undefined}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
         </div>
-      )}
 
+        {/* Next button */}
+        <button
+          type="button"
+          className={classNames(styles.pageButton, styles.nextButton, {
+            [styles.disabled]: current >= totalPages || disabled,
+          })}
+          onClick={() => handlePageChange(current + 1)}
+          disabled={current >= totalPages || disabled}
+          aria-label="Next page"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="9,18 15,12 9,6" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Page size changer */}
       {showSizeChanger && (
         <div className={styles.sizeChanger}>
-          <select
-            value={pageSize}
-            onChange={(e) => handleSizeChange(Number(e.target.value))}
-            className={styles.sizeSelect}
+          <span className={styles.sizeLabel}>Show</span>
+          <Select
+            value={pageSize.toString()}
+            onChange={handleSizeChange}
             disabled={disabled}
-          >
-            {pageSizeOptions.map(option => (
-              <option key={option} value={option}>
-                {option} / page
-              </option>
-            ))}
-          </select>
+            size={size}
+            className={styles.sizeSelect}
+            options={pageSizeOptions.map(option => ({
+              value: option,
+              label: option,
+            }))}
+          />
+          <span className={styles.sizeLabel}>per page</span>
         </div>
       )}
 
+      {/* Quick jumper */}
       {showQuickJumper && (
         <div className={styles.quickJumper}>
-          <span>Go to</span>
+          <span className={styles.jumperLabel}>Go to</span>
           <input
             type="number"
-            className={styles.jumpInput}
             min={1}
             max={totalPages}
+            className={styles.jumperInput}
             onKeyDown={handleQuickJump}
             disabled={disabled}
             placeholder="Page"
+            aria-label="Go to page"
           />
         </div>
       )}
     </div>
   );
 };
-
-export default Pagination;

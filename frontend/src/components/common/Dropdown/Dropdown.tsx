@@ -1,25 +1,8 @@
-/**
- * Dropdown Component
- * Universal dropdown menu with customizable trigger and content
- */
-import React, { useState, useRef, cloneElement } from 'react';
+// src/components/common/Dropdown/Dropdown.tsx
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import classNames from 'classnames';
-import { useClickOutside } from '../../../hooks/useClickOutside';
+import { Button } from '../Button/Button';
 import styles from './Dropdown.module.css';
-
-export type DropdownPlacement =
-  | 'bottom-start'
-  | 'bottom-end'
-  | 'bottom-center'
-  | 'top-start'
-  | 'top-end'
-  | 'top-center'
-  | 'left-start'
-  | 'left-end'
-  | 'right-start'
-  | 'right-end';
-
-export type DropdownTrigger = 'click' | 'hover' | 'contextMenu';
 
 export interface DropdownMenuItem {
   key: string;
@@ -28,239 +11,350 @@ export interface DropdownMenuItem {
   disabled?: boolean;
   danger?: boolean;
   divider?: boolean;
-  onClick?: (event: React.MouseEvent) => void;
   children?: DropdownMenuItem[];
+  onClick?: (item: DropdownMenuItem) => void;
 }
 
 interface DropdownProps {
-  children: React.ReactElement;
-  overlay?: React.ReactNode;
-  menu?: DropdownMenuItem[];
-  placement?: DropdownPlacement;
-  trigger?: DropdownTrigger | DropdownTrigger[];
+  menu: DropdownMenuItem[];
+  trigger?: 'hover' | 'click' | 'contextMenu';
+  placement?: 'bottom' | 'bottomLeft' | 'bottomRight' | 'top' | 'topLeft' | 'topRight' | 'left' | 'right';
+  arrow?: boolean;
+  disabled?: boolean;
   visible?: boolean;
   onVisibleChange?: (visible: boolean) => void;
-  disabled?: boolean;
-  arrow?: boolean;
-  offset?: [number, number];
-  className?: string;
+  overlay?: React.ReactNode;
   overlayClassName?: string;
-  'data-testid'?: string;
+  overlayStyle?: React.CSSProperties;
+  getPopupContainer?: () => HTMLElement;
+  autoAdjustOverflow?: boolean;
+  destroyPopupOnHide?: boolean;
+  children: React.ReactElement;
+  className?: string;
+  dropdownRender?: (menu: React.ReactNode) => React.ReactNode;
 }
 
 export const Dropdown: React.FC<DropdownProps> = ({
-  children,
-  overlay,
   menu,
-  placement = 'bottom-start',
   trigger = 'click',
+  placement = 'bottomLeft',
+  arrow = false,
+  disabled = false,
   visible,
   onVisibleChange,
-  disabled = false,
-  arrow = true,
-  offset = [0, 4],
-  className,
+  overlay,
   overlayClassName,
-  'data-testid': testId,
+  overlayStyle,
+  getPopupContainer,
+  autoAdjustOverflow = true,
+  destroyPopupOnHide = false,
+  children,
+  className,
+  dropdownRender,
 }) => {
   const [internalVisible, setInternalVisible] = useState(false);
-  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
-
+  const [position, setPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout>();
 
   const isVisible = visible !== undefined ? visible : internalVisible;
-  const triggers = Array.isArray(trigger) ? trigger : [trigger];
 
-  // Handle click outside
-  useClickOutside(dropdownRef, () => {
-    if (isVisible && triggers.includes('click')) {
-      handleVisibleChange(false);
+  // Calculate position based on placement
+  const calculatePosition = useCallback(() => {
+    if (!triggerRef.current || !menuRef.current) return;
+
+    const triggerRect = triggerRef.current.getBoundingClientRect();
+    const menuRect = menuRef.current.getBoundingClientRect();
+    const viewport = {
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
+
+    let top = 0;
+    let left = 0;
+
+    // Calculate base position
+    switch (placement) {
+      case 'bottom':
+        top = triggerRect.bottom + 4;
+        left = triggerRect.left + (triggerRect.width - menuRect.width) / 2;
+        break;
+      case 'bottomLeft':
+        top = triggerRect.bottom + 4;
+        left = triggerRect.left;
+        break;
+      case 'bottomRight':
+        top = triggerRect.bottom + 4;
+        left = triggerRect.right - menuRect.width;
+        break;
+      case 'top':
+        top = triggerRect.top - menuRect.height - 4;
+        left = triggerRect.left + (triggerRect.width - menuRect.width) / 2;
+        break;
+      case 'topLeft':
+        top = triggerRect.top - menuRect.height - 4;
+        left = triggerRect.left;
+        break;
+      case 'topRight':
+        top = triggerRect.top - menuRect.height - 4;
+        left = triggerRect.right - menuRect.width;
+        break;
+      case 'left':
+        top = triggerRect.top + (triggerRect.height - menuRect.height) / 2;
+        left = triggerRect.left - menuRect.width - 4;
+        break;
+      case 'right':
+        top = triggerRect.top + (triggerRect.height - menuRect.height) / 2;
+        left = triggerRect.right + 4;
+        break;
     }
-  }, isVisible);
 
-  const handleVisibleChange = (newVisible: boolean) => {
+    // Auto adjust overflow
+    if (autoAdjustOverflow) {
+      if (left < 8) left = 8;
+      if (left + menuRect.width > viewport.width - 8) {
+        left = viewport.width - menuRect.width - 8;
+      }
+      if (top < 8) top = 8;
+      if (top + menuRect.height > viewport.height - 8) {
+        top = Math.max(8, triggerRect.top - menuRect.height - 4);
+      }
+    }
+
+    setPosition({ top, left });
+  }, [placement, autoAdjustOverflow]);
+
+  // Handle visibility change
+  const handleVisibleChange = useCallback((newVisible: boolean) => {
     if (disabled) return;
 
     if (visible === undefined) {
       setInternalVisible(newVisible);
     }
     onVisibleChange?.(newVisible);
-  };
+  }, [disabled, visible, onVisibleChange]);
 
-  const handleClick = (event: React.MouseEvent) => {
-    if (disabled || !triggers.includes('click')) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    handleVisibleChange(!isVisible);
-  };
-
-  const handleMouseEnter = () => {
-    if (disabled || !triggers.includes('hover')) return;
-
-    if (hoverTimeout) {
-      clearTimeout(hoverTimeout);
-      setHoverTimeout(null);
+  // Handle trigger events
+  const handleTriggerClick = useCallback(() => {
+    if (trigger === 'click') {
+      handleVisibleChange(!isVisible);
     }
+  }, [trigger, isVisible, handleVisibleChange]);
 
-    handleVisibleChange(true);
-  };
+  const handleTriggerMouseEnter = useCallback(() => {
+    if (trigger === 'hover') {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      handleVisibleChange(true);
+    }
+  }, [trigger, handleVisibleChange]);
 
-  const handleMouseLeave = () => {
-    if (disabled || !triggers.includes('hover')) return;
+  const handleTriggerMouseLeave = useCallback(() => {
+    if (trigger === 'hover') {
+      timeoutRef.current = setTimeout(() => {
+        handleVisibleChange(false);
+      }, 100);
+    }
+  }, [trigger, handleVisibleChange]);
 
-    const timeout = setTimeout(() => {
-      handleVisibleChange(false);
-    }, 100);
+  const handleMenuMouseEnter = useCallback(() => {
+    if (trigger === 'hover' && timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  }, [trigger]);
 
-    setHoverTimeout(timeout);
-  };
+  const handleMenuMouseLeave = useCallback(() => {
+    if (trigger === 'hover') {
+      timeoutRef.current = setTimeout(() => {
+        handleVisibleChange(false);
+      }, 100);
+    }
+  }, [trigger, handleVisibleChange]);
 
-  const handleContextMenu = (event: React.MouseEvent) => {
-    if (disabled || !triggers.includes('contextMenu')) return;
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    if (trigger === 'contextMenu') {
+      e.preventDefault();
+      setPosition({ top: e.clientY, left: e.clientX });
+      handleVisibleChange(true);
+    }
+  }, [trigger, handleVisibleChange]);
 
-    event.preventDefault();
-    handleVisibleChange(true);
-  };
-
-  const handleMenuItemClick = (item: DropdownMenuItem, event: React.MouseEvent) => {
+  // Handle menu item click
+  const handleMenuItemClick = useCallback((item: DropdownMenuItem) => {
     if (item.disabled) return;
 
-    item.onClick?.(event);
+    item.onClick?.(item);
 
-    // Close dropdown after item click unless it has children
     if (!item.children) {
       handleVisibleChange(false);
     }
-  };
+  }, [handleVisibleChange]);
 
-  const renderMenuItem = (item: DropdownMenuItem, level: number = 0): React.ReactNode => {
-    if (item.divider) {
-      return <div key={item.key} className={styles.divider} />;
+  // Handle keyboard navigation
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    switch (e.key) {
+      case 'Escape':
+        handleVisibleChange(false);
+        break;
+      case 'Enter':
+      case ' ':
+        if (!isVisible) {
+          e.preventDefault();
+          handleVisibleChange(true);
+        }
+        break;
     }
+  }, [isVisible, handleVisibleChange]);
 
-    const itemClasses = classNames(
-      styles.menuItem,
-      {
-        [styles.disabled]: item.disabled,
-        [styles.danger]: item.danger,
-        [styles.hasChildren]: item.children && item.children.length > 0,
+  // Click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(event.target as Node)
+      ) {
+        handleVisibleChange(false);
       }
-    );
+    };
+
+    if (isVisible) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isVisible, handleVisibleChange]);
+
+  // Calculate position when visible
+  useEffect(() => {
+    if (isVisible) {
+      // Use setTimeout to ensure DOM is updated
+      setTimeout(calculatePosition, 0);
+      window.addEventListener('resize', calculatePosition);
+      window.addEventListener('scroll', calculatePosition);
+
+      return () => {
+        window.removeEventListener('resize', calculatePosition);
+        window.removeEventListener('scroll', calculatePosition);
+      };
+    }
+  }, [isVisible, calculatePosition]);
+
+  // Cleanup timeout
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Render menu items
+  const renderMenuItem = (item: DropdownMenuItem, index: number) => {
+    if (item.divider) {
+      return <div key={item.key || index} className={styles.divider} />;
+    }
 
     return (
       <div
-        key={item.key}
-        className={itemClasses}
-        onClick={(e) => handleMenuItemClick(item, e)}
+        key={item.key || index}
+        className={classNames(styles.menuItem, {
+          [styles.disabled]: item.disabled,
+          [styles.danger]: item.danger,
+        })}
+        onClick={() => handleMenuItemClick(item)}
+        role="menuitem"
+        tabIndex={item.disabled ? -1 : 0}
+        aria-disabled={item.disabled}
       >
-        <div className={styles.menuItemContent}>
-          {item.icon && (
-            <span className={styles.menuItemIcon}>{item.icon}</span>
-          )}
-          <span className={styles.menuItemLabel}>{item.label}</span>
-          {item.children && item.children.length > 0 && (
-            <span className={styles.menuItemArrow}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="9,18 15,12 9,6" />
-              </svg>
-            </span>
-          )}
-        </div>
-
-        {item.children && item.children.length > 0 && (
-          <div className={styles.submenu}>
-            {item.children.map(child => renderMenuItem(child, level + 1))}
-          </div>
+        {item.icon && <span className={styles.menuItemIcon}>{item.icon}</span>}
+        <span className={styles.menuItemLabel}>{item.label}</span>
+        {item.children && (
+          <span className={styles.menuItemArrow}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="9,18 15,12 9,6" />
+            </svg>
+          </span>
         )}
       </div>
     );
   };
 
-  const renderOverlay = () => {
+  const renderMenu = () => {
     if (overlay) {
       return overlay;
     }
 
-    if (menu && menu.length > 0) {
-      return (
-        <div className={styles.menu}>
-          {menu.map(item => renderMenuItem(item))}
-        </div>
-      );
-    }
+    const menuContent = (
+      <div className={styles.menu} role="menu">
+        {menu.map(renderMenuItem)}
+      </div>
+    );
 
-    return null;
+    return dropdownRender ? dropdownRender(menuContent) : menuContent;
   };
 
-  const overlayContent = renderOverlay();
-  if (!overlayContent) {
-    return children;
-  }
-
-  const dropdownClasses = classNames(
-    styles.dropdown,
-    {
-      [styles.disabled]: disabled,
-    },
-    className
-  );
-
-  const overlayClasses = classNames(
-    styles.overlay,
-    styles[placement],
-    {
-      [styles.visible]: isVisible,
-      [styles.withArrow]: arrow,
-    },
-    overlayClassName
-  );
-
   // Clone trigger element and add event handlers
-  const triggerElement = cloneElement(children, {
+  const triggerElement = React.cloneElement(children, {
     ref: triggerRef,
     onClick: (e: React.MouseEvent) => {
       children.props.onClick?.(e);
-      handleClick(e);
+      handleTriggerClick();
+    },
+    onMouseEnter: (e: React.MouseEvent) => {
+      children.props.onMouseEnter?.(e);
+      handleTriggerMouseEnter();
+    },
+    onMouseLeave: (e: React.MouseEvent) => {
+      children.props.onMouseLeave?.(e);
+      handleTriggerMouseLeave();
     },
     onContextMenu: (e: React.MouseEvent) => {
       children.props.onContextMenu?.(e);
       handleContextMenu(e);
     },
-    onMouseEnter: (e: React.MouseEvent) => {
-      children.props.onMouseEnter?.(e);
-      handleMouseEnter();
+    onKeyDown: (e: React.KeyboardEvent) => {
+      children.props.onKeyDown?.(e);
+      handleKeyDown(e);
     },
-    onMouseLeave: (e: React.MouseEvent) => {
-      children.props.onMouseLeave?.(e);
-      handleMouseLeave();
-    },
+    className: classNames(children.props.className, {
+      [styles.triggerActive]: isVisible,
+    }),
+    'aria-haspopup': 'menu',
+    'aria-expanded': isVisible,
   });
 
   return (
-    <div
-      ref={dropdownRef}
-      className={dropdownClasses}
-      data-testid={testId}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
+    <div className={classNames(styles.dropdown, className)}>
       {triggerElement}
 
-      <div
-        className={overlayClasses}
-        style={{
-          transform: `translate(${offset[0]}px, ${offset[1]}px)`,
-        }}
-      >
-        {arrow && <div className={styles.arrow} />}
-        <div className={styles.overlayContent}>
-          {overlayContent}
+      {isVisible && (!destroyPopupOnHide || isVisible) && (
+        <div
+          ref={dropdownRef}
+          className={classNames(styles.dropdownMenu, overlayClassName)}
+          style={{
+            ...overlayStyle,
+            position: 'fixed',
+            top: position.top,
+            left: position.left,
+            zIndex: 1000,
+          }}
+          onMouseEnter={handleMenuMouseEnter}
+          onMouseLeave={handleMenuMouseLeave}
+        >
+          <div ref={menuRef}>
+            {arrow && (
+              <div
+                className={classNames(styles.arrow, styles[`arrow-${placement}`])}
+              />
+            )}
+            {renderMenu()}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
-
-export default Dropdown;
