@@ -1,6 +1,9 @@
 /**
  * Card Component Export
  */
-export { Card, CardHeader, CardBody, CardFooter, type CardSize } from './Card';
-export type { default as CardProps } from './Card';
-export { default } from './Card';
+import CardComponent, { CardHeader, CardBody, CardFooter } from './Card';
+
+// Export the main component as both named and default
+export const Card = CardComponent;
+export { CardHeader, CardBody, CardFooter };
+export default CardComponent;

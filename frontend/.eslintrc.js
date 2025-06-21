@@ -1,30 +1,45 @@
 module.exports = {
-  parser: '@typescript-eslint/parser',
+  env: {
+    browser: true,
+    es2021: true,
+    node: true,
+  },
+  extends: [
+    'eslint:recommended',
+    'react-app',
+    'react-app/jest',
+  ],
   parserOptions: {
-    ecmaVersion: 2021,
-    sourceType: 'module',
     ecmaFeatures: {
       jsx: true,
     },
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+  },
+  plugins: [
+    'react',
+  ],
+  rules: {
+    // React specific rules
+    'react/react-in-jsx-scope': 'off',
+    'react/prop-types': 'off',
+
+    // General rules
+    'no-console': 'warn',
+    'no-debugger': 'error',
+    'prefer-const': 'error',
+    'no-var': 'error',
+    'no-unused-vars': 'warn',
   },
   settings: {
     react: {
       version: 'detect',
     },
   },
-  extends: [
-    'plugin:react/recommended',
-    'plugin:react-hooks/recommended',
-    'plugin:@typescript-eslint/recommended',
-    'prettier',
-    'plugin:prettier/recommended',
+  ignorePatterns: [
+    'build/',
+    'dist/',
+    'node_modules/',
+    '*.config.js',
   ],
-  rules: {
-    'react/react-in-jsx-scope': 'off',
-    'react/prop-types': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'warn',
-    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-    'prettier/prettier': ['error', {}, { usePrettierrc: true }],
-  },
-}
+};

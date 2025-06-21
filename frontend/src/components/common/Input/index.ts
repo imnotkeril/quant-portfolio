@@ -1,6 +1,8 @@
 /**
  * Input Component Export
  */
-export { Input, type InputType, type InputSize } from './Input';
-export type { default as InputProps } from './Input';
-export { default } from './Input';
+import InputComponent from './Input';
+
+// Export the main component as both named and default
+export const Input = InputComponent;
+export default InputComponent;

@@ -1,7 +1,10 @@
 /**
- * Risk state types
+ * Risk Management Actions
+ * Async actions for risk analysis operations
  */
-import {
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import { riskService } from '../../services/risk/riskService';
+import type {
   VaRResponse,
   StressTestResponse,
   MonteCarloResponse,
@@ -9,69 +12,7 @@ import {
   RiskContributionResponse,
 } from '../../types/risk';
 
-/**
- * Risk analysis types
- */
-export type RiskAnalysisType =
-  | 'var'
-  | 'stress_test'
-  | 'monte_carlo'
-  | 'drawdowns'
-  | 'risk_contribution';
-
-/**
- * Risk state interface
- */
-export interface RiskState {
-  // VaR analysis
-  varResults: Record<string, VaRResponse>;
-  varLoading: boolean;
-  varError: string | null;
-
-  // Stress test analysis
-  stressTestResults: Record<string, StressTestResponse>;
-  stressTestLoading: boolean;
-  stressTestError: string | null;
-
-  // Monte Carlo simulation
-  monteCarloResults: Record<string, MonteCarloResponse>;
-  monteCarloLoading: boolean;
-  monteCarloError: string | null;
-
-  // Drawdown analysis
-  drawdownResults: Record<string, DrawdownResponse>;
-  drawdownsLoading: boolean;
-  drawdownsError: string | null;
-
-  // Risk contribution analysis
-  riskContributionResults: Record<string, RiskContributionResponse>;
-  riskContributionLoading: boolean;
-  riskContributionError: string | null;
-
-  // UI state
-  selectedPortfolioId: string | null;
-  selectedAnalysisType: RiskAnalysisType | null;
-  selectedScenarios: string[];
-  selectedConfidenceLevels: number[];
-  selectedTimeHorizons: number[];
-  riskParams: RiskParams;
-}
-
-/**
- * Risk analysis parameters
- */
-export interface RiskParams {
-  confidenceLevel: number;
-  timeHorizon: number;
-  simulations: number;
-  startDate: string | null;
-  endDate: string | null;
-  riskFreeRate: number;
-}
-
-/**
- * Calculate VaR payload
- */
+// Action payload types
 export interface CalculateVaRPayload {
   portfolioId: string;
   returns: Record<string, number[]>;
@@ -81,33 +22,15 @@ export interface CalculateVaRPayload {
   method?: 'parametric' | 'historical' | 'monte_carlo';
 }
 
-/**
- * Perform stress test payload
- */
 export interface PerformStressTestPayload {
   portfolioId: string;
   scenario: string;
   returns?: Record<string, any>;
   portfolioValue?: number;
-  dataFetcher?: any;
-  currentPortfolioTickers?: string[];
-  weights?: Record<string, number>;
-  portfolioData?: Record<string, any>;
   testType?: 'historical' | 'custom' | 'advanced';
-
-  // For custom stress test
   shocks?: Record<string, number>;
-
-  // For advanced stress test
-  customShocks?: Record<string, any>;
-  assetSectors?: Record<string, string>;
-  correlationAdjusted?: boolean;
-  useBeta?: boolean;
 }
 
-/**
- * Perform Monte Carlo payload
- */
 export interface PerformMonteCarloPayload {
   portfolioId: string;
   returns: Record<string, any>;
@@ -117,17 +40,11 @@ export interface PerformMonteCarloPayload {
   annualContribution?: number;
 }
 
-/**
- * Analyze drawdowns payload
- */
 export interface AnalyzeDrawdownsPayload {
   portfolioId: string;
   returns: Record<string, any>;
 }
 
-/**
- * Calculate risk contribution payload
- */
 export interface CalculateRiskContributionPayload {
   portfolioId: string;
   returns: Record<string, any>;
@@ -135,43 +52,117 @@ export interface CalculateRiskContributionPayload {
 }
 
 /**
- * Set risk params payload
+ * Calculate Value at Risk (VaR)
  */
-export interface SetRiskParamsPayload {
-  params: Partial<RiskParams>;
-}
+export const calculateVaR = createAsyncThunk<
+  VaRResponse,
+  CalculateVaRPayload,
+  { rejectValue: string }
+>(
+  'risk/calculateVaR',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await riskService.calculateVaR(payload);
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Failed to calculate VaR'
+      );
+    }
+  }
+);
 
 /**
- * Set selected portfolio payload
+ * Perform stress test analysis
  */
-export interface SetSelectedPortfolioPayload {
-  portfolioId: string | null;
-}
+export const performStressTest = createAsyncThunk<
+  StressTestResponse,
+  PerformStressTestPayload,
+  { rejectValue: string }
+>(
+  'risk/performStressTest',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await riskService.performStressTest(payload);
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Failed to perform stress test'
+      );
+    }
+  }
+);
 
 /**
- * Set selected analysis type payload
+ * Perform Monte Carlo simulation
  */
-export interface SetSelectedAnalysisTypePayload {
-  analysisType: RiskAnalysisType | null;
-}
+export const performMonteCarlo = createAsyncThunk<
+  MonteCarloResponse,
+  PerformMonteCarloPayload,
+  { rejectValue: string }
+>(
+  'risk/performMonteCarlo',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await riskService.performMonteCarlo(payload);
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Failed to perform Monte Carlo simulation'
+      );
+    }
+  }
+);
 
 /**
- * Set selected scenarios payload
+ * Analyze portfolio drawdowns
  */
-export interface SetSelectedScenariosPayload {
-  scenarios: string[];
-}
+export const analyzeDrawdowns = createAsyncThunk<
+  DrawdownResponse,
+  AnalyzeDrawdownsPayload,
+  { rejectValue: string }
+>(
+  'risk/analyzeDrawdowns',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await riskService.analyzeDrawdowns(payload);
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Failed to analyze drawdowns'
+      );
+    }
+  }
+);
 
 /**
- * Set selected confidence levels payload
+ * Calculate risk contribution analysis
  */
-export interface SetSelectedConfidenceLevelsPayload {
-  levels: number[];
-}
+export const calculateRiskContribution = createAsyncThunk<
+  RiskContributionResponse,
+  CalculateRiskContributionPayload,
+  { rejectValue: string }
+>(
+  'risk/calculateRiskContribution',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await riskService.calculateRiskContribution(payload);
+      return response;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Failed to calculate risk contribution'
+      );
+    }
+  }
+);
 
-/**
- * Set selected time horizons payload
- */
-export interface SetSelectedTimeHorizonsPayload {
-  horizons: number[];
-}
+// Export all action creators
+export const riskActions = {
+  calculateVaR,
+  performStressTest,
+  performMonteCarlo,
+  analyzeDrawdowns,
+  calculateRiskContribution,
+};
+
+export default riskActions;

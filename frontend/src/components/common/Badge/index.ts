@@ -1,6 +1,8 @@
 /**
  * Badge Component Export
  */
-export { Badge, type BadgeStatus, type BadgeSize } from './Badge';
-export type { default as BadgeProps } from './Badge';
-export { default } from './Badge';
+import BadgeComponent from './Badge';
+
+// Export the main component as both named and default
+export const Badge = BadgeComponent;
+export default BadgeComponent;

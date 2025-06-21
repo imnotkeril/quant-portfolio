@@ -274,3 +274,7 @@ export const formatRatio = (value: number, precision: number = 3): string => {
 export const formatBasisPoints = (value: number): string => {
   return `${formatNumber(value * 10000, 0)} bps`;
 };
+
+ * Format file size (alias for formatBytes)
+ */
+export const formatFileSize = formatBytes;
