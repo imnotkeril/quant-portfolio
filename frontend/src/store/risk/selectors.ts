@@ -118,6 +118,23 @@ export const selectRiskParams = createSelector(
   (state) => state.riskParams
 );
 
+// Combined data selectors - БАЗОВЫЕ СЕЛЕКТОРЫ ДОЛЖНЫ БЫТЬ ОБЪЯВЛЕНЫ РАНЬШЕ
+export const selectRiskData = createSelector(
+  selectRiskState,
+  (state) => ({
+    varResults: state.varResults,
+    stressTestResults: state.stressTestResults,
+    monteCarloResults: state.monteCarloResults,
+    drawdownResults: state.drawdownResults,
+    riskContributionResults: state.riskContributionResults,
+  })
+);
+
+export const selectHasRiskData = createSelector(
+  selectRiskData,
+  (data) => Object.values(data).some(results => Object.keys(results).length > 0)
+);
+
 // Loading state selectors
 export const selectRiskLoading = createSelector(
   selectRiskState,
@@ -183,23 +200,6 @@ export const selectRiskContributionForPortfolio = (portfolioId: string) =>
     (results) => results[portfolioId]
   );
 
-// Combined data selectors
-export const selectRiskData = createSelector(
-  selectRiskState,
-  (state) => ({
-    varResults: state.varResults,
-    stressTestResults: state.stressTestResults,
-    monteCarloResults: state.monteCarloResults,
-    drawdownResults: state.drawdownResults,
-    riskContributionResults: state.riskContributionResults,
-  })
-);
-
-export const selectHasRiskData = createSelector(
-  selectRiskData,
-  (data) => Object.values(data).some(results => Object.keys(results).length > 0)
-);
-
 // Computed selectors
 export const selectRiskSummaryForPortfolio = (portfolioId: string) =>
   createSelector(
@@ -245,4 +245,25 @@ export const selectPortfoliosWithRiskData = createSelector(
       hasRiskContribution: !!data.riskContributionResults[portfolioId],
     }));
   }
+);
+
+// НЕДОСТАЮЩИЕ СЕЛЕКТОРЫ - добавляем в конец
+export const selectRiskMetrics = createSelector(
+  selectRiskData,
+  (data) => data
+);
+
+export const selectVaRData = createSelector(
+  selectVaRResults,
+  (results) => results
+);
+
+export const selectDrawdowns = createSelector(
+  selectDrawdownResults,
+  (results) => results
+);
+
+export const selectCorrelationMatrix = createSelector(
+  selectRiskData,
+  (data) => data.correlationMatrix || null
 );

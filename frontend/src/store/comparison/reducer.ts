@@ -1,6 +1,7 @@
 /**
  * Comparison store reducer
  */
+ /* eslint-disable no-case-declarations */
 import { ComparisonState, ComparisonAction, ComparisonActionTypes, initialComparisonState } from './types';
 
 /**

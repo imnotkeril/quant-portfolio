@@ -382,6 +382,15 @@ export const selectShouldRefreshScenarios = createSelector(
   }
 );
 
+export const selectScenarioResults = createSelector(
+  selectSimulationResults,
+  selectImpactResults,
+  (simulation, impact) => ({
+    simulation,
+    impact,
+  })
+);
+
 export const selectShouldRefreshImpact = (portfolioId: string) =>
   createSelector(
     selectCachedImpact(portfolioId),

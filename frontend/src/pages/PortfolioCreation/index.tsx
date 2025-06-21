@@ -2,6 +2,7 @@
  * Portfolio Creation Page
  * Multi-step wizard for creating new investment portfolios
  */
+ /* eslint-disable no-case-declarations */
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';

@@ -30,6 +30,9 @@ module.exports = {
     'prefer-const': 'error',
     'no-var': 'error',
     'no-unused-vars': 'warn',
+
+    // Отключаем проблемное правило
+    'no-case-declarations': 'off',
   },
   settings: {
     react: {

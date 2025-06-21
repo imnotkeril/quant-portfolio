@@ -25,7 +25,7 @@ import {
   selectHistoricalAnalogies,
   selectHistoricalContext,
   selectPatternMatches,
-  selectHistoricalLoading
+  selectAnyHistoricalLoading
 } from '../../store/historical/selectors';
 import { formatPercentage, formatDate } from '../../utils/formatters';
 import { ROUTES } from '../../constants/routes';
@@ -51,7 +51,7 @@ const HistoricalAnalogiesPage: React.FC = () => {
   const historicalAnalogies = useSelector(selectHistoricalAnalogies);
   const historicalContext = useSelector(selectHistoricalContext);
   const patternMatches = useSelector(selectPatternMatches);
-  const historicalLoading = useSelector(selectHistoricalLoading);
+  const historicalLoading = useSelector(selectAnyHistoricalLoading);
 
   // Local state
   const [selectedPortfolio, setSelectedPortfolio] = useState<string>('');

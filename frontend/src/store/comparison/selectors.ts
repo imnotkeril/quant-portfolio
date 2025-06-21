@@ -498,6 +498,11 @@ export const selectShouldRefreshComparison = (comparisonId: string) =>
     }
   );
 
+export const selectComparisonResults = createSelector(
+  selectActiveComparisonData,
+  (data) => data ? [data] : []
+);
+
 /**
  * Export data selectors
  */

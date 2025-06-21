@@ -25,7 +25,7 @@ import {
   selectReportTemplates,
   selectReportHistory,
   selectScheduledReports,
-  selectReportsLoading,
+  selectIsAnyLoading,
   selectCurrentReport
 } from '../../store/reports/selectors';
 import { formatDate } from '../../utils/formatters';

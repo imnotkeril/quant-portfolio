@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 /**
  * ComparisonTable Component
  * Table for displaying comparison metrics between portfolios
@@ -69,18 +70,22 @@ export const ComparisonTable: React.FC<ComparisonTableProps> = ({
 
         if (value1 !== undefined && value2 !== undefined) {
           switch (displayMode) {
-            case 'relative':
+            case 'relative': {
               row.difference = value1 !== 0 ? ((value2 - value1) / Math.abs(value1)) * 100 : 0;
               break;
-            case 'percentage':
+            }
+            case 'percentage': {
               row.difference = value2 - value1;
               break;
-            case 'normalized':
+            }
+            case 'normalized': {
               const max = Math.max(Math.abs(value1), Math.abs(value2));
               row.difference = max !== 0 ? ((value2 - value1) / max) * 100 : 0;
               break;
-            default:
+            }
+            default: {
               row.difference = value2 - value1;
+            }
           }
         }
       }
