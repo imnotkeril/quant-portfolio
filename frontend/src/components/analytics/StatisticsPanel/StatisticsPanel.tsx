@@ -3,7 +3,7 @@
  * Comprehensive statistical analysis panel with distribution metrics
  */
 import React, { useMemo } from 'react';
-import { Card } from '../../common/Card/Card';
+import Card from '../../common/Card/Card';
 import { MetricsTable, MetricItem } from '../MetricsTable/MetricsTable';
 import { MetricsCard, MetricsCardData } from '../MetricsCard/MetricsCard';
 import { LineChart, LineChartSeries } from '../../charts/LineChart/LineChart';

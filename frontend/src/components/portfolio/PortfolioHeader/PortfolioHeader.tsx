@@ -5,7 +5,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import { Button } from '../../common/Button';
-import { Badge } from '../../common/Badge';
+import Badge from '../../common/Badge';
 import { Select } from '../../common/Select';
 import { PortfolioListItem } from '../../../types/portfolio';
 import { PortfolioSort } from '../../../store/portfolio/types';

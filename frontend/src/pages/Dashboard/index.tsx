@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../../components/layout/PageContainer/PageContainer';
-import { Card } from '../../components/common/Card/Card';
+import Card from '../../components/common/Card/Card';
 import { Button } from '../../components/common/Button/Button';
 import { Select } from '../../components/common/Select/Select';
 import { PortfolioCard } from '../../components/portfolio/PortfolioCard/PortfolioCard';

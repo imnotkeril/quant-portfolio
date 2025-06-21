@@ -4,7 +4,7 @@
  */
 import React from 'react';
 import { Select } from '../../common/Select/Select';
-import { Card } from '../../common/Card/Card';
+import Card from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
 import styles from './BenchmarkSelector.module.css';
 

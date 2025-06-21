@@ -4,11 +4,11 @@
  */
 import React, { useState } from 'react';
 import classNames from 'classnames';
-import { Card } from '../../common/Card';
-import { Input } from '../../common/Input';
+import Card from '../../common/Card';
+import Input from '../../common/Input';
 import { Select } from '../../common/Select';
 import { Button } from '../../common/Button';
-import { Badge } from '../../common/Badge';
+import Badge from '../../common/Badge';
 import { PortfolioFilters as FilterType } from '../../../store/portfolio/types';
 import { formatDate } from '../../../utils/formatters';
 import styles from './PortfolioFilters.module.css';

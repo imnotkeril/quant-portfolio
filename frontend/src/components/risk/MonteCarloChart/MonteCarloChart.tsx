@@ -4,9 +4,9 @@
  */
 import React, { useState } from 'react';
 import classNames from 'classnames';
-import { Card } from '../../common/Card/Card';
+import Card from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
-import { Input } from '../../common/Input/Input';
+import Input from '../../common/Input/Input';
 import { LineChart } from '../../charts/LineChart/LineChart';
 import { BarChart } from '../../charts/BarChart/BarChart';
 import { ChartContainer } from '../../charts/ChartContainer/ChartContainer';

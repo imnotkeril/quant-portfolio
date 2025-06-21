@@ -7,7 +7,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { PageContainer } from '../../components/layout/PageContainer/PageContainer';
 import { SplitPane } from '../../components/layout/SplitPane/SplitPane';
-import { Card } from '../../components/common/Card/Card';
+import Card from '../../components/common/Card/Card';
 import { Button } from '../../components/common/Button/Button';
 import { Select } from '../../components/common/Select/Select';
 import { PortfolioHeader } from '../../components/portfolio/PortfolioHeader/PortfolioHeader';

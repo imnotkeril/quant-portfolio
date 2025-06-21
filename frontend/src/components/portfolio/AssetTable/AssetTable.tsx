@@ -6,7 +6,7 @@ import React from 'react';
 import classNames from 'classnames';
 import { Table, TableColumn } from '../../common/Table';
 import { Button } from '../../common/Button';
-import { Badge } from '../../common/Badge';
+import Badge from '../../common/Badge';
 import { Asset, AssetCreate } from '../../../types/portfolio';
 import { formatCurrency, formatPercentage, formatDate } from '../../../utils/formatters';
 import styles from './AssetTable.module.css';

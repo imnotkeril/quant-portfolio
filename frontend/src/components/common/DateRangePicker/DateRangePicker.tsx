@@ -3,7 +3,7 @@
  * Date range selection component
  */
 import React, { useState } from 'react';
-import { Input } from '../Input/Input';
+import Input from '../Input/Input';
 import styles from './DateRangePicker.module.css';
 
 interface DateRangePickerProps {

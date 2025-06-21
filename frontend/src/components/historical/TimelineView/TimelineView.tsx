@@ -3,10 +3,10 @@
  * Interactive timeline visualization for historical events
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { Card } from '../../common/Card/Card';
+import Card from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
-import { Input } from '../../common/Input/Input';
-import { Badge } from '../../common/Badge/Badge';
+import Input from '../../common/Input/Input';
+import Badge from '../../common/Badge/Badge';
 import { HistoricalEvent } from '../../../types/historical';
 import { formatDate } from '../../../utils/formatters';
 import styles from './TimelineView.module.css';

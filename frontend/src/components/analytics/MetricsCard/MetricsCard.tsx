@@ -4,7 +4,7 @@
  */
 import React from 'react';
 import classNames from 'classnames';
-import { Card } from '../../common/Card/Card';
+import Card from '../../common/Card/Card';
 import { formatPercentage, formatNumber, formatCurrency } from '../../../utils/formatters';
 import styles from './MetricsCard.module.css';
 

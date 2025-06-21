@@ -4,7 +4,7 @@
  */
 import React from 'react';
 import classNames from 'classnames';
-import { Card } from '../../components/common/Card/Card';
+import Card from '../../components/common/Card/Card';
 import { Button } from '../../components/common/Button/Button';
 import { DashboardWidget } from './DashboardWidget';
 import { Portfolio } from '../../types/portfolio';

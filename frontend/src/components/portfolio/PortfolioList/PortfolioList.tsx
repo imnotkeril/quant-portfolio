@@ -4,7 +4,7 @@
  */
 import React, { useState, useMemo } from 'react';
 import classNames from 'classnames';
-import { Input } from '../../common/Input';
+import Input from '../../common/Input';
 import { Button } from '../../common/Button';
 import { Select } from '../../common/Select';
 import { PortfolioCard } from '../PortfolioCard';

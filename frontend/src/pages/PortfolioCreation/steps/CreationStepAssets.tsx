@@ -3,7 +3,7 @@
  * Assets selection step for portfolio creation
  */
 import React, { useState, useEffect } from 'react';
-import { Card } from '../../../components/common/Card/Card';
+import Card from '../../../components/common/Card/Card';
 import { Button } from '../../../components/common/Button/Button';
 import { Modal } from '../../../components/common/Modal/Modal';
 import { AssetForm } from '../../../components/portfolio/AssetForm/AssetForm';

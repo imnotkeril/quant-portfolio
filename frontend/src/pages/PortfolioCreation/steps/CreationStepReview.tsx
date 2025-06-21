@@ -3,7 +3,7 @@
  * Review and confirm portfolio creation
  */
 import React from 'react';
-import { Card } from '../../../components/common/Card/Card';
+import Card from '../../../components/common/Card/Card';
 import { Button } from '../../../components/common/Button/Button';
 import { PieChart } from '../../../components/charts/PieChart/PieChart';
 import { AssetTable } from '../../../components/portfolio/AssetTable/AssetTable';

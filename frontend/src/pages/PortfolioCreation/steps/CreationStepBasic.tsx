@@ -3,8 +3,8 @@
  * Basic information step for portfolio creation
  */
 import React, { useState, useEffect } from 'react';
-import { Card } from '../../../components/common/Card/Card';
-import { Input } from '../../../components/common/Input/Input';
+import Card from '../../../components/common/Card/Card';
+import Input from '../../../components/common/Input/Input';
 import { Button } from '../../../components/common/Button/Button';
 import { validatePortfolio } from '../../../utils/validators';
 import styles from '../styles.module.css';

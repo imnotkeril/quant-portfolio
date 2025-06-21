@@ -5,7 +5,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import { Table, TableColumn } from '../../common/Table/Table';
-import { Card } from '../../common/Card/Card';
+import Card from '../../common/Card/Card';
 import { formatPercentage, formatNumber, formatCurrency } from '../../../utils/formatters';
 import styles from './MetricsTable.module.css';
 

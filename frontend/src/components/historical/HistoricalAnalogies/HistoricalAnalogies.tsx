@@ -3,8 +3,8 @@
  * Displays historical analogies and their similarity scores
  */
 import React, { useState } from 'react';
-import { Card } from '../../common/Card/Card';
-import { Badge } from '../../common/Badge/Badge';
+import Card from '../../common/Card/Card';
+import Badge from '../../common/Badge/Badge';
 import { Button } from '../../common/Button/Button';
 import { Table, TableColumn } from '../../common/Table/Table';
 import { BarChart } from '../../charts/BarChart/BarChart';

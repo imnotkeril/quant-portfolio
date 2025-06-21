@@ -3,7 +3,7 @@
  * Quick analysis insights panel
  */
 import React from 'react';
-import { Card } from '../../../components/common/Card/Card';
+import Card from '../../../components/common/Card/Card';
 import { MetricsCard } from '../../../components/analytics/MetricsCard/MetricsCard';
 import { Portfolio } from '../../../types/portfolio';
 import { PerformanceMetricsResponse, RiskMetricsResponse } from '../../../types/analytics';

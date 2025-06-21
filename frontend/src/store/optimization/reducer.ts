@@ -251,6 +251,15 @@ export const optimizationReducer = (
     default:
       return state;
   }
-};
 
+};
+export const setConstraints = (constraints: any) => ({
+  type: 'SET_CONSTRAINTS',
+  payload: constraints,
+});
+
+export const setSelectedMethod = (method: string) => ({
+  type: 'SET_SELECTED_METHOD',
+  payload: method,
+});
 export default optimizationReducer;

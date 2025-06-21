@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { PageContainer } from '../../components/layout/PageContainer/PageContainer';
-import { Card } from '../../components/common/Card/Card';
+import Card from '../../components/common/Card/Card';
 import { Button } from '../../components/common/Button/Button';
 import { Select } from '../../components/common/Select/Select';
 import { ComparisonDashboard } from '../../components/comparison/ComparisonDashboard/ComparisonDashboard';
@@ -18,7 +18,6 @@ import { LineChart } from '../../components/charts/LineChart/LineChart';
 import { BarChart } from '../../components/charts/BarChart/BarChart';
 import { ScatterChart } from '../../components/charts/ScatterChart/ScatterChart';
 import { usePortfolios } from '../../hooks/usePortfolios';
-import { useComparison } from '../../hooks/useComparison';
 import {
   selectPortfolios,
   selectPortfoliosLoading

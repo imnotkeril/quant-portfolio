@@ -4,9 +4,9 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Card } from '../../common/Card/Card';
+import Card from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
-import { Input } from '../../common/Input/Input';
+import Input from '../../common/Input/Input';
 import { Select } from '../../common/Select/Select';
 import { Checkbox } from '../../common/Checkbox/Checkbox';
 import { DateRangePicker } from '../../common/DateRangePicker';

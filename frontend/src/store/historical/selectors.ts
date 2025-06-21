@@ -36,11 +36,6 @@ export const selectPatternMatches = createSelector(
   }
 );
 
-// Current scenario key selector
-export const selectCurrentScenarioKey = createSelector(
-  selectHistoricalState,
-  (state) => state.currentScenarioKey
-);
 
 // Selected analogies selector
 export const selectSelectedAnalogies = createSelector(

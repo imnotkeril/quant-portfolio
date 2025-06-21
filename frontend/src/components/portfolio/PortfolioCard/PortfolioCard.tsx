@@ -4,9 +4,9 @@
  */
 import React from 'react';
 import classNames from 'classnames';
-import { Card } from '../../common/Card';
+import Card from '../../common/Card';
 import { Button } from '../../common/Button';
-import { Badge } from '../../common/Badge';
+import Badge from '../../common/Badge';
 import { PortfolioListItem } from '../../../types/portfolio';
 import { formatDate, formatNumber } from '../../../utils/formatters';
 import styles from './PortfolioCard.module.css';

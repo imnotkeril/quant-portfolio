@@ -4,10 +4,10 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Card } from '../../common/Card/Card';
+import Card from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
 import { Modal } from '../../common/Modal/Modal';
-import { Tabs } from '../../common/Tabs/Tabs';
+import Tabs from '../../common/Tabs/Tabs';
 import { LineChart } from '../../charts/LineChart/LineChart';
 import { PieChart } from '../../charts/PieChart/PieChart';
 import { BarChart } from '../../charts/BarChart/BarChart';

@@ -4,7 +4,7 @@
  */
 import React from 'react';
 import classNames from 'classnames';
-import { Card } from '../../components/common/Card/Card';
+import Card from '../../components/common/Card/Card';
 import styles from './styles.module.css';
 
 interface DashboardWidgetProps {

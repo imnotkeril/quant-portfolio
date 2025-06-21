@@ -4,14 +4,14 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Card } from '../../common/Card/Card';
+import Card from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
 import { Table } from '../../common/Table/Table';
 import { Modal } from '../../common/Modal/Modal';
 import { Select } from '../../common/Select/Select';
-import { Input } from '../../common/Input/Input';
+import Input from '../../common/Input/Input';
 import { Checkbox } from '../../common/Checkbox/Checkbox';
-import { Badge } from '../../common/Badge/Badge';
+import Badge from '../../common/Badge/Badge';
 import {
   loadScheduledReports,
   scheduleReport,
