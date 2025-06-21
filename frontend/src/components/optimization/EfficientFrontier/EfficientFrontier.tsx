@@ -13,7 +13,7 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
-import Card from '../../common/Card/Card';
+import { Card } from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
 import { COLORS } from '../../../constants/colors';
 import { EfficientFrontierResponse, EfficientFrontierPoint } from '../../../types/optimization';

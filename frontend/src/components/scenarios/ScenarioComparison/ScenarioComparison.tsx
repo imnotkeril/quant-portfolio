@@ -5,7 +5,7 @@
 import React, { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import classNames from 'classnames';
-import Card from '../../common/Card/Card';
+import { Card } from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
 import { Table, TableColumn } from '../../common/Table/Table';
 import { BarChart } from '../../charts/BarChart/BarChart';

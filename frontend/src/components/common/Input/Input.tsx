@@ -313,3 +313,5 @@ export const Input = forwardRef<InputRef, InputProps>(({
     </div>
   );
 });
+
+export default Input;

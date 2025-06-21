@@ -464,3 +464,5 @@ export const Tabs: React.FC<TabsProps> & { TabPane: typeof TabPane } = ({
 };
 
 Tabs.TabPane = TabPane;
+
+export default Tabs;

@@ -4,10 +4,10 @@
  */
 import React, { useMemo, useState } from 'react';
 import { LineChart, LineChartSeries } from '../../charts/LineChart/LineChart';
-import Card from '../../common/Card/Card';
+import { Card } from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
 import { Select } from '../../common/Select/Select';
-import Input from '../../common/Input/Input';
+import { Input } from '../../common/Input/Input';
 import { COLORS } from '../../../constants/colors';
 import { formatPercentage, formatNumber, formatDate } from '../../../utils/formatters';
 import { RollingMetricsResponse } from '../../../types/analytics';

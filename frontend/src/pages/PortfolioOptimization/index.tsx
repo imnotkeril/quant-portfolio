@@ -10,7 +10,7 @@ import { SplitPane } from '../../components/layout/SplitPane/SplitPane';
 import Card from '../../components/common/Card/Card';
 import { Button } from '../../components/common/Button/Button';
 import { Select } from '../../components/common/Select/Select';
-import Input from '../../components/common/Input/Input';
+import { Input } from '../../components/common/Input/Input';
 import { PortfolioHeader } from '../../components/portfolio/PortfolioHeader/PortfolioHeader';
 import { EfficientFrontier } from '../../components/optimization/EfficientFrontier/EfficientFrontier';
 import { WeightsTable } from '../../components/optimization/WeightsTable/WeightsTable';

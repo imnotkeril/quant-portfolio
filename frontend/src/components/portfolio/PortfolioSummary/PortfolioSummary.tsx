@@ -6,7 +6,7 @@ import React from 'react';
 import classNames from 'classnames';
 import Card from '../../common/Card';
 import { Button } from '../../common/Button';
-import Badge from '../../common/Badge';
+import { Badge } from '../../common/Badge';
 import { PieChart, PieChartDataPoint } from '../../charts/PieChart';
 import { Portfolio } from '../../../types/portfolio';
 import { formatCurrency, formatPercentage, formatDate, formatNumber } from '../../../utils/formatters';

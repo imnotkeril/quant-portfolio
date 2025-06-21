@@ -4,7 +4,7 @@
  */
 import React, { useMemo } from 'react';
 import { LineChart, LineChartSeries } from '../../charts/LineChart/LineChart';
-import Card from '../../common/Card/Card';
+import { Card } from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
 import { Select } from '../../common/Select/Select';
 import { COLORS } from '../../../constants/colors';

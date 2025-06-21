@@ -5,8 +5,8 @@
 import React, { useState, useRef } from 'react';
 import Card from '../../../components/common/Card/Card';
 import { Button } from '../../../components/common/Button/Button';
-import Input from '../../../components/common/Input/Input';
-import Tabs from '../../../components/common/Tabs/Tabs';
+import { Input } from '../../../components/common/Input/Input';
+import { Tabs } from '../../../components/common/Tabs/Tabs';
 import { TextPortfolioCreate } from '../../../types/portfolio';
 import styles from '../styles.module.css';
 

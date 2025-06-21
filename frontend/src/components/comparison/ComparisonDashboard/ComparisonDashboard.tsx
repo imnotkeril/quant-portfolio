@@ -5,10 +5,10 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import classNames from 'classnames';
-import Card from '../../common/Card/Card';
+import { Card } from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
 import { Select } from '../../common/Select/Select';
-import Tabs from '../../common/Tabs/Tabs';
+import { Tabs } from '../../common/Tabs/Tabs';
 import { PortfolioSelector } from '../PortfolioSelector/PortfolioSelector';
 import { ComparisonTable } from '../ComparisonTable/ComparisonTable';
 import { ComparisonChart } from '../ComparisonChart/ComparisonChart';

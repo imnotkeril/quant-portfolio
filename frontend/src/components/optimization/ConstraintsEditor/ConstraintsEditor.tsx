@@ -3,11 +3,11 @@
  * Visual editor for portfolio optimization constraints
  */
 import React, { useState, useEffect } from 'react';
-import Card from '../../common/Card/Card';
+import { Card } from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
-import Input from '../../common/Input/Input';
+import { Input } from '../../common/Input/Input';
 import { Table, TableColumn } from '../../common/Table/Table';
-import Badge from '../../common/Badge/Badge';
+import { Badge } from '../../common/Badge/Badge';
 import { Modal } from '../../common/Modal/Modal';
 import { formatPercentage } from '../../../utils/formatters';
 import styles from './ConstraintsEditor.module.css';

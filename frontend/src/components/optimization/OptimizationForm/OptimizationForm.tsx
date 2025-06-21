@@ -3,9 +3,9 @@
  * Form for configuring portfolio optimization parameters
  */
 import React, { useState, useEffect } from 'react';
-import Card from '../../common/Card/Card';
+import { Card } from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
-import Input from '../../common/Input/Input';
+import { Input } from '../../common/Input/Input';
 import { Modal } from '../../common/Modal/Modal';
 import { useOptimization } from '../../../hooks/useOptimization';
 import {

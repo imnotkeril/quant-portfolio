@@ -3,10 +3,10 @@
  * Compare multiple optimization results side by side
  */
 import React, { useState, useMemo } from 'react';
-import Card from '../../common/Card/Card';
+import { Card } from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
 import { Table, TableColumn } from '../../common/Table/Table';
-import Badge from '../../common/Badge/Badge';
+import { Badge } from '../../common/Badge/Badge';
 import { LineChart, LineChartSeries } from '../../charts/LineChart/LineChart';
 import { OptimizationResponse } from '../../../types/optimization';
 import { formatPercentage, formatNumber } from '../../../utils/formatters';

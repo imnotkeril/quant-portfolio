@@ -8,7 +8,7 @@ import { useLayout } from '../../../contexts/LayoutContext';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { Button } from '../../common/Button/Button';
 import { Dropdown } from '../../common/Dropdown/Dropdown';
-import Badge from '../../common/Badge/Badge';
+import { Badge } from '../../common/Badge/Badge';
 import styles from './Header.module.css';
 
 interface HeaderProps {

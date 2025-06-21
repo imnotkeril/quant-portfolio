@@ -4,10 +4,10 @@
  */
 import React, { useState, useMemo } from 'react';
 import classNames from 'classnames';
-import Card from '../../common/Card/Card';
+import { Card } from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
 import { Select } from '../../common/Select/Select';
-import Tabs from '../../common/Tabs/Tabs';
+import { Tabs } from '../../common/Tabs/Tabs';
 import { LineChart } from '../../charts/LineChart/LineChart';
 import { BarChart } from '../../charts/BarChart/BarChart';
 import { HeatmapChart } from '../../charts/HeatmapChart/HeatmapChart';

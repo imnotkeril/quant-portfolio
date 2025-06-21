@@ -4,10 +4,10 @@
  */
 import React, { useState } from 'react';
 import classNames from 'classnames';
-import Card from '../../common/Card/Card';
+import { Card } from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
 import { Select } from '../../common/Select/Select';
-import Input from '../../common/Input/Input';
+import { Input } from '../../common/Input/Input';
 import { BarChart } from '../../charts/BarChart/BarChart';
 import { COLORS } from '../../../constants/colors';
 import { VaRResponse } from '../../../types/risk';

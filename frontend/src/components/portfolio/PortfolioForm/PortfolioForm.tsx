@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import classNames from 'classnames';
 import Card from '../../common/Card';
-import Input from '../../common/Input';
+import { Input } from '../../common/Input';
 import { Button } from '../../common/Button';
 import { Modal } from '../../common/Modal';
 import { AssetTable } from '../AssetTable';

@@ -9,7 +9,7 @@ import { PageContainer } from '../../components/layout/PageContainer/PageContain
 import Card from '../../components/common/Card/Card';
 import { Button } from '../../components/common/Button/Button';
 import { Select } from '../../components/common/Select/Select';
-import Input from '../../components/common/Input/Input';
+import { Input } from '../../components/common/Input/Input';
 import { HistoricalContext } from '../../components/historical/HistoricalContext/HistoricalContext';
 import { HistoricalAnalogies } from '../../components/historical/HistoricalAnalogies/HistoricalAnalogies';
 import { TimelineView } from '../../components/historical/TimelineView/TimelineView';

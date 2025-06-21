@@ -3,8 +3,8 @@
  * Displays detailed historical context for a specific scenario
  */
 import React from 'react';
-import Card from '../../common/Card/Card';
-import Badge from '../../common/Badge/Badge';
+import { Card } from '../../common/Card/Card';
+import { Badge } from '../../common/Badge/Badge';
 import { Button } from '../../common/Button/Button';
 import { HistoricalContext as HistoricalContextType } from '../../../types/historical';
 import styles from './HistoricalContext.module.css';

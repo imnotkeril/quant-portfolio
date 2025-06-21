@@ -136,3 +136,4 @@ export const Badge: React.FC<BadgeProps> = ({
   // Return children only if badge is empty
   return hasChildren ? <span className={className} style={style}>{children}</span> : null;
 };
+export default Badge;

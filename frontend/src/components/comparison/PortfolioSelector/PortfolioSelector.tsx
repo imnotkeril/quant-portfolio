@@ -5,8 +5,8 @@
 import React, { useState } from 'react';
 import classNames from 'classnames';
 import { Button } from '../../common/Button/Button';
-import Card from '../../common/Card/Card';
-import Input from '../../common/Input/Input';
+import { Card } from '../../common/Card/Card';
+import { Input } from '../../common/Input/Input';
 import { Checkbox } from '../../common/Checkbox/Checkbox';
 import styles from './PortfolioSelector.module.css';
 

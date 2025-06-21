@@ -8,7 +8,7 @@ import classNames from 'classnames';
 import { useLayout } from '../../../contexts/LayoutContext';
 import { NAVIGATION_ITEMS } from '../../../constants/routes';
 import { Button } from '../../common/Button/Button';
-import Badge from '../../common/Badge/Badge';
+import { Badge } from '../../common/Badge/Badge';
 import styles from './Sidebar.module.css';
 
 interface SidebarProps {

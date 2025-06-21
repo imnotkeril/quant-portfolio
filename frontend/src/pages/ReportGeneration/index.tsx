@@ -9,7 +9,7 @@ import { PageContainer } from '../../components/layout/PageContainer/PageContain
 import Card from '../../components/common/Card/Card';
 import { Button } from '../../components/common/Button/Button';
 import { Select } from '../../components/common/Select/Select';
-import Input from '../../components/common/Input/Input';
+import { Input } from '../../components/common/Input/Input';
 import { ReportGenerator } from '../../components/reports/ReportGenerator/ReportGenerator';
 import { ReportTemplateSelector } from '../../components/reports/ReportTemplateSelector/ReportTemplateSelector';
 import { ReportPreview } from '../../components/reports/ReportPreview/ReportPreview';

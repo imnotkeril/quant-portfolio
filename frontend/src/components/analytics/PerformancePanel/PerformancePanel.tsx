@@ -4,7 +4,7 @@
  */
 import React, { useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import Card from '../../common/Card/Card';
+import { Card } from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
 import { Select } from '../../common/Select/Select';
 import { MetricsCard, MetricsCardData } from '../MetricsCard/MetricsCard';

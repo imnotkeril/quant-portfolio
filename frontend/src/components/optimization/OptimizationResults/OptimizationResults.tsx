@@ -3,9 +3,9 @@
  * Display comprehensive optimization results with metrics, weights, and insights
  */
 import React, { useState, useMemo } from 'react';
-import Card from '../../common/Card/Card';
+import { Card } from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
-import Badge from '../../common/Badge/Badge';
+import { Badge } from '../../common/Badge/Badge';
 import { Modal } from '../../common/Modal/Modal';
 import { PieChart, PieChartDataPoint } from '../../charts/PieChart/PieChart';
 import { OptimizationResponse } from '../../../types/optimization';

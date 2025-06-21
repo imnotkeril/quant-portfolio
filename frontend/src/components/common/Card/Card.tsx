@@ -255,3 +255,4 @@ export const Card: React.FC<CardProps> & {
 
 Card.Meta = CardMeta;
 Card.Grid = CardGrid;
+export default Card;

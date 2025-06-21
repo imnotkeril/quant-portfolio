@@ -4,10 +4,10 @@
  */
 import React, { useState, useMemo, useEffect } from 'react';
 import { Table, TableColumn } from '../../common/Table/Table';
-import Input from '../../common/Input/Input';
+import { Input } from '../../common/Input/Input';
 import { Button } from '../../common/Button/Button';
-import Card from '../../common/Card/Card';
-import Badge from '../../common/Badge/Badge';
+import { Card } from '../../common/Card/Card';
+import { Badge } from '../../common/Badge/Badge';
 import { formatPercentage, formatCurrency } from '../../../utils/formatters';
 import styles from './WeightsTable.module.css';
 

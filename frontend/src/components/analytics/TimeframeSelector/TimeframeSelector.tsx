@@ -4,8 +4,8 @@
  */
 import React, { useState } from 'react';
 import { Button } from '../../common/Button/Button';
-import Input from '../../common/Input/Input';
-import Card from '../../common/Card/Card';
+import { Input } from '../../common/Input/Input';
+import { Card } from '../../common/Card/Card';
 import { Modal } from '../../common/Modal/Modal';
 import styles from './TimeframeSelector.module.css';
 

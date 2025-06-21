@@ -4,7 +4,7 @@
  */
 import React, { useState } from 'react';
 import classNames from 'classnames';
-import Card from '../../common/Card/Card';
+import { Card } from '../../common/Card/Card';
 import { Button } from '../../common/Button/Button';
 import { Select } from '../../common/Select/Select';
 import { Table } from '../../common/Table/Table';

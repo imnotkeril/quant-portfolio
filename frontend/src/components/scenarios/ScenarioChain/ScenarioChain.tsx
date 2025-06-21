@@ -6,8 +6,8 @@ import React, { useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import classNames from 'classnames';
 import { Button } from '../../common/Button/Button';
-import Input from '../../common/Input/Input';
-import Card from '../../common/Card/Card';
+import { Input } from '../../common/Input/Input';
+import { Card } from '../../common/Card/Card';
 import { Modal } from '../../common/Modal/Modal';
 import { Table, TableColumn } from '../../common/Table/Table';
 import {
