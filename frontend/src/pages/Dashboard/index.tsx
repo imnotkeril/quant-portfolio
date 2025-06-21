@@ -62,6 +62,7 @@ const Dashboard: React.FC = () => {
   };
 
   const handleExploreDemo = () => {
+    // Идем на Analytics (PortfolioAnalysis)
     navigate('/analytics');
   };
 
@@ -71,13 +72,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className={styles.dashboard}>
-      {/* Header Section */}
-      <div className={styles.header}>
-        <div className={styles.welcome}>
-          <h1 className={styles.title}>Portfolio Dashboard</h1>
-        </div>
-      </div>
-
       {/* Welcome Section */}
       <div className={styles.welcomeSection}>
         <div className={styles.welcomeCard}>

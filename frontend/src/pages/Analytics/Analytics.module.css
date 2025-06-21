@@ -1,9 +1,9 @@
 /* src/pages/Analytics/Analytics.module.css */
 .analytics {
   padding: var(--spacing-l);
-  min-height: 100vh;
   background-color: var(--color-background);
   color: var(--color-text-light);
+  min-height: calc(100vh - 160px); /* Учитываем header и footer */
 }
 
 .loadingContainer {

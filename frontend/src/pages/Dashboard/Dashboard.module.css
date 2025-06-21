@@ -1,20 +1,8 @@
 /* src/pages/Dashboard/styles.module.css */
 .dashboard {
-  min-height: 100vh;
-  background-color: var(--color-background);
   padding: var(--spacing-l);
+  background-color: transparent; /* Убираем фон, он уже есть в layout */
   color: var(--color-text-light);
-}
-
-.header {
-  margin-bottom: var(--spacing-xl);
-}
-
-.title {
-  font-size: var(--font-size-h1);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-light);
-  margin: 0;
 }
 
 .welcomeSection {
