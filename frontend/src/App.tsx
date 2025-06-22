@@ -1,5 +1,5 @@
 /**
- * Main App Component
+ * Main App Component - ПОЛНАЯ ВЕРСИЯ
  * Root component that sets up providers and layout
  */
 import React from 'react';
@@ -15,7 +15,7 @@ import { Footer } from './components/layout/Footer/Footer';
 
 // Context providers
 import { ThemeProvider } from './contexts/ThemeContext';
-import { LayoutProvider } from './contexts/LayoutContext';
+import { LayoutProvider, useLayout } from './contexts/LayoutContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 
 // Routes
@@ -34,6 +34,8 @@ const ErrorFallback: React.FC<{ error: Error; resetErrorBoundary: () => void }> 
   error,
   resetErrorBoundary,
 }) => {
+  console.error('Application error:', error);
+
   return (
     <div style={{
       display: 'flex',
@@ -43,7 +45,7 @@ const ErrorFallback: React.FC<{ error: Error; resetErrorBoundary: () => void }> 
       minHeight: '100vh',
       padding: '2rem',
       textAlign: 'center',
-      backgroundColor: 'var(--color-background-primary)',
+      backgroundColor: 'var(--color-background)',
       color: 'var(--color-text-primary)',
     }}>
       <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
@@ -51,7 +53,7 @@ const ErrorFallback: React.FC<{ error: Error; resetErrorBoundary: () => void }> 
         fontSize: '1.5rem',
         fontWeight: 600,
         marginBottom: '1rem',
-        color: 'var(--color-error-600)'
+        color: 'var(--color-negative)'
       }}>
         Something went wrong
       </h1>
@@ -63,145 +65,136 @@ const ErrorFallback: React.FC<{ error: Error; resetErrorBoundary: () => void }> 
       }}>
         We encountered an unexpected error. This has been logged and our team will investigate.
       </p>
-      <details style={{
-        marginBottom: '2rem',
-        padding: '1rem',
-        backgroundColor: 'var(--color-background-subtle)',
-        border: '1px solid var(--color-border)',
-        borderRadius: '8px',
-        maxWidth: '600px',
-        textAlign: 'left'
-      }}>
-        <summary style={{
-          cursor: 'pointer',
-          fontWeight: 500,
-          marginBottom: '0.5rem'
-        }}>
-          Error Details
-        </summary>
-        <pre style={{
-          fontSize: '0.875rem',
-          color: 'var(--color-error-600)',
-          whiteSpace: 'pre-wrap',
-          wordBreak: 'break-word'
-        }}>
-          {error.message}
-        </pre>
-      </details>
       <button
         onClick={resetErrorBoundary}
         style={{
           padding: '0.75rem 1.5rem',
-          backgroundColor: 'var(--color-primary-500)',
+          backgroundColor: 'var(--color-accent)',
           color: 'white',
           border: 'none',
-          borderRadius: '6px',
+          borderRadius: 'var(--border-radius-m)',
+          cursor: 'pointer',
           fontSize: '1rem',
           fontWeight: 500,
-          cursor: 'pointer',
-          transition: 'background-color 0.2s ease'
-        }}
-        onMouseOver={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--color-primary-600)';
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--color-primary-500)';
         }}
       >
-        Try Again
+        Try again
       </button>
     </div>
   );
 };
 
-// Main App Layout
+// Main layout component that uses the layout context
 const AppLayout: React.FC = () => {
+  const { sidebarState } = useLayout();
+
+  const layoutClasses = [
+    sidebarState === 'collapsed' && 'collapsed',
+    sidebarState === 'hidden' && 'sidebarHidden'
+  ].filter(Boolean).join(' ');
+
   return (
-    <LayoutProvider>
-      <div className="app-container">
-        <Sidebar />
-        <div className="app-main">
-          <Header />
-          <main className="app-content">
+    <div className="layout-container" style={{
+      display: 'flex',
+      height: '100vh',
+      overflow: 'hidden',
+      backgroundColor: 'var(--color-background)'
+    }}>
+      {/* Sidebar */}
+      <Sidebar />
+
+      {/* Main Content Area */}
+      <main
+        className={`main-content ${layoutClasses}`}
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          marginLeft: sidebarState === 'hidden' ? '0' :
+                     sidebarState === 'collapsed' ? 'var(--sidebar-width-collapsed)' :
+                     'var(--sidebar-width)',
+          transition: 'margin-left var(--transition-medium)',
+          overflow: 'hidden',
+          position: 'relative'
+        }}
+      >
+        {/* Header */}
+        <Header />
+
+        {/* Page Content with Footer */}
+        <div
+          className="page-content"
+          style={{
+            flex: 1,
+            overflow: 'auto',
+            paddingTop: 'var(--header-height)', // ОТСТУП ОТ ФИКСИРОВАННОГО HEADER
+            backgroundColor: 'var(--color-background)'
+          }}
+        >
+          <div style={{
+            padding: 'var(--spacing-l)',
+            minHeight: 'calc(100vh - var(--header-height) - 200px)' // МИНИМАЛЬНАЯ ВЫСОТА ДЛЯ КОНТЕНТА
+          }}>
             <AppRoutes />
-          </main>
+          </div>
+
+          {/* Footer как часть контента */}
           <Footer />
         </div>
-      </div>
-    </LayoutProvider>
+      </main>
+
+      {/* Toast notifications */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: 'var(--card-background)',
+            color: 'var(--color-text-primary)',
+            border: '1px solid var(--color-divider)',
+            borderRadius: 'var(--border-radius-m)',
+          },
+          success: {
+            iconTheme: {
+              primary: 'var(--color-positive)',
+              secondary: 'white',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: 'var(--color-negative)',
+              secondary: 'white',
+            },
+          },
+        }}
+      />
+    </div>
   );
 };
 
-// Main App Component
+// Root App component
 const App: React.FC = () => {
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
       onError={(error, errorInfo) => {
-        // Log error to monitoring service
-        console.error('App Error:', error, errorInfo);
-
-        // You can integrate with error monitoring services here
-        // e.g., Sentry, LogRocket, Bugsnag
-        if (process.env.NODE_ENV === 'production') {
-          // Example: Sentry.captureException(error);
-        }
+        console.error('Application error:', error, errorInfo);
+        // You can send this to your error reporting service
+        // logErrorToService(error, errorInfo);
+      }}
+      onReset={() => {
+        // Clear any state that might have caused the error
+        window.location.reload();
       }}
     >
       <Provider store={store}>
         <BrowserRouter>
           <ThemeProvider>
-            <NotificationProvider>
-              <AppLayout />
-
-              {/* Global toast notifications */}
-              <Toaster
-                position="top-right"
-                reverseOrder={false}
-                gutter={8}
-                containerClassName=""
-                containerStyle={{}}
-                toastOptions={{
-                  // Default options for all toasts
-                  className: '',
-                  duration: 4000,
-                  style: {
-                    background: 'var(--color-background-primary)',
-                    color: 'var(--color-text-primary)',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: '8px',
-                    fontSize: '0.875rem',
-                  },
-                  // Default options for specific types
-                  success: {
-                    iconTheme: {
-                      primary: 'var(--color-success-500)',
-                      secondary: 'white',
-                    },
-                    style: {
-                      border: '1px solid var(--color-success-200)',
-                      backgroundColor: 'var(--color-success-50)',
-                    },
-                  },
-                  error: {
-                    iconTheme: {
-                      primary: 'var(--color-error-500)',
-                      secondary: 'white',
-                    },
-                    style: {
-                      border: '1px solid var(--color-error-200)',
-                      backgroundColor: 'var(--color-error-50)',
-                    },
-                  },
-                  loading: {
-                    iconTheme: {
-                      primary: 'var(--color-primary-500)',
-                      secondary: 'white',
-                    },
-                  },
-                }}
-              />
-            </NotificationProvider>
+            <LayoutProvider>
+              <NotificationProvider>
+                <AppLayout />
+              </NotificationProvider>
+            </LayoutProvider>
           </ThemeProvider>
         </BrowserRouter>
       </Provider>

@@ -1,25 +1,23 @@
-/**
- * Header Styles for Wild Market Capital
- */
+/* FIXED frontend/src/components/layout/Header/Header.module.css */
 
 .header {
   position: fixed;
   top: 0;
-  left: var(--sidebar-width);
+  left: var(--sidebar-width); /* 280px */
   right: 0;
-  height: var(--header-height);
+  height: var(--header-height); /* 64px */
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--spacing-l);
   background-color: var(--color-background);
   border-bottom: 1px solid var(--color-divider);
-  z-index: var(--z-index-header);
+  z-index: var(--z-index-header); /* 90 */
   transition: left var(--transition-medium);
 }
 
 .collapsed {
-  left: var(--sidebar-width-collapsed);
+  left: var(--sidebar-width-collapsed); /* 80px */
 }
 
 .hidden {
@@ -46,8 +44,24 @@
 }
 
 .menuButton {
-  display: none;
+  display: flex !important; /* CRITICAL FIX: Force display */
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  background: transparent;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
   color: var(--color-text-light);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.menuButton:hover {
+  border-color: var(--color-accent);
+  background: rgba(191, 159, 251, 0.1);
+  color: var(--color-accent);
 }
 
 .mobile .menuButton {
@@ -142,17 +156,30 @@
 }
 
 .controlButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  background: transparent;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
   color: var(--color-neutral-gray);
-  transition: color var(--transition-fast);
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
 .controlButton:hover {
+  border-color: var(--color-accent);
+  background: rgba(191, 159, 251, 0.1);
   color: var(--color-accent);
 }
 
 .controlButton.active {
   color: var(--color-accent);
   background-color: rgba(191, 159, 251, 0.1);
+  border-color: var(--color-accent);
 }
 
 .mobile .controls {
@@ -169,92 +196,89 @@
 
 /* User section */
 .userSection {
-  display: flex;
-  align-items: center;
+  position: relative;
 }
 
 .userButton {
   display: flex;
   align-items: center;
   gap: var(--spacing-s);
-  padding: var(--spacing-xs) var(--spacing-s);
+  padding: var(--spacing-s) var(--spacing-m);
+  background: transparent;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-m);
   color: var(--color-text-light);
+  cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .userButton:hover {
-  background-color: rgba(42, 46, 57, 0.5);
-  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: rgba(191, 159, 251, 0.1);
 }
 
 .userAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--border-radius-circle);
+  background: var(--gradient-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  background-color: var(--color-accent);
-  border-radius: var(--border-radius-circle);
-  color: var(--color-text-light);
+  font-size: 12px;
+  color: var(--color-text-dark);
 }
 
 .userName {
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-medium);
-  white-space: nowrap;
 }
 
 .mobile .userName {
   display: none;
 }
 
-/* Badge positioning */
-.controls :global(.badge-container) {
-  display: flex;
-}
-
-/* Responsive design */
-@media (max-width: 480px) {
+/* Responsive breakpoints */
+@media (max-width: 1024px) {
   .header {
-    padding: 0 var(--spacing-s);
+    left: 0; /* Always full width on mobile */
   }
 
-  .left {
-    gap: var(--spacing-s);
-  }
-
-  .right {
-    gap: var(--spacing-s);
-  }
-
-  .controls {
-    gap: 2px;
-  }
-
-  .userButton {
-    padding: var(--spacing-xs);
-  }
-}
-
-/* High contrast mode */
-@media (prefers-contrast: more) {
-  .header {
-    border-bottom-width: 2px;
+  .collapsed,
+  .hidden {
+    left: 0;
   }
 
   .searchInput {
-    border-width: 2px;
-  }
-
-  .logoText {
-    font-weight: var(--font-weight-bold);
+    width: 200px;
   }
 }
 
-/* Sticky behavior for mobile */
 @media (max-width: 768px) {
   .header {
-    position: sticky;
-    top: 0;
+    padding: var(--spacing-m);
+  }
+
+  .center {
+    display: none;
+  }
+
+  .controls {
+    gap: var(--spacing-xs);
+  }
+
+  .userName {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: var(--spacing-s);
+    gap: var(--spacing-m);
+  }
+
+  .logoText {
+    display: none;
   }
 }

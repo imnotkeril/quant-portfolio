@@ -1,6 +1,4 @@
-/**
- * Sidebar Styles for Wild Market Capital
- */
+/* FIXED frontend/src/components/layout/Sidebar/Sidebar.module.css */
 
 :root {
   --sidebar-width: 280px;
@@ -14,13 +12,17 @@
   left: 0;
   width: var(--sidebar-width);
   height: 100vh;
-  background-color: var(--color-background);
+  background: linear-gradient(180deg, rgba(42, 46, 57, 0.4) 0%, rgba(42, 46, 57, 0.2) 100%);
   border-right: 1px solid var(--color-divider);
-  z-index: var(--z-index-elevated);
+  display: flex;
+  flex-direction: column;
   transition: all var(--transition-medium);
+  backdrop-filter: blur(10px);
+  z-index: var(--z-index-elevated);
   transform: translateX(0);
 }
 
+/* CRITICAL FIX: Toggle states */
 .collapsed {
   width: var(--sidebar-width-collapsed);
 }
@@ -78,6 +80,7 @@
   flex-direction: column;
   line-height: 1.2;
   overflow: hidden;
+  transition: opacity var(--transition-medium);
 }
 
 .brandName {
@@ -94,8 +97,42 @@
   white-space: nowrap;
 }
 
+/* CRITICAL FIX: Toggle button */
+.toggleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  color: var(--color-neutral-gray);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.toggleButton:hover {
+  border-color: var(--color-accent);
+  background: rgba(191, 159, 251, 0.1);
+  color: var(--color-accent);
+}
+
+/* Collapsed state hiding */
 .collapsed .brandText {
-  display: none;
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.collapsed .brand {
+  justify-content: center;
+  padding: var(--spacing-l) var(--spacing-s);
+}
+
+.collapsed .toggleButton {
+  display: none; /* Hide toggle button when collapsed */
 }
 
 /* Navigation section */
@@ -107,6 +144,25 @@
 
 .navSection {
   padding: 0 var(--spacing-s);
+}
+
+.navSectionTitle {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-neutral-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: var(--spacing-m) var(--spacing-s) var(--spacing-s);
+}
+
+.collapsed .navSectionTitle {
+  display: none;
+}
+
+.navList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .navItem {
@@ -122,6 +178,9 @@
   transition: all var(--transition-fast);
   text-align: left;
   min-height: 44px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .navButton:hover {
@@ -153,6 +212,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: left;
+  transition: opacity var(--transition-medium);
 }
 
 .expandIcon {
@@ -185,7 +245,7 @@
   color: var(--color-text-light);
 }
 
-/* Collapsed state */
+/* Collapsed state navigation */
 .collapsed .navButton {
   padding: var(--spacing-s);
   justify-content: center;
@@ -193,7 +253,9 @@
 
 .collapsed .navLabel,
 .collapsed .expandIcon {
-  display: none;
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
 }
 
 .collapsed .navIcon {
@@ -220,9 +282,13 @@
   height: 16px;
 }
 
-/* Footer section */
+.collapsed .subMenu {
+  display: none;
+}
+
+/* Footer section - FIXED: Reduced padding */
 .footer {
-  padding: var(--spacing-m);
+  padding: var(--spacing-s); /* Reduced from var(--spacing-m) */
   border-top: 1px solid var(--color-divider);
   flex-shrink: 0;
 }
@@ -230,7 +296,7 @@
 .footerContent {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-s);
+  gap: var(--spacing-xs); /* Reduced from var(--spacing-s) */
 }
 
 .version {
@@ -245,7 +311,7 @@
 }
 
 .collapsed .footer {
-  padding: var(--spacing-s);
+  padding: var(--spacing-xs); /* Even smaller when collapsed */
 }
 
 .collapsed .footerContent {
@@ -329,7 +395,9 @@
 @media (prefers-reduced-motion: reduce) {
   .sidebar,
   .navButton,
-  .expandIcon {
+  .expandIcon,
+  .brandText,
+  .navLabel {
     transition: none;
   }
 

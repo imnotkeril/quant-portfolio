@@ -1,6 +1,6 @@
 /**
- * Footer Component
- * Application footer with links and information
+ * Footer Component - СТИЛЬНАЯ КОМПАКТНАЯ ВЕРСИЯ
+ * Application footer с современным дизайном
  */
 import React from 'react';
 import classNames from 'classnames';
@@ -31,7 +31,7 @@ export const Footer: React.FC<FooterProps> = ({
 
   const currentYear = new Date().getFullYear();
 
-  const footerLinks = [
+  const quickLinks = [
     { label: 'Privacy Policy', href: '/privacy' },
     { label: 'Terms of Service', href: '/terms' },
     { label: 'Support', href: '/support' },
@@ -70,52 +70,46 @@ export const Footer: React.FC<FooterProps> = ({
     },
   ];
 
-  if (isFullScreen) {
-    return null;
-  }
-
   return (
     <footer className={footerClasses} data-testid={testId}>
       <div className={styles.container}>
         <div className={styles.content}>
-          <div className={styles.section}>
+          {/* Left Section - Brand & Copyright */}
+          <div className={styles.leftSection}>
             <div className={styles.brand}>
               <div className={styles.brandIcon}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                   <path d="M2 17l10 5 10-5"/>
                   <path d="M2 12l10 5 10-5"/>
                 </svg>
               </div>
               <div className={styles.brandText}>
-                <span className={styles.brandName}>Wild Market Capital</span>
-                <span className={styles.brandDescription}>
-                  Professional Portfolio Management System
-                </span>
+                <span className={styles.brandName}>Wild Market</span>
+                <span className={styles.brandSub}>Capital</span>
               </div>
+            </div>
+            <div className={styles.copyright}>
+              © {currentYear} Wild Market Capital. All rights reserved.
             </div>
           </div>
 
-          <div className={styles.section}>
-            <h4 className={styles.sectionTitle}>Quick Links</h4>
-            <ul className={styles.linkList}>
-              {footerLinks.map((link) => (
-                <li key={link.href}>
-                  <a
-                    href={link.href}
-                    className={styles.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {link.label}
-                  </a>
-                </li>
+          {/* Center Section - Links & Social */}
+          <div className={styles.centerSection}>
+            <div className={styles.quickLinks}>
+              {quickLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className={styles.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {link.label}
+                </a>
               ))}
-            </ul>
-          </div>
+            </div>
 
-          <div className={styles.section}>
-            <h4 className={styles.sectionTitle}>Connect</h4>
             <div className={styles.socialLinks}>
               {socialLinks.map((social) => (
                 <a
@@ -132,28 +126,21 @@ export const Footer: React.FC<FooterProps> = ({
             </div>
           </div>
 
-          <div className={styles.section}>
-            <div className={styles.systemInfo}>
-              <div className={styles.version}>
-                <span className={styles.versionLabel}>Version</span>
-                <span className={styles.versionNumber}>1.0.0</span>
-              </div>
-              <div className={styles.status}>
-                <div className={styles.statusIndicator} />
-                <span className={styles.statusText}>All systems operational</span>
-              </div>
+          {/* Right Section - Status & Version */}
+          <div className={styles.rightSection}>
+            <div className={styles.status}>
+              <div className={styles.statusIndicator} />
+              <span className={styles.statusText}>All systems operational</span>
             </div>
-          </div>
-        </div>
 
-        <div className={styles.bottom}>
-          <div className={styles.copyright}>
-            <span>© {currentYear} Wild Market Capital. All rights reserved.</span>
-          </div>
-          <div className={styles.legal}>
-            <span className={styles.legalText}>
+            <div className={styles.version}>
+              <span>Version</span>
+              <span className={styles.versionNumber}>1.0.0</span>
+            </div>
+
+            <div className={styles.tech}>
               Built with React • TypeScript • FastAPI
-            </span>
+            </div>
           </div>
         </div>
       </div>

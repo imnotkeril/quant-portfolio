@@ -1,61 +1,123 @@
-/* FIXED frontend/src/assets/styles/variables.css - Wild Market Capital */
+/**
+ * CSS Variables - Wild Market Capital
+ * ПОЛНАЯ версия с исправленным контрастом
+ */
+
 :root {
-  /* Color System */
-  --color-background: #0D1015;
+  /* Color Palette - ИСПРАВЛЕН для лучшего контраста */
+  --color-primary: #0D1015;
+  --color-secondary: #2A2E39;
   --color-accent: #BF9FFB;
-  --color-text-dark: #0D1015;
-  --color-text-light: #FFFFFF;
-  --color-positive: #74F174;
-  --color-negative: #FAA1A4;
-  --color-neutral-1: #90BFF9;
-  --color-neutral-2: #FFF59D;
-  --color-neutral-gray: #D1D4DC;
-  --color-divider: #2A2E39;
   --color-hover: #D3BFFC;
   --color-active: #A880FA;
-  --color-disabled: #757280;
 
-  /* Extended Color Palette */
-  --color-background-10: rgba(42, 46, 57, 0.1);
-  --color-background-20: rgba(42, 46, 57, 0.2);
-  --color-background-30: rgba(42, 46, 57, 0.3);
-  --color-background-40: rgba(42, 46, 57, 0.4);
+  /* Background Colors - УЛУЧШЕНЫ */
+  --color-background: #0D1015;
+  --color-background-secondary: #1A1D24;
+  --color-surface: #2A2E39;
+  --color-surface-secondary: #363A47;
 
-  /* Chart Colors */
-  --color-chart-up: #D1D4DC;
-  --color-chart-down: #BF9FFB;
+  /* Text Colors - ИСПРАВЛЕНЫ для лучшей читаемости */
+  --color-text-primary: #FFFFFF;        /* Чисто белый для лучшего контраста */
+  --color-text-secondary: #E1E4E8;      /* Светло-серый с хорошим контрастом */
+  --color-text-light: #FFFFFF;          /* Последовательный белый */
+  --color-text-muted: #8B949E;          /* Средний серый */
+  --color-text-disabled: #6E7681;       /* Темнее серый для отключенных */
 
-  /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #BF9FFB 0%, #A880FA 100%);
-  --gradient-dark: linear-gradient(135deg, #0D1015 0%, #1A1E2A 100%);
-  --gradient-card: linear-gradient(135deg, rgba(42, 46, 57, 0.4) 0%, rgba(42, 46, 57, 0.2) 100%);
-  --color-gradient-primary: var(--gradient-primary);
+  /* Interactive Colors */
+  --color-link: #BF9FFB;
+  --color-link-hover: #D3BFFC;
+  --color-link-visited: #A880FA;
+
+  /* Status Colors - УЛУЧШЕН контраст */
+  --color-positive: #3FB950;            /* Ярче зеленый */
+  --color-negative: #F85149;            /* Ярче красный */
+  --color-warning: #D29922;             /* Лучше желтый */
+  --color-info: #58A6FF;                /* Ярче синий */
+
+  /* Error Colors */
+  --color-error-50: #FEF2F2;
+  --color-error-100: #FEE2E2;
+  --color-error-200: #FECACA;
+  --color-error-300: #FCA5A5;
+  --color-error-400: #F87171;
+  --color-error-500: #EF4444;
+  --color-error-600: #DC2626;
+  --color-error-700: #B91C1C;
+  --color-error-800: #991B1B;
+  --color-error-900: #7F1D1D;
+
+  /* Success Colors */
+  --color-success-50: #F0FDF4;
+  --color-success-100: #DCFCE7;
+  --color-success-200: #BBF7D0;
+  --color-success-300: #86EFAC;
+  --color-success-400: #4ADE80;
+  --color-success-500: #22C55E;
+  --color-success-600: #16A34A;
+  --color-success-700: #15803D;
+  --color-success-800: #166534;
+  --color-success-900: #14532D;
+
+  /* Warning Colors */
+  --color-warning-50: #FFFBEB;
+  --color-warning-100: #FEF3C7;
+  --color-warning-200: #FDE68A;
+  --color-warning-300: #FCD34D;
+  --color-warning-400: #FBBF24;
+  --color-warning-500: #F59E0B;
+  --color-warning-600: #D97706;
+  --color-warning-700: #B45309;
+  --color-warning-800: #92400E;
+  --color-warning-900: #78350F;
+
+  /* Neutral Colors - ИСПРАВЛЕНЫ */
+  --color-neutral-50: #FAFAFA;
+  --color-neutral-100: #F4F4F5;
+  --color-neutral-200: #E4E4E7;
+  --color-neutral-300: #D1D5DB;
+  --color-neutral-400: #9CA3AF;
+  --color-neutral-500: #6B7280;
+  --color-neutral-600: #4B5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1F2937;
+  --color-neutral-900: #111827;
+  --color-neutral-gray: #8B949E;        /* Лучше видимость */
+
+  /* Border Colors - УЛУЧШЕНЫ */
+  --color-border: #30363D;
+  --color-divider: #30363D;
+  --color-border-light: #40464D;
+  --color-border-focus: #BF9FFB;
+
+  /* Chart Colors - УСИЛЕНЫ */
+  --color-chart-primary: #BF9FFB;
+  --color-chart-secondary: #58A6FF;
+  --color-chart-tertiary: #3FB950;
+  --color-chart-quaternary: #D29922;
+  --color-chart-up: #3FB950;            /* Ярче зеленый */
+  --color-chart-down: #F85149;          /* Ярче красный */
+  --color-disabled: #6E7681;
 
   /* Typography */
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-
-  /* Font Weights */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   --font-weight-light: 300;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semi-bold: 600;
   --font-weight-bold: 700;
-
-  /* Font Sizes */
-  --font-size-h1: 24px;
-  --font-size-h2: 20px;
-  --font-size-h3: 16px;
-  --font-size-body: 12px;
-  --font-size-caption: 10px;
-  --font-size-footer: 9px;
-
-  /* Line Heights */
-  --line-height-h1: 32px;
-  --line-height-h2: 28px;
-  --line-height-h3: 24px;
-  --line-height-body: 18px;
-  --line-height-caption: 16px;
-  --line-height-footer: 14px;
+  --font-size-h1: 32px;
+  --font-size-h2: 24px;
+  --font-size-h3: 20px;
+  --font-size-body: 14px;
+  --font-size-caption: 12px;
+  --font-size-footer: 11px;
+  --line-height-h1: 40px;
+  --line-height-h2: 32px;
+  --line-height-h3: 28px;
+  --line-height-body: 20px;
+  --line-height-caption: 18px;
+  --line-height-footer: 16px;
 
   /* Spacing System */
   --spacing-xs: 4px;
@@ -90,96 +152,74 @@
   --sidebar-width-collapsed: 80px;
   --header-height: 64px;
 
-  /* Component Variables */
-  --card-background: rgba(13, 16, 21, 0.8);
+  /* Component Variables - УЛУЧШЕНЫ */
+  --card-background: rgba(26, 29, 36, 0.8);
   --card-border: var(--color-divider);
   --card-border-radius: var(--border-radius-m);
   --card-padding: var(--spacing-m);
 
-  /* Input Variables */
-  --input-background: rgba(42, 46, 57, 0.5);
+  /* Gradient Definitions */
+  --gradient-primary: linear-gradient(135deg, #0D1015 0%, #1A1D24 100%);
+  --gradient-secondary: linear-gradient(135deg, #2A2E39 0%, #363A47 100%);
+  --gradient-accent: linear-gradient(135deg, #BF9FFB 0%, #D3BFFC 100%);
+  --gradient-card: linear-gradient(135deg, rgba(26, 29, 36, 0.8) 0%, rgba(42, 46, 57, 0.4) 100%);
+
+  /* Input Variables - УСИЛЕНЫ */
+  --input-background: rgba(42, 46, 57, 0.6);
   --input-border: var(--color-divider);
   --input-border-focus: var(--color-accent);
   --input-border-radius: var(--border-radius-s);
-  --input-text: var(--color-text-light);
-  --input-placeholder: var(--color-neutral-gray);
+  --input-text: var(--color-text-primary);      /* ИСПРАВЛЕНО: белый текст */
+  --input-placeholder: var(--color-text-muted);  /* ИСПРАВЛЕНО: лучше контраст */
   --input-height: 40px;
 
-  /* Table Variables */
+  /* Table Variables - УЛУЧШЕНЫ */
   --table-background: var(--card-background);
   --table-border: var(--color-divider);
-  --table-header-background: rgba(42, 46, 57, 0.5);
+  --table-header-background: rgba(42, 46, 57, 0.6);
   --table-row-even-background: rgba(42, 46, 57, 0.1);
   --table-row-hover-background: rgba(42, 46, 57, 0.3);
 
-  /* Scrollbar Variables */
-  --scrollbar-width: 8px;
-  --scrollbar-track: rgba(42, 46, 57, 0.3);
-  --scrollbar-thumb: rgba(191, 159, 251, 0.5);
-  --scrollbar-thumb-hover: rgba(191, 159, 251, 0.7);
-
-  /* Z-Index System */
-  --z-index-dropdown: 1000;
-  --z-index-sticky: 1020;
-  --z-index-fixed: 1030;
-  --z-index-modal-backdrop: 1040;
-  --z-index-modal: 1050;
-  --z-index-popover: 1060;
-  --z-index-tooltip: 1070;
-  --z-index-notification: 1080;
-  --z-index-elevated: 100;
-  --z-index-header: 90;
-
-  /* Breakpoints */
-  --breakpoint-xs: 480px;
-  --breakpoint-sm: 768px;
-  --breakpoint-md: 1024px;
-  --breakpoint-lg: 1200px;
-  --breakpoint-xl: 1400px;
-
-  /* Animation Variables */
-  --animation-duration-fast: 150ms;
-  --animation-duration-medium: 250ms;
-  --animation-duration-slow: 350ms;
-  --animation-easing: cubic-bezier(0.4, 0.0, 0.2, 1);
-
-  /* Focus Ring */
-  --focus-ring-width: 2px;
-  --focus-ring-offset: 2px;
-  --focus-ring-color: var(--color-accent);
-
-  /* Loading States */
-  --loading-background: rgba(42, 46, 57, 0.6);
-  --loading-spinner: var(--color-accent);
-
-  /* Error States */
-  --error-background: rgba(250, 161, 164, 0.1);
-  --error-border: rgba(250, 161, 164, 0.3);
-  --error-text: var(--color-negative);
-
-  /* Success States */
-  --success-background: rgba(116, 241, 116, 0.1);
-  --success-border: rgba(116, 241, 116, 0.3);
-  --success-text: var(--color-positive);
-
-  /* Warning States */
-  --warning-background: rgba(255, 245, 157, 0.1);
-  --warning-border: rgba(255, 245, 157, 0.3);
-  --warning-text: var(--color-neutral-2);
-
-  /* Info States */
-  --info-background: rgba(144, 191, 249, 0.1);
-  --info-border: rgba(144, 191, 249, 0.3);
-  --info-text: var(--color-neutral-1);
+  /* Z-Index Scale */
+  --z-dropdown: 1000;
+  --z-sticky: 1010;
+  --z-fixed: 1020;
+  --z-modal-backdrop: 1030;
+  --z-modal: 1040;
+  --z-popover: 1050;
+  --z-tooltip: 1060;
+  --z-toast: 1070;
 }
 
-:root {
-  --sidebar-width: 280px;
-  --sidebar-width-collapsed: 80px;
-  --header-height: 64px;
+/* Dark theme improvements */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Enhanced dark mode colors */
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #E1E4E8;
+    --color-text-light: #FFFFFF;
+    --color-background: #0D1015;
+    --color-surface: #1A1D24;
+  }
+}
 
-  /* Z-index system */
-  --z-index-sidebar: 1000;
-  --z-index-header: 10;
-  --z-index-overlay: 999;
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  :root {
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #FFFFFF;
+    --color-text-light: #FFFFFF;
+    --color-border: #FFFFFF;
+    --color-divider: #FFFFFF;
+    --color-accent: #FFFFFF;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0s;
+    --transition-medium: 0s;
+    --transition-slow: 0s;
+  }
 }
