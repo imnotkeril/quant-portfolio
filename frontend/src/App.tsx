@@ -1,5 +1,5 @@
 /**
- * Main App Component - ПОЛНАЯ ВЕРСИЯ
+ * Main App Component - ИСПРАВЛЕННАЯ ВЕРСИЯ
  * Root component that sets up providers and layout
  */
 import React from 'react';
@@ -47,6 +47,7 @@ const ErrorFallback: React.FC<{ error: Error; resetErrorBoundary: () => void }> 
       textAlign: 'center',
       backgroundColor: 'var(--color-background)',
       color: 'var(--color-text-primary)',
+      zIndex: 'var(--z-index-max)'
     }}>
       <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
       <h1 style={{
@@ -70,12 +71,13 @@ const ErrorFallback: React.FC<{ error: Error; resetErrorBoundary: () => void }> 
         style={{
           padding: '0.75rem 1.5rem',
           backgroundColor: 'var(--color-accent)',
-          color: 'white',
+          color: 'var(--color-text-dark)',
           border: 'none',
           borderRadius: 'var(--border-radius-m)',
           cursor: 'pointer',
           fontSize: '1rem',
           fontWeight: 500,
+          transition: 'all var(--transition-fast)'
         }}
       >
         Try again
@@ -94,12 +96,16 @@ const AppLayout: React.FC = () => {
   ].filter(Boolean).join(' ');
 
   return (
-    <div className="layout-container" style={{
-      display: 'flex',
-      height: '100vh',
-      overflow: 'hidden',
-      backgroundColor: 'var(--color-background)'
-    }}>
+    <div
+      className="layout-container"
+      style={{
+        display: 'flex',
+        height: '100vh',
+        overflow: 'hidden',
+        backgroundColor: 'var(--color-background)',
+        position: 'relative'
+      }}
+    >
       {/* Sidebar */}
       <Sidebar />
 
@@ -115,10 +121,11 @@ const AppLayout: React.FC = () => {
                      'var(--sidebar-width)',
           transition: 'margin-left var(--transition-medium)',
           overflow: 'hidden',
-          position: 'relative'
+          position: 'relative',
+          zIndex: 'var(--z-index-content)'
         }}
       >
-        {/* Header */}
+        {/* Header - ALWAYS VISIBLE */}
         <Header />
 
         {/* Page Content with Footer */}
@@ -129,10 +136,12 @@ const AppLayout: React.FC = () => {
             overflow: 'auto',
             paddingTop: 'var(--header-height)', // ОТСТУП ОТ ФИКСИРОВАННОГО HEADER
             backgroundColor: 'var(--color-background)',
-            minHeight: 'calc(100vh - var(--header-height))' // МИНИМУМ ПОЛНАЯ ВЫСОТА
+            minHeight: 'calc(100vh - var(--header-height))', // МИНИМУМ ПОЛНАЯ ВЫСОТА
+            position: 'relative',
+            zIndex: 'var(--z-index-base)'
           }}
         >
-          {/* ОБЫЧНЫЙ КОНТЕНТ БЕЗ ДОПОЛНИТЕЛЬНЫХ WRAPPER'ОВ */}
+          {/* КОНТЕНТ СТРАНИЦ */}
           <AppRoutes />
 
           {/* Footer в конце контента */}
@@ -150,19 +159,39 @@ const AppLayout: React.FC = () => {
             color: 'var(--color-text-primary)',
             border: '1px solid var(--color-divider)',
             borderRadius: 'var(--border-radius-m)',
+            fontSize: 'var(--font-size-body)',
+            fontFamily: 'var(--font-family)',
+            zIndex: 'var(--z-index-toast)'
           },
           success: {
             iconTheme: {
               primary: 'var(--color-positive)',
               secondary: 'white',
             },
+            style: {
+              borderLeft: '4px solid var(--color-positive)'
+            }
           },
           error: {
             iconTheme: {
               primary: 'var(--color-negative)',
               secondary: 'white',
             },
+            style: {
+              borderLeft: '4px solid var(--color-negative)'
+            }
           },
+          loading: {
+            iconTheme: {
+              primary: 'var(--color-accent)',
+              secondary: 'var(--color-background)',
+            }
+          }
+        }}
+        containerStyle={{
+          top: 'calc(var(--header-height) + var(--spacing-m))', // ПОД ХЭДЕРОМ
+          right: 'var(--spacing-m)',
+          zIndex: 'var(--z-index-toast)'
         }}
       />
     </div>

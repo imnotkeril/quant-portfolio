@@ -1,6 +1,6 @@
 /**
  * CSS Variables - Wild Market Capital
- * ПОЛНАЯ версия с исправленным контрастом
+ * ПОЛНАЯ версия с исправленным контрастом + Z-INDEX для layout
  */
 
 :root {
@@ -23,6 +23,7 @@
   --color-text-light: #FFFFFF;          /* Последовательный белый */
   --color-text-muted: #8B949E;          /* Средний серый */
   --color-text-disabled: #6E7681;       /* Темнее серый для отключенных */
+  --color-text-dark: #0D1015;           /* ДОБАВЛЕНО: для кнопок */
 
   /* Interactive Colors */
   --color-link: #BF9FFB;
@@ -83,6 +84,8 @@
   --color-neutral-800: #1F2937;
   --color-neutral-900: #111827;
   --color-neutral-gray: #8B949E;        /* Лучше видимость */
+  --color-neutral-1: #90BFF9;           /* ДОБАВЛЕНО: для графиков */
+  --color-neutral-2: #FFF59D;           /* ДОБАВЛЕНО: для графиков */
 
   /* Border Colors - УЛУЧШЕНЫ */
   --color-border: #30363D;
@@ -147,10 +150,37 @@
   --transition-medium: 0.25s ease-in-out;
   --transition-slow: 0.35s ease-in-out;
 
-  /* Layout Dimensions */
+  /* Layout Dimensions - ОСНОВНЫЕ ПЕРЕМЕННЫЕ */
   --sidebar-width: 280px;
   --sidebar-width-collapsed: 80px;
-  --header-height: 64px; /* УБЕДИЛСЯ ЧТО ЕСТЬ */
+  --header-height: 64px;
+
+  /* Z-INDEX СЛОИ - ДОБАВЛЕНО ДЛЯ ПРАВИЛЬНОГО LAYERING */
+  --z-index-base: 1;
+  --z-index-content: 10;
+  --z-index-page-header: 50;
+  --z-index-sidebar: 100;
+  --z-index-header: 999;               /* HEADER ВСЕГДА СВЕРХУ */
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1010;
+  --z-index-fixed: 1020;
+  --z-index-modal-backdrop: 1030;
+  --z-index-modal: 1040;
+  --z-index-popover: 1050;
+  --z-index-tooltip: 1060;
+  --z-index-toast: 1070;
+  --z-index-max: 9999;
+
+  /* LEGACY Z-INDEX SUPPORT */
+  --z-dropdown: 1000;
+  --z-sticky: 1010;
+  --z-fixed: 1020;
+  --z-modal-backdrop: 1030;
+  --z-modal: 1040;
+  --z-popover: 1050;
+  --z-tooltip: 1060;
+  --z-toast: 1070;
+  --z-index-elevated: 100;
 
   /* Component Variables - УЛУЧШЕНЫ */
   --card-background: rgba(26, 29, 36, 0.8);
@@ -180,15 +210,15 @@
   --table-row-even-background: rgba(42, 46, 57, 0.1);
   --table-row-hover-background: rgba(42, 46, 57, 0.3);
 
-  /* Z-Index Scale */
-  --z-dropdown: 1000;
-  --z-sticky: 1010;
-  --z-fixed: 1020;
-  --z-modal-backdrop: 1030;
-  --z-modal: 1040;
-  --z-popover: 1050;
-  --z-tooltip: 1060;
-  --z-toast: 1070;
+  /* SCROLLBAR ПЕРЕМЕННЫЕ - ДОБАВЛЕНО */
+  --scrollbar-width: 8px;
+  --scrollbar-track: rgba(42, 46, 57, 0.3);
+  --scrollbar-thumb: rgba(191, 159, 251, 0.5);
+  --scrollbar-thumb-hover: rgba(191, 159, 251, 0.7);
+
+  /* LAYOUT ПЕРЕМЕННЫЕ - ДОБАВЛЕНО */
+  --content-padding-top: calc(var(--header-height) + var(--spacing-m));
+  --content-max-width: 1400px;
 }
 
 /* Dark theme improvements */
@@ -212,6 +242,7 @@
     --color-border: #FFFFFF;
     --color-divider: #FFFFFF;
     --color-accent: #FFFFFF;
+    --z-index-header: 9999; /* УВЕЛИЧЕН для высокого контраста */
   }
 }
 
