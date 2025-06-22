@@ -1,16 +1,49 @@
 /**
  * API configuration
  * Contains base URLs, endpoints, and other API-related constants
+ * ИСПРАВЛЕННАЯ ВЕРСИЯ
  */
-// Get environment variables safely in React
+
+// Get environment variables safely in React - ИСПРАВЛЕННАЯ ФУНКЦИЯ
 const getEnvVar = (key: string, defaultValue: string): string => {
+  // В production среде Node.js
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[key] || defaultValue;
+  }
+
+  // В development среде для Vite
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return (import.meta.env as any)[key] || defaultValue;
+  }
+
+  // Для Create React App
   if (typeof window !== 'undefined' && (window as any).env) {
     return (window as any).env[key] || defaultValue;
   }
+
+  // Browser fallback для runtime config
+  if (typeof window !== 'undefined' && (window as any).__ENV__) {
+    return (window as any).__ENV__[key] || defaultValue;
+  }
+
   return defaultValue;
 };
 
+// API Base URL configuration
 export const API_BASE_URL = getEnvVar('REACT_APP_API_URL', 'http://localhost:8000/api/v1');
+
+// API timeout configuration
+export const API_TIMEOUT = 30000; // 30 seconds
+
+// API error codes
+export const API_ERROR_CODES = {
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  VALIDATION_ERROR: 422,
+  SERVER_ERROR: 500,
+  NETWORK_ERROR: 0,
+} as const;
 
 // Authentication endpoints
 export const AUTH_API = {
@@ -42,7 +75,7 @@ export const ASSET_API = {
   PERFORMANCE: (ticker: string) => `${API_BASE_URL}/assets/performance/${ticker}`,
   VALIDATE: (ticker: string) => `${API_BASE_URL}/assets/validate/${ticker}`,
   MARKET_STATUS: `${API_BASE_URL}/assets/market-status`,
-  SECTOR_PERFORMANCE: `${API_BASE_URL}/assets/sectors/performance`,
+  SECTOR_PERFORMANCE: `${API_BASE_URL}/assets/sector-performance`,
 };
 
 // Analytics endpoints
@@ -59,20 +92,20 @@ export const ANALYTICS_API = {
 export const ENHANCED_ANALYTICS_API = {
   ADVANCED_METRICS: `${API_BASE_URL}/enhanced-analytics/advanced-metrics`,
   ROLLING_METRICS: `${API_BASE_URL}/enhanced-analytics/rolling-metrics`,
-  SEASONAL_PATTERNS: `${API_BASE_URL}/enhanced-analytics/seasonal-patterns`,
-  CONFIDENCE_INTERVALS: `${API_BASE_URL}/enhanced-analytics/confidence-intervals`,
-  TAIL_RISK: `${API_BASE_URL}/enhanced-analytics/tail-risk`,
+  ATTRIBUTION: `${API_BASE_URL}/enhanced-analytics/attribution`,
+  BENCHMARK_ANALYSIS: `${API_BASE_URL}/enhanced-analytics/benchmark-analysis`,
+  CALENDAR_ANALYSIS: `${API_BASE_URL}/enhanced-analytics/calendar-analysis`,
+  FACTOR_ANALYSIS: `${API_BASE_URL}/enhanced-analytics/factor-analysis`,
 };
 
 // Optimization endpoints
 export const OPTIMIZATION_API = {
-  OPTIMIZE: `${API_BASE_URL}/optimization`,
   EFFICIENT_FRONTIER: `${API_BASE_URL}/optimization/efficient-frontier`,
-  MARKOWITZ: `${API_BASE_URL}/optimization/markowitz`,
+  OPTIMIZE: `${API_BASE_URL}/optimization/optimize`,
   RISK_PARITY: `${API_BASE_URL}/optimization/risk-parity`,
+  MEAN_VARIANCE: `${API_BASE_URL}/optimization/mean-variance`,
   MINIMUM_VARIANCE: `${API_BASE_URL}/optimization/minimum-variance`,
   MAXIMUM_SHARPE: `${API_BASE_URL}/optimization/maximum-sharpe`,
-  EQUAL_WEIGHT: `${API_BASE_URL}/optimization/equal-weight`,
 };
 
 // Advanced optimization endpoints
@@ -119,61 +152,61 @@ export const HISTORICAL_API = {
 
 // Comparison endpoints
 export const COMPARISON_API = {
-  COMPARE: `${API_BASE_URL}/comparison`,
+  COMPARE: `${API_BASE_URL}/comparison/compare`,
   COMPOSITION: `${API_BASE_URL}/comparison/composition`,
   PERFORMANCE: `${API_BASE_URL}/comparison/performance`,
   RISK: `${API_BASE_URL}/comparison/risk`,
   SECTORS: `${API_BASE_URL}/comparison/sectors`,
-  DIFFERENTIAL_RETURNS: `${API_BASE_URL}/comparison/differential-returns`,
   SCENARIOS: `${API_BASE_URL}/comparison/scenarios`,
+  DIFFERENTIAL: `${API_BASE_URL}/comparison/differential`,
 };
 
 // Report endpoints
 export const REPORT_API = {
   GENERATE: `${API_BASE_URL}/reports/generate`,
-  COMPARE: `${API_BASE_URL}/reports/compare`,
+  LIST: `${API_BASE_URL}/reports/list`,
+  DOWNLOAD: (reportId: string) => `${API_BASE_URL}/reports/download/${reportId}`,
+  DELETE: (reportId: string) => `${API_BASE_URL}/reports/${reportId}`,
   SCHEDULE: `${API_BASE_URL}/reports/schedule`,
-  SCHEDULED: `${API_BASE_URL}/reports/scheduled`,
-  CANCEL_SCHEDULED: (id: string) => `${API_BASE_URL}/reports/scheduled/${id}`,
-  HISTORY: `${API_BASE_URL}/reports/history`,
   TEMPLATES: `${API_BASE_URL}/reports/templates`,
-  DOWNLOAD: (id: string) => `${API_BASE_URL}/reports/download/${id}`,
 };
 
 // System endpoints
 export const SYSTEM_API = {
-  HEALTH: `${API_BASE_URL}/system/health`,
+  HEALTH: `${API_BASE_URL}/health`,
   INFO: `${API_BASE_URL}/system/info`,
-  CONFIG: `${API_BASE_URL}/system/config`,
-  PING: `${API_BASE_URL}/system/ping`,
+  STATUS: `${API_BASE_URL}/system/status`,
 };
 
-// API request timeout in milliseconds
-export const API_TIMEOUT = 30000;
-
-// API error codes
-export const API_ERROR_CODES = {
-  UNAUTHORIZED: 401,
-  FORBIDDEN: 403,
-  NOT_FOUND: 404,
-  SERVER_ERROR: 500,
+// Consolidated endpoints object for easier imports
+export const endpoints = {
+  auth: AUTH_API,
+  portfolio: PORTFOLIO_API,
+  asset: ASSET_API,
+  analytics: ANALYTICS_API,
+  enhancedAnalytics: ENHANCED_ANALYTICS_API,
+  optimization: OPTIMIZATION_API,
+  advancedOptimization: ADVANCED_OPTIMIZATION_API,
+  risk: RISK_API,
+  scenario: SCENARIO_API,
+  historical: HISTORICAL_API,
+  comparison: COMPARISON_API,
+  report: REPORT_API,
+  system: SYSTEM_API,
 };
 
-export default {
-  API_BASE_URL,
-  AUTH_API,
-  PORTFOLIO_API,
-  ASSET_API,
-  ANALYTICS_API,
-  ENHANCED_ANALYTICS_API,
-  OPTIMIZATION_API,
-  ADVANCED_OPTIMIZATION_API,
-  RISK_API,
-  SCENARIO_API,
-  HISTORICAL_API,
-  COMPARISON_API,
-  REPORT_API,
-  SYSTEM_API,
-  API_TIMEOUT,
-  API_ERROR_CODES,
+// Export API configuration
+export const API_CONFIG = {
+  baseURL: API_BASE_URL,
+  timeout: API_TIMEOUT,
+  errorCodes: API_ERROR_CODES,
 };
+
+// Debug information for development
+if (getEnvVar('REACT_APP_DEBUG', 'false') === 'true') {
+  console.log('🔧 API Configuration:', {
+    baseURL: API_BASE_URL,
+    timeout: API_TIMEOUT,
+    environment: getEnvVar('REACT_APP_ENV', 'development'),
+  });
+}

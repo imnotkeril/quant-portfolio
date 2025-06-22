@@ -20,7 +20,10 @@ class Settings(BaseSettings):
 
     # API
     API_PREFIX: str = "/api/v1"
-    CORS_ORIGINS: List[str] = ["*"]
+    CORS_ORIGINS: List[str] = Field(
+        default=["http://localhost:3000", "http://127.0.0.1:3000", "http://0.0.0.0:3000"],
+        env="CORS_ORIGINS"
+    )
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
