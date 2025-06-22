@@ -1,20 +1,49 @@
-/* Dashboard.module.css - ПОЛНАЯ ВЫСОТА СТРАНИЦЫ */
+/* Beautiful Dashboard.module.css - Wild Market Capital */
 
 .dashboard {
-  min-height: 100%; /* ЗАНИМАЕТ ВСЮ ДОСТУПНУЮ ВЫСОТУ */
+  min-height: 100%;
   background-color: var(--color-background);
   display: flex;
   flex-direction: column;
+  gap: var(--spacing-l);
+}
+
+/* Welcome Section - FIXED POSITIONING */
+.welcomeSection {
+  position: relative;
+  z-index: 10; /* БЕЗОПАСНЫЙ Z-INDEX */
+  margin-bottom: var(--spacing-xl);
 }
 
 .welcomeCard {
-  background: var(--gradient-card);
+  background: linear-gradient(135deg,
+    rgba(191, 159, 251, 0.08) 0%,
+    rgba(191, 159, 251, 0.04) 50%,
+    rgba(144, 191, 249, 0.04) 100%
+  );
   border: 1px solid var(--color-divider);
-  border-radius: var(--border-radius-l);
-  padding: var(--spacing-xl);
-  margin-bottom: var(--spacing-xl);
+  border-radius: var(--border-radius-xl);
+  padding: var(--spacing-xxxl);
   text-align: center;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+}
+
+.welcomeCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--color-accent) 20%,
+    var(--color-neutral-1) 50%,
+    var(--color-accent) 80%,
+    transparent 100%
+  );
 }
 
 .welcomeTitle {
@@ -22,105 +51,384 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-text-light);
   margin: 0 0 var(--spacing-s) 0;
+  background: linear-gradient(135deg, var(--color-text-light) 0%, var(--color-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.welcomeSubtitle {
+.welcomeText {
   font-size: var(--font-size-body);
   color: var(--color-neutral-gray);
   margin: 0 0 var(--spacing-l) 0;
   line-height: 1.6;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .welcomeActions {
   display: flex;
   justify-content: center;
   gap: var(--spacing-m);
+  flex-wrap: wrap;
 }
 
-/* ИСПРАВЛЕНО: Content layout с полной высотой */
+.primaryButton {
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-hover) 100%);
+  color: var(--color-text-dark);
+  border: none;
+  border-radius: var(--border-radius-m);
+  padding: var(--spacing-m) var(--spacing-xl);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  box-shadow: 0 4px 16px rgba(191, 159, 251, 0.3);
+}
+
+.primaryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(191, 159, 251, 0.4);
+}
+
+.secondaryButton {
+  background: transparent;
+  color: var(--color-accent);
+  border: 2px solid var(--color-accent);
+  border-radius: var(--border-radius-m);
+  padding: var(--spacing-m) var(--spacing-xl);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semi-bold);
+  cursor: pointer;
+  transition: all var(--transition-medium);
+}
+
+.secondaryButton:hover {
+  background: rgba(191, 159, 251, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Content Grid */
 .content {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: var(--spacing-xl);
   max-width: 1400px;
   margin: 0 auto;
+  width: 100%;
   align-items: start;
-  flex: 1; /* ЗАНИМАЕТ ВСЁ ОСТАВШЕЕСЯ МЕСТО */
-  min-height: 0; /* ПОЗВОЛЯЕТ СЖИМАТЬСЯ */
+  flex: 1;
+  min-height: 0;
 }
 
 .leftPanel {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xl);
+  gap: var(--spacing-l);
   min-width: 0;
-  min-height: 100%; /* ЗАПОЛНЯЕТ ВЫСОТУ */
 }
 
 .rightPanel {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xl);
+  gap: var(--spacing-l);
   min-width: 0;
-  min-height: 100%; /* ЗАПОЛНЯЕТ ВЫСОТУ */
 }
 
+/* Sections */
 .section {
-  background: var(--gradient-card);
+  background: linear-gradient(135deg,
+    rgba(26, 29, 36, 0.9) 0%,
+    rgba(42, 46, 57, 0.6) 100%
+  );
   border: 1px solid var(--color-divider);
   border-radius: var(--border-radius-l);
   padding: var(--spacing-l);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px);
   position: relative;
-  flex: 1; /* РАСТЯГИВАЕТСЯ ПО ВЫСОТЕ */
-  display: flex;
-  flex-direction: column;
+  overflow: hidden;
+  transition: all var(--transition-medium);
+}
+
+.section:hover {
+  border-color: rgba(191, 159, 251, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .sectionTitle {
   font-size: var(--font-size-h3);
   font-weight: var(--font-weight-semi-bold);
   color: var(--color-text-light);
-  margin: 0 0 var(--spacing-m) 0;
+  margin: 0 0 var(--spacing-l) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+}
+
+.sectionTitle::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-neutral-1) 100%);
+  border-radius: 2px;
 }
 
 .sectionContent {
-  flex: 1; /* ЗАНИМАЕТ ОСТАВШЕЕСЯ МЕСТО В СЕКЦИИ */
+  flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-/* Portfolio grid - ЗАПОЛНЯЕТ ДОСТУПНУЮ ВЫСОТУ */
+/* Portfolio Grid */
 .portfolioGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--spacing-m);
-  margin-top: var(--spacing-m);
-  flex: 1; /* РАСТЯГИВАЕТСЯ ПО ВЫСОТЕ */
-  align-content: start; /* ВЫРАВНИВАНИЕ СВЕРХУ */
+  margin-top: var(--spacing-s);
 }
 
+.portfolioCard {
+  background: linear-gradient(135deg,
+    rgba(42, 46, 57, 0.4) 0%,
+    rgba(42, 46, 57, 0.2) 100%
+  );
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-l);
+  padding: var(--spacing-l);
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  position: relative;
+  overflow: hidden;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.portfolioCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    var(--color-accent) 0%,
+    var(--color-neutral-1) 50%,
+    var(--color-accent) 100%
+  );
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.portfolioCard:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(191, 159, 251, 0.2);
+}
+
+.portfolioCard:hover::before {
+  opacity: 1;
+}
+
+.portfolioHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-m);
+}
+
+.portfolioName {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0;
+}
+
+.portfolioValue {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-light);
+  text-align: right;
+}
+
+.portfolioChange {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.portfolioChange.positive {
+  color: var(--color-positive);
+}
+
+.portfolioChange.negative {
+  color: var(--color-negative);
+}
+
+/* Action Grid */
+.actionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-m);
+  margin-top: var(--spacing-s);
+}
+
+.actionCard {
+  background: linear-gradient(135deg,
+    rgba(42, 46, 57, 0.3) 0%,
+    rgba(42, 46, 57, 0.1) 100%
+  );
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-l);
+  padding: var(--spacing-l);
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  text-align: center;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-s);
+}
+
+.actionCard:hover {
+  border-color: var(--color-accent);
+  background: linear-gradient(135deg,
+    rgba(191, 159, 251, 0.1) 0%,
+    rgba(144, 191, 249, 0.05) 100%
+  );
+  transform: translateY(-2px);
+}
+
+.actionIcon {
+  font-size: 32px;
+  margin-bottom: var(--spacing-s);
+  color: var(--color-accent);
+}
+
+.actionTitle {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin: 0;
+}
+
+.actionDescription {
+  font-size: var(--font-size-body);
+  color: var(--color-neutral-gray);
+  margin: 0;
+}
+
+/* Market Overview */
+.marketGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-m);
+  margin-top: var(--spacing-s);
+}
+
+.marketCard {
+  background: linear-gradient(135deg,
+    rgba(42, 46, 57, 0.3) 0%,
+    rgba(42, 46, 57, 0.1) 100%
+  );
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-m);
+  padding: var(--spacing-m);
+  transition: all var(--transition-fast);
+}
+
+.marketCard:hover {
+  border-color: rgba(191, 159, 251, 0.3);
+}
+
+.marketName {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-gray);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.marketValue {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-light);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.marketChange {
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+}
+
+.marketChange.positive {
+  color: var(--color-positive);
+}
+
+.marketChange.negative {
+  color: var(--color-negative);
+}
+
+/* Chart Section */
+.chartSection {
+  grid-column: 1 / -1;
+  margin-top: var(--spacing-l);
+}
+
+.chartContainer {
+  background: linear-gradient(135deg,
+    rgba(26, 29, 36, 0.8) 0%,
+    rgba(42, 46, 57, 0.4) 100%
+  );
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-l);
+  padding: var(--spacing-l);
+  margin-top: var(--spacing-m);
+}
+
+/* Empty States */
 .emptyState {
   grid-column: 1 / -1;
   text-align: center;
-  padding: var(--spacing-xxl);
+  padding: var(--spacing-xxxl);
   color: var(--color-neutral-gray);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 300px; /* МИНИМАЛЬНАЯ ВЫСОТА ДЛЯ ПУСТОГО СОСТОЯНИЯ */
+  min-height: 300px;
+  background: linear-gradient(135deg,
+    rgba(42, 46, 57, 0.2) 0%,
+    rgba(42, 46, 57, 0.05) 100%
+  );
+  border: 2px dashed var(--color-divider);
+  border-radius: var(--border-radius-l);
 }
 
 .emptyIcon {
   font-size: 48px;
   margin-bottom: var(--spacing-m);
   opacity: 0.5;
+  color: var(--color-accent);
+}
+
+.emptyTitle {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-s);
 }
 
 .emptyText {
-  font-size: var(--font-size-h3);
+  font-size: var(--font-size-body);
   margin-bottom: var(--spacing-l);
+  max-width: 400px;
 }
 
 .createButton {
@@ -140,193 +448,7 @@
   filter: brightness(1.1);
 }
 
-/* Portfolio cards */
-.portfolioCard {
-  background: linear-gradient(135deg, rgba(42, 46, 57, 0.4) 0%, rgba(42, 46, 57, 0.2) 100%);
-  border: 1px solid var(--color-divider);
-  border-radius: var(--border-radius-l);
-  padding: var(--spacing-l);
-  cursor: pointer;
-  transition: all var(--transition-medium);
-  position: relative;
-  overflow: hidden;
-  min-height: 120px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.portfolioCard:hover {
-  border-color: var(--color-accent);
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-glow);
-}
-
-.portfolioCard.selected {
-  border-color: var(--color-accent);
-  box-shadow: var(--shadow-glow);
-}
-
-.portfolioCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--gradient-primary);
-  transform: scaleX(0);
-  transition: transform var(--transition-medium);
-}
-
-.portfolioCard:hover::before,
-.portfolioCard.selected::before {
-  transform: scaleX(1);
-}
-
-.portfolioHeader {
-  margin-bottom: var(--spacing-m);
-}
-
-.portfolioName {
-  font-size: var(--font-size-h3);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-light);
-  margin: 0 0 var(--spacing-xs) 0;
-  line-height: 1.2;
-}
-
-.portfolioValue {
-  font-size: 20px;
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-light);
-  margin-bottom: var(--spacing-s);
-  line-height: 1.2;
-}
-
-.portfolioChange {
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-medium);
-  line-height: 1.2;
-}
-
-.positive {
-  color: var(--color-positive);
-}
-
-.negative {
-  color: var(--color-negative);
-}
-
-/* Action grid */
-.actionGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--spacing-m);
-  margin-top: var(--spacing-m);
-  flex: 1; /* ЗАПОЛНЯЕТ ДОСТУПНУЮ ВЫСОТУ */
-  align-content: start;
-}
-
-.actionCard {
-  background: linear-gradient(135deg, rgba(42, 46, 57, 0.4) 0%, rgba(42, 46, 57, 0.2) 100%);
-  border: 1px solid var(--color-divider);
-  border-radius: var(--border-radius-l);
-  padding: var(--spacing-l);
-  text-align: center;
-  cursor: pointer;
-  transition: all var(--transition-medium);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 120px;
-}
-
-.actionCard:hover {
-  border-color: var(--color-accent);
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-glow);
-}
-
-.actionIcon {
-  font-size: 32px;
-  margin-bottom: var(--spacing-m);
-  color: var(--color-accent);
-}
-
-.actionTitle {
-  font-size: var(--font-size-h3);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-light);
-  margin: 0 0 var(--spacing-s) 0;
-}
-
-.actionDescription {
-  font-size: var(--font-size-body);
-  color: var(--color-neutral-gray);
-  margin: 0;
-  line-height: 1.4;
-}
-
-/* Market cards */
-.marketCard {
-  background: linear-gradient(135deg, rgba(42, 46, 57, 0.4) 0%, rgba(42, 46, 57, 0.2) 100%);
-  border: 1px solid var(--color-divider);
-  border-radius: var(--border-radius-l);
-  padding: var(--spacing-l);
-  margin-bottom: var(--spacing-m);
-  transition: all var(--transition-medium);
-}
-
-.marketCard:hover {
-  border-color: var(--color-accent);
-  transform: translateY(-2px);
-}
-
-.marketLabel {
-  font-size: var(--font-size-body);
-  color: var(--color-neutral-gray);
-  margin: 0 0 4px 0;
-  line-height: 1.2;
-}
-
-.marketValue {
-  font-size: var(--font-size-h3);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-light);
-  margin: 0 0 4px 0;
-  line-height: 1.2;
-}
-
-.marketChange {
-  font-size: var(--font-size-caption);
-  font-weight: var(--font-weight-medium);
-  margin: 0;
-  line-height: 1.2;
-}
-
-.chartSection {
-  background: var(--gradient-card);
-  border: 1px solid var(--color-divider);
-  border-radius: var(--border-radius-l);
-  padding: var(--spacing-l);
-  backdrop-filter: blur(10px);
-  flex: 1; /* ЗАПОЛНЯЕТ ДОСТУПНУЮ ВЫСОТУ */
-  display: flex;
-  flex-direction: column;
-}
-
-.chartContainer {
-  margin-top: var(--spacing-m);
-  border-radius: var(--border-radius-m);
-  overflow: hidden;
-  min-height: 300px;
-  flex: 1; /* РАСТЯГИВАЕТСЯ ПО ВЫСОТЕ */
-  position: relative;
-}
-
-/* Responsive design */
+/* Responsive Design */
 @media (max-width: 1200px) {
   .content {
     grid-template-columns: 1fr;
@@ -343,6 +465,20 @@
 }
 
 @media (max-width: 768px) {
+  .welcomeCard {
+    padding: var(--spacing-l);
+    margin-bottom: var(--spacing-l);
+  }
+
+  .welcomeTitle {
+    font-size: var(--font-size-h2);
+  }
+
+  .welcomeActions {
+    flex-direction: column;
+    align-items: center;
+  }
+
   .content {
     gap: var(--spacing-m);
   }
@@ -357,13 +493,9 @@
     gap: var(--spacing-s);
   }
 
-  .welcomeActions {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .welcomeCard {
-    padding: var(--spacing-l);
+  .marketGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-s);
   }
 
   .section {
@@ -372,63 +504,79 @@
 }
 
 @media (max-width: 480px) {
+  .welcomeCard {
+    padding: var(--spacing-m);
+  }
+
   .actionGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .marketGrid {
     grid-template-columns: 1fr;
   }
 
   .actionCard {
     padding: var(--spacing-m);
-    min-height: 80px;
+    min-height: 100px;
   }
 
   .portfolioCard {
     padding: var(--spacing-m);
-    min-height: 100px;
-  }
-
-  .welcomeCard {
-    padding: var(--spacing-m);
-  }
-
-  .welcomeTitle {
-    font-size: var(--font-size-h2);
+    min-height: 120px;
   }
 }
 
-/* ДОБАВЛЕНО: Стили для страниц с минимальным контентом */
-.centeredContent {
+/* Loading States */
+.loading {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
-  min-height: 60vh;
-  text-align: center;
-  padding: var(--spacing-xxxl);
+  padding: var(--spacing-xl);
+  color: var(--color-neutral-gray);
 }
 
-.centeredTitle {
-  font-size: var(--font-size-h1);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
-  margin: 0 0 var(--spacing-m) 0;
+.loadingSpinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(191, 159, 251, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--color-accent);
+  animation: spin 1s linear infinite;
+  margin-right: var(--spacing-s);
 }
 
-.centeredDescription {
-  font-size: var(--font-size-body);
-  color: var(--color-text-secondary);
-  max-width: 500px;
-  line-height: var(--line-height-body);
-  margin: 0 0 var(--spacing-xl) 0;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.centeredActions {
-  display: flex;
-  gap: var(--spacing-m);
-  justify-content: center;
-  flex-wrap: wrap;
+/* Animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Ensure proper stacking */
+.section {
+  animation: slideInUp 0.6s ease-out;
+}
+
+.portfolioCard {
+  animation: slideInUp 0.6s ease-out;
+}
+
+.actionCard {
+  animation: slideInUp 0.6s ease-out;
+}
+
+/* Stacking Context */
 .section,
 .portfolioCard,
 .actionCard,
@@ -447,6 +595,7 @@
 }
 
 .portfolioGrid > *,
-.actionGrid > * {
+.actionGrid > *,
+.marketGrid > * {
   min-width: 0;
 }

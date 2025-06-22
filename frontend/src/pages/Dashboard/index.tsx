@@ -1,4 +1,4 @@
-// src/pages/Dashboard/index.tsx
+// Beautiful Dashboard Component - index.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -13,32 +13,62 @@ interface Portfolio {
   assets: number;
 }
 
+interface MarketIndex {
+  name: string;
+  value: number;
+  change: number;
+  changePercent: number;
+}
+
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [portfolios] = useState<Portfolio[]>([
     {
       id: '1',
+      name: 'Growth Portfolio',
+      value: 125420.87,
+      change: 2341.23,
+      changePercent: 1.91,
+      assets: 12
+    },
+    {
+      id: '2',
+      name: 'Conservative Portfolio',
+      value: 89650.45,
+      change: 456.78,
+      changePercent: 0.51,
+      assets: 8
+    },
+    {
+      id: '3',
+      name: 'Tech Focus',
+      value: 67890.12,
+      change: -1234.56,
+      changePercent: -1.78,
+      assets: 15
+    }
+  ]);
+
+  const [marketData] = useState<MarketIndex[]>([
+    {
       name: 'S&P 500',
       value: 4558.87,
       change: 81.23,
       changePercent: 1.81
     },
     {
-      id: '2',
       name: 'NASDAQ',
       value: 15848.0,
       change: 233.45,
       changePercent: 1.50
     },
     {
-      id: '3',
       name: 'Dow Jones',
       value: 34786.45,
       change: 156.78,
       changePercent: 0.45
     },
     {
-      id: '4',
       name: 'VIX',
       value: 18.42,
       change: -0.67,
@@ -47,14 +77,46 @@ const Dashboard: React.FC = () => {
   ]);
 
   const [selectedPortfolio, setSelectedPortfolio] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const performanceData = [
-    { name: 'Jan', portfolio: 4000, benchmark: 3000 },
-    { name: 'Feb', portfolio: 3000, benchmark: 2000 },
-    { name: 'Mar', portfolio: 5000, benchmark: 4000 },
-    { name: 'Apr', portfolio: 4500, benchmark: 3800 },
-    { name: 'May', portfolio: 6000, benchmark: 5000 },
-    { name: 'Jun', portfolio: 8000, benchmark: 6000 },
+    { name: 'Jan', portfolio: 98000, benchmark: 95000 },
+    { name: 'Feb', portfolio: 102000, benchmark: 97000 },
+    { name: 'Mar', portfolio: 108000, benchmark: 101000 },
+    { name: 'Apr', portfolio: 105000, benchmark: 103000 },
+    { name: 'May', portfolio: 115000, benchmark: 108000 },
+    { name: 'Jun', portfolio: 125000, benchmark: 112000 },
+  ];
+
+  const quickActions = [
+    {
+      id: 'create-portfolio',
+      title: 'Create Portfolio',
+      description: 'Build a new investment portfolio',
+      icon: '📊',
+      action: () => navigate('/portfolio/create')
+    },
+    {
+      id: 'market-analysis',
+      title: 'Market Analysis',
+      description: 'Explore market insights',
+      icon: '📈',
+      action: () => navigate('/analytics')
+    },
+    {
+      id: 'risk-assessment',
+      title: 'Risk Assessment',
+      description: 'Analyze portfolio risks',
+      icon: '⚖️',
+      action: () => navigate('/risk')
+    },
+    {
+      id: 'optimization',
+      title: 'Optimization',
+      description: 'Optimize allocations',
+      icon: '⚡',
+      action: () => navigate('/optimization')
+    }
   ];
 
   const handleCreatePortfolio = () => {
@@ -62,12 +124,32 @@ const Dashboard: React.FC = () => {
   };
 
   const handleExploreDemo = () => {
-    // Идем на Analytics (PortfolioAnalysis)
     navigate('/analytics');
   };
 
   const handlePortfolioClick = (portfolioId: string) => {
     setSelectedPortfolio(portfolioId);
+    navigate(`/portfolio/${portfolioId}`);
+  };
+
+  const formatCurrency = (value: number): string => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
+  };
+
+  const formatNumber = (value: number): string => {
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
+  };
+
+  const formatPercentage = (value: number): string => {
+    return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
   };
 
   return (
@@ -75,163 +157,173 @@ const Dashboard: React.FC = () => {
       {/* Welcome Section */}
       <div className={styles.welcomeSection}>
         <div className={styles.welcomeCard}>
-          <h2 className={styles.welcomeTitle}>Welcome to Portfolio Management</h2>
+          <h1 className={styles.welcomeTitle}>Welcome to Portfolio Management</h1>
           <p className={styles.welcomeText}>
             Discover advanced portfolio analysis, enhance your portfolio
             performance, optimize allocations, and manage risk with our
-            comprehensive tools.
+            comprehensive suite of professional tools.
           </p>
           <div className={styles.welcomeActions}>
             <button className={styles.primaryButton} onClick={handleCreatePortfolio}>
-              Create Your First Portfolio
+              <span>Create Your First Portfolio</span>
             </button>
             <button className={styles.secondaryButton} onClick={handleExploreDemo}>
-              Explore Demo
+              <span>Explore Demo</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Content Grid */}
+      {/* Main Content Grid */}
       <div className={styles.content}>
-        {/* Left Panel - Portfolios */}
+        {/* Left Panel */}
         <div className={styles.leftPanel}>
+          {/* Your Portfolios */}
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>Your Portfolios</h3>
-            <div className={styles.portfolioGrid}>
+            <h2 className={styles.sectionTitle}>Your Portfolios</h2>
+            <div className={styles.sectionContent}>
               {portfolios.length === 0 ? (
                 <div className={styles.emptyState}>
                   <div className={styles.emptyIcon}>📊</div>
-                  <p className={styles.emptyText}>No portfolios yet</p>
+                  <h3 className={styles.emptyTitle}>No Portfolios Yet</h3>
+                  <p className={styles.emptyText}>
+                    Create your first portfolio to start tracking and optimizing your investments.
+                  </p>
                   <button className={styles.createButton} onClick={handleCreatePortfolio}>
                     Create Portfolio
                   </button>
                 </div>
               ) : (
-                portfolios.map((portfolio) => (
-                  <div
-                    key={portfolio.id}
-                    className={`${styles.portfolioCard} ${selectedPortfolio === portfolio.id ? styles.selected : ''}`}
-                    onClick={() => handlePortfolioClick(portfolio.id)}
-                  >
-                    <div className={styles.portfolioHeader}>
-                      <h4 className={styles.portfolioName}>{portfolio.name}</h4>
+                <div className={styles.portfolioGrid}>
+                  {portfolios.map((portfolio) => (
+                    <div
+                      key={portfolio.id}
+                      className={styles.portfolioCard}
+                      onClick={() => handlePortfolioClick(portfolio.id)}
+                    >
+                      <div className={styles.portfolioHeader}>
+                        <div>
+                          <h3 className={styles.portfolioName}>{portfolio.name}</h3>
+                          <p style={{
+                            fontSize: 'var(--font-size-caption)',
+                            color: 'var(--color-neutral-gray)',
+                            margin: '4px 0 0 0'
+                          }}>
+                            {portfolio.assets} assets
+                          </p>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div className={styles.portfolioValue}>
+                            {formatCurrency(portfolio.value)}
+                          </div>
+                          <div className={`${styles.portfolioChange} ${
+                            portfolio.change >= 0 ? styles.positive : styles.negative
+                          }`}>
+                            {formatCurrency(Math.abs(portfolio.change))}
+                            ({formatPercentage(portfolio.changePercent)})
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className={styles.portfolioValue}>
-                      ${portfolio.value.toLocaleString()}
-                    </div>
-                    <div className={styles.portfolioChange}>
-                      <span className={portfolio.change >= 0 ? styles.positive : styles.negative}>
-                        {portfolio.change >= 0 ? '+' : ''}
-                        ${Math.abs(portfolio.change).toFixed(2)} ({portfolio.changePercent}%)
-                      </span>
-                    </div>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
             </div>
           </div>
 
-          {/* Action Cards */}
-          <div className={styles.actionGrid}>
-            <div className={styles.actionCard} onClick={handleCreatePortfolio}>
-              <div className={styles.actionIcon}>+</div>
-              <div className={styles.actionText}>
-                <div className={styles.actionTitle}>Create Portfolio</div>
-                <div className={styles.actionDesc}>Build new portfolio</div>
-              </div>
-            </div>
-
-            <div className={styles.actionCard}>
-              <div className={styles.actionIcon}>📈</div>
-              <div className={styles.actionText}>
-                <div className={styles.actionTitle}>Market Analysis</div>
-                <div className={styles.actionDesc}>View market insights</div>
-              </div>
-            </div>
-
-            <div className={styles.actionCard}>
-              <div className={styles.actionIcon}>⚖️</div>
-              <div className={styles.actionText}>
-                <div className={styles.actionTitle}>Risk Assessment</div>
-                <div className={styles.actionDesc}>Analyze portfolio risk</div>
-              </div>
-            </div>
-
-            <div className={styles.actionCard}>
-              <div className={styles.actionIcon}>📊</div>
-              <div className={styles.actionText}>
-                <div className={styles.actionTitle}>Performance</div>
-                <div className={styles.actionDesc}>Track performance</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Panel - Market Overview */}
-        <div className={styles.rightPanel}>
-          <div className={styles.marketOverview}>
-            <h3 className={styles.sectionTitle}>Market Overview</h3>
-            <div className={styles.marketCards}>
-              {portfolios.map((portfolio) => (
-                <div key={portfolio.id} className={styles.marketCard}>
-                  <div className={styles.marketName}>{portfolio.name}</div>
-                  <div className={styles.marketValue}>
-                    ${portfolio.value.toLocaleString()}
-                  </div>
-                  <div className={`${styles.marketChange} ${portfolio.change >= 0 ? styles.positive : styles.negative}`}>
-                    {portfolio.change >= 0 ? '+' : ''}${Math.abs(portfolio.change).toFixed(2)} ({portfolio.changePercent}%)
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Performance Chart */}
-          {selectedPortfolio && (
-            <div className={styles.chartSection}>
-              <h3 className={styles.sectionTitle}>Portfolio Performance</h3>
+          {portfolios.length > 0 && (
+            <div className={styles.section}>
+              <h2 className={styles.sectionTitle}>Portfolio Performance</h2>
               <div className={styles.chartContainer}>
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={250}>
                   <LineChart data={performanceData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#2A2E39" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-divider)" />
                     <XAxis
                       dataKey="name"
-                      stroke="#D1D4DC"
-                      fontSize={10}
+                      stroke="var(--color-neutral-gray)"
+                      fontSize={12}
                     />
                     <YAxis
-                      stroke="#D1D4DC"
-                      fontSize={10}
+                      stroke="var(--color-neutral-gray)"
+                      fontSize={12}
+                      tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#1A1E2A',
-                        border: '1px solid #2A2E39',
-                        borderRadius: '8px',
-                        color: '#FFFFFF'
+                        backgroundColor: 'var(--card-background)',
+                        border: '1px solid var(--color-divider)',
+                        borderRadius: 'var(--border-radius-s)',
+                        color: 'var(--color-text-light)',
+                        fontSize: 'var(--font-size-body)'
                       }}
+                      formatter={(value: any) => [formatCurrency(value), '']}
                     />
                     <Line
                       type="monotone"
                       dataKey="portfolio"
-                      stroke="#BF9FFB"
-                      strokeWidth={2}
-                      dot={{ fill: '#BF9FFB', strokeWidth: 2, r: 4 }}
+                      stroke="var(--color-accent)"
+                      strokeWidth={3}
+                      dot={{ fill: 'var(--color-accent)', strokeWidth: 2, r: 5 }}
+                      name="Portfolio"
                     />
                     <Line
                       type="monotone"
                       dataKey="benchmark"
-                      stroke="#90BFF9"
+                      stroke="var(--color-neutral-1)"
                       strokeWidth={2}
                       strokeDasharray="5 5"
-                      dot={{ fill: '#90BFF9', strokeWidth: 2, r: 4 }}
+                      dot={{ fill: 'var(--color-neutral-1)', strokeWidth: 2, r: 4 }}
+                      name="Benchmark"
                     />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             </div>
           )}
+        </div>
+
+        {/* Right Panel */}
+        <div className={styles.rightPanel}>
+          {/* Quick Actions */}
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Quick Actions</h2>
+            <div className={styles.actionGrid}>
+              {quickActions.map((action) => (
+                <div
+                  key={action.id}
+                  className={styles.actionCard}
+                  onClick={action.action}
+                >
+                  <div className={styles.actionIcon}>{action.icon}</div>
+                  <h3 className={styles.actionTitle}>{action.title}</h3>
+                  <p className={styles.actionDescription}>{action.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Market Overview */}
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Market Overview</h2>
+            <div className={styles.marketGrid}>
+              {marketData.map((market) => (
+                <div key={market.name} className={styles.marketCard}>
+                  <div className={styles.marketName}>{market.name}</div>
+                  <div className={styles.marketValue}>
+                    {formatNumber(market.value)}
+                  </div>
+                  <div className={`${styles.marketChange} ${
+                    market.change >= 0 ? styles.positive : styles.negative
+                  }`}>
+                    {market.change >= 0 ? '+' : ''}
+                    {formatNumber(Math.abs(market.change))}
+                    ({formatPercentage(market.changePercent)})
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

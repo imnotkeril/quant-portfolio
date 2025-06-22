@@ -1,74 +1,56 @@
-/**
- * PageContainer Component
- * Main container for page content with consistent layout
- */
-import React from 'react';
+// PageContainer Component - Unified page structure
+import React, { ReactNode } from 'react';
 import classNames from 'classnames';
-import { useLayout } from '../../../contexts/LayoutContext';
 import styles from './PageContainer.module.css';
 
 interface PageContainerProps {
-  children: React.ReactNode;
+  children: ReactNode;
+  className?: string;
   title?: string;
   subtitle?: string;
-  actions?: React.ReactNode;
-  breadcrumb?: React.ReactNode;
-  className?: string;
-  fluid?: boolean;
-  noPadding?: boolean;
-  noScroll?: boolean;
+  actions?: ReactNode;
+  fullHeight?: boolean;
+  scrollable?: boolean;
+  padding?: 'none' | 'small' | 'medium' | 'large';
   'data-testid'?: string;
 }
 
 export const PageContainer: React.FC<PageContainerProps> = ({
   children,
+  className,
   title,
   subtitle,
   actions,
-  breadcrumb,
-  className,
-  fluid = false,
-  noPadding = false,
-  noScroll = false,
+  fullHeight = true,
+  scrollable = true,
+  padding = 'medium',
   'data-testid': testId,
 }) => {
-  const { isFullScreen, isMobile } = useLayout();
-
   const containerClasses = classNames(
     styles.container,
     {
-      [styles.fluid]: fluid,
-      [styles.noPadding]: noPadding,
-      [styles.noScroll]: noScroll,
-      [styles.fullScreen]: isFullScreen,
-      [styles.mobile]: isMobile,
+      [styles.fullHeight]: fullHeight,
+      [styles.scrollable]: scrollable,
+      [styles.paddingNone]: padding === 'none',
+      [styles.paddingSmall]: padding === 'small',
+      [styles.paddingMedium]: padding === 'medium',
+      [styles.paddingLarge]: padding === 'large',
     },
     className
   );
 
-  const hasHeader = title || subtitle || actions || breadcrumb;
-
   return (
     <div className={containerClasses} data-testid={testId}>
-      {hasHeader && (
+      {(title || subtitle || actions) && (
         <div className={styles.header}>
-          {breadcrumb && (
-            <div className={styles.breadcrumb}>
-              {breadcrumb}
-            </div>
-          )}
-
-          <div className={styles.titleSection}>
-            <div className={styles.titleContent}>
-              {title && <h1 className={styles.title}>{title}</h1>}
-              {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-            </div>
-
-            {actions && (
-              <div className={styles.actions}>
-                {actions}
+          <div className={styles.headerContent}>
+            {(title || subtitle) && (
+              <div className={styles.headerText}>
+                {title && <h1 className={styles.title}>{title}</h1>}
+                {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
               </div>
             )}
+            {actions && <div className={styles.actions}>{actions}</div>}
           </div>
         </div>
       )}
@@ -79,5 +61,3 @@ export const PageContainer: React.FC<PageContainerProps> = ({
     </div>
   );
 };
-
-export default PageContainer;

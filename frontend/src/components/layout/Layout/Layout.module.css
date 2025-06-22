@@ -52,11 +52,11 @@
   margin-left: 0;
 }
 
-/* Header - ФИКСИРОВАННЫЙ */
+/* Header - ФИКСИРОВАННЫЙ с правильным z-index */
 .header {
-  position: fixed; /* ДЕЛАЮ ФИКСИРОВАННЫМ */
+  position: fixed;
   top: 0;
-  left: var(--sidebar-width); /* НАЧИНАЕТСЯ ПОСЛЕ SIDEBAR */
+  left: var(--sidebar-width);
   right: 0;
   display: flex;
   align-items: center;
@@ -65,9 +65,10 @@
   padding: 0 var(--spacing-l);
   background-color: var(--color-background);
   border-bottom: 2px solid var(--color-divider);
-  z-index: 100;
+  z-index: 998; /* НИЖЕ SIDEBAR, НО ВЫШЕ CONTENT */
   transition: left var(--transition-medium);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
 }
 
 /* Content - FIXED padding and scrolling */
@@ -77,8 +78,11 @@
   overflow-x: hidden;
   background-color: var(--color-background);
   position: relative;
-  padding-top: var(--spacing-l); /* ADDED: proper spacing from header */
-  padding-bottom: 120px; /* ADDED: space for footer */
+  padding-top: calc(var(--header-height) + var(--spacing-m)); /* ИСПРАВЛЕНО: учитываем высоту хэдера */
+  padding-left: var(--spacing-l);
+  padding-right: var(--spacing-l);
+  padding-bottom: var(--spacing-xxl);
+  min-height: calc(100vh - var(--header-height)); /* МИНИМАЛЬНАЯ ВЫСОТА */
 }
 
 /* Header states */
@@ -92,11 +96,11 @@
 
 /* Footer - УБИРАЮ ФИКСИРОВАННОЕ ПОЗИЦИОНИРОВАНИЕ */
 .footer {
-  position: relative; /* МЕНЯЮ НА ОТНОСИТЕЛЬНОЕ */
+  position: relative;
   background-color: var(--color-background);
   border-top: 2px solid var(--color-divider);
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-  /* УБРАЛ margin-top - он теперь в CSS самого footer */
+  margin-top: auto;
 }
 
 /* Sidebar header */
@@ -199,10 +203,13 @@
 .navLink.active {
   background-color: rgba(191, 159, 251, 0.2);
   color: var(--color-accent);
-  font-weight: var(--font-weight-medium);
+  border-left: 3px solid var(--color-accent);
 }
 
 .navIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 20px;
   height: 20px;
   flex-shrink: 0;
@@ -210,33 +217,7 @@
 
 .navLabel {
   flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.activeIndicator {
-  position: absolute;
-  left: -var(--spacing-m);
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 24px;
-  background-color: var(--color-accent);
-  border-radius: 0 2px 2px 0;
-}
-
-/* Sidebar footer */
-.sidebarFooter {
-  padding: var(--spacing-m);
-  border-top: 1px solid var(--color-divider);
-  flex-shrink: 0;
-}
-
-.version {
-  font-size: var(--font-size-caption);
-  color: var(--color-neutral-gray);
-  text-align: center;
+  font-weight: var(--font-weight-medium);
 }
 
 /* Header content */
@@ -245,65 +226,49 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  gap: var(--spacing-l);
 }
 
 .headerLeft {
-  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
 }
 
-.pageTitle {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-light);
-  margin: 0;
+.headerCenter {
+  flex: 1;
+  display: flex;
+  justify-content: center;
 }
 
 .headerRight {
   display: flex;
   align-items: center;
-  gap: var(--spacing-l);
+  gap: var(--spacing-m);
+}
+
+.menuButton {
+  display: none;
 }
 
 .searchBox {
-  display: flex;
-  align-items: center;
   position: relative;
+  max-width: 400px;
+  width: 100%;
 }
 
 .searchInput {
-  width: 300px;
-  height: 40px;
-  padding: 0 var(--spacing-m) 0 40px;
-  background-color: var(--input-background);
+  width: 100%;
+  padding: var(--spacing-s) var(--spacing-m);
+  background: var(--input-background);
   border: 1px solid var(--input-border);
   border-radius: var(--input-border-radius);
-  color: var(--input-text);
+  color: var(--color-text-light);
   font-size: var(--font-size-body);
-  transition: border-color var(--transition-fast);
-}
-
-.searchInput:focus {
-  outline: none;
-  border-color: var(--input-border-focus);
 }
 
 .searchInput::placeholder {
-  color: var(--input-placeholder);
-}
-
-.searchButton {
-  position: absolute;
-  left: var(--spacing-m);
-  background: none;
-  border: none;
   color: var(--color-neutral-gray);
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.userMenu {
-  display: flex;
-  align-items: center;
 }
 
 .userButton {
@@ -361,6 +326,24 @@
   align-items: center;
 }
 
+/* SCROLLBAR STYLING */
+.content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: rgba(42, 46, 57, 0.3);
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: rgba(191, 159, 251, 0.5);
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: rgba(191, 159, 251, 0.7);
+}
+
 /* Responsive design */
 @media (max-width: 1024px) {
   .sidebar {
@@ -386,7 +369,7 @@
   }
 
   .header {
-    left: 0; /* НА МОБИЛЕ HEADER НА ВСЮ ШИРИНУ */
+    left: 0;
   }
 
   .header.collapsed,
@@ -394,8 +377,13 @@
     left: 0;
   }
 
-  .searchInput {
-    width: 250px;
+  .menuButton {
+    display: flex;
+  }
+
+  .content {
+    padding-left: var(--spacing-m);
+    padding-right: var(--spacing-m);
   }
 }
 
@@ -410,13 +398,14 @@
     width: 100%;
   }
 
-  .searchInput {
-    width: 100%;
-  }
-
   .header {
     padding: var(--spacing-m);
     height: var(--header-height);
+  }
+
+  .content {
+    padding-left: var(--spacing-s);
+    padding-right: var(--spacing-s);
   }
 }
 
