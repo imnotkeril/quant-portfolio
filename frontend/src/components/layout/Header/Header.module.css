@@ -1,4 +1,4 @@
-/* ИСПРАВЛЕННЫЙ Header.module.css - правильный поиск */
+/* ИСПРАВЛЕННЫЙ Header.module.css - правильное позиционирование иконки поиска */
 
 .header {
   position: fixed !important;
@@ -16,6 +16,7 @@
   transition: left var(--transition-medium);
   backdrop-filter: blur(10px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .collapsed {
@@ -44,6 +45,7 @@
   gap: var(--spacing-m);
   flex-shrink: 0;
   min-width: 0;
+  max-width: 300px;
 }
 
 .menuButton {
@@ -81,6 +83,8 @@
   font-weight: var(--font-weight-semi-bold);
   color: var(--color-text-light);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Center section - ИСПРАВЛЕН */
@@ -89,18 +93,24 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  max-width: 500px;
-  margin: 0 var(--spacing-l);
+  margin: 0 var(--spacing-m);
   min-width: 0;
+  max-width: none;
 }
 
+/* ИСПРАВЛЕННЫЙ контейнер поиска */
 .searchBox {
   position: relative;
   width: 100%;
-  max-width: 400px;
+  max-width: 350px;
   min-width: 200px;
+  flex-shrink: 1;
+  display: flex;
+  align-items: center;
+  overflow: visible; /* ДОБАВЛЕНО: Убеждаемся что элементы видны */
 }
 
+/* ИСПРАВЛЕННОЕ поле поиска */
 .searchInput {
   width: 100%;
   height: 40px;
@@ -114,6 +124,8 @@
   transition: all var(--transition-fast);
   outline: none;
   box-sizing: border-box;
+  position: relative; /* ДОБАВЛЕНО: Устанавливаем позиционирование */
+  z-index: 1; /* ДОБАВЛЕНО: Ниже чем иконка */
 }
 
 .searchInput:focus {
@@ -127,6 +139,7 @@
   font-size: var(--font-size-body);
 }
 
+/* ИСПРАВЛЕННАЯ иконка поиска */
 .searchIcon {
   position: absolute;
   left: 12px;
@@ -139,21 +152,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 2;
+  font-size: 16px; /* ДОБАВЛЕНО: Устанавливаем размер иконки */
+  line-height: 1; /* ДОБАВЛЕНО: Убеждаемся в правильной высоте строки */
 }
 
-/* Right section */
+/* Right section - ИСПРАВЛЕН */
 .right {
   display: flex;
   align-items: center;
   gap: var(--spacing-m);
   flex-shrink: 0;
   min-width: 0;
+  max-width: 300px;
 }
 
 .controls {
   display: flex;
   align-items: center;
   gap: var(--spacing-s);
+  flex-shrink: 0;
 }
 
 .controlButton {
@@ -199,6 +217,7 @@
   cursor: pointer;
   transition: all var(--transition-fast);
   min-width: 0;
+  max-width: 200px;
 }
 
 .userButton:hover {
@@ -254,7 +273,21 @@
   display: flex;
 }
 
-/* Responsive breakpoints */
+/* Responsive breakpoints - ИСПРАВЛЕНЫ */
+@media (max-width: 1200px) {
+  .header {
+    padding: 0 var(--spacing-m);
+  }
+
+  .center {
+    margin: 0 var(--spacing-s);
+  }
+
+  .searchBox {
+    max-width: 300px;
+  }
+}
+
 @media (max-width: 1024px) {
   .header {
     left: 0 !important;
@@ -271,8 +304,13 @@
   }
 
   .center {
-    max-width: 300px;
-    margin: 0 var(--spacing-m);
+    max-width: 250px;
+    margin: 0 var(--spacing-s);
+  }
+
+  .right,
+  .left {
+    max-width: 200px;
   }
 }
 
@@ -295,10 +333,12 @@
 
   .left {
     gap: var(--spacing-s);
+    max-width: 150px;
   }
 
   .right {
     gap: var(--spacing-s);
+    max-width: 150px;
   }
 }
 
@@ -319,20 +359,24 @@
 
   .userButton {
     padding: var(--spacing-xs);
+    max-width: 80px;
+  }
+
+  .left,
+  .right {
+    max-width: 100px;
   }
 }
 
-/* Force high z-index for all header elements */
-.header,
-.header *,
-.menuButton,
-.logo,
+/* Force correct positioning for search elements */
 .searchBox,
 .searchInput,
-.controlButton,
-.userButton {
+.searchIcon {
   position: relative;
-  z-index: inherit;
+}
+
+.searchIcon {
+  position: absolute !important;
 }
 
 /* Animation for search focus */
