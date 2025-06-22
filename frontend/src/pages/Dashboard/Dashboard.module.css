@@ -1,17 +1,19 @@
-/* Beautiful Dashboard.module.css - Wild Market Capital */
+/* ИСПРАВЛЕННЫЙ Dashboard.module.css - под существующую структуру */
 
 .dashboard {
-  min-height: 100%;
+  width: 100%;
   background-color: var(--color-background);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-l);
+  padding: var(--spacing-l); /* ДОБАВИЛ ОТСТУПЫ ВНУТРИ */
+  min-height: calc(100vh - var(--header-height)); /* МИНИМАЛЬНАЯ ВЫСОТА БЕЗ HEADER */
 }
 
-/* Welcome Section - FIXED POSITIONING */
+/* Welcome Section */
 .welcomeSection {
   position: relative;
-  z-index: 10; /* БЕЗОПАСНЫЙ Z-INDEX */
+  z-index: 10;
   margin-bottom: var(--spacing-xl);
 }
 
@@ -375,12 +377,7 @@
   color: var(--color-negative);
 }
 
-/* Chart Section */
-.chartSection {
-  grid-column: 1 / -1;
-  margin-top: var(--spacing-l);
-}
-
+/* Chart Container */
 .chartContainer {
   background: linear-gradient(135deg,
     rgba(26, 29, 36, 0.8) 0%,
@@ -465,6 +462,10 @@
 }
 
 @media (max-width: 768px) {
+  .dashboard {
+    padding: var(--spacing-m); /* УМЕНЬШИЛ ОТСТУПЫ НА МОБИЛЕ */
+  }
+
   .welcomeCard {
     padding: var(--spacing-l);
     margin-bottom: var(--spacing-l);
@@ -504,6 +505,10 @@
 }
 
 @media (max-width: 480px) {
+  .dashboard {
+    padding: var(--spacing-s); /* ЕЩЕ МЕНЬШЕ НА ТЕЛЕФОНЕ */
+  }
+
   .welcomeCard {
     padding: var(--spacing-m);
   }
@@ -525,77 +530,4 @@
     padding: var(--spacing-m);
     min-height: 120px;
   }
-}
-
-/* Loading States */
-.loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--spacing-xl);
-  color: var(--color-neutral-gray);
-}
-
-.loadingSpinner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid rgba(191, 159, 251, 0.3);
-  border-radius: 50%;
-  border-top-color: var(--color-accent);
-  animation: spin 1s linear infinite;
-  margin-right: var(--spacing-s);
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Animations */
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.section {
-  animation: slideInUp 0.6s ease-out;
-}
-
-.portfolioCard {
-  animation: slideInUp 0.6s ease-out;
-}
-
-.actionCard {
-  animation: slideInUp 0.6s ease-out;
-}
-
-/* Stacking Context */
-.section,
-.portfolioCard,
-.actionCard,
-.marketCard {
-  position: relative;
-  z-index: 1;
-}
-
-/* Fix overflow issues */
-* {
-  box-sizing: border-box;
-}
-
-.content > * {
-  min-width: 0;
-}
-
-.portfolioGrid > *,
-.actionGrid > *,
-.marketGrid > * {
-  min-width: 0;
 }
