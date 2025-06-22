@@ -90,17 +90,17 @@ const AppRoutes: React.FC = () => {
         <Route path={ROUTES.PORTFOLIO.CREATE} element={<PortfolioCreation />} />
         <Route path={ROUTES.PORTFOLIO.ANALYSIS_ROOT} element={<PortfolioAnalysis />} /> {/* ДОБАВЛЕНО: роут для выбора портфеля для анализа */}
         <Route path={ROUTES.PORTFOLIO.ANALYSIS} element={<PortfolioAnalysis />} />
-        <Route path={ROUTES.PORTFOLIO.EDIT} element={<ComingSoon pageName="Portfolio Edit" />} />
+        <Route path={ROUTES.PORTFOLIO.EDIT} element={<PortfolioCreation />} />
 
         {/* Analytics Routes */}
-        <Route path={ROUTES.ANALYTICS.ROOT} element={<ComingSoon pageName="Analytics Dashboard" />} /> {/* ИЗМЕНЕНО: отделил от PortfolioAnalysis */}
-        <Route path={ROUTES.ANALYTICS.PERFORMANCE} element={<ComingSoon pageName="Performance Analytics" />} />
-        <Route path={ROUTES.ANALYTICS.ATTRIBUTION} element={<ComingSoon pageName="Attribution Analysis" />} />
+        <Route path={ROUTES.ANALYTICS.ROOT} element={<PortfolioAnalysis />} />
+        <Route path={ROUTES.ANALYTICS.PERFORMANCE} element={<PortfolioAnalysis />} />
+        <Route path={ROUTES.ANALYTICS.ATTRIBUTION} element={<PortfolioAnalysis />} />
 
         {/* Optimization Routes */}
         <Route path={ROUTES.OPTIMIZATION.ROOT} element={<PortfolioOptimization />} />
-        <Route path={ROUTES.OPTIMIZATION.ADVANCED} element={<ComingSoon pageName="Advanced Optimization" />} />
-        <Route path={ROUTES.OPTIMIZATION.COMPARISON} element={<ComingSoon pageName="Optimization Comparison" />} />
+        <Route path={ROUTES.OPTIMIZATION.ADVANCED} element={<PortfolioOptimization />} />
+        <Route path={ROUTES.OPTIMIZATION.COMPARISON} element={<PortfolioOptimization />} />
 
         {/* Risk Management Routes */}
         <Route path={ROUTES.RISK.ROOT} element={<RiskManagement />} />

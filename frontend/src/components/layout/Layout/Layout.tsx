@@ -1,6 +1,6 @@
 // Layout Component with Sidebar Toggle - Layout.tsx
 import React, { useState, useEffect, ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './Layout.module.css';
 
 interface LayoutProps {
@@ -18,6 +18,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarState, setSidebarState] = useState<'expanded' | 'collapsed' | 'hidden'>('expanded');
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Navigation items configuration
   const navigationItems: NavigationItem[] = [
@@ -192,9 +193,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   // Navigation handler
   const handleNavigation = (path: string) => {
-    // Navigation logic would go here
-    // For now, just log the path
-    console.log('Navigate to:', path);
+    navigate(path);
 
     // Auto-hide sidebar on mobile after navigation
     if (isMobile) {
