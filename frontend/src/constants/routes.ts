@@ -15,9 +15,11 @@ export const ROUTES = {
     EDIT: '/portfolio/:id/edit',
     ANALYZE: '/portfolio/:id/analyze',
     ANALYSIS: '/portfolio/:id/analysis',
+    ANALYSIS_ROOT: '/portfolio/analysis', // ДОБАВЛЕНО: общий роут для выбора портфеля для анализа
     DETAILED_PATH: (id: string) => `/portfolio/${id}`,
     EDIT_PATH: (id: string) => `/portfolio/${id}/edit`,
     ANALYZE_PATH: (id: string) => `/portfolio/${id}/analyze`,
+    ANALYSIS_PATH: (id: string) => `/portfolio/${id}/analysis`, // ДОБАВЛЕНО: путь для анализа конкретного портфеля
   },
 
   // Analytics routes
@@ -133,6 +135,11 @@ export const NAVIGATION_ITEMS = [
         path: ROUTES.PORTFOLIO.CREATE,
       },
     ],
+  },
+  {
+    label: 'Portfolio Analysis', // ДОБАВЛЕНО: отдельная страница анализа портфелей
+    path: ROUTES.PORTFOLIO.ANALYSIS_ROOT,
+    icon: 'chart',
   },
   {
     label: 'Analytics',

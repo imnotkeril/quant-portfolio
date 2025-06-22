@@ -1,76 +1,67 @@
-/**
- * Application Routes
- * Central routing configuration for the application
- */
 import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { PageContainer } from './components/layout/PageContainer/PageContainer';
 import { ROUTES } from './constants/routes';
 
-// Import pages
-import {
-  Dashboard,
-  PortfolioCreation,
-  PortfolioAnalysis,
-  PortfolioOptimization,
-  RiskManagement,
-  ScenarioAnalysis,
-  HistoricalAnalogies,
-  PortfolioComparison,
-  ReportGeneration,
-} from './pages';
-
-// Error pages (to be implemented)
-const NotFound = React.lazy(() => import('./pages/NotFound/NotFound'));
+// Page components
+import Dashboard from './pages/Dashboard';
+import PortfolioCreation from './pages/PortfolioCreation';
+import PortfolioAnalysis from './pages/PortfolioAnalysis';
+import PortfolioOptimization from './pages/PortfolioOptimization';
+import RiskManagement from './pages/RiskManagement';
+import ScenarioAnalysis from './pages/ScenarioAnalysis';
+import HistoricalAnalogies from './pages/HistoricalAnalogies';
+import PortfolioComparison from './pages/PortfolioComparison';
+import ReportGeneration from './pages/ReportGeneration';
 
 // Loading component
 const PageLoader: React.FC = () => (
-  <PageContainer>
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '60vh',
+    flexDirection: 'column',
+    gap: '20px'
+  }}>
     <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '400px',
-      color: 'var(--color-text-secondary)'
-    }}>
-      <div style={{
-        width: '40px',
-        height: '40px',
-        border: '3px solid var(--color-border)',
-        borderTop: '3px solid var(--color-primary-500)',
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite',
-        marginBottom: '1rem'
-      }} />
-      <p>Loading page...</p>
-    </div>
-  </PageContainer>
+      width: '40px',
+      height: '40px',
+      border: '3px solid #2A2E39',
+      borderTop: '3px solid #BF9FFB',
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite'
+    }}></div>
+    <p style={{ color: '#9CA3AF' }}>Loading...</p>
+  </div>
 );
 
-// Coming Soon component for unimplemented features
+// Page Container component
+const PageContainer: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div style={{
+    padding: '24px',
+    background: '#0D1015',
+    minHeight: '100vh'
+  }}>
+    {children}
+  </div>
+);
+
+// Coming Soon placeholder component
 const ComingSoon: React.FC<{ pageName: string }> = ({ pageName }) => (
   <PageContainer>
     <div style={{
       display: 'flex',
-      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      minHeight: '400px',
-      textAlign: 'center',
-      color: 'var(--color-text-secondary)'
+      height: '60vh',
+      flexDirection: 'column',
+      gap: '20px'
     }}>
-      <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🚧</div>
-      <h2 style={{
-        fontSize: '1.5rem',
-        fontWeight: 600,
-        color: 'var(--color-text-primary)',
-        marginBottom: '0.5rem'
-      }}>
-        {pageName} Coming Soon
-      </h2>
-      <p style={{ marginBottom: '2rem' }}>
-        This feature is currently under development and will be available soon.
+      <h1 style={{ fontSize: '2rem', color: '#BF9FFB' }}>
+        {pageName}
+      </h1>
+      <p style={{ fontSize: '1.2rem', color: '#9CA3AF' }}>
+        Coming Soon...
       </p>
     </div>
   </PageContainer>
@@ -78,7 +69,16 @@ const ComingSoon: React.FC<{ pageName: string }> = ({ pageName }) => (
 
 const AppRoutes: React.FC = () => {
   return (
-    <Suspense fallback={<PageLoader />}>
+    <>
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+      <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* Dashboard - Home */}
         <Route path={ROUTES.HOME} element={<Dashboard />} />
@@ -88,11 +88,12 @@ const AppRoutes: React.FC = () => {
         <Route path={ROUTES.PORTFOLIO.ROOT} element={<Navigate to={ROUTES.PORTFOLIO.LIST} replace />} />
         <Route path={ROUTES.PORTFOLIO.LIST} element={<Dashboard />} /> {/* Reuse dashboard for now */}
         <Route path={ROUTES.PORTFOLIO.CREATE} element={<PortfolioCreation />} />
+        <Route path={ROUTES.PORTFOLIO.ANALYSIS_ROOT} element={<PortfolioAnalysis />} /> {/* ДОБАВЛЕНО: роут для выбора портфеля для анализа */}
         <Route path={ROUTES.PORTFOLIO.ANALYSIS} element={<PortfolioAnalysis />} />
         <Route path={ROUTES.PORTFOLIO.EDIT} element={<ComingSoon pageName="Portfolio Edit" />} />
 
         {/* Analytics Routes */}
-        <Route path={ROUTES.ANALYTICS.ROOT} element={<PortfolioAnalysis />} />
+        <Route path={ROUTES.ANALYTICS.ROOT} element={<ComingSoon pageName="Analytics Dashboard" />} /> {/* ИЗМЕНЕНО: отделил от PortfolioAnalysis */}
         <Route path={ROUTES.ANALYTICS.PERFORMANCE} element={<ComingSoon pageName="Performance Analytics" />} />
         <Route path={ROUTES.ANALYTICS.ATTRIBUTION} element={<ComingSoon pageName="Attribution Analysis" />} />
 
@@ -142,6 +143,7 @@ const AppRoutes: React.FC = () => {
         <Route path="*" element={<ComingSoon pageName="Page Not Found" />} />
       </Routes>
     </Suspense>
+    </>
   );
 };
 

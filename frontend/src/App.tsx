@@ -8,9 +8,9 @@ import { Provider } from 'react-redux';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Toaster } from 'react-hot-toast';
 
-// Layout components
+// Layout components - ИСПРАВЛЕННЫЕ ИМПОРТЫ
 import { Header } from './components/layout/Header/Header';
-import { Sidebar } from './components/layout/Sidebar/Sidebar';
+import Sidebar from './components/layout/Sidebar/Sidebar'; // ИЗМЕНЕНО: default import
 import { Footer } from './components/layout/Footer/Footer';
 
 // Context providers
@@ -155,72 +155,48 @@ const AppLayout: React.FC = () => {
         toastOptions={{
           duration: 4000,
           style: {
-            background: 'var(--card-background)',
+            background: 'var(--color-surface)',
             color: 'var(--color-text-primary)',
             border: '1px solid var(--color-divider)',
             borderRadius: 'var(--border-radius-m)',
-            fontSize: 'var(--font-size-body)',
-            fontFamily: 'var(--font-family)',
-            zIndex: 'var(--z-index-toast)'
+            boxShadow: 'var(--shadow-large)'
           },
           success: {
             iconTheme: {
-              primary: 'var(--color-positive)',
-              secondary: 'white',
-            },
-            style: {
-              borderLeft: '4px solid var(--color-positive)'
+              primary: 'var(--color-success)',
+              secondary: 'var(--color-text-dark)'
             }
           },
           error: {
             iconTheme: {
-              primary: 'var(--color-negative)',
-              secondary: 'white',
-            },
-            style: {
-              borderLeft: '4px solid var(--color-negative)'
-            }
-          },
-          loading: {
-            iconTheme: {
-              primary: 'var(--color-accent)',
-              secondary: 'var(--color-background)',
+              primary: 'var(--color-error)',
+              secondary: 'var(--color-text-dark)'
             }
           }
-        }}
-        containerStyle={{
-          top: 'calc(var(--header-height) + var(--spacing-m))', // ПОД ХЭДЕРОМ
-          right: 'var(--spacing-m)',
-          zIndex: 'var(--z-index-toast)'
         }}
       />
     </div>
   );
 };
 
-// Root App component
+// Main App component
 const App: React.FC = () => {
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
       onError={(error, errorInfo) => {
-        console.error('Application error:', error, errorInfo);
-        // You can send this to your error reporting service
-        // logErrorToService(error, errorInfo);
-      }}
-      onReset={() => {
-        // Clear any state that might have caused the error
-        window.location.reload();
+        console.error('Application error boundary caught an error:', error, errorInfo);
+        // Here you could send error to logging service
       }}
     >
       <Provider store={store}>
         <BrowserRouter>
           <ThemeProvider>
-            <LayoutProvider>
-              <NotificationProvider>
+            <NotificationProvider>
+              <LayoutProvider>
                 <AppLayout />
-              </NotificationProvider>
-            </LayoutProvider>
+              </LayoutProvider>
+            </NotificationProvider>
           </ThemeProvider>
         </BrowserRouter>
       </Provider>

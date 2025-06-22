@@ -58,6 +58,13 @@ const NavigationItem: React.FC<NavigationItemProps> = ({
           <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
         </svg>
       ),
+      chart: ( // ДОБАВЛЕНО: иконка для Portfolio Analysis
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+      ),
       analytics: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M3 3v18h18"/>
@@ -121,24 +128,20 @@ const NavigationItem: React.FC<NavigationItemProps> = ({
     );
   };
 
-  const itemClasses = classNames(
-    styles.navItem,
-    {
-      [styles.active]: isActive,
-      [styles.childActive]: isChildActive && !isActive,
-      [styles.hasChildren]: hasChildren,
-      [styles.expanded]: isExpanded,
-      [styles.collapsed]: collapsed,
-    }
-  );
-
   return (
-    <div className={itemClasses}>
-      <Button
-        variant="text"
-        className={styles.navButton}
+    <div className={styles.navItem}>
+      <button
+        className={classNames(
+          styles.navButton,
+          {
+            [styles.active]: isActive,
+            [styles.childActive]: isChildActive && !isActive,
+            [styles.collapsed]: collapsed,
+          }
+        )}
         onClick={handleClick}
-        fullWidth
+        title={collapsed ? item.label : undefined}
+        aria-expanded={hasChildren ? isExpanded : undefined}
       >
         <div className={styles.navButtonContent}>
           <div className={styles.navIcon}>
@@ -148,33 +151,34 @@ const NavigationItem: React.FC<NavigationItemProps> = ({
           {!collapsed && (
             <>
               <span className={styles.navLabel}>{item.label}</span>
-
               {hasChildren && (
                 <div className={classNames(styles.expandIcon, {
                   [styles.rotated]: isExpanded
                 })}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="9,18 15,12 9,6"/>
+                    <polyline points="9,18 15,12 9,6"></polyline>
                   </svg>
                 </div>
               )}
-
               {item.badge && (
-                <Badge count={item.badge} size="small" />
+                <Badge variant="accent" size="small">
+                  {item.badge}
+                </Badge>
               )}
             </>
           )}
         </div>
-      </Button>
+      </button>
 
-      {hasChildren && !collapsed && isExpanded && (
+      {/* Submenu */}
+      {hasChildren && isExpanded && !collapsed && (
         <div className={styles.subMenu}>
-          {item.children.map((child: any) => (
+          {item.children.map((child: any, index: number) => (
             <NavigationItem
-              key={child.path}
+              key={`${child.path}-${index}`}
               item={child}
               level={level + 1}
-              collapsed={collapsed}
+              collapsed={false}
             />
           ))}
         </div>
@@ -183,71 +187,89 @@ const NavigationItem: React.FC<NavigationItemProps> = ({
   );
 };
 
-export const Sidebar: React.FC<SidebarProps> = ({
-  className,
-  'data-testid': testId,
-}) => {
-  const { sidebarState, isFullScreen, isMobile } = useLayout();
+const Sidebar: React.FC<SidebarProps> = ({ className, 'data-testid': testId }) => {
+  const { sidebarState, collapseSidebar } = useLayout();
+  const location = useLocation();
 
-  const sidebarClasses = classNames(
-    styles.sidebar,
-    {
-      [styles.collapsed]: sidebarState === 'collapsed',
-      [styles.hidden]: sidebarState === 'hidden',
-      [styles.fullScreen]: isFullScreen,
-      [styles.mobile]: isMobile,
-    },
-    className
-  );
-
-  const isCollapsed = sidebarState === 'collapsed';
+  // Handle mobile click outside
+  const handleBackdropClick = () => {
+    if (window.innerWidth <= 768) {
+      collapseSidebar();
+    }
+  };
 
   return (
-    <aside className={sidebarClasses} data-testid={testId}>
-      <div className={styles.sidebarContent}>
-        <div className={styles.brand}>
-          <div className={styles.brandIcon}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-              <path d="M2 17l10 5 10-5"/>
-              <path d="M2 12l10 5 10-5"/>
-            </svg>
-          </div>
+    <>
+      {/* Mobile backdrop */}
+      {sidebarState === 'expanded' && window.innerWidth <= 768 && (
+        <div
+          className={styles.backdrop}
+          onClick={handleBackdropClick}
+          aria-hidden="true"
+        />
+      )}
 
-          {!isCollapsed && (
-            <div className={styles.brandText}>
-              <span className={styles.brandName}>Wild Market</span>
-              <span className={styles.brandSub}>Capital</span>
+      <aside
+        className={classNames(
+          styles.sidebar,
+          {
+            [styles.collapsed]: sidebarState === 'collapsed',
+            [styles.hidden]: sidebarState === 'hidden',
+          },
+          className
+        )}
+        data-testid={testId}
+      >
+        {/* Header - УБРАНА КНОПКА TOGGLE */}
+        <div className={styles.header}>
+          <div className={styles.brand}>
+            <div className={styles.logoIcon}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+              </svg>
             </div>
-          )}
+
+            {sidebarState !== 'collapsed' && (
+              <div className={styles.brandText}>
+                <div className={styles.brandName}>Wild Market</div>
+                <div className={styles.brandSub}>Capital</div>
+              </div>
+            )}
+          </div>
+          {/* КНОПКА TOGGLE УДАЛЕНА - ОСТАЕТСЯ ТОЛЬКО В ХЕДЕРЕ */}
         </div>
 
+        {/* Navigation */}
         <nav className={styles.navigation}>
           <div className={styles.navSection}>
-            {NAVIGATION_ITEMS.map((item) => (
+            {NAVIGATION_ITEMS.map((item, index) => (
               <NavigationItem
-                key={item.path}
+                key={`${item.path}-${index}`}
                 item={item}
-                collapsed={isCollapsed}
+                collapsed={sidebarState === 'collapsed'}
               />
             ))}
           </div>
         </nav>
 
+        {/* Footer */}
         <div className={styles.footer}>
-          {!isCollapsed && (
-            <div className={styles.footerContent}>
-              <div className={styles.version}>
-                <span>Version 1.0.0</span>
-              </div>
-              <div className={styles.status}>
-                <Badge status="success" text="Online" />
-              </div>
+          <div className={styles.footerContent}>
+            {sidebarState !== 'collapsed' && (
+              <div className={styles.version}>v1.0.0</div>
+            )}
+            <div className={styles.status}>
+              <Badge variant="success" size="small">
+                Online
+              </Badge>
             </div>
-          )}
+          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 };
 
