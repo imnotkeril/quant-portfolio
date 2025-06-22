@@ -466,14 +466,24 @@ tbody tr:hover {
 .h-50 { height: 50% !important; }
 .h-25 { height: 25% !important; }
 
+/* ПРОСТЫЕ PAGE UTILITIES - минимальные изменения */
+.page-min-height {
+  min-height: calc(100vh - var(--header-height));
+}
+
+.page-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  min-height: calc(100vh - var(--header-height));
+  text-align: center;
+}
+
 /* Responsive helpers */
 @media (max-width: 480px) {
   body {
     font-size: var(--font-size-caption);
-  }
-
-  .layout-container .main-content .page-content {
-    padding-bottom: 70px; /* УМЕНЬШИЛ для маленького footer */
   }
 
   h1 {

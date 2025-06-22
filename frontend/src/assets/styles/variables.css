@@ -150,7 +150,7 @@
   /* Layout Dimensions */
   --sidebar-width: 280px;
   --sidebar-width-collapsed: 80px;
-  --header-height: 64px;
+  --header-height: 64px; /* УБЕДИЛСЯ ЧТО ЕСТЬ */
 
   /* Component Variables - УЛУЧШЕНЫ */
   --card-background: rgba(26, 29, 36, 0.8);

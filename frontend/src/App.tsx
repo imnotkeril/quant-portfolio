@@ -128,17 +128,14 @@ const AppLayout: React.FC = () => {
             flex: 1,
             overflow: 'auto',
             paddingTop: 'var(--header-height)', // ОТСТУП ОТ ФИКСИРОВАННОГО HEADER
-            backgroundColor: 'var(--color-background)'
+            backgroundColor: 'var(--color-background)',
+            minHeight: 'calc(100vh - var(--header-height))' // МИНИМУМ ПОЛНАЯ ВЫСОТА
           }}
         >
-          <div style={{
-            padding: 'var(--spacing-l)',
-            minHeight: 'calc(100vh - var(--header-height) - 200px)' // МИНИМАЛЬНАЯ ВЫСОТА ДЛЯ КОНТЕНТА
-          }}>
-            <AppRoutes />
-          </div>
+          {/* ОБЫЧНЫЙ КОНТЕНТ БЕЗ ДОПОЛНИТЕЛЬНЫХ WRAPPER'ОВ */}
+          <AppRoutes />
 
-          {/* Footer как часть контента */}
+          {/* Footer в конце контента */}
           <Footer />
         </div>
       </main>
