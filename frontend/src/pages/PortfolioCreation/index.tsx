@@ -15,7 +15,105 @@ import PortfolioModeSelector from './PortfolioModeSelector';
 import { usePortfolios } from '../../hooks/usePortfolios';
 import { ROUTES } from '../../constants/routes';
 import { formatCurrency, formatPercentage } from '../../utils/formatters';
-import { PORTFOLIO_TEMPLATES, templateToFormData } from '../../constants/portfolioTemplates';
+// Built-in templates to avoid import issues
+const PORTFOLIO_TEMPLATES = [
+  {
+    id: 'warren_buffett',
+    name: 'Warren Buffett Style',
+    description: 'Value investing approach with quality companies',
+    icon: '🎯',
+    riskLevel: 'medium',
+    expectedReturn: '8-12% annually',
+    assets: [
+      { ticker: 'BRK.B', name: 'Berkshire Hathaway', weight: 25, sector: 'Financial', assetClass: 'stocks' },
+      { ticker: 'AAPL', name: 'Apple Inc.', weight: 20, sector: 'Technology', assetClass: 'stocks' },
+      { ticker: 'KO', name: 'Coca-Cola', weight: 15, sector: 'Consumer', assetClass: 'stocks' },
+      { ticker: 'PG', name: 'Procter & Gamble', weight: 15, sector: 'Consumer', assetClass: 'stocks' },
+      { ticker: 'JNJ', name: 'Johnson & Johnson', weight: 15, sector: 'Healthcare', assetClass: 'stocks' },
+      { ticker: 'BAC', name: 'Bank of America', weight: 10, sector: 'Financial', assetClass: 'stocks' }
+    ]
+  },
+  {
+    id: 'tech_giants',
+    name: 'Tech Giants',
+    description: 'Growth portfolio with leading tech companies',
+    icon: '🚀',
+    riskLevel: 'high',
+    expectedReturn: '12-18% annually',
+    assets: [
+      { ticker: 'AAPL', name: 'Apple Inc.', weight: 25, sector: 'Technology', assetClass: 'stocks' },
+      { ticker: 'MSFT', name: 'Microsoft', weight: 20, sector: 'Technology', assetClass: 'stocks' },
+      { ticker: 'GOOGL', name: 'Alphabet', weight: 20, sector: 'Technology', assetClass: 'stocks' },
+      { ticker: 'AMZN', name: 'Amazon', weight: 15, sector: 'Technology', assetClass: 'stocks' },
+      { ticker: 'TSLA', name: 'Tesla', weight: 10, sector: 'Technology', assetClass: 'stocks' },
+      { ticker: 'META', name: 'Meta', weight: 10, sector: 'Technology', assetClass: 'stocks' }
+    ]
+  },
+  {
+    id: 'balanced_global',
+    name: 'Balanced Global',
+    description: 'Diversified mix of stocks and bonds',
+    icon: '🌍',
+    riskLevel: 'medium',
+    expectedReturn: '7-11% annually',
+    assets: [
+      { ticker: 'VTI', name: 'Total Stock Market', weight: 40, sector: 'Diversified', assetClass: 'etf' },
+      { ticker: 'VXUS', name: 'International Stocks', weight: 20, sector: 'Diversified', assetClass: 'etf' },
+      { ticker: 'BND', name: 'Total Bond Market', weight: 30, sector: 'Fixed Income', assetClass: 'bonds' },
+      { ticker: 'VNQ', name: 'Real Estate', weight: 10, sector: 'Real Estate', assetClass: 'etf' }
+    ]
+  },
+  {
+    id: 'dividend_focus',
+    name: 'Dividend Focus',
+    description: 'Income-generating dividend stocks',
+    icon: '💰',
+    riskLevel: 'low',
+    expectedReturn: '6-10% annually',
+    assets: [
+      { ticker: 'JNJ', name: 'Johnson & Johnson', weight: 20, sector: 'Healthcare', assetClass: 'stocks' },
+      { ticker: 'PG', name: 'Procter & Gamble', weight: 20, sector: 'Consumer', assetClass: 'stocks' },
+      { ticker: 'KO', name: 'Coca-Cola', weight: 15, sector: 'Consumer', assetClass: 'stocks' },
+      { ticker: 'PEP', name: 'PepsiCo', weight: 15, sector: 'Consumer', assetClass: 'stocks' },
+      { ticker: 'WMT', name: 'Walmart', weight: 15, sector: 'Consumer', assetClass: 'stocks' },
+      { ticker: 'HD', name: 'Home Depot', weight: 15, sector: 'Consumer', assetClass: 'stocks' }
+    ]
+  },
+  {
+    id: 'sp500_simple',
+    name: 'S&P 500 Simple',
+    description: 'Simple S&P 500 index fund approach',
+    icon: '📊',
+    riskLevel: 'medium',
+    expectedReturn: '10-14% annually',
+    assets: [
+      { ticker: 'SPY', name: 'SPDR S&P 500 ETF', weight: 70, sector: 'Diversified', assetClass: 'etf' },
+      { ticker: 'QQQ', name: 'Invesco QQQ', weight: 20, sector: 'Technology', assetClass: 'etf' },
+      { ticker: 'BND', name: 'Vanguard Bond ETF', weight: 10, sector: 'Fixed Income', assetClass: 'bonds' }
+    ]
+  }
+];
+
+const templateToFormData = (template: any) => ({
+  name: template.name,
+  description: template.description,
+  assets: template.assets.map((asset: any, index: number) => ({
+    id: `template_${index}`,
+    ticker: asset.ticker,
+    name: asset.name,
+    weight: asset.weight,
+    quantity: 0,
+    purchasePrice: 100,
+    currentPrice: 100,
+    purchaseDate: new Date().toISOString().split('T')[0],
+    sector: asset.sector,
+    industry: '',
+    assetClass: asset.assetClass,
+    currency: 'USD',
+    country: 'United States',
+    exchange: 'NASDAQ'
+  }))
+});
 import styles from './PortfolioCreation.module.css';
 
 type CreationMode = 'easy' | 'professional';
@@ -41,7 +139,6 @@ interface Asset {
 interface PortfolioCreateRequest {
   name: string;
   description: string;
-  initialCash: number;
   assets: Asset[];
 }
 
@@ -164,7 +261,6 @@ const PortfolioCreation: React.FC = () => {
   const [formData, setFormData] = useState<PortfolioCreateRequest>({
     name: '',
     description: '',
-    initialCash: 100000,
     assets: []
   });
 
@@ -246,9 +342,6 @@ const PortfolioCreation: React.FC = () => {
         if (!formData.name.trim()) {
           newErrors.name = 'Portfolio name is required';
         }
-        if (formData.initialCash <= 0) {
-          newErrors.initialCash = 'Starting amount must be greater than 0';
-        }
         break;
 
       case 'assets':
@@ -295,28 +388,14 @@ const PortfolioCreation: React.FC = () => {
     try {
       console.log('Creating portfolio with data:', formData);
 
-      // Transform data for createPortfolio using existing hook structure
+      // Transform data for createPortfolio
       const portfolioData = {
         name: formData.name,
         description: formData.description,
-        assets: formData.assets.map(asset => ({
-          ticker: asset.ticker,
-          name: asset.name,
-          weight: asset.weight,
-          quantity: asset.quantity,
-          purchasePrice: asset.purchasePrice,
-          currentPrice: asset.currentPrice,
-          purchaseDate: asset.purchaseDate,
-          sector: asset.sector,
-          industry: asset.industry,
-          assetClass: asset.assetClass,
-          currency: asset.currency,
-          country: asset.country,
-          exchange: asset.exchange
-        })),
-        initialCash: formData.initialCash,
         type: 'CUSTOM',
         currency: 'USD',
+        initialCash: 100000,
+        assets: formData.assets,
         riskTolerance: 'MODERATE',
         investmentObjective: 'GROWTH',
         tags: []
@@ -427,16 +506,6 @@ const PortfolioCreation: React.FC = () => {
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 placeholder="My Investment Portfolio"
                 error={errors.name}
-                required
-              />
-
-              <Input
-                label="Starting Amount"
-                type="number"
-                value={formData.initialCash}
-                onChange={(e) => handleInputChange('initialCash', parseFloat(e.target.value) || 0)}
-                placeholder="100000"
-                error={errors.initialCash}
                 required
               />
 
