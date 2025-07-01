@@ -1,313 +1,305 @@
-/* PortfolioCreation.module.css */
+/* Portfolio Creation Styles - ФИНАЛЬНАЯ ВЕРСИЯ */
 
 .container {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 0;
 }
 
+/* Header */
 .header {
-  text-align: center;
   margin-bottom: 32px;
 }
 
-.title {
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin-bottom: 8px;
-}
-
-.subtitle {
-  font-size: 1.125rem;
-  color: var(--color-text-secondary);
-}
-
-/* Progress Steps */
-.progressCard {
-  margin-bottom: 32px;
-  padding: 24px;
-}
-
-.progressSteps {
+.headerContent {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.headerTitle h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #F9FAFB;
+  margin: 0 0 4px 0;
+}
+
+.headerTitle p {
+  font-size: 1rem;
+  color: #D1D5DB;
+  margin: 0;
+}
+
+/* Step Indicator */
+.stepIndicator {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 20px;
+  background: #1F2937;
+  border-radius: 12px;
+  border: 1px solid #374151;
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
   position: relative;
 }
 
-.progressSteps::before {
+.stepItem:not(:last-child)::after {
   content: '';
   position: absolute;
-  top: 20px;
-  left: 40px;
-  right: 40px;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
   height: 2px;
-  background-color: var(--color-border);
+  background: #374151;
   z-index: 1;
 }
 
-.progressStep {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  position: relative;
-  z-index: 2;
-  background-color: var(--color-background);
-  padding: 0 16px;
-}
-
-.progressStep.active .stepNumber {
-  background-color: var(--color-primary);
-  color: white;
-  border-color: var(--color-primary);
-}
-
-.progressStep.completed .stepNumber {
-  background-color: var(--color-success);
-  color: white;
-  border-color: var(--color-success);
+.stepItem.completed:not(:last-child)::after {
+  background: #10B981;
 }
 
 .stepNumber {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: 2px solid var(--color-border);
-  background-color: var(--color-background);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  color: var(--color-text-secondary);
-  margin-bottom: 8px;
-  transition: all 0.3s ease;
+  font-size: 0.875rem;
+  background: #374151;
+  color: #9CA3AF;
+  flex-shrink: 0;
+}
+
+.stepItem.active .stepNumber {
+  background: #BF9FFB;
+  color: white;
+}
+
+.stepItem.completed .stepNumber {
+  background: #10B981;
+  color: white;
 }
 
 .stepInfo {
-  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .stepTitle {
-  font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 2px;
+  color: #F9FAFB;
+  font-size: 0.875rem;
 }
 
 .stepDescription {
   font-size: 0.75rem;
-  color: var(--color-text-secondary);
+  color: #9CA3AF;
 }
 
-/* Main content */
+.stepItem.active .stepTitle {
+  color: #BF9FFB;
+}
+
+/* Main Card */
 .mainCard {
   padding: 32px;
   margin-bottom: 24px;
 }
 
+/* Step Content */
 .stepContent {
-  min-height: 400px;
+  margin-bottom: 32px;
 }
 
 .stepTitle {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: #F9FAFB;
   margin-bottom: 8px;
 }
 
 .stepDescription {
   font-size: 1rem;
-  color: var(--color-text-secondary);
+  color: #D1D5DB;
   margin-bottom: 32px;
+  line-height: 1.6;
 }
 
-/* Form styling */
+/* Form Grid */
 .formGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 24px;
   margin-bottom: 32px;
 }
 
-.formField {
-  display: flex;
-  flex-direction: column;
-}
-
-.formFieldFull {
+.fullWidth {
   grid-column: 1 / -1;
 }
 
-/* Strategy section */
-.strategyInfo {
-  margin-top: 24px;
-  padding: 24px;
-  background-color: var(--color-background-secondary);
-}
-
-.strategyInfo h4 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 16px;
-}
-
-.guidelines {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.guideline {
-  font-size: 0.9rem;
-  color: var(--color-text-primary);
-  line-height: 1.5;
-}
-
-.guideline strong {
-  color: var(--color-primary);
-}
-
-/* Assets section */
+/* Assets Section */
 .assetsHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--color-border);
+  gap: 24px;
 }
 
-.assetsActions {
+.assetActions {
   display: flex;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .allocationSummary {
-  font-size: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 0;
+  border-top: 1px solid #374151;
+  margin-top: 16px;
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: #F9FAFB;
 }
 
-.assetFormCard {
-  margin-bottom: 24px;
-  padding: 24px;
-  border: 2px dashed var(--color-border);
-  border-radius: 12px;
+.totalWeight {
+  color: #10B981;
+  font-size: 1.125rem;
 }
 
+/* Empty Assets */
 .emptyAssets {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 32px;
   text-align: center;
-  padding: 48px 24px;
-  border: 2px dashed var(--color-border);
+  background: #374151;
   border-radius: 12px;
-  background-color: var(--color-background-secondary);
+  border: 2px dashed #4B5563;
 }
 
 .emptyIcon {
   font-size: 3rem;
   margin-bottom: 16px;
+  opacity: 0.7;
+}
+
+.emptyAssets h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #F9FAFB;
+  margin: 0 0 8px 0;
 }
 
 .emptyAssets p {
-  color: var(--color-text-secondary);
-  margin-bottom: 8px;
+  font-size: 1rem;
+  color: #D1D5DB;
+  margin: 0 0 24px 0;
+  line-height: 1.6;
 }
 
-.emptyDescription {
-  font-size: 0.9rem;
-  margin-bottom: 24px !important;
+.quickActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
-.templatesButton {
-  margin-top: 16px;
-}
-
-/* Review section */
-.reviewSections {
+/* Review Summary */
+.reviewSummary {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
   margin-bottom: 32px;
 }
 
-.reviewCard {
+.summaryCard,
+.assetsCard {
   padding: 24px;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
 }
 
-.reviewCard h4 {
+.summaryCard h4,
+.assetsCard h4 {
   font-size: 1.125rem;
   font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--color-border);
+  color: #F9FAFB;
+  margin: 0 0 16px 0;
 }
 
-.reviewItem {
+.summaryItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid #4B5563;
 }
 
-.reviewItem:last-child {
+.summaryItem:last-child {
   border-bottom: none;
 }
 
-.reviewItem span:first-child {
-  font-weight: 500;
-  color: var(--color-text-secondary);
+.summaryItem span:first-child {
+  color: #9CA3AF;
 }
 
-.reviewItem span:last-child {
-  color: var(--color-text-primary);
-  text-align: right;
+.summaryItem span:last-child {
+  font-weight: 600;
+  color: #F9FAFB;
 }
 
-.reviewAsset {
+/* Assets List */
+.assetsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.assetItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--color-border-light);
+  padding: 12px 16px;
+  background: #374151;
+  border-radius: 8px;
+  border: 1px solid #4B5563;
 }
 
-.reviewAsset:last-of-type {
-  border-bottom: 1px solid var(--color-border);
-  margin-bottom: 8px;
+.assetInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.assetSymbol {
+.assetTicker {
   font-weight: 700;
-  color: var(--color-primary);
-  min-width: 60px;
+  font-size: 1rem;
+  color: #F9FAFB;
 }
 
 .assetName {
-  flex: 1;
-  margin: 0 12px;
-  color: var(--color-text-primary);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  color: #9CA3AF;
 }
 
 .assetWeight {
   font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.totalWeight {
-  font-weight: 700;
-  color: var(--color-primary);
-  font-size: 1.1rem;
-  text-align: right;
-  padding-top: 8px;
+  font-size: 1rem;
+  color: #10B981;
 }
 
 /* Navigation */
@@ -315,69 +307,235 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 0;
+  padding-top: 24px;
+  border-top: 1px solid #374151;
 }
 
-.navLeft,
-.navRight {
+.navigationRight {
   display: flex;
   gap: 12px;
 }
 
-/* Error styling */
-.error {
-  background-color: rgba(var(--color-error-rgb), 0.1);
-  border: 1px solid var(--color-error);
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  color: var(--color-error);
-  font-size: 0.9rem;
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
 }
 
-/* Responsive design */
+.modalContent {
+  background: #1F2937;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 0 24px;
+  margin-bottom: 24px;
+}
+
+.modalHeader h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #F9FAFB;
+  margin: 0;
+}
+
+/* Simple Asset Form */
+.simpleAssetForm {
+  padding: 0 24px 24px 24px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.remainingWeight {
+  font-size: 0.875rem;
+  color: #9CA3AF;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.quickWeights {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.formActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* Templates Modal */
+.templatesModal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.templatesCard {
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.templatesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 0 24px;
+  margin-bottom: 24px;
+}
+
+.templatesHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #F9FAFB;
+  margin: 0;
+}
+
+.templatesList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 24px 24px 24px;
+}
+
+.templateItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: #374151;
+  border-radius: 12px;
+  border: 1px solid #4B5563;
+  transition: all 0.3s ease;
+}
+
+.templateItem:hover {
+  border-color: #10B981;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.templateInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.templateIcon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.templateInfo h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #F9FAFB;
+  margin: 0 0 4px 0;
+}
+
+.templateInfo p {
+  font-size: 0.875rem;
+  color: #9CA3AF;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.templateMeta {
+  display: flex;
+  gap: 12px;
+}
+
+.templateRisk {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+.templateReturn {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #10B981;
+}
+
+/* Error Messages */
+.error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: #EF4444;
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+}
+
+.error::before {
+  content: '⚠️';
+  flex-shrink: 0;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
   .container {
     padding: 16px;
   }
 
-  .title {
-    font-size: 1.75rem;
-  }
-
-  .progressSteps {
+  .stepIndicator {
     flex-direction: column;
     gap: 16px;
   }
 
-  .progressSteps::before {
+  .stepItem {
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  .stepItem:not(:last-child)::after {
     display: none;
   }
 
-  .progressStep {
-    flex-direction: row;
-    padding: 0;
-    width: 100%;
-    justify-content: flex-start;
-    background-color: transparent;
-  }
-
-  .stepInfo {
-    min-width: auto;
-    text-align: left;
-    margin-left: 12px;
-  }
-
-  .mainCard {
-    padding: 24px 16px;
-  }
-
-  .formGrid {
-    grid-template-columns: 1fr;
+  .headerContent {
+    flex-direction: column;
+    align-items: flex-start;
     gap: 16px;
   }
 
-  .reviewSections {
+  .formGrid,
+  .formRow {
     grid-template-columns: 1fr;
   }
 
@@ -387,8 +545,12 @@
     gap: 16px;
   }
 
-  .assetsActions {
+  .assetActions {
     justify-content: center;
+  }
+
+  .reviewSummary {
+    grid-template-columns: 1fr;
   }
 
   .navigation {
@@ -396,24 +558,49 @@
     gap: 16px;
   }
 
-  .navLeft,
-  .navRight {
+  .navigationRight {
     width: 100%;
     justify-content: center;
   }
 
-  .reviewAsset {
+  .quickActions,
+  .quickWeights {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
+    align-items: stretch;
+  }
+
+  .formActions {
+    flex-direction: column;
+  }
+
+  .modal,
+  .templatesModal {
+    padding: 16px;
+  }
+
+  .modalContent,
+  .templatesCard {
+    max-height: 95vh;
+  }
+
+  .templateItem {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .templateInfo {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
 }
 
 /* Animations */
-@keyframes fadeInUp {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -422,26 +609,26 @@
 }
 
 .stepContent {
-  animation: fadeInUp 0.5s ease-out;
+  animation: fadeIn 0.3s ease-out;
 }
 
-/* Focus states */
-.stepNumber:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
+.modal,
+.templatesModal {
+  animation: fadeIn 0.2s ease-out;
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .progressStep {
-    background-color: var(--color-background-card);
-  }
+.modalContent,
+.templatesCard {
+  animation: slideUp 0.3s ease-out;
+}
 
-  .emptyAssets {
-    background-color: var(--color-background-elevated);
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
   }
-
-  .assetFormCard {
-    background-color: var(--color-background-card);
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }

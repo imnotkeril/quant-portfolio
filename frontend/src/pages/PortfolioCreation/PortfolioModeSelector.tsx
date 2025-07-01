@@ -3,46 +3,23 @@
  * Mode selection for portfolio creation (Easy vs Professional)
  */
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../../components/layout/PageContainer/PageContainer';
 import Card from '../../components/common/Card/Card';
 import { Button } from '../../components/common/Button/Button';
-import { ROUTES } from '../../constants/routes';
 import styles from './PortfolioModeSelector.module.css';
 
 interface PortfolioModeSelectorProps {
   onModeSelect?: (mode: 'easy' | 'professional') => void;
 }
 
-export const PortfolioModeSelector: React.FC<PortfolioModeSelectorProps> = ({
+const PortfolioModeSelector: React.FC<PortfolioModeSelectorProps> = ({
   onModeSelect
 }) => {
-  const navigate = useNavigate();
-
   const handleModeSelect = (mode: 'easy' | 'professional') => {
     if (onModeSelect) {
       onModeSelect(mode);
-    } else {
-      // Navigate to creation page with mode parameter
-      navigate(`${ROUTES.PORTFOLIO.CREATE}?mode=${mode}`);
     }
   };
-
-  const easyModeFeatures = [
-    '✅ Quick 2-step setup',
-    '✅ Smart auto-completion',
-    '✅ Ready-made templates',
-    '✅ Instant portfolio creation',
-    '✅ Perfect for beginners'
-  ];
-
-  const professionalModeFeatures = [
-    '⚙️ Full control over all settings',
-    '⚙️ Advanced constraints & limits',
-    '⚙️ Custom optimization algorithms',
-    '⚙️ Detailed analytics & backtesting',
-    '⚙️ Professional-grade features'
-  ];
 
   return (
     <PageContainer>
@@ -55,39 +32,44 @@ export const PortfolioModeSelector: React.FC<PortfolioModeSelectorProps> = ({
         </div>
 
         <div className={styles.modeSelection}>
-          <Card className={styles.modeCard}>
-            <div className={styles.modeIcon}>🟢</div>
-            <h2 className={styles.modeTitle}>Easy Mode</h2>
-            <p className={styles.modeDescription}>
-              Perfect for getting started quickly with smart defaults and guided setup
-            </p>
+          {/* Easy Mode Card */}
+          <Card className={`${styles.modeCard} ${styles.easyMode}`}>
+            <div className={styles.modeHeader}>
+              <div className={styles.modeIcon}>⚡</div>
+              <div>
+                <h2 className={styles.modeTitle}>Easy Mode</h2>
+                <p className={styles.modeDescription}>
+                  Perfect for getting started quickly with smart defaults
+                </p>
+              </div>
+            </div>
 
             <div className={styles.featuresList}>
-              {easyModeFeatures.map((feature, index) => (
-                <div key={index} className={styles.feature}>
-                  {feature}
-                </div>
-              ))}
+              <div className={styles.feature}>📋 Ready-made templates</div>
+              <div className={styles.feature}>🔄 Smart auto-completion</div>
+              <div className={styles.feature}>⚡ Instant portfolio creation</div>
+              <div className={styles.feature}>👤 Perfect for beginners</div>
             </div>
 
             <div className={styles.modeStats}>
               <div className={styles.stat}>
-                <span className={styles.statValue}>~3 min</span>
-                <span className={styles.statLabel}>Setup time</span>
+                <span className={styles.statValue}>2-3</span>
+                <span className={styles.statLabel}>Steps</span>
               </div>
               <div className={styles.stat}>
-                <span className={styles.statValue}>5+ templates</span>
-                <span className={styles.statLabel}>Ready portfolios</span>
+                <span className={styles.statValue}>5 min</span>
+                <span className={styles.statLabel}>Setup</span>
               </div>
             </div>
 
             <Button
-              onClick={() => handleModeSelect('easy')}
               variant="primary"
               size="large"
+              fullWidth
+              onClick={() => handleModeSelect('easy')}
               className={styles.selectButton}
             >
-              Start Easy Mode ➡️
+              Choose Easy Mode ⚡
             </Button>
 
             <div className={styles.tip}>
@@ -95,39 +77,44 @@ export const PortfolioModeSelector: React.FC<PortfolioModeSelectorProps> = ({
             </div>
           </Card>
 
-          <Card className={styles.modeCard}>
-            <div className={styles.modeIcon}>🔵</div>
-            <h2 className={styles.modeTitle}>Professional Mode</h2>
-            <p className={styles.modeDescription}>
-              Advanced setup with full control over every aspect of your portfolio
-            </p>
+          {/* Professional Mode Card */}
+          <Card className={`${styles.modeCard} ${styles.proMode}`}>
+            <div className={styles.modeHeader}>
+              <div className={styles.modeIcon}>⚙️</div>
+              <div>
+                <h2 className={styles.modeTitle}>Professional Mode</h2>
+                <p className={styles.modeDescription}>
+                  Complete control over all portfolio parameters
+                </p>
+              </div>
+            </div>
 
             <div className={styles.featuresList}>
-              {professionalModeFeatures.map((feature, index) => (
-                <div key={index} className={styles.feature}>
-                  {feature}
-                </div>
-              ))}
+              <div className={styles.feature}>⚙️ Full control over settings</div>
+              <div className={styles.feature}>📊 Advanced constraints</div>
+              <div className={styles.feature}>🎯 Custom algorithms</div>
+              <div className={styles.feature}>📈 Professional features</div>
             </div>
 
             <div className={styles.modeStats}>
               <div className={styles.stat}>
-                <span className={styles.statValue}>~10 min</span>
-                <span className={styles.statLabel}>Setup time</span>
+                <span className={styles.statValue}>4-5</span>
+                <span className={styles.statLabel}>Steps</span>
               </div>
               <div className={styles.stat}>
-                <span className={styles.statValue}>5+ algorithms</span>
-                <span className={styles.statLabel}>Optimization methods</span>
+                <span className={styles.statValue}>15+ min</span>
+                <span className={styles.statLabel}>Setup</span>
               </div>
             </div>
 
             <Button
-              onClick={() => handleModeSelect('professional')}
               variant="primary"
               size="large"
+              fullWidth
+              onClick={() => handleModeSelect('professional')}
               className={styles.selectButton}
             >
-              Advanced Mode ➡️
+              Choose Professional Mode ⚙️
             </Button>
 
             <div className={styles.tip}>
@@ -136,49 +123,20 @@ export const PortfolioModeSelector: React.FC<PortfolioModeSelectorProps> = ({
           </Card>
         </div>
 
-        <div className={styles.comparison}>
-          <Card className={styles.comparisonCard}>
-            <h3 className={styles.comparisonTitle}>Quick Comparison</h3>
-            <div className={styles.comparisonTable}>
-              <div className={styles.comparisonRow}>
-                <div className={styles.comparisonFeature}>Setup complexity</div>
-                <div className={styles.comparisonEasy}>Simple</div>
-                <div className={styles.comparisonPro}>Advanced</div>
-              </div>
-              <div className={styles.comparisonRow}>
-                <div className={styles.comparisonFeature}>Required fields</div>
-                <div className={styles.comparisonEasy}>3-5 fields</div>
-                <div className={styles.comparisonPro}>15+ fields</div>
-              </div>
-              <div className={styles.comparisonRow}>
-                <div className={styles.comparisonFeature}>Optimization</div>
-                <div className={styles.comparisonEasy}>Auto-optimization</div>
-                <div className={styles.comparisonPro}>Manual control</div>
-              </div>
-              <div className={styles.comparisonRow}>
-                <div className={styles.comparisonFeature}>Templates</div>
-                <div className={styles.comparisonEasy}>✅ Included</div>
-                <div className={styles.comparisonPro}>✅ Included</div>
-              </div>
-              <div className={styles.comparisonRow}>
-                <div className={styles.comparisonFeature}>Constraints</div>
-                <div className={styles.comparisonEasy}>Smart defaults</div>
-                <div className={styles.comparisonPro}>Custom limits</div>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        <div className={styles.footer}>
-          <p className={styles.footerText}>
-            💡 You can always upgrade from Easy Mode to Professional Mode later
-          </p>
-          <Button
-            onClick={() => navigate(ROUTES.PORTFOLIOS)}
-            variant="ghost"
-          >
-            ← Back to Portfolios
-          </Button>
+        {/* Simplified Comparison */}
+        <div className={styles.quickComparison}>
+          <div className={styles.comparisonItem}>
+            <span className={styles.comparisonLabel}>Templates:</span>
+            <span className={styles.comparisonEasy}>5 Ready-made</span>
+            <span className={styles.comparisonVs}>vs</span>
+            <span className={styles.comparisonPro}>Custom + Templates</span>
+          </div>
+          <div className={styles.comparisonItem}>
+            <span className={styles.comparisonLabel}>Setup:</span>
+            <span className={styles.comparisonEasy}>Quick & Simple</span>
+            <span className={styles.comparisonVs}>vs</span>
+            <span className={styles.comparisonPro}>Detailed Control</span>
+          </div>
         </div>
       </div>
     </PageContainer>
