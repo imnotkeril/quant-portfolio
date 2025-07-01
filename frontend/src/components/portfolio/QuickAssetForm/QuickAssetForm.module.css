@@ -1,0 +1,314 @@
+/* QuickAssetForm.module.css */
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.header h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 6px;
+}
+
+.header p {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.quickFields {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Ticker field with auto-complete */
+.tickerField {
+  position: relative;
+}
+
+.tickerInput {
+  position: relative;
+}
+
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--color-background-elevated);
+  border: 1px solid var(--color-border);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.suggestion {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.suggestion:hover {
+  background-color: var(--color-background-secondary);
+}
+
+.suggestion:last-child {
+  border-bottom: none;
+}
+
+.suggestionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.suggestionTicker {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+}
+
+.suggestionName {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.assetInfo {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background-color: rgba(var(--color-success-rgb), 0.1);
+  border: 1px solid var(--color-success);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--color-success);
+}
+
+/* Weight field with quick buttons */
+.weightField {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quickWeights {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.quickWeightsLabel {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  min-width: fit-content;
+}
+
+.quickWeightBtn {
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--color-background);
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.quickWeightBtn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: rgba(var(--color-primary-rgb), 0.05);
+}
+
+.quickWeightBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quickWeightBtn.active {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.remainingInfo {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+/* Info box */
+.infoBox {
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.1) 0%, rgba(var(--color-primary-rgb), 0.05) 100%);
+  border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+  border-radius: 12px;
+}
+
+.infoBox h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 12px;
+}
+
+.infoBox ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.infoBox li {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.leftActions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    padding: 0;
+  }
+
+  .header {
+    margin-bottom: 20px;
+  }
+
+  .header h3 {
+    font-size: 1.25rem;
+  }
+
+  .quickFields {
+    gap: 16px;
+  }
+
+  .quickWeights {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .quickWeightsLabel {
+    margin-bottom: 4px;
+  }
+
+  .quickWeightBtn {
+    padding: 8px 12px;
+    text-align: center;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+
+  .leftActions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .suggestion {
+    padding: 16px;
+  }
+
+  .infoBox {
+    padding: 16px;
+  }
+
+  .infoBox ul {
+    gap: 8px;
+  }
+}
+
+/* Focus states */
+.suggestion:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.quickWeightBtn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Animation for suggestions */
+.suggestions {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading state */
+.container[data-loading="true"] {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .suggestions {
+    background-color: var(--color-background-card);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .infoBox {
+    background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.15) 0%, rgba(var(--color-primary-rgb), 0.08) 100%);
+  }
+}

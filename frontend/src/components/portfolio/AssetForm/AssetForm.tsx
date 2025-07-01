@@ -93,7 +93,6 @@ export const AssetForm: React.FC<AssetFormProps> = ({
     }
   }, [asset]);
 
-  // Handle form field changes
   const handleFieldChange = (field: keyof AssetCreate, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
 
@@ -106,42 +105,31 @@ export const AssetForm: React.FC<AssetFormProps> = ({
     }
   };
 
-  // Handle form submission
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
-    // Validate form
-    const validation = validateAsset(formData);
+    // Validate asset data
+    const validation = validateAsset(formData, existingTickers);
     if (!validation.isValid) {
       const errors: Record<string, string> = {};
       validation.errors.forEach(error => {
         if (error.includes('ticker')) errors.ticker = error;
+        if (error.includes('name')) errors.name = error;
         if (error.includes('weight')) errors.weight = error;
         if (error.includes('quantity')) errors.quantity = error;
         if (error.includes('price')) {
-          if (error.includes('purchase')) errors.purchasePrice = error;
-          else errors.currentPrice = error;
+          if (error.includes('purchase')) {
+            errors.purchasePrice = error;
+          } else {
+            errors.currentPrice = error;
+          }
         }
       });
       setValidationErrors(errors);
       return;
     }
 
-    // Check for duplicate ticker
-    if (!asset && existingTickers.includes(formData.ticker.toUpperCase())) {
-      setValidationErrors({ ticker: 'This ticker already exists in the portfolio' });
-      return;
-    }
-
-    // Submit form data
-    onSubmit({
-      ...formData,
-      ticker: formData.ticker.toUpperCase(),
-      weight: Number(formData.weight),
-      quantity: Number(formData.quantity),
-      purchasePrice: Number(formData.purchasePrice),
-      currentPrice: Number(formData.currentPrice),
-    });
+    onSubmit(formData);
   };
 
   const containerClasses = classNames(styles.container, className);
@@ -149,13 +137,17 @@ export const AssetForm: React.FC<AssetFormProps> = ({
   return (
     <div className={containerClasses} data-testid={testId}>
       <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.header}>
+          <h3>{asset ? 'Edit Asset' : 'Add Asset'}</h3>
+        </div>
+
         <div className={styles.section}>
           <h4 className={styles.sectionTitle}>Basic Information</h4>
 
           <div className={styles.row}>
             <Input
               label="Ticker Symbol"
-              placeholder="e.g., AAPL"
+              placeholder="e.g., AAPL, GOOGL, SPY"
               value={formData.ticker}
               onChange={(e) => handleFieldChange('ticker', e.target.value.toUpperCase())}
               error={validationErrors.ticker}
@@ -200,7 +192,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
               label="Weight (%)"
               placeholder="0"
               value={formData.weight?.toString() || ''}
-              onChange={(e) => handleFieldChange('weight', e.target.value)}
+              onChange={(e) => handleFieldChange('weight', Number(e.target.value))}
               error={validationErrors.weight}
               min="0"
               max="100"
@@ -212,7 +204,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
               label="Quantity"
               placeholder="0"
               value={formData.quantity?.toString() || ''}
-              onChange={(e) => handleFieldChange('quantity', e.target.value)}
+              onChange={(e) => handleFieldChange('quantity', Number(e.target.value))}
               error={validationErrors.quantity}
               min="0"
               step="0.001"
@@ -225,49 +217,49 @@ export const AssetForm: React.FC<AssetFormProps> = ({
               label="Purchase Price"
               placeholder="0.00"
               value={formData.purchasePrice?.toString() || ''}
-              onChange={(e) => handleFieldChange('purchasePrice', e.target.value)}
+              onChange={(e) => handleFieldChange('purchasePrice', Number(e.target.value))}
               error={validationErrors.purchasePrice}
               min="0"
               step="0.01"
             />
 
             <Input
-              type="date"
-              label="Purchase Date"
-              value={formData.purchaseDate}
-              onChange={(e) => handleFieldChange('purchaseDate', e.target.value)}
-              error={validationErrors.purchaseDate}
-            />
-          </div>
-
-          <div className={styles.row}>
-            <Input
               type="number"
               label="Current Price"
               placeholder="0.00"
               value={formData.currentPrice?.toString() || ''}
-              onChange={(e) => handleFieldChange('currentPrice', e.target.value)}
+              onChange={(e) => handleFieldChange('currentPrice', Number(e.target.value))}
               error={validationErrors.currentPrice}
               min="0"
               step="0.01"
             />
           </div>
+
+          <div className={styles.row}>
+            <Input
+              type="date"
+              label="Purchase Date"
+              value={formData.purchaseDate}
+              onChange={(e) => handleFieldChange('purchaseDate', e.target.value)}
+              max={formatDate(new Date(), 'input')}
+            />
+          </div>
         </div>
 
         <div className={styles.section}>
-          <h4 className={styles.sectionTitle}>Additional Information</h4>
+          <h4 className={styles.sectionTitle}>Additional Information (Optional)</h4>
 
           <div className={styles.row}>
             <Input
               label="Sector"
-              placeholder="e.g., Technology"
+              placeholder="e.g., Technology, Healthcare"
               value={formData.sector}
               onChange={(e) => handleFieldChange('sector', e.target.value)}
             />
 
             <Input
               label="Industry"
-              placeholder="e.g., Consumer Electronics"
+              placeholder="e.g., Software, Pharmaceuticals"
               value={formData.industry}
               onChange={(e) => handleFieldChange('industry', e.target.value)}
             />
@@ -276,14 +268,14 @@ export const AssetForm: React.FC<AssetFormProps> = ({
           <div className={styles.row}>
             <Input
               label="Country"
-              placeholder="e.g., United States"
+              placeholder="e.g., United States, Germany"
               value={formData.country}
               onChange={(e) => handleFieldChange('country', e.target.value)}
             />
 
             <Input
               label="Exchange"
-              placeholder="e.g., NASDAQ"
+              placeholder="e.g., NASDAQ, NYSE"
               value={formData.exchange}
               onChange={(e) => handleFieldChange('exchange', e.target.value)}
             />
@@ -294,8 +286,8 @@ export const AssetForm: React.FC<AssetFormProps> = ({
           {onCancel && (
             <Button
               type="button"
-              variant="outline"
               onClick={onCancel}
+              variant="secondary"
               disabled={loading}
             >
               Cancel
@@ -304,10 +296,11 @@ export const AssetForm: React.FC<AssetFormProps> = ({
 
           <Button
             type="submit"
+            variant="primary"
             loading={loading}
-            disabled={!formData.ticker.trim()}
+            disabled={loading}
           >
-            {asset ? 'Update Asset' : 'Add Asset'}
+            {loading ? 'Saving...' : (asset ? 'Update Asset' : 'Add Asset')}
           </Button>
         </div>
       </form>

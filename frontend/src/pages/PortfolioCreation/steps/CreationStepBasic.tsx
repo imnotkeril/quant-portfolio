@@ -160,7 +160,7 @@ export const CreationStepBasic: React.FC<CreationStepBasicProps> = ({
                       <button
                         key={tag}
                         type="button"
-                        className={`${styles.tagButton} ${isSelected ? styles.selected : ''}`}
+                        className={`${styles.tagButton} ${isSelected ? styles.tagSelected : ''}`}
                         onClick={() => handleSuggestedTagClick(tag)}
                         disabled={loading}
                       >
@@ -174,24 +174,28 @@ export const CreationStepBasic: React.FC<CreationStepBasicProps> = ({
           </div>
         </div>
 
-        <div className={styles.stepActions}>
+        <div className={styles.formActions}>
           <Button
             type="button"
-            variant="outline"
             onClick={onCancel}
+            variant="secondary"
             disabled={loading}
           >
-            Back
+            Cancel
           </Button>
+
           <Button
             type="submit"
+            variant="primary"
             loading={loading}
-            disabled={!formData.name.trim()}
+            disabled={loading}
           >
-            Continue to Assets
+            Continue
           </Button>
         </div>
       </form>
     </Card>
   );
 };
+
+export default CreationStepBasic;

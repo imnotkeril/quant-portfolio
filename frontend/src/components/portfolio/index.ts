@@ -10,6 +10,11 @@ export { PortfolioSummary } from './PortfolioSummary';
 export { PortfolioFilters } from './PortfolioFilters';
 export { PortfolioHeader } from './PortfolioHeader';
 
+// New components for Enhanced Portfolio Creation
+export { default as PortfolioTemplates } from './PortfolioTemplates/PortfolioTemplates';
+export { default as QuickAssetForm } from './QuickAssetForm/QuickAssetForm';
+export { default as AssetImport } from './AssetImport/AssetImport';
+
 export type { default as PortfolioCardProps } from './PortfolioCard';
 export type { default as PortfolioListProps } from './PortfolioList';
 export type { default as PortfolioFormProps } from './PortfolioForm';

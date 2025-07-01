@@ -204,16 +204,19 @@ export const PortfolioForm: React.FC<PortfolioFormProps> = ({
                 placeholder="Enter portfolio description (optional)"
                 value={formData.description}
                 onChange={(e) => handleFieldChange('description', e.target.value)}
+                error={validationErrors.description}
+                multiline
+                rows={3}
                 fullWidth
               />
 
               <Input
                 label="Tags"
                 placeholder="Enter tags separated by commas"
-                value={formData.tags?.join(', ') || ''}
+                value={Array.isArray(formData.tags) ? formData.tags.join(', ') : ''}
                 onChange={handleTagsChange}
-                helperText="Separate multiple tags with commas"
                 fullWidth
+                helperText="Use tags to categorize and organize your portfolios"
               />
             </div>
           </div>
@@ -223,16 +226,16 @@ export const PortfolioForm: React.FC<PortfolioFormProps> = ({
               <h3 className={styles.sectionTitle}>Assets</h3>
               <Button
                 type="button"
-                variant="secondary"
                 onClick={handleAddAsset}
-                disabled={loading}
+                variant="primary"
+                size="small"
               >
                 Add Asset
               </Button>
             </div>
 
             {validationErrors.assets && (
-              <div className={styles.fieldError}>
+              <div className={styles.error}>
                 {validationErrors.assets}
               </div>
             )}
@@ -242,19 +245,14 @@ export const PortfolioForm: React.FC<PortfolioFormProps> = ({
                 assets={assets}
                 onEdit={handleEditAsset}
                 onDelete={handleDeleteAsset}
-                className={styles.assetTable}
+                showActions
               />
             ) : (
               <div className={styles.emptyAssets}>
-                <p>No assets added yet.</p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleAddAsset}
-                  disabled={loading}
-                >
-                  Add Your First Asset
-                </Button>
+                <p>No assets added yet</p>
+                <p className={styles.emptyDescription}>
+                  Click "Add Asset" to start building your portfolio
+                </p>
               </div>
             )}
           </div>
@@ -263,8 +261,8 @@ export const PortfolioForm: React.FC<PortfolioFormProps> = ({
             {onCancel && (
               <Button
                 type="button"
-                variant="outline"
                 onClick={onCancel}
+                variant="secondary"
                 disabled={loading}
               >
                 Cancel
@@ -273,29 +271,32 @@ export const PortfolioForm: React.FC<PortfolioFormProps> = ({
 
             <Button
               type="submit"
+              variant="primary"
               loading={loading}
-              disabled={!formData.name.trim() || assets.length === 0}
+              disabled={loading}
             >
-              {submitText}
+              {loading ? 'Saving...' : submitText}
             </Button>
           </div>
         </form>
       </Card>
 
       {/* Asset Form Modal */}
-      <Modal
-        isOpen={showAssetForm}
-        onClose={handleAssetCancel}
-        title={editingAsset ? 'Edit Asset' : 'Add Asset'}
-        size="large"
-      >
-        <AssetForm
-          asset={editingAsset}
-          onSubmit={handleAssetSubmit}
-          onCancel={handleAssetCancel}
-          existingTickers={assets.map(a => a.ticker).filter(t => t !== editingAsset?.ticker)}
-        />
-      </Modal>
+      {showAssetForm && (
+        <Modal
+          isOpen={showAssetForm}
+          onClose={handleAssetCancel}
+          title={editingAsset ? 'Edit Asset' : 'Add Asset'}
+          maxWidth="md"
+        >
+          <AssetForm
+            asset={editingAsset}
+            onSubmit={handleAssetSubmit}
+            onCancel={handleAssetCancel}
+            existingTickers={assets.map(a => a.ticker)}
+          />
+        </Modal>
+      )}
     </div>
   );
 };

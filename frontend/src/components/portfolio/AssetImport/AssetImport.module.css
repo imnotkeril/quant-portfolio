@@ -1,0 +1,308 @@
+/* AssetImport.module.css */
+
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 6px;
+}
+
+.header p {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.methodSelector {
+  margin-bottom: 24px;
+}
+
+.methodButtons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.importArea {
+  margin-bottom: 24px;
+}
+
+.fileUpload {
+  text-align: center;
+  margin-bottom: 16px;
+  padding: 20px;
+  border: 2px dashed var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-background-secondary);
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadButton {
+  margin-bottom: 8px;
+}
+
+.uploadText {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.textArea {
+  margin-bottom: 16px;
+}
+
+.importInput {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.85rem;
+}
+
+.example {
+  padding: 16px;
+  background-color: var(--color-background-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.example h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.exampleText {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  background-color: var(--color-background);
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  overflow-x: auto;
+  margin: 0;
+}
+
+.errors {
+  margin-bottom: 16px;
+}
+
+.error {
+  padding: 8px 12px;
+  background-color: rgba(var(--color-error-rgb), 0.1);
+  border: 1px solid var(--color-error);
+  border-radius: 6px;
+  color: var(--color-error);
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.error:last-child {
+  margin-bottom: 0;
+}
+
+.preview {
+  margin-bottom: 24px;
+  padding: 20px;
+  background-color: var(--color-background-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.preview h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 16px;
+}
+
+.validAssets,
+.invalidAssets {
+  margin-bottom: 16px;
+}
+
+.validAssets:last-child,
+.invalidAssets:last-child {
+  margin-bottom: 0;
+}
+
+.validTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-success);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.invalidTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-error);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.assetsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.assetItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.assetTicker {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  min-width: 60px;
+}
+
+.assetWeight {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-primary);
+  min-width: 50px;
+}
+
+.assetName {
+  flex: 1;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.assetErrors {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    padding: 0;
+  }
+
+  .header {
+    margin-bottom: 20px;
+  }
+
+  .methodButtons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .fileUpload {
+    padding: 16px;
+  }
+
+  .preview {
+    padding: 16px;
+  }
+
+  .assetItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .assetTicker,
+  .assetWeight {
+    min-width: auto;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .exampleText {
+    font-size: 0.75rem;
+    padding: 8px;
+  }
+}
+
+/* Hover effects */
+.uploadButton:hover {
+  transform: translateY(-1px);
+}
+
+.assetItem:hover {
+  border-color: var(--color-primary);
+  background-color: rgba(var(--color-primary-rgb), 0.02);
+}
+
+/* Focus states */
+.fileInput:focus-visible + .uploadButton {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Animations */
+.assetItem {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .fileUpload {
+    background-color: var(--color-background-elevated);
+  }
+
+  .example {
+    background-color: var(--color-background-elevated);
+  }
+
+  .exampleText {
+    background-color: var(--color-background-card);
+  }
+
+  .preview {
+    background-color: var(--color-background-elevated);
+  }
+
+  .assetItem {
+    background-color: var(--color-background-card);
+  }
+}
