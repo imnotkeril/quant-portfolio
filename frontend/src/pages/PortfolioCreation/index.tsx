@@ -1,8 +1,8 @@
 /**
  * Portfolio Creation Component - Fixed according to design guidelines
- * Implements the new design with Basic/Advanced modes
+ * File: frontend/src/pages/PortfolioCreation/index.tsx
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
 import { Card } from '../../components/common/Card';
@@ -11,14 +11,13 @@ import { Input } from '../../components/common/Input';
 import { Select } from '../../components/common/Select';
 import { Modal } from '../../components/common/Modal';
 import { Badge } from '../../components/common/Badge';
-import { Tooltip } from '../../components/common/Tooltip';
 import { usePortfolios } from '../../hooks/usePortfolios';
 import { AssetCreate, PortfolioCreate } from '../../types/portfolio';
 import styles from './PortfolioCreation.module.css';
 
 // Types
 type CreationMode = 'basic' | 'advanced';
-type CreationStep = 'mode' | 'basic_info' | 'assets' | 'advanced_setup' | 'constraints' | 'review';
+type CreationStep = 'mode' | 'basic_info' | 'assets' | 'constraints';
 
 interface PortfolioFormData {
   name: string;
@@ -30,11 +29,8 @@ interface PortfolioFormData {
   rebalancing?: string;
   tags?: string[];
   assets: AssetFormData[];
-  // Advanced mode fields
   maxPositionSize?: number;
   minPositionSize?: number;
-  sectorLimits?: Record<string, number>;
-  geographicConstraints?: string[];
   enableTaxOptimization?: boolean;
   enableESG?: boolean;
   enableCurrencyHedging?: boolean;
@@ -65,7 +61,7 @@ interface PortfolioTemplate {
   }>;
 }
 
-// Portfolio Templates
+// Portfolio Templates exactly as in design
 const PORTFOLIO_TEMPLATES: PortfolioTemplate[] = [
   {
     id: 'warren_buffett',
@@ -140,6 +136,151 @@ const PORTFOLIO_TEMPLATES: PortfolioTemplate[] = [
   }
 ];
 
+// Quick Add Asset Modal Component - MOVED BEFORE MAIN COMPONENT
+const QuickAddAssetModal: React.FC<{
+  onAdd: (asset: AssetFormData) => void;
+  onCancel: () => void;
+  remainingWeight: number;
+}> = ({ onAdd, onCancel, remainingWeight }) => {
+  const [ticker, setTicker] = useState('');
+  const [weight, setWeight] = useState(Math.min(remainingWeight, 15));
+  const [assetInfo, setAssetInfo] = useState<any>(null);
+
+  const handleTickerChange = (value: string) => {
+    setTicker(value.toUpperCase());
+
+    if (value.length >= 2) {
+      // Mock API call - replace with real API
+      setTimeout(() => {
+        setAssetInfo({
+          name: value === 'AAPL' ? 'Apple Inc.' : `${value} Company`,
+          price: 150.25,
+          sector: 'Technology'
+        });
+      }, 500);
+    }
+  };
+
+  const handleAdd = () => {
+    if (ticker && weight > 0) {
+      const asset: AssetFormData = {
+        id: `asset-${Date.now()}`,
+        ticker,
+        name: assetInfo?.name || `${ticker} Company`,
+        weight,
+        sector: assetInfo?.sector,
+        currentPrice: assetInfo?.price
+      };
+      onAdd(asset);
+    }
+  };
+
+  return (
+    <Modal open={true} onClose={onCancel} title="🚀 Quick Add Asset">
+      <div className={styles.quickAddForm}>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Ticker Symbol *</label>
+          <div className={styles.tickerInputGroup}>
+            <Input
+              value={ticker}
+              onChange={(e) => handleTickerChange(e.target.value)}
+              placeholder="AAPL"
+            />
+            <Button variant="ghost" size="small">
+              🔍
+            </Button>
+          </div>
+          {assetInfo && (
+            <div className={styles.assetInfo}>
+              💡 {assetInfo.name} - ${assetInfo.price}
+            </div>
+          )}
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Weight (%) *</label>
+          <Input
+            type="number"
+            value={weight}
+            onChange={(e) => setWeight(Number(e.target.value))}
+            max={remainingWeight}
+          />
+          <div className={styles.remainingInfo}>
+            💡 Remaining: {remainingWeight}%
+          </div>
+        </div>
+
+        <div className={styles.modalActions}>
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleAdd}
+            disabled={!ticker || weight <= 0 || weight > remainingWeight}
+          >
+            Add Asset ✅
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+// Portfolio Templates Modal Component - MOVED BEFORE MAIN COMPONENT
+const PortfolioTemplatesModal: React.FC<{
+  onSelect: (templateId: string) => void;
+  onCancel: () => void;
+}> = ({ onSelect, onCancel }) => {
+  return (
+    <Modal open={true} onClose={onCancel} title="📋 Portfolio Templates">
+      <div className={styles.templatesContainer}>
+        {PORTFOLIO_TEMPLATES.map((template) => (
+          <Card key={template.id} className={styles.templateCard}>
+            <div className={styles.templateHeader}>
+              <h3>{template.name}</h3>
+              <div className={styles.templateMeta}>
+                <Badge variant="secondary">{template.riskLevel}</Badge>
+                <span className={styles.expectedReturn}>{template.expectedReturn}</span>
+              </div>
+            </div>
+            <p className={styles.templateDescription}>{template.description}</p>
+            <div className={styles.templateAssets}>
+              {template.assets.slice(0, 5).map((asset, index) => (
+                <span key={index} className={styles.assetTag}>
+                  {asset.ticker} {asset.weight}%
+                </span>
+              ))}
+              {template.assets.length > 5 && (
+                <span className={styles.assetTag}>
+                  +{template.assets.length - 5} more
+                </span>
+              )}
+            </div>
+            <Button
+              onClick={() => onSelect(template.id)}
+              variant="primary"
+              className={styles.useTemplateButton}
+            >
+              Use Template ➡️
+            </Button>
+          </Card>
+        ))}
+
+        <div className={styles.modalActions}>
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button variant="primary">
+            Custom Mix
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+// MAIN COMPONENT
 const PortfolioCreation: React.FC = () => {
   const navigate = useNavigate();
   const { createPortfolio, isLoading } = usePortfolios();
@@ -164,7 +305,6 @@ const PortfolioCreation: React.FC = () => {
 
   const handleFormChange = (field: keyof PortfolioFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
@@ -221,7 +361,7 @@ const PortfolioCreation: React.FC = () => {
         description: formData.description,
         assets: formData.assets.map(asset => ({
           ticker: asset.ticker,
-          weight: asset.weight / 100 // Convert percentage to decimal
+          weight: asset.weight / 100
         })) as AssetCreate[]
       };
 
@@ -274,37 +414,25 @@ const PortfolioCreation: React.FC = () => {
               onClick={() => handleModeSelect('basic')}
             >
               <div className={styles.modeIcon}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12,6 12,12 16,14"/>
-                </svg>
+                🟢
               </div>
               <h3 className={styles.modeTitle}>Basic Mode</h3>
               <div className={styles.modeFeatures}>
                 <div className={styles.feature}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="9,11 12,14 22,4"/>
-                    <path d="m21,12.5a8.38,8.38 0 0,1 -0.9,3.8 8.5,8.5 0 0,1 -7.6,4.7 8.38,8.38 0 0,1 -3.8,-0.9L3,21l1.9-5.7a8.38,8.38 0 0,1 -0.9,-3.8 8.5,8.5 0 0,1 4.7,-7.6 8.38,8.38 0 0,1 3.8,-0.9h0.5a8.48,8.48 0 0,1 8,8v0.5z"/>
-                  </svg>
-                  Quick setup
+                  <span>✅</span>
+                  <span>Quick setup</span>
                 </div>
                 <div className={styles.feature}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="9,11 12,14 22,4"/>
-                    <path d="m21,12.5a8.38,8.38 0 0,1 -0.9,3.8 8.5,8.5 0 0,1 -7.6,4.7 8.38,8.38 0 0,1 -3.8,-0.9L3,21l1.9-5.7a8.38,8.38 0 0,1 -0.9,-3.8 8.5,8.5 0 0,1 4.7,-7.6 8.38,8.38 0 0,1 3.8,-0.9h0.5a8.48,8.48 0 0,1 8,8v0.5z"/>
-                  </svg>
-                  Smart defaults
+                  <span>✅</span>
+                  <span>Smart defaults</span>
                 </div>
                 <div className={styles.feature}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="9,11 12,14 22,4"/>
-                    <path d="m21,12.5a8.38,8.38 0 0,1 -0.9,3.8 8.5,8.5 0 0,1 -7.6,4.7 8.38,8.38 0 0,1 -3.8,-0.9L3,21l1.9-5.7a8.38,8.38 0 0,1 -0.9,-3.8 8.5,8.5 0 0,1 4.7,-7.6 8.38,8.38 0 0,1 3.8,-0.9h0.5a8.48,8.48 0 0,1 8,8v0.5z"/>
-                  </svg>
-                  Ready templates
+                  <span>✅</span>
+                  <span>Ready templates</span>
                 </div>
               </div>
               <Button variant="primary" className={styles.modeButton}>
-                Start Basic →
+                Start Basic ➡️
               </Button>
             </Card>
 
@@ -313,37 +441,25 @@ const PortfolioCreation: React.FC = () => {
               onClick={() => handleModeSelect('advanced')}
             >
               <div className={styles.modeIcon}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="3"/>
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                </svg>
+                🔵
               </div>
-              <h3 className={styles.modeTitle}>Advanced Mode</h3>
+              <h3 className={styles.modeTitle}>Professional Mode</h3>
               <div className={styles.modeFeatures}>
                 <div className={styles.feature}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="3"/>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                  </svg>
-                  Full control
+                  <span>⚙️</span>
+                  <span>Full control</span>
                 </div>
                 <div className={styles.feature}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="3"/>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                  </svg>
-                  All options
+                  <span>⚙️</span>
+                  <span>All options</span>
                 </div>
                 <div className={styles.feature}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="3"/>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                  </svg>
-                  Advanced setup
+                  <span>⚙️</span>
+                  <span>Advanced setup</span>
                 </div>
               </div>
               <Button variant="primary" className={styles.modeButton}>
-                Advanced →
+                Advanced ➡️
               </Button>
             </Card>
           </div>
@@ -637,7 +753,7 @@ const PortfolioCreation: React.FC = () => {
           </div>
         </div>
 
-        {/* Quick Add Asset Modal */}
+        {/* Modal Components */}
         {showAssetForm && (
           <QuickAddAssetModal
             onAdd={handleAssetAdd}
@@ -646,7 +762,6 @@ const PortfolioCreation: React.FC = () => {
           />
         )}
 
-        {/* Templates Modal */}
         {showTemplates && (
           <PortfolioTemplatesModal
             onSelect={handleTemplateSelect}
@@ -678,7 +793,7 @@ const PortfolioCreation: React.FC = () => {
                     type="number"
                     value={formData.maxPositionSize || 25}
                     onChange={(e) => handleFormChange('maxPositionSize', Number(e.target.value))}
-                    suffix="%"
+                    placeholder="25"
                   />
                 </div>
                 <div className={styles.formGroup}>
@@ -687,7 +802,7 @@ const PortfolioCreation: React.FC = () => {
                     type="number"
                     value={formData.minPositionSize || 1}
                     onChange={(e) => handleFormChange('minPositionSize', Number(e.target.value))}
-                    suffix="%"
+                    placeholder="1"
                   />
                 </div>
               </div>
@@ -695,24 +810,18 @@ const PortfolioCreation: React.FC = () => {
 
             <div className={styles.constraintsSection}>
               <h3>Sector Allocation Limits</h3>
-              <div className={styles.sectorLimits}>
-                <div className={styles.limitsGrid}>
-                  <div className={styles.limitItem}>
-                    <label>Technology: Max</label>
-                    <Input type="number" defaultValue={40} suffix="%" />
-                  </div>
-                  <div className={styles.limitItem}>
-                    <label>Healthcare: Max</label>
-                    <Input type="number" defaultValue={20} suffix="%" />
-                  </div>
-                  <div className={styles.limitItem}>
-                    <label>Finance: Max</label>
-                    <Input type="number" defaultValue={15} suffix="%" />
-                  </div>
-                  <div className={styles.limitItem}>
-                    <label>Energy: Max</label>
-                    <Input type="number" defaultValue={10} suffix="%" />
-                  </div>
+              <div className={styles.limitsGrid}>
+                <div className={styles.limitItem}>
+                  <label>Technology: Max 40%</label>
+                </div>
+                <div className={styles.limitItem}>
+                  <label>Healthcare: Max 20%</label>
+                </div>
+                <div className={styles.limitItem}>
+                  <label>Finance: Max 15%</label>
+                </div>
+                <div className={styles.limitItem}>
+                  <label>Energy: Max 10%</label>
                 </div>
               </div>
             </div>
@@ -784,153 +893,6 @@ const PortfolioCreation: React.FC = () => {
   }
 
   return null;
-};
-
-// Quick Add Asset Modal Component
-const QuickAddAssetModal: React.FC<{
-  onAdd: (asset: AssetFormData) => void;
-  onCancel: () => void;
-  remainingWeight: number;
-}> = ({ onAdd, onCancel, remainingWeight }) => {
-  const [ticker, setTicker] = useState('');
-  const [weight, setWeight] = useState(Math.min(remainingWeight, 10));
-  const [assetInfo, setAssetInfo] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-
-  const handleTickerChange = async (value: string) => {
-    setTicker(value.toUpperCase());
-
-    if (value.length >= 2) {
-      setLoading(true);
-      // Mock API call - replace with real API
-      setTimeout(() => {
-        setAssetInfo({
-          name: value === 'AAPL' ? 'Apple Inc.' : `${value} Company`,
-          price: 150.25,
-          sector: 'Technology'
-        });
-        setLoading(false);
-      }, 500);
-    }
-  };
-
-  const handleAdd = () => {
-    if (ticker && weight > 0) {
-      const asset: AssetFormData = {
-        id: `asset-${Date.now()}`,
-        ticker,
-        name: assetInfo?.name || `${ticker} Company`,
-        weight,
-        sector: assetInfo?.sector,
-        currentPrice: assetInfo?.price
-      };
-      onAdd(asset);
-    }
-  };
-
-  return (
-    <Modal isOpen={true} onClose={onCancel} title="🚀 Quick Add Asset">
-      <div className={styles.quickAddForm}>
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Ticker Symbol *</label>
-          <div className={styles.tickerInputGroup}>
-            <Input
-              value={ticker}
-              onChange={(e) => handleTickerChange(e.target.value)}
-              placeholder="AAPL"
-            />
-            <Button variant="ghost" size="small">
-              🔍
-            </Button>
-          </div>
-          {assetInfo && (
-            <div className={styles.assetInfo}>
-              💡 {assetInfo.name} - ${assetInfo.price}
-            </div>
-          )}
-        </div>
-
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Weight (%) *</label>
-          <Input
-            type="number"
-            value={weight}
-            onChange={(e) => setWeight(Number(e.target.value))}
-            max={remainingWeight}
-          />
-          <div className={styles.remainingInfo}>
-            💡 Remaining: {remainingWeight}%
-          </div>
-        </div>
-
-        <div className={styles.modalActions}>
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            onClick={handleAdd}
-            disabled={!ticker || weight <= 0 || weight > remainingWeight}
-          >
-            Add Asset ✅
-          </Button>
-        </div>
-      </div>
-    </Modal>
-  );
-};
-
-// Portfolio Templates Modal Component
-const PortfolioTemplatesModal: React.FC<{
-  onSelect: (templateId: string) => void;
-  onCancel: () => void;
-}> = ({ onSelect, onCancel }) => {
-  return (
-    <Modal isOpen={true} onClose={onCancel} title="📋 Portfolio Templates" size="large">
-      <div className={styles.templatesContainer}>
-        {PORTFOLIO_TEMPLATES.map((template) => (
-          <Card key={template.id} className={styles.templateCard}>
-            <div className={styles.templateHeader}>
-              <h3>{template.name}</h3>
-              <div className={styles.templateMeta}>
-                <Badge variant="secondary">{template.riskLevel}</Badge>
-                <span className={styles.expectedReturn}>{template.expectedReturn}</span>
-              </div>
-            </div>
-            <p className={styles.templateDescription}>{template.description}</p>
-            <div className={styles.templateAssets}>
-              {template.assets.slice(0, 5).map((asset, index) => (
-                <span key={index} className={styles.assetTag}>
-                  {asset.ticker} {asset.weight}%
-                </span>
-              ))}
-              {template.assets.length > 5 && (
-                <span className={styles.assetTag}>
-                  +{template.assets.length - 5} more
-                </span>
-              )}
-            </div>
-            <Button
-              onClick={() => onSelect(template.id)}
-              variant="primary"
-              className={styles.useTemplateButton}
-            >
-              Use Template →
-            </Button>
-          </Card>
-        ))}
-
-        <div className={styles.modalActions}>
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button variant="primary">
-            Custom Mix
-          </Button>
-        </div>
-      </div>
-    </Modal>
-  );
 };
 
 export default PortfolioCreation;
