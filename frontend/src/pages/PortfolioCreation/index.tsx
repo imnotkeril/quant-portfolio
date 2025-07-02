@@ -1,5 +1,5 @@
 /**
- * Enhanced Portfolio Creation Component
+ * Portfolio Creation Component - Fixed according to design guidelines
  * Implements the new design with Basic/Advanced modes
  */
 import React, { useState, useEffect } from 'react';
@@ -76,20 +76,20 @@ const PORTFOLIO_TEMPLATES: PortfolioTemplate[] = [
     assets: [
       { ticker: 'BRK.B', name: 'Berkshire Hathaway', weight: 25, sector: 'Financial', assetClass: 'stocks' },
       { ticker: 'AAPL', name: 'Apple Inc.', weight: 20, sector: 'Technology', assetClass: 'stocks' },
-      { ticker: 'KO', name: 'Coca-Cola', weight: 15, sector: 'Consumer', assetClass: 'stocks' },
-      { ticker: 'PG', name: 'Procter & Gamble', weight: 10, sector: 'Consumer', assetClass: 'stocks' },
+      { ticker: 'KO', name: 'Coca-Cola', weight: 15, sector: 'Consumer Staples', assetClass: 'stocks' },
+      { ticker: 'PG', name: 'Procter & Gamble', weight: 10, sector: 'Consumer Staples', assetClass: 'stocks' },
       { ticker: 'JNJ', name: 'Johnson & Johnson', weight: 10, sector: 'Healthcare', assetClass: 'stocks' },
       { ticker: 'BAC', name: 'Bank of America', weight: 10, sector: 'Financial', assetClass: 'stocks' },
-      { ticker: 'KHC', name: 'Kraft Heinz', weight: 5, sector: 'Consumer', assetClass: 'stocks' },
+      { ticker: 'KHC', name: 'Kraft Heinz', weight: 5, sector: 'Consumer Staples', assetClass: 'stocks' },
       { ticker: 'AMZN', name: 'Amazon', weight: 5, sector: 'Technology', assetClass: 'stocks' }
     ]
   },
   {
     id: 'tech_giants',
     name: 'Tech Giants',
-    description: 'Technology focused portfolio with FAANG+ stocks',
-    riskLevel: 'High',
-    expectedReturn: '15-25% annually',
+    description: 'High-growth technology companies',
+    riskLevel: 'Aggressive',
+    expectedReturn: '12-18% annually',
     assets: [
       { ticker: 'AAPL', name: 'Apple Inc.', weight: 25, sector: 'Technology', assetClass: 'stocks' },
       { ticker: 'MSFT', name: 'Microsoft', weight: 20, sector: 'Technology', assetClass: 'stocks' },
@@ -105,7 +105,7 @@ const PORTFOLIO_TEMPLATES: PortfolioTemplate[] = [
     name: 'S&P 500 Top 10',
     description: 'Top 10 companies by market cap in S&P 500',
     riskLevel: 'Moderate',
-    expectedReturn: '12-18% annually',
+    expectedReturn: '8-12% annually',
     assets: [
       { ticker: 'AAPL', name: 'Apple Inc.', weight: 12, sector: 'Technology', assetClass: 'stocks' },
       { ticker: 'MSFT', name: 'Microsoft', weight: 10, sector: 'Technology', assetClass: 'stocks' },
@@ -122,17 +122,17 @@ const PORTFOLIO_TEMPLATES: PortfolioTemplate[] = [
   {
     id: 'dividend_aristocrats',
     name: 'Dividend Aristocrats',
-    description: 'High-quality dividend paying stocks with 25+ years of increases',
-    riskLevel: 'Low',
-    expectedReturn: '8-12% annually',
+    description: 'Companies with 25+ years of dividend increases',
+    riskLevel: 'Conservative',
+    expectedReturn: '6-10% annually',
     assets: [
       { ticker: 'JNJ', name: 'Johnson & Johnson', weight: 15, sector: 'Healthcare', assetClass: 'stocks' },
-      { ticker: 'PG', name: 'Procter & Gamble', weight: 15, sector: 'Consumer', assetClass: 'stocks' },
-      { ticker: 'KO', name: 'Coca-Cola', weight: 12, sector: 'Consumer', assetClass: 'stocks' },
-      { ticker: 'PEP', name: 'PepsiCo', weight: 12, sector: 'Consumer', assetClass: 'stocks' },
-      { ticker: 'WMT', name: 'Walmart', weight: 10, sector: 'Consumer', assetClass: 'stocks' },
-      { ticker: 'MCD', name: 'McDonald\'s', weight: 8, sector: 'Consumer', assetClass: 'stocks' },
-      { ticker: 'HD', name: 'Home Depot', weight: 8, sector: 'Consumer', assetClass: 'stocks' },
+      { ticker: 'PG', name: 'Procter & Gamble', weight: 15, sector: 'Consumer Staples', assetClass: 'stocks' },
+      { ticker: 'KO', name: 'Coca-Cola', weight: 12, sector: 'Consumer Staples', assetClass: 'stocks' },
+      { ticker: 'PEP', name: 'PepsiCo', weight: 12, sector: 'Consumer Staples', assetClass: 'stocks' },
+      { ticker: 'WMT', name: 'Walmart', weight: 10, sector: 'Consumer Staples', assetClass: 'stocks' },
+      { ticker: 'MCD', name: 'McDonald\'s', weight: 8, sector: 'Consumer Discretionary', assetClass: 'stocks' },
+      { ticker: 'HD', name: 'Home Depot', weight: 8, sector: 'Consumer Discretionary', assetClass: 'stocks' },
       { ticker: 'MMM', name: '3M Company', weight: 7, sector: 'Industrial', assetClass: 'stocks' },
       { ticker: 'CVX', name: 'Chevron', weight: 7, sector: 'Energy', assetClass: 'stocks' },
       { ticker: 'CAT', name: 'Caterpillar', weight: 6, sector: 'Industrial', assetClass: 'stocks' }
@@ -140,363 +140,737 @@ const PORTFOLIO_TEMPLATES: PortfolioTemplate[] = [
   }
 ];
 
-// Portfolio types for advanced mode
-const PORTFOLIO_TYPES = [
-  { value: 'conservative', label: 'Conservative Growth' },
-  { value: 'moderate', label: 'Moderate Growth' },
-  { value: 'aggressive', label: 'Aggressive Growth' },
-  { value: 'income', label: 'Income Focused' },
-  { value: 'balanced', label: 'Balanced' },
-  { value: 'growth', label: 'Pure Growth' }
-];
+const PortfolioCreation: React.FC = () => {
+  const navigate = useNavigate();
+  const { createPortfolio, isLoading } = usePortfolios();
 
-const RISK_TOLERANCE_OPTIONS = [
-  { value: 'conservative', label: 'Conservative' },
-  { value: 'moderate', label: 'Moderate' },
-  { value: 'aggressive', label: 'Aggressive' }
-];
+  const [mode, setMode] = useState<CreationMode | null>(null);
+  const [step, setStep] = useState<CreationStep>('mode');
+  const [formData, setFormData] = useState<PortfolioFormData>({
+    name: '',
+    description: '',
+    startingAmount: 100000,
+    assets: []
+  });
 
-const INVESTMENT_OBJECTIVES = [
-  { value: 'growth', label: 'Growth' },
-  { value: 'income', label: 'Income' },
-  { value: 'balanced', label: 'Balanced' },
-  { value: 'capital_preservation', label: 'Capital Preservation' }
-];
+  const [showAssetForm, setShowAssetForm] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-const REBALANCING_OPTIONS = [
-  { value: 'monthly', label: 'Monthly' },
-  { value: 'quarterly', label: 'Quarterly' },
-  { value: 'semi_annually', label: 'Semi-Annually' },
-  { value: 'annually', label: 'Annually' },
-  { value: 'never', label: 'Never' }
-];
+  const handleModeSelect = (selectedMode: CreationMode) => {
+    setMode(selectedMode);
+    setStep('basic_info');
+  };
 
-// Mock asset search function (should be replaced with real API)
-const searchAssets = async (query: string): Promise<Array<{ticker: string, name: string, price: number, sector: string}>> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 300));
-
-  const mockAssets = [
-    { ticker: 'AAPL', name: 'Apple Inc.', price: 175.23, sector: 'Technology' },
-    { ticker: 'MSFT', name: 'Microsoft Corp.', price: 378.85, sector: 'Technology' },
-    { ticker: 'GOOGL', name: 'Alphabet Inc.', price: 142.56, sector: 'Technology' },
-    { ticker: 'AMZN', name: 'Amazon.com Inc.', price: 153.87, sector: 'Consumer Cyclical' },
-    { ticker: 'TSLA', name: 'Tesla Inc.', price: 243.92, sector: 'Consumer Cyclical' },
-    { ticker: 'NVDA', name: 'NVIDIA Corp.', price: 498.36, sector: 'Technology' },
-    { ticker: 'META', name: 'Meta Platforms Inc.', price: 348.15, sector: 'Technology' },
-    { ticker: 'JNJ', name: 'Johnson & Johnson', price: 158.47, sector: 'Healthcare' },
-    { ticker: 'PG', name: 'Procter & Gamble', price: 154.32, sector: 'Consumer Defensive' },
-    { ticker: 'KO', name: 'Coca-Cola Co.', price: 62.18, sector: 'Consumer Defensive' }
-  ];
-
-  return mockAssets.filter(asset =>
-    asset.ticker.toLowerCase().includes(query.toLowerCase()) ||
-    asset.name.toLowerCase().includes(query.toLowerCase())
-  );
-};
-
-// Mode Selection Component
-const ModeSelection: React.FC<{
-  onModeSelect: (mode: CreationMode) => void;
-}> = ({ onModeSelect }) => {
-  return (
-    <div className={styles.modeSelection}>
-      <div className={styles.modeContainer}>
-        <h1 className={styles.title}>Create New Portfolio</h1>
-        <p className={styles.subtitle}>Choose your preferred creation method:</p>
-
-        <div className={styles.modeOptions}>
-          <Card className={classNames(styles.modeCard, styles.basicMode)}>
-            <div className={styles.modeIcon}>
-              <div className={styles.iconCircle}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-            </div>
-            <h3 className={styles.modeTitle}>Basic Mode</h3>
-            <ul className={styles.modeFeatures}>
-              <li>✅ Quick setup</li>
-              <li>✅ Smart defaults</li>
-              <li>✅ Ready templates</li>
-            </ul>
-            <Button
-              onClick={() => onModeSelect('basic')}
-              className={styles.modeButton}
-              variant="primary"
-            >
-              Start Basic →
-            </Button>
-          </Card>
-
-          <Card className={classNames(styles.modeCard, styles.advancedMode)}>
-            <div className={styles.modeIcon}>
-              <div className={styles.iconCircle}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                  <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-            </div>
-            <h3 className={styles.modeTitle}>Advanced Mode</h3>
-            <ul className={styles.modeFeatures}>
-              <li>⚙️ Full control</li>
-              <li>⚙️ All options</li>
-              <li>⚙️ Advanced setup</li>
-            </ul>
-            <Button
-              onClick={() => onModeSelect('advanced')}
-              className={styles.modeButton}
-              variant="primary"
-            >
-              Advanced →
-            </Button>
-          </Card>
-        </div>
-
-        <div className={styles.tip}>
-          💡 Tip: Start with Basic Mode, upgrade later if needed
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Basic Info Step Component
-const BasicInfoStep: React.FC<{
-  formData: PortfolioFormData;
-  onChange: (field: keyof PortfolioFormData, value: any) => void;
-  errors: Record<string, string>;
-  mode: CreationMode;
-}> = ({ formData, onChange, errors, mode }) => {
-  return (
-    <div className={styles.stepContainer}>
-      <div className={styles.stepHeader}>
-        <h2>{mode === 'basic' ? '📋 Step 1: Portfolio Basics' : '⚙️ Professional Portfolio Setup'}</h2>
-      </div>
-
-      <div className={styles.formGrid}>
-        <div className={styles.formGroup}>
-          <Input
-            label="Portfolio Name"
-            value={formData.name}
-            onChange={(value) => onChange('name', value)}
-            error={errors.name}
-            placeholder={mode === 'basic' ? 'My Investment Portfolio' : 'Tech Growth Portfolio Q4 2025'}
-            required
-          />
-        </div>
-
-        <div className={styles.formGroup}>
-          <Input
-            label="Description"
-            value={formData.description}
-            onChange={(value) => onChange('description', value)}
-            error={errors.description}
-            placeholder={mode === 'basic' ? 'Long-term growth portfolio focused on tech stocks' : 'High-growth technology portfolio targeting 15% annual returns'}
-            multiline
-            rows={3}
-          />
-        </div>
-
-        <div className={styles.formRow}>
-          <div className={styles.formGroup}>
-            <Input
-              label="Starting Amount"
-              type="number"
-              value={formData.startingAmount}
-              onChange={(value) => onChange('startingAmount', Number(value))}
-              error={errors.startingAmount}
-              placeholder="100000"
-              prefix="$"
-              required
-            />
-          </div>
-
-          {mode === 'advanced' && (
-            <div className={styles.formGroup}>
-              <Select
-                label="Portfolio Type"
-                value={formData.portfolioType || ''}
-                onChange={(value) => onChange('portfolioType', value)}
-                options={PORTFOLIO_TYPES}
-                placeholder="Select type"
-              />
-            </div>
-          )}
-        </div>
-
-        {mode === 'advanced' && (
-          <>
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <Select
-                  label="Risk Tolerance"
-                  value={formData.riskTolerance || ''}
-                  onChange={(value) => onChange('riskTolerance', value)}
-                  options={RISK_TOLERANCE_OPTIONS}
-                  placeholder="Select risk level"
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <Select
-                  label="Investment Objective"
-                  value={formData.investmentObjective || ''}
-                  onChange={(value) => onChange('investmentObjective', value)}
-                  options={INVESTMENT_OBJECTIVES}
-                  placeholder="Select objective"
-                />
-              </div>
-            </div>
-
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <Select
-                  label="Rebalancing"
-                  value={formData.rebalancing || ''}
-                  onChange={(value) => onChange('rebalancing', value)}
-                  options={REBALANCING_OPTIONS}
-                  placeholder="Select frequency"
-                />
-              </div>
-            </div>
-
-            <div className={styles.formGroup}>
-              <Input
-                label="Tags (comma separated)"
-                value={formData.tags?.join(', ') || ''}
-                onChange={(value) => onChange('tags', value.split(',').map(t => t.trim()).filter(Boolean))}
-                placeholder="tech, growth, aggressive, high-risk"
-              />
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Quick Asset Add Component
-const QuickAssetAdd: React.FC<{
-  onAdd: (asset: AssetFormData) => void;
-  onCancel: () => void;
-  existingAssets: AssetFormData[];
-  startingAmount: number;
-}> = ({ onAdd, onCancel, existingAssets, startingAmount }) => {
-  const [ticker, setTicker] = useState('');
-  const [weight, setWeight] = useState('');
-  const [suggestions, setSuggestions] = useState<Array<{ticker: string, name: string, price: number, sector: string}>>([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedAsset, setSelectedAsset] = useState<{ticker: string, name: string, price: number, sector: string} | null>(null);
-
-  const remainingWeight = 100 - existingAssets.reduce((sum, asset) => sum + asset.weight, 0);
-
-  const handleTickerChange = async (value: string) => {
-    setTicker(value);
-    setSelectedAsset(null);
-
-    if (value.length >= 1) {
-      setLoading(true);
-      try {
-        const results = await searchAssets(value);
-        setSuggestions(results);
-      } catch (error) {
-        console.error('Error searching assets:', error);
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      setSuggestions([]);
+  const handleFormChange = (field: keyof PortfolioFormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
 
-  const handleAssetSelect = (asset: {ticker: string, name: string, price: number, sector: string}) => {
-    setTicker(asset.ticker);
-    setSelectedAsset(asset);
-    setSuggestions([]);
+  const validateBasicInfo = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Portfolio name is required';
+    }
+
+    if (!formData.startingAmount || formData.startingAmount <= 0) {
+      newErrors.startingAmount = 'Starting amount must be greater than 0';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
-    if (!ticker || !weight) return;
+  const handleNext = () => {
+    if (step === 'basic_info' && !validateBasicInfo()) {
+      return;
+    }
 
-    const weightNum = Number(weight);
-    if (weightNum <= 0 || weightNum > remainingWeight) return;
+    if (step === 'basic_info') {
+      setStep('assets');
+    } else if (step === 'assets') {
+      if (mode === 'advanced') {
+        setStep('constraints');
+      } else {
+        handleCreatePortfolio();
+      }
+    } else if (step === 'constraints') {
+      handleCreatePortfolio();
+    }
+  };
 
-    const asset: AssetFormData = {
-      id: Date.now().toString(),
-      ticker: ticker.toUpperCase(),
-      name: selectedAsset?.name || `${ticker.toUpperCase()} Asset`,
-      weight: weightNum,
-      sector: selectedAsset?.sector,
-      currentPrice: selectedAsset?.price
-    };
+  const handleBack = () => {
+    if (step === 'basic_info') {
+      setStep('mode');
+      setMode(null);
+    } else if (step === 'assets') {
+      setStep('basic_info');
+    } else if (step === 'constraints') {
+      setStep('assets');
+    }
+  };
 
-    onAdd(asset);
+  const handleCreatePortfolio = async () => {
+    try {
+      const portfolioData: PortfolioCreate = {
+        name: formData.name,
+        description: formData.description,
+        assets: formData.assets.map(asset => ({
+          ticker: asset.ticker,
+          weight: asset.weight / 100 // Convert percentage to decimal
+        })) as AssetCreate[]
+      };
+
+      await createPortfolio(portfolioData);
+      navigate('/portfolios');
+    } catch (error) {
+      console.error('Failed to create portfolio:', error);
+    }
+  };
+
+  const handleAssetAdd = (asset: AssetFormData) => {
+    handleFormChange('assets', [...formData.assets, asset]);
+    setShowAssetForm(false);
+  };
+
+  const handleAssetDelete = (assetId: string) => {
+    handleFormChange('assets', formData.assets.filter(a => a.id !== assetId));
+  };
+
+  const handleTemplateSelect = (templateId: string) => {
+    const template = PORTFOLIO_TEMPLATES.find(t => t.id === templateId);
+    if (template) {
+      const templateAssets: AssetFormData[] = template.assets.map((asset, index) => ({
+        id: `template-${index}`,
+        ticker: asset.ticker,
+        name: asset.name,
+        weight: asset.weight,
+        sector: asset.sector,
+        assetClass: asset.assetClass
+      }));
+
+      handleFormChange('assets', templateAssets);
+      setShowTemplates(false);
+    }
+  };
+
+  // Mode Selection Step
+  if (step === 'mode') {
+    return (
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <div className={styles.header}>
+            <h1 className={styles.title}>Create New Portfolio</h1>
+            <p className={styles.subtitle}>Choose your preferred creation method:</p>
+          </div>
+
+          <div className={styles.modeSelection}>
+            <Card
+              className={classNames(styles.modeCard, styles.basicMode)}
+              onClick={() => handleModeSelect('basic')}
+            >
+              <div className={styles.modeIcon}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12,6 12,12 16,14"/>
+                </svg>
+              </div>
+              <h3 className={styles.modeTitle}>Basic Mode</h3>
+              <div className={styles.modeFeatures}>
+                <div className={styles.feature}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="9,11 12,14 22,4"/>
+                    <path d="m21,12.5a8.38,8.38 0 0,1 -0.9,3.8 8.5,8.5 0 0,1 -7.6,4.7 8.38,8.38 0 0,1 -3.8,-0.9L3,21l1.9-5.7a8.38,8.38 0 0,1 -0.9,-3.8 8.5,8.5 0 0,1 4.7,-7.6 8.38,8.38 0 0,1 3.8,-0.9h0.5a8.48,8.48 0 0,1 8,8v0.5z"/>
+                  </svg>
+                  Quick setup
+                </div>
+                <div className={styles.feature}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="9,11 12,14 22,4"/>
+                    <path d="m21,12.5a8.38,8.38 0 0,1 -0.9,3.8 8.5,8.5 0 0,1 -7.6,4.7 8.38,8.38 0 0,1 -3.8,-0.9L3,21l1.9-5.7a8.38,8.38 0 0,1 -0.9,-3.8 8.5,8.5 0 0,1 4.7,-7.6 8.38,8.38 0 0,1 3.8,-0.9h0.5a8.48,8.48 0 0,1 8,8v0.5z"/>
+                  </svg>
+                  Smart defaults
+                </div>
+                <div className={styles.feature}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="9,11 12,14 22,4"/>
+                    <path d="m21,12.5a8.38,8.38 0 0,1 -0.9,3.8 8.5,8.5 0 0,1 -7.6,4.7 8.38,8.38 0 0,1 -3.8,-0.9L3,21l1.9-5.7a8.38,8.38 0 0,1 -0.9,-3.8 8.5,8.5 0 0,1 4.7,-7.6 8.38,8.38 0 0,1 3.8,-0.9h0.5a8.48,8.48 0 0,1 8,8v0.5z"/>
+                  </svg>
+                  Ready templates
+                </div>
+              </div>
+              <Button variant="primary" className={styles.modeButton}>
+                Start Basic →
+              </Button>
+            </Card>
+
+            <Card
+              className={classNames(styles.modeCard, styles.advancedMode)}
+              onClick={() => handleModeSelect('advanced')}
+            >
+              <div className={styles.modeIcon}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+              </div>
+              <h3 className={styles.modeTitle}>Advanced Mode</h3>
+              <div className={styles.modeFeatures}>
+                <div className={styles.feature}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                  </svg>
+                  Full control
+                </div>
+                <div className={styles.feature}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                  </svg>
+                  All options
+                </div>
+                <div className={styles.feature}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                  </svg>
+                  Advanced setup
+                </div>
+              </div>
+              <Button variant="primary" className={styles.modeButton}>
+                Advanced →
+              </Button>
+            </Card>
+          </div>
+
+          <div className={styles.tip}>
+            💡 Tip: Start with Basic Mode, upgrade later if needed
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Basic Info Step
+  if (step === 'basic_info') {
+    return (
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <div className={styles.stepHeader}>
+            <h2 className={styles.stepTitle}>
+              📋 Step 1: Portfolio Basics
+            </h2>
+          </div>
+
+          <Card className={styles.formCard}>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                Portfolio Name *
+              </label>
+              <Input
+                value={formData.name}
+                onChange={(e) => handleFormChange('name', e.target.value)}
+                placeholder="My Investment Portfolio"
+                error={errors.name}
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                Description (optional)
+              </label>
+              <Input
+                value={formData.description}
+                onChange={(e) => handleFormChange('description', e.target.value)}
+                placeholder="Long-term growth portfolio focused on tech stocks"
+                multiline
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                Starting Amount *
+              </label>
+              <Input
+                type="number"
+                value={formData.startingAmount}
+                onChange={(e) => handleFormChange('startingAmount', Number(e.target.value))}
+                placeholder="100000"
+                error={errors.startingAmount}
+              />
+            </div>
+
+            {mode === 'advanced' && (
+              <>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>
+                    Portfolio Type
+                  </label>
+                  <Select
+                    value={formData.portfolioType || ''}
+                    onChange={(value) => handleFormChange('portfolioType', value)}
+                    options={[
+                      { value: 'aggressive_growth', label: 'Aggressive Growth' },
+                      { value: 'growth', label: 'Growth' },
+                      { value: 'balanced', label: 'Balanced' },
+                      { value: 'conservative', label: 'Conservative' },
+                      { value: 'income', label: 'Income' }
+                    ]}
+                    placeholder="Select portfolio type"
+                  />
+                </div>
+
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>
+                      Risk Tolerance
+                    </label>
+                    <Select
+                      value={formData.riskTolerance || ''}
+                      onChange={(value) => handleFormChange('riskTolerance', value)}
+                      options={[
+                        { value: 'conservative', label: 'Conservative' },
+                        { value: 'moderate', label: 'Moderate' },
+                        { value: 'aggressive', label: 'Aggressive' }
+                      ]}
+                      placeholder="Select risk tolerance"
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label className={styles.label}>
+                      Investment Objective
+                    </label>
+                    <Select
+                      value={formData.investmentObjective || ''}
+                      onChange={(value) => handleFormChange('investmentObjective', value)}
+                      options={[
+                        { value: 'growth', label: 'Growth' },
+                        { value: 'income', label: 'Income' },
+                        { value: 'preservation', label: 'Capital Preservation' },
+                        { value: 'speculation', label: 'Speculation' }
+                      ]}
+                      placeholder="Select objective"
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>
+                    Rebalancing Frequency
+                  </label>
+                  <Select
+                    value={formData.rebalancing || ''}
+                    onChange={(value) => handleFormChange('rebalancing', value)}
+                    options={[
+                      { value: 'monthly', label: 'Monthly' },
+                      { value: 'quarterly', label: 'Quarterly' },
+                      { value: 'semi_annual', label: 'Semi-Annual' },
+                      { value: 'annual', label: 'Annual' },
+                      { value: 'manual', label: 'Manual' }
+                    ]}
+                    placeholder="Select rebalancing frequency"
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>
+                    Tags (comma separated)
+                  </label>
+                  <Input
+                    value={formData.tags?.join(', ') || ''}
+                    onChange={(e) => handleFormChange('tags', e.target.value.split(',').map(tag => tag.trim()))}
+                    placeholder="tech, growth, aggressive, high-risk"
+                  />
+                </div>
+              </>
+            )}
+          </Card>
+
+          <div className={styles.stepActions}>
+            <Button variant="outline" onClick={handleBack}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleNext}>
+              Next: Add Assets
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Assets Step
+  if (step === 'assets') {
+    const totalWeight = formData.assets.reduce((sum, asset) => sum + asset.weight, 0);
+    const remainingWeight = 100 - totalWeight;
+
+    return (
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <div className={styles.stepHeader}>
+            <h2 className={styles.stepTitle}>
+              📊 Step 2: Portfolio Assets
+            </h2>
+          </div>
+
+          <Card className={styles.assetsCard}>
+            <div className={styles.addAssetsSection}>
+              <div className={styles.addMethodTabs}>
+                <div className={styles.tabGroup}>
+                  <h3>🎯 Quick Add</h3>
+                  <Button
+                    variant="outline"
+                    size="small"
+                    onClick={() => setShowAssetForm(true)}
+                  >
+                    + Add
+                  </Button>
+                </div>
+
+                <div className={styles.tabGroup}>
+                  <h3>📋 Templates</h3>
+                  <Button
+                    variant="outline"
+                    size="small"
+                    onClick={() => setShowTemplates(true)}
+                  >
+                    Use Template
+                  </Button>
+                </div>
+
+                <div className={styles.tabGroup}>
+                  <h3>📁 Import</h3>
+                  <div className={styles.importButtons}>
+                    <Button variant="outline" size="small">
+                      From CSV
+                    </Button>
+                    <Button variant="outline" size="small">
+                      From Text
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.currentPortfolio}>
+              <h3>📈 Current Portfolio:</h3>
+
+              {formData.assets.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <p>No assets added yet. Use the options above to add assets to your portfolio.</p>
+                </div>
+              ) : (
+                <>
+                  <div className={styles.portfolioTable}>
+                    <div className={styles.tableHeader}>
+                      <div>Symbol</div>
+                      <div>Name</div>
+                      <div>Weight</div>
+                      <div>Amount</div>
+                      <div>Actions</div>
+                    </div>
+                    {formData.assets.map((asset) => (
+                      <div key={asset.id} className={styles.tableRow}>
+                        <div className={styles.assetSymbol}>{asset.ticker}</div>
+                        <div className={styles.assetName}>{asset.name}</div>
+                        <div className={styles.assetWeight}>{asset.weight}%</div>
+                        <div className={styles.assetAmount}>
+                          ${((asset.weight / 100) * formData.startingAmount).toLocaleString()}
+                        </div>
+                        <div className={styles.assetActions}>
+                          <Button
+                            variant="ghost"
+                            size="small"
+                            onClick={() => handleAssetDelete(asset.id)}
+                          >
+                            🗑️
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    <div className={classNames(styles.tableRow, styles.totalRow)}>
+                      <div></div>
+                      <div></div>
+                      <div className={styles.totalWeight}>
+                        {totalWeight}%
+                      </div>
+                      <div className={styles.totalAmount}>
+                        ${formData.startingAmount.toLocaleString()}
+                      </div>
+                      <div></div>
+                    </div>
+                  </div>
+
+                  {totalWeight !== 100 && (
+                    <div className={classNames(styles.weightWarning, {
+                      [styles.overWeight]: totalWeight > 100,
+                      [styles.underWeight]: totalWeight < 100
+                    })}>
+                      {totalWeight > 100
+                        ? `⚠️ Portfolio is over-weighted by ${totalWeight - 100}%`
+                        : `💡 Remaining weight to allocate: ${remainingWeight}%`
+                      }
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </Card>
+
+          <div className={styles.stepActions}>
+            <Button variant="outline" onClick={handleBack}>
+              Back
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleNext}
+              disabled={formData.assets.length === 0 || totalWeight !== 100}
+            >
+              {mode === 'basic' ? 'Create Portfolio ✅' : 'Next: Strategy'}
+            </Button>
+          </div>
+        </div>
+
+        {/* Quick Add Asset Modal */}
+        {showAssetForm && (
+          <QuickAddAssetModal
+            onAdd={handleAssetAdd}
+            onCancel={() => setShowAssetForm(false)}
+            remainingWeight={remainingWeight}
+          />
+        )}
+
+        {/* Templates Modal */}
+        {showTemplates && (
+          <PortfolioTemplatesModal
+            onSelect={handleTemplateSelect}
+            onCancel={() => setShowTemplates(false)}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Advanced Constraints Step
+  if (step === 'constraints' && mode === 'advanced') {
+    return (
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <div className={styles.stepHeader}>
+            <h2 className={styles.stepTitle}>
+              📊 Investment Strategy & Constraints
+            </h2>
+          </div>
+
+          <Card className={styles.constraintsCard}>
+            <div className={styles.constraintsSection}>
+              <h3>Position Limits</h3>
+              <div className={styles.limitsRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Max per asset:</label>
+                  <Input
+                    type="number"
+                    value={formData.maxPositionSize || 25}
+                    onChange={(e) => handleFormChange('maxPositionSize', Number(e.target.value))}
+                    suffix="%"
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Min per asset:</label>
+                  <Input
+                    type="number"
+                    value={formData.minPositionSize || 1}
+                    onChange={(e) => handleFormChange('minPositionSize', Number(e.target.value))}
+                    suffix="%"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.constraintsSection}>
+              <h3>Sector Allocation Limits</h3>
+              <div className={styles.sectorLimits}>
+                <div className={styles.limitsGrid}>
+                  <div className={styles.limitItem}>
+                    <label>Technology: Max</label>
+                    <Input type="number" defaultValue={40} suffix="%" />
+                  </div>
+                  <div className={styles.limitItem}>
+                    <label>Healthcare: Max</label>
+                    <Input type="number" defaultValue={20} suffix="%" />
+                  </div>
+                  <div className={styles.limitItem}>
+                    <label>Finance: Max</label>
+                    <Input type="number" defaultValue={15} suffix="%" />
+                  </div>
+                  <div className={styles.limitItem}>
+                    <label>Energy: Max</label>
+                    <Input type="number" defaultValue={10} suffix="%" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.constraintsSection}>
+              <h3>Geographic Constraints</h3>
+              <div className={styles.checkboxGrid}>
+                <label className={styles.checkboxItem}>
+                  <input type="checkbox" defaultChecked />
+                  <span>☑️ US Markets</span>
+                </label>
+                <label className={styles.checkboxItem}>
+                  <input type="checkbox" defaultChecked />
+                  <span>☑️ European Markets</span>
+                </label>
+                <label className={styles.checkboxItem}>
+                  <input type="checkbox" defaultChecked />
+                  <span>☑️ Asian Markets</span>
+                </label>
+                <label className={styles.checkboxItem}>
+                  <input type="checkbox" />
+                  <span>☐ Emerging Markets</span>
+                </label>
+              </div>
+            </div>
+
+            <div className={styles.constraintsSection}>
+              <h3>Advanced Options</h3>
+              <div className={styles.checkboxGrid}>
+                <label className={styles.checkboxItem}>
+                  <input
+                    type="checkbox"
+                    checked={formData.enableTaxOptimization || false}
+                    onChange={(e) => handleFormChange('enableTaxOptimization', e.target.checked)}
+                  />
+                  <span>☑️ Enable tax-loss harvesting</span>
+                </label>
+                <label className={styles.checkboxItem}>
+                  <input
+                    type="checkbox"
+                    checked={formData.enableESG || false}
+                    onChange={(e) => handleFormChange('enableESG', e.target.checked)}
+                  />
+                  <span>☑️ ESG screening (exclude tobacco, weapons)</span>
+                </label>
+                <label className={styles.checkboxItem}>
+                  <input
+                    type="checkbox"
+                    checked={formData.enableCurrencyHedging || false}
+                    onChange={(e) => handleFormChange('enableCurrencyHedging', e.target.checked)}
+                  />
+                  <span>☐ Currency hedging for international positions</span>
+                </label>
+              </div>
+            </div>
+          </Card>
+
+          <div className={styles.stepActions}>
+            <Button variant="outline" onClick={handleBack}>
+              Back
+            </Button>
+            <Button variant="primary" onClick={handleNext}>
+              Create Portfolio ✅
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+// Quick Add Asset Modal Component
+const QuickAddAssetModal: React.FC<{
+  onAdd: (asset: AssetFormData) => void;
+  onCancel: () => void;
+  remainingWeight: number;
+}> = ({ onAdd, onCancel, remainingWeight }) => {
+  const [ticker, setTicker] = useState('');
+  const [weight, setWeight] = useState(Math.min(remainingWeight, 10));
+  const [assetInfo, setAssetInfo] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleTickerChange = async (value: string) => {
+    setTicker(value.toUpperCase());
+
+    if (value.length >= 2) {
+      setLoading(true);
+      // Mock API call - replace with real API
+      setTimeout(() => {
+        setAssetInfo({
+          name: value === 'AAPL' ? 'Apple Inc.' : `${value} Company`,
+          price: 150.25,
+          sector: 'Technology'
+        });
+        setLoading(false);
+      }, 500);
+    }
+  };
+
+  const handleAdd = () => {
+    if (ticker && weight > 0) {
+      const asset: AssetFormData = {
+        id: `asset-${Date.now()}`,
+        ticker,
+        name: assetInfo?.name || `${ticker} Company`,
+        weight,
+        sector: assetInfo?.sector,
+        currentPrice: assetInfo?.price
+      };
+      onAdd(asset);
+    }
   };
 
   return (
     <Modal isOpen={true} onClose={onCancel} title="🚀 Quick Add Asset">
-      <div className={styles.quickAssetForm}>
+      <div className={styles.quickAddForm}>
         <div className={styles.formGroup}>
-          <label>Ticker Symbol *</label>
-          <div className={styles.assetSearchContainer}>
+          <label className={styles.label}>Ticker Symbol *</label>
+          <div className={styles.tickerInputGroup}>
             <Input
               value={ticker}
-              onChange={handleTickerChange}
+              onChange={(e) => handleTickerChange(e.target.value)}
               placeholder="AAPL"
-              className={styles.tickerInput}
             />
-            {loading && <div className={styles.searchLoader}>Searching...</div>}
-            {suggestions.length > 0 && (
-              <div className={styles.suggestions}>
-                {suggestions.map((asset) => (
-                  <div
-                    key={asset.ticker}
-                    className={styles.suggestion}
-                    onClick={() => handleAssetSelect(asset)}
-                  >
-                    <div className={styles.suggestionMain}>
-                      <strong>{asset.ticker}</strong> - ${asset.price.toFixed(2)}
-                    </div>
-                    <div className={styles.suggestionMeta}>
-                      {asset.name} • {asset.sector}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <Button variant="ghost" size="small">
+              🔍
+            </Button>
           </div>
-          {selectedAsset && (
-            <div className={styles.selectedAsset}>
-              💡 {selectedAsset.name} - ${selectedAsset.price.toFixed(2)}
+          {assetInfo && (
+            <div className={styles.assetInfo}>
+              💡 {assetInfo.name} - ${assetInfo.price}
             </div>
           )}
         </div>
 
         <div className={styles.formGroup}>
-          <label>Weight (%) *</label>
+          <label className={styles.label}>Weight (%) *</label>
           <Input
             type="number"
             value={weight}
-            onChange={setWeight}
-            placeholder="15"
+            onChange={(e) => setWeight(Number(e.target.value))}
             max={remainingWeight}
-            min={1}
           />
-          <div className={styles.remainingWeight}>
-            💡 Remaining: {remainingWeight.toFixed(1)}%
+          <div className={styles.remainingInfo}>
+            💡 Remaining: {remainingWeight}%
           </div>
         </div>
 
         <div className={styles.modalActions}>
-          <Button onClick={onCancel} variant="secondary">
+          <Button variant="outline" onClick={onCancel}>
             Cancel
           </Button>
           <Button
-            onClick={handleSubmit}
             variant="primary"
-            disabled={!ticker || !weight || Number(weight) <= 0 || Number(weight) > remainingWeight}
+            onClick={handleAdd}
+            disabled={!ticker || weight <= 0 || weight > remainingWeight}
           >
             Add Asset ✅
           </Button>
@@ -506,7 +880,7 @@ const QuickAssetAdd: React.FC<{
   );
 };
 
-// Portfolio Templates Component
+// Portfolio Templates Modal Component
 const PortfolioTemplatesModal: React.FC<{
   onSelect: (templateId: string) => void;
   onCancel: () => void;
@@ -525,11 +899,16 @@ const PortfolioTemplatesModal: React.FC<{
             </div>
             <p className={styles.templateDescription}>{template.description}</p>
             <div className={styles.templateAssets}>
-              {template.assets.map((asset, index) => (
+              {template.assets.slice(0, 5).map((asset, index) => (
                 <span key={index} className={styles.assetTag}>
                   {asset.ticker} {asset.weight}%
                 </span>
               ))}
+              {template.assets.length > 5 && (
+                <span className={styles.assetTag}>
+                  +{template.assets.length - 5} more
+                </span>
+              )}
             </div>
             <Button
               onClick={() => onSelect(template.id)}
@@ -540,547 +919,17 @@ const PortfolioTemplatesModal: React.FC<{
             </Button>
           </Card>
         ))}
+
+        <div className={styles.modalActions}>
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button variant="primary">
+            Custom Mix
+          </Button>
+        </div>
       </div>
     </Modal>
-  );
-};
-
-// Assets Step Component
-const AssetsStep: React.FC<{
-  formData: PortfolioFormData;
-  onChange: (field: keyof PortfolioFormData, value: any) => void;
-  mode: CreationMode;
-}> = ({ formData, onChange, mode }) => {
-  const [showAssetForm, setShowAssetForm] = useState(false);
-  const [showTemplates, setShowTemplates] = useState(false);
-  const [showImport, setShowImport] = useState(false);
-
-  const handleAssetAdd = (asset: AssetFormData) => {
-    onChange('assets', [...formData.assets, asset]);
-    setShowAssetForm(false);
-  };
-
-  const handleAssetDelete = (assetId: string) => {
-    onChange('assets', formData.assets.filter(a => a.id !== assetId));
-  };
-
-  const handleTemplateSelect = (templateId: string) => {
-    const template = PORTFOLIO_TEMPLATES.find(t => t.id === templateId);
-    if (template) {
-      const templateAssets = template.assets.map((asset, index) => ({
-        id: `template_${index}`,
-        ticker: asset.ticker,
-        name: asset.name,
-        weight: asset.weight,
-        sector: asset.sector,
-        assetClass: asset.assetClass,
-        currentPrice: Math.random() * 300 + 50 // Mock price
-      }));
-
-      onChange('name', template.name);
-      onChange('description', template.description);
-      onChange('assets', templateAssets);
-      setShowTemplates(false);
-    }
-  };
-
-  const totalWeight = formData.assets.reduce((sum, asset) => sum + asset.weight, 0);
-  const remainingWeight = 100 - totalWeight;
-
-  return (
-    <div className={styles.stepContainer}>
-      <div className={styles.stepHeader}>
-        <h2>📊 Step 2: Portfolio Assets</h2>
-      </div>
-
-      <div className={styles.addAssetsSection}>
-        <div className={styles.addAssetsTabs}>
-          <div className={styles.tabGroup}>
-            <h3>🎯 Quick Add</h3>
-            <Button
-              onClick={() => setShowAssetForm(true)}
-              variant="primary"
-              className={styles.addButton}
-            >
-              + Add Asset
-            </Button>
-          </div>
-
-          <div className={styles.tabGroup}>
-            <h3>📋 Templates</h3>
-            <Button
-              onClick={() => setShowTemplates(true)}
-              variant="secondary"
-              className={styles.templatesButton}
-            >
-              Use Template
-            </Button>
-          </div>
-
-          <div className={styles.tabGroup}>
-            <h3>📁 Import</h3>
-            <div className={styles.importButtons}>
-              <Button
-                onClick={() => setShowImport(true)}
-                variant="secondary"
-                size="sm"
-              >
-                From CSV
-              </Button>
-              <Button
-                onClick={() => setShowImport(true)}
-                variant="secondary"
-                size="sm"
-              >
-                From Text
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className={styles.currentPortfolio}>
-        <h3>📈 Current Portfolio:</h3>
-
-        {formData.assets.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p>No assets added yet. Use the options above to add assets to your portfolio.</p>
-          </div>
-        ) : (
-          <>
-            <div className={styles.portfolioTable}>
-              <div className={styles.tableHeader}>
-                <div>Symbol</div>
-                <div>Name</div>
-                <div>Weight</div>
-                <div>Amount</div>
-                <div>Actions</div>
-              </div>
-
-              {formData.assets.map((asset) => (
-                <div key={asset.id} className={styles.tableRow}>
-                  <div className={styles.ticker}>{asset.ticker}</div>
-                  <div className={styles.name}>{asset.name}</div>
-                  <div className={styles.weight}>{asset.weight}%</div>
-                  <div className={styles.amount}>
-                    ${((formData.startingAmount * asset.weight) / 100).toLocaleString()}
-                  </div>
-                  <div className={styles.actions}>
-                    <Button
-                      onClick={() => handleAssetDelete(asset.id)}
-                      variant="danger"
-                      size="sm"
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              ))}
-
-              <div className={styles.totalRow}>
-                <div></div>
-                <div><strong>Total</strong></div>
-                <div><strong>{totalWeight}%</strong></div>
-                <div><strong>${formData.startingAmount.toLocaleString()}</strong></div>
-                <div></div>
-              </div>
-            </div>
-
-            {Math.abs(totalWeight - 100) > 0.01 && (
-              <div className={styles.weightWarning}>
-                ⚠️ Total weight is {totalWeight.toFixed(1)}%. It should equal 100%.
-              </div>
-            )}
-          </>
-        )}
-      </div>
-
-      {showAssetForm && (
-        <QuickAssetAdd
-          onAdd={handleAssetAdd}
-          onCancel={() => setShowAssetForm(false)}
-          existingAssets={formData.assets}
-          startingAmount={formData.startingAmount}
-        />
-      )}
-
-      {showTemplates && (
-        <PortfolioTemplatesModal
-          onSelect={handleTemplateSelect}
-          onCancel={() => setShowTemplates(false)}
-        />
-      )}
-
-      {showImport && (
-        <Modal isOpen={true} onClose={() => setShowImport(false)} title="📁 Import Assets">
-          <div className={styles.importPlaceholder}>
-            <p>Import functionality will be implemented here</p>
-            <p>Support for CSV files and text paste</p>
-          </div>
-        </Modal>
-      )}
-    </div>
-  );
-};
-
-// Advanced Constraints Step Component
-const AdvancedConstraintsStep: React.FC<{
-  formData: PortfolioFormData;
-  onChange: (field: keyof PortfolioFormData, value: any) => void;
-}> = ({ formData, onChange }) => {
-  return (
-    <div className={styles.stepContainer}>
-      <div className={styles.stepHeader}>
-        <h2>📊 Investment Strategy & Constraints</h2>
-      </div>
-
-      <div className={styles.constraintsGrid}>
-        <div className={styles.constraintSection}>
-          <h3>Position Limits</h3>
-          <div className={styles.limitInputs}>
-            <Input
-              label="Max per asset (%)"
-              type="number"
-              value={formData.maxPositionSize || 25}
-              onChange={(value) => onChange('maxPositionSize', Number(value))}
-              placeholder="25"
-            />
-            <Input
-              label="Min per asset (%)"
-              type="number"
-              value={formData.minPositionSize || 1}
-              onChange={(value) => onChange('minPositionSize', Number(value))}
-              placeholder="1"
-            />
-          </div>
-        </div>
-
-        <div className={styles.constraintSection}>
-          <h3>Sector Allocation Limits</h3>
-          <div className={styles.sectorLimits}>
-            <div className={styles.sectorGrid}>
-              <div>Technology: Max 40%</div>
-              <div>Healthcare: Max 20%</div>
-              <div>Finance: Max 15%</div>
-              <div>Energy: Max 10%</div>
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.constraintSection}>
-          <h3>Geographic Constraints</h3>
-          <div className={styles.geographicOptions}>
-            <label>
-              <input type="checkbox" defaultChecked />
-              ☑️ US Markets
-            </label>
-            <label>
-              <input type="checkbox" defaultChecked />
-              ☑️ European Markets
-            </label>
-            <label>
-              <input type="checkbox" defaultChecked />
-              ☑️ Asian Markets
-            </label>
-            <label>
-              <input type="checkbox" />
-              ☐ Emerging Markets
-            </label>
-          </div>
-        </div>
-
-        <div className={styles.constraintSection}>
-          <h3>Advanced Options</h3>
-          <div className={styles.advancedOptions}>
-            <label>
-              <input
-                type="checkbox"
-                checked={formData.enableTaxOptimization || false}
-                onChange={(e) => onChange('enableTaxOptimization', e.target.checked)}
-              />
-              ☑️ Enable tax-loss harvesting
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={formData.enableESG || false}
-                onChange={(e) => onChange('enableESG', e.target.checked)}
-              />
-              ☑️ ESG screening (exclude tobacco, weapons)
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={formData.enableCurrencyHedging || false}
-                onChange={(e) => onChange('enableCurrencyHedging', e.target.checked)}
-              />
-              ☐ Currency hedging for international positions
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Review Step Component
-const ReviewStep: React.FC<{
-  formData: PortfolioFormData;
-  mode: CreationMode;
-}> = ({ formData, mode }) => {
-  const totalWeight = formData.assets.reduce((sum, asset) => sum + asset.weight, 0);
-  const hasConstraintWarnings = mode === 'advanced' && formData.assets.length > 0;
-  const techWeight = formData.assets
-    .filter(asset => asset.sector === 'Technology')
-    .reduce((sum, asset) => sum + asset.weight, 0);
-
-  return (
-    <div className={styles.stepContainer}>
-      <div className={styles.stepHeader}>
-        <h2>📋 Review & Create Portfolio</h2>
-      </div>
-
-      <div className={styles.reviewGrid}>
-        <Card className={styles.reviewCard}>
-          <h3>Portfolio Details</h3>
-          <div className={styles.reviewDetails}>
-            <div><strong>Name:</strong> {formData.name}</div>
-            <div><strong>Description:</strong> {formData.description}</div>
-            <div><strong>Starting Amount:</strong> ${formData.startingAmount.toLocaleString()}</div>
-            {mode === 'advanced' && (
-              <>
-                <div><strong>Type:</strong> {formData.portfolioType}</div>
-                <div><strong>Risk Tolerance:</strong> {formData.riskTolerance}</div>
-                <div><strong>Rebalancing:</strong> {formData.rebalancing}</div>
-              </>
-            )}
-          </div>
-        </Card>
-
-        <Card className={styles.reviewCard}>
-          <h3>Asset Allocation</h3>
-          <div className={styles.assetReview}>
-            {formData.assets.map((asset) => (
-              <div key={asset.id} className={styles.assetReviewItem}>
-                <span>{asset.ticker}</span>
-                <span>{asset.weight}%</span>
-                <span>${((formData.startingAmount * asset.weight) / 100).toLocaleString()}</span>
-              </div>
-            ))}
-            <div className={styles.totalLine}>
-              <span><strong>Total</strong></span>
-              <span><strong>{totalWeight}%</strong></span>
-              <span><strong>${formData.startingAmount.toLocaleString()}</strong></span>
-            </div>
-          </div>
-        </Card>
-
-        {hasConstraintWarnings && techWeight > 40 && (
-          <Card className={styles.warningCard}>
-            <h3>⚠️ Constraint Warnings</h3>
-            <ul>
-              <li>Tech sector exceeds 40% limit (currently {techWeight.toFixed(1)}%)</li>
-              <li>Consider adding more diversification</li>
-            </ul>
-          </Card>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Main Portfolio Creation Component
-const PortfolioCreation: React.FC = () => {
-  const navigate = useNavigate();
-  const { createPortfolio, loading } = usePortfolios();
-
-  const [mode, setMode] = useState<CreationMode | null>(null);
-  const [currentStep, setCurrentStep] = useState<CreationStep>('mode');
-  const [formData, setFormData] = useState<PortfolioFormData>({
-    name: '',
-    description: '',
-    startingAmount: 100000,
-    assets: []
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const handleInputChange = (field: keyof PortfolioFormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  };
-
-  const handleModeSelect = (selectedMode: CreationMode) => {
-    setMode(selectedMode);
-    setCurrentStep('basic_info');
-  };
-
-  const validateStep = (step: CreationStep): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    switch (step) {
-      case 'basic_info':
-        if (!formData.name.trim()) {
-          newErrors.name = 'Portfolio name is required';
-        }
-        if (formData.startingAmount <= 0) {
-          newErrors.startingAmount = 'Starting amount must be greater than 0';
-        }
-        break;
-
-      case 'assets':
-        if (formData.assets.length === 0) {
-          newErrors.assets = 'At least one asset is required';
-        }
-        const totalWeight = formData.assets.reduce((sum, asset) => sum + asset.weight, 0);
-        if (Math.abs(totalWeight - 100) > 0.01) {
-          newErrors.assets = 'Total asset weights must equal 100%';
-        }
-        break;
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleNext = () => {
-    if (!validateStep(currentStep)) return;
-
-    const stepFlow = mode === 'basic'
-      ? ['mode', 'basic_info', 'assets', 'review']
-      : ['mode', 'basic_info', 'constraints', 'assets', 'review'];
-
-    const currentIndex = stepFlow.indexOf(currentStep);
-    if (currentIndex < stepFlow.length - 1) {
-      setCurrentStep(stepFlow[currentIndex + 1] as CreationStep);
-    }
-  };
-
-  const handleBack = () => {
-    const stepFlow = mode === 'basic'
-      ? ['mode', 'basic_info', 'assets', 'review']
-      : ['mode', 'basic_info', 'constraints', 'assets', 'review'];
-
-    const currentIndex = stepFlow.indexOf(currentStep);
-    if (currentIndex > 0) {
-      setCurrentStep(stepFlow[currentIndex - 1] as CreationStep);
-    }
-  };
-
-  const handleCreate = async () => {
-    if (!validateStep('assets')) return;
-
-    try {
-      const portfolioData: PortfolioCreate = {
-        name: formData.name,
-        description: formData.description,
-        tags: formData.tags || [],
-        assets: formData.assets.map(asset => ({
-          ticker: asset.ticker,
-          name: asset.name,
-          weight: asset.weight,
-          sector: asset.sector,
-          assetClass: asset.assetClass || 'stocks',
-          quantity: 0,
-          purchasePrice: asset.currentPrice || 0,
-          currentPrice: asset.currentPrice || 0,
-          purchaseDate: new Date().toISOString().split('T')[0],
-          currency: 'USD',
-          country: 'United States',
-          exchange: 'NASDAQ'
-        }))
-      };
-
-      await createPortfolio(portfolioData);
-      navigate('/portfolios');
-    } catch (error) {
-      console.error('Error creating portfolio:', error);
-    }
-  };
-
-  const canProceed = () => {
-    switch (currentStep) {
-      case 'basic_info':
-        return formData.name.trim() && formData.startingAmount > 0;
-      case 'assets':
-        return formData.assets.length > 0 &&
-               Math.abs(formData.assets.reduce((sum, asset) => sum + asset.weight, 0) - 100) < 0.01;
-      default:
-        return true;
-    }
-  };
-
-  return (
-    <div className={styles.portfolioCreation}>
-      {currentStep === 'mode' && (
-        <ModeSelection onModeSelect={handleModeSelect} />
-      )}
-
-      {currentStep === 'basic_info' && mode && (
-        <BasicInfoStep
-          formData={formData}
-          onChange={handleInputChange}
-          errors={errors}
-          mode={mode}
-        />
-      )}
-
-      {currentStep === 'constraints' && mode === 'advanced' && (
-        <AdvancedConstraintsStep
-          formData={formData}
-          onChange={handleInputChange}
-        />
-      )}
-
-      {currentStep === 'assets' && mode && (
-        <AssetsStep
-          formData={formData}
-          onChange={handleInputChange}
-          mode={mode}
-        />
-      )}
-
-      {currentStep === 'review' && mode && (
-        <ReviewStep
-          formData={formData}
-          mode={mode}
-        />
-      )}
-
-      {currentStep !== 'mode' && (
-        <div className={styles.stepNavigation}>
-          <Button
-            onClick={handleBack}
-            variant="secondary"
-            disabled={loading}
-          >
-            Back
-          </Button>
-
-          {currentStep === 'review' ? (
-            <Button
-              onClick={handleCreate}
-              variant="primary"
-              loading={loading}
-              disabled={!canProceed()}
-            >
-              Create Portfolio ✅
-            </Button>
-          ) : (
-            <Button
-              onClick={handleNext}
-              variant="primary"
-              disabled={!canProceed()}
-            >
-              Next: {currentStep === 'basic_info' ? (mode === 'basic' ? 'Add Assets' : 'Strategy') :
-                     currentStep === 'constraints' ? 'Add Assets' :
-                     currentStep === 'assets' ? 'Review' : 'Continue'}
-            </Button>
-          )}
-        </div>
-      )}
-    </div>
   );
 };
 

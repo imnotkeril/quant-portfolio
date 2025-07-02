@@ -29,11 +29,11 @@ export const COLORS = {
   // Gradients
   GRADIENT_PRIMARY: 'linear-gradient(135deg, #BF9FFB 0%, #A880FA 100%)',
   GRADIENT_DARK: 'linear-gradient(135deg, #0D1015 0%, #1A1E2A 100%)',
-  
+
   // Overlays
   OVERLAY_LIGHT: 'rgba(255, 255, 255, 0.05)',
   OVERLAY_DARK: 'rgba(13, 16, 21, 0.7)',
-  
+
   // Transparent backgrounds
   BACKGROUND_TRANSPARENT: 'rgba(13, 16, 21, 0.5)',
   DIVIDER_TRANSPARENT: 'rgba(42, 46, 57, 0.5)',
