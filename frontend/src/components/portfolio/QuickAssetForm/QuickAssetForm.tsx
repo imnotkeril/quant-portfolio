@@ -1,13 +1,14 @@
 /**
- * QuickAssetForm Component
- * Simplified asset form for Easy Mode - only ticker and weight required
+ * Enhanced QuickAssetForm Component
+ * Simplified asset form with auto-completion and real-time price fetching
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import { Input } from '../../common/Input/Input';
 import { Button } from '../../common/Button/Button';
 import { Select } from '../../common/Select/Select';
 import { Badge } from '../../common/Badge/Badge';
+import { Loader } from '../../common/Loader/Loader';
 import { AssetCreate } from '../../../types/portfolio';
 import styles from './QuickAssetForm.module.css';
 
@@ -22,6 +23,20 @@ interface QuickAssetFormProps {
   'data-testid'?: string;
 }
 
+interface AssetSuggestion {
+  ticker: string;
+  name: string;
+  price: number;
+  sector: string;
+  assetClass: string;
+  exchange: string;
+  currency: string;
+  marketCap?: number;
+  volume?: number;
+  change?: number;
+  changePercent?: number;
+}
+
 const QUICK_ASSET_CLASSES = [
   { value: 'stocks', label: '📈 Stocks' },
   { value: 'etf', label: '📊 ETF' },
@@ -31,23 +46,211 @@ const QUICK_ASSET_CLASSES = [
   { value: 'commodity', label: '🥇 Commodities' },
 ];
 
-// Popular tickers for auto-suggestions
-const POPULAR_TICKERS = [
-  { ticker: 'AAPL', name: 'Apple Inc.', sector: 'Technology' },
-  { ticker: 'MSFT', name: 'Microsoft Corp.', sector: 'Technology' },
-  { ticker: 'GOOGL', name: 'Alphabet Inc.', sector: 'Technology' },
-  { ticker: 'AMZN', name: 'Amazon.com Inc.', sector: 'Consumer Cyclical' },
-  { ticker: 'TSLA', name: 'Tesla Inc.', sector: 'Consumer Cyclical' },
-  { ticker: 'NVDA', name: 'NVIDIA Corp.', sector: 'Technology' },
-  { ticker: 'META', name: 'Meta Platforms', sector: 'Technology' },
-  { ticker: 'BRK.B', name: 'Berkshire Hathaway', sector: 'Financial Services' },
-  { ticker: 'SPY', name: 'SPDR S&P 500 ETF', sector: 'Diversified' },
-  { ticker: 'QQQ', name: 'Invesco QQQ ETF', sector: 'Technology' },
-  { ticker: 'VTI', name: 'Vanguard Total Stock Market', sector: 'Diversified' },
-  { ticker: 'BND', name: 'Vanguard Total Bond Market', sector: 'Fixed Income' },
-];
+// Mock API service for asset search
+const searchAssets = async (query: string): Promise<AssetSuggestion[]> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 300));
 
-export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
+  const mockDatabase: AssetSuggestion[] = [
+    {
+      ticker: 'AAPL',
+      name: 'Apple Inc.',
+      price: 175.23,
+      sector: 'Technology',
+      assetClass: 'stocks',
+      exchange: 'NASDAQ',
+      currency: 'USD',
+      marketCap: 2800000000000,
+      volume: 45000000,
+      change: 2.45,
+      changePercent: 1.42
+    },
+    {
+      ticker: 'MSFT',
+      name: 'Microsoft Corporation',
+      price: 378.85,
+      sector: 'Technology',
+      assetClass: 'stocks',
+      exchange: 'NASDAQ',
+      currency: 'USD',
+      marketCap: 2900000000000,
+      volume: 35000000,
+      change: -1.23,
+      changePercent: -0.32
+    },
+    {
+      ticker: 'GOOGL',
+      name: 'Alphabet Inc. Class A',
+      price: 142.56,
+      sector: 'Technology',
+      assetClass: 'stocks',
+      exchange: 'NASDAQ',
+      currency: 'USD',
+      marketCap: 1800000000000,
+      volume: 28000000,
+      change: 5.67,
+      changePercent: 4.14
+    },
+    {
+      ticker: 'AMZN',
+      name: 'Amazon.com Inc.',
+      price: 153.87,
+      sector: 'Consumer Cyclical',
+      assetClass: 'stocks',
+      exchange: 'NASDAQ',
+      currency: 'USD',
+      marketCap: 1600000000000,
+      volume: 42000000,
+      change: -3.21,
+      changePercent: -2.04
+    },
+    {
+      ticker: 'TSLA',
+      name: 'Tesla Inc.',
+      price: 243.92,
+      sector: 'Consumer Cyclical',
+      assetClass: 'stocks',
+      exchange: 'NASDAQ',
+      currency: 'USD',
+      marketCap: 780000000000,
+      volume: 95000000,
+      change: 12.45,
+      changePercent: 5.38
+    },
+    {
+      ticker: 'NVDA',
+      name: 'NVIDIA Corporation',
+      price: 498.36,
+      sector: 'Technology',
+      assetClass: 'stocks',
+      exchange: 'NASDAQ',
+      currency: 'USD',
+      marketCap: 1200000000000,
+      volume: 38000000,
+      change: 15.23,
+      changePercent: 3.15
+    },
+    {
+      ticker: 'META',
+      name: 'Meta Platforms Inc.',
+      price: 348.15,
+      sector: 'Technology',
+      assetClass: 'stocks',
+      exchange: 'NASDAQ',
+      currency: 'USD',
+      marketCap: 880000000000,
+      volume: 22000000,
+      change: -8.45,
+      changePercent: -2.37
+    },
+    {
+      ticker: 'JNJ',
+      name: 'Johnson & Johnson',
+      price: 158.47,
+      sector: 'Healthcare',
+      assetClass: 'stocks',
+      exchange: 'NYSE',
+      currency: 'USD',
+      marketCap: 420000000000,
+      volume: 8500000,
+      change: 0.85,
+      changePercent: 0.54
+    },
+    {
+      ticker: 'PG',
+      name: 'Procter & Gamble Co.',
+      price: 154.32,
+      sector: 'Consumer Defensive',
+      assetClass: 'stocks',
+      exchange: 'NYSE',
+      currency: 'USD',
+      marketCap: 360000000000,
+      volume: 6200000,
+      change: -1.23,
+      changePercent: -0.79
+    },
+    {
+      ticker: 'KO',
+      name: 'Coca-Cola Co.',
+      price: 62.18,
+      sector: 'Consumer Defensive',
+      assetClass: 'stocks',
+      exchange: 'NYSE',
+      currency: 'USD',
+      marketCap: 270000000000,
+      volume: 12000000,
+      change: 0.45,
+      changePercent: 0.73
+    },
+    {
+      ticker: 'SPY',
+      name: 'SPDR S&P 500 ETF Trust',
+      price: 456.78,
+      sector: 'Diversified',
+      assetClass: 'etf',
+      exchange: 'NYSE',
+      currency: 'USD',
+      marketCap: 450000000000,
+      volume: 75000000,
+      change: 2.34,
+      changePercent: 0.51
+    },
+    {
+      ticker: 'QQQ',
+      name: 'Invesco QQQ Trust',
+      price: 389.45,
+      sector: 'Technology',
+      assetClass: 'etf',
+      exchange: 'NASDAQ',
+      currency: 'USD',
+      marketCap: 180000000000,
+      volume: 45000000,
+      change: 5.67,
+      changePercent: 1.48
+    },
+    {
+      ticker: 'VTI',
+      name: 'Vanguard Total Stock Market ETF',
+      price: 234.56,
+      sector: 'Diversified',
+      assetClass: 'etf',
+      exchange: 'NYSE',
+      currency: 'USD',
+      marketCap: 320000000000,
+      volume: 28000000,
+      change: 1.78,
+      changePercent: 0.76
+    },
+    {
+      ticker: 'BND',
+      name: 'Vanguard Total Bond Market ETF',
+      price: 78.92,
+      sector: 'Fixed Income',
+      assetClass: 'bonds',
+      exchange: 'NYSE',
+      currency: 'USD',
+      marketCap: 85000000000,
+      volume: 5500000,
+      change: -0.12,
+      changePercent: -0.15
+    }
+  ];
+
+  return mockDatabase.filter(asset =>
+    asset.ticker.toLowerCase().includes(query.toLowerCase()) ||
+    asset.name.toLowerCase().includes(query.toLowerCase())
+  );
+};
+
+// Format large numbers
+const formatMarketCap = (value: number): string => {
+  if (value >= 1e12) return `${(value / 1e12).toFixed(1)}T`;
+  if (value >= 1e9) return `${(value / 1e9).toFixed(1)}B`;
+  if (value >= 1e6) return `${(value / 1e6).toFixed(1)}M`;
+  return `${value.toLocaleString()}`;
+};
+
+const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
   onSubmit,
   onCancel,
   onSwitchToAdvanced,
@@ -63,58 +266,74 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
     assetClass: 'stocks'
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [tickerSuggestions, setTickerSuggestions] = useState<typeof POPULAR_TICKERS>([]);
+  const [suggestions, setSuggestions] = useState<AssetSuggestion[]>([]);
+  const [selectedAssetInfo, setSelectedAssetInfo] = useState<AssetSuggestion | null>(null);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedAssetInfo, setSelectedAssetInfo] = useState<typeof POPULAR_TICKERS[0] | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Auto-complete for ticker
-  useEffect(() => {
-    if (formData.ticker.length >= 1) {
-      const suggestions = POPULAR_TICKERS.filter(item =>
-        item.ticker.toLowerCase().includes(formData.ticker.toLowerCase()) ||
-        item.name.toLowerCase().includes(formData.ticker.toLowerCase())
-      ).slice(0, 6);
+  const searchTimeoutRef = useRef<NodeJS.Timeout>();
+  const suggestionsRef = useRef<HTMLDivElement>(null);
 
-      setTickerSuggestions(suggestions);
-      setShowSuggestions(suggestions.length > 0);
-    } else {
-      setShowSuggestions(false);
-    }
-  }, [formData.ticker]);
-
-  // Auto-fill weight with remaining weight
-  useEffect(() => {
-    if (remainingWeight > 0 && remainingWeight <= 100 && !formData.weight) {
-      setFormData(prev => ({ ...prev, weight: remainingWeight.toString() }));
-    }
-  }, [remainingWeight]);
-
+  // Handle ticker input with debounced search
   const handleTickerChange = (value: string) => {
-    const upperValue = value.toUpperCase();
-    setFormData(prev => ({ ...prev, ticker: upperValue }));
+    setFormData(prev => ({ ...prev, ticker: value }));
+    setSelectedAssetInfo(null);
+    setShowSuggestions(true);
 
-    // Check if ticker matches a known asset
-    const matchedAsset = POPULAR_TICKERS.find(item =>
-      item.ticker === upperValue
-    );
-    setSelectedAssetInfo(matchedAsset || null);
+    // Clear existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
 
-    // Clear error
+    // Clear errors
+    if (errors.ticker) {
+      setErrors(prev => ({ ...prev, ticker: '' }));
+    }
+
+    // Don't search for very short queries
+    if (value.length < 1) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    // Debounced search
+    searchTimeoutRef.current = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const results = await searchAssets(value);
+        setSuggestions(results);
+      } catch (error) {
+        console.error('Error searching assets:', error);
+        setSuggestions([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+  };
+
+  // Handle asset selection from suggestions
+  const handleAssetSelect = (asset: AssetSuggestion) => {
+    setFormData(prev => ({
+      ...prev,
+      ticker: asset.ticker,
+      assetClass: asset.assetClass
+    }));
+    setSelectedAssetInfo(asset);
+    setShowSuggestions(false);
+    setSuggestions([]);
+
+    // Clear ticker error if exists
     if (errors.ticker) {
       setErrors(prev => ({ ...prev, ticker: '' }));
     }
   };
 
-  const handleSuggestionClick = (suggestion: typeof POPULAR_TICKERS[0]) => {
-    setFormData(prev => ({ ...prev, ticker: suggestion.ticker }));
-    setSelectedAssetInfo(suggestion);
-    setShowSuggestions(false);
-  };
-
+  // Handle weight input validation
   const handleWeightChange = (value: string) => {
-    // Only allow numbers and decimal point
-    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+    // Allow only numbers and decimal point
+    if (/^\d*\.?\d*$/.test(value)) {
       setFormData(prev => ({ ...prev, weight: value }));
 
       // Clear error
@@ -124,10 +343,11 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
     }
   };
 
+  // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Quick validation
+    // Validation
     const newErrors: Record<string, string> = {};
 
     if (!formData.ticker.trim()) {
@@ -150,146 +370,201 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
       return;
     }
 
-    // Create asset data with smart defaults
+    // Create asset data with real or mock data
     const assetData: AssetCreate = {
       ticker: formData.ticker.toUpperCase(),
       name: selectedAssetInfo?.name || `${formData.ticker.toUpperCase()} Asset`,
       weight: weightNum,
-      quantity: 0, // Will be calculated based on weight and cash
-      purchasePrice: 0, // Will be fetched from API
-      currentPrice: 0, // Will be fetched from API
+      quantity: 0, // Will be calculated based on weight and starting amount
+      purchasePrice: selectedAssetInfo?.price || 100, // Use real price or fallback
+      currentPrice: selectedAssetInfo?.price || 100,
       assetClass: formData.assetClass,
-      currency: 'USD',
-      sector: selectedAssetInfo?.sector || '',
+      currency: selectedAssetInfo?.currency || 'USD',
+      sector: selectedAssetInfo?.sector || 'Unknown',
       industry: '',
       country: 'United States',
-      exchange: 'NASDAQ',
+      exchange: selectedAssetInfo?.exchange || 'NASDAQ',
       purchaseDate: new Date().toISOString().split('T')[0],
     };
 
     onSubmit(assetData);
-
-    // Reset form
-    setFormData({ ticker: '', weight: '', assetClass: 'stocks' });
-    setSelectedAssetInfo(null);
-    setErrors({});
   };
 
-  const quickWeightButtons = [
-    { label: '5%', value: 5 },
-    { label: '10%', value: 10 },
-    { label: '15%', value: 15 },
-    { label: '20%', value: 20 },
-    { label: '25%', value: 25 },
-    { label: `All (${remainingWeight.toFixed(1)}%)`, value: remainingWeight },
-  ].filter(btn => btn.value <= remainingWeight);
+  // Handle clicks outside suggestions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
-    <div className={classNames(styles.container, className)} data-testid={testId}>
-      <div className={styles.header}>
+    <div className={classNames(styles.quickAssetForm, className)} data-testid={testId}>
+      <div className={styles.formHeader}>
         <h3>🚀 Quick Add Asset</h3>
-        <p>Add assets fast with smart auto-completion</p>
+        <p>Add assets with smart auto-completion and real-time prices</p>
       </div>
 
       <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={styles.quickFields}>
-          {/* Ticker input with auto-complete */}
-          <div className={styles.tickerField}>
-            <Input
-              label="Ticker Symbol *"
-              placeholder="Type AAPL, GOOGL, SPY..."
-              value={formData.ticker}
-              onChange={(e) => handleTickerChange(e.target.value)}
-              error={errors.ticker}
-              autoFocus
-              className={styles.tickerInput}
-            />
-
-            {showSuggestions && (
-              <div className={styles.suggestions}>
-                {tickerSuggestions.map((suggestion, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    className={styles.suggestion}
-                    onClick={() => handleSuggestionClick(suggestion)}
-                  >
-                    <div className={styles.suggestionInfo}>
-                      <span className={styles.suggestionTicker}>{suggestion.ticker}</span>
-                      <span className={styles.suggestionName}>{suggestion.name}</span>
-                    </div>
-                    <Badge size="small" variant="neutral">
-                      {suggestion.sector}
-                    </Badge>
-                  </button>
-                ))}
+        <div className={styles.formBody}>
+          {/* Ticker input with suggestions */}
+          <div className={styles.formGroup}>
+            <label className={styles.label}>
+              Ticker Symbol *
+            </label>
+            <div className={styles.searchContainer} ref={suggestionsRef}>
+              <div className={styles.inputContainer}>
+                <Input
+                  value={formData.ticker}
+                  onChange={handleTickerChange}
+                  error={errors.ticker}
+                  placeholder="AAPL"
+                  className={styles.tickerInput}
+                  autoComplete="off"
+                />
+                {searchLoading && (
+                  <div className={styles.searchLoader}>
+                    <Loader size="sm" />
+                  </div>
+                )}
+                <div className={styles.searchIcon}>🔍</div>
               </div>
-            )}
 
+              {/* Asset suggestions dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className={styles.suggestions}>
+                  {suggestions.slice(0, 8).map((asset) => (
+                    <div
+                      key={asset.ticker}
+                      className={styles.suggestion}
+                      onClick={() => handleAssetSelect(asset)}
+                    >
+                      <div className={styles.suggestionMain}>
+                        <div className={styles.tickerPrice}>
+                          <strong>{asset.ticker}</strong>
+                          <span className={styles.price}>${asset.price.toFixed(2)}</span>
+                          {asset.change && (
+                            <span className={classNames(styles.change, {
+                              [styles.positive]: asset.change > 0,
+                              [styles.negative]: asset.change < 0
+                            })}>
+                              {asset.change > 0 ? '+' : ''}{asset.changePercent?.toFixed(2)}%
+                            </span>
+                          )}
+                        </div>
+                        <div className={styles.assetName}>{asset.name}</div>
+                      </div>
+                      <div className={styles.suggestionMeta}>
+                        <Badge variant="secondary" size="sm">{asset.assetClass}</Badge>
+                        <span className={styles.sector}>{asset.sector}</span>
+                        <span className={styles.exchange}>{asset.exchange}</span>
+                        {asset.marketCap && (
+                          <span className={styles.marketCap}>{formatMarketCap(asset.marketCap)}</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* No results message */}
+              {showSuggestions && !searchLoading && formData.ticker.length > 0 && suggestions.length === 0 && (
+                <div className={styles.noResults}>
+                  <div className={styles.noResultsText}>
+                    No assets found for "{formData.ticker}"
+                  </div>
+                  <div className={styles.noResultsHint}>
+                    Try searching by ticker symbol or company name
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Selected asset info */}
             {selectedAssetInfo && (
-              <div className={styles.assetInfo}>
-                ✅ {selectedAssetInfo.name} • {selectedAssetInfo.sector}
+              <div className={styles.selectedAsset}>
+                <div className={styles.selectedAssetHeader}>
+                  <span className={styles.selectedTicker}>💡 {selectedAssetInfo.ticker}</span>
+                  <span className={styles.selectedPrice}>${selectedAssetInfo.price.toFixed(2)}</span>
+                  {selectedAssetInfo.change && (
+                    <span className={classNames(styles.selectedChange, {
+                      [styles.positive]: selectedAssetInfo.change > 0,
+                      [styles.negative]: selectedAssetInfo.change < 0
+                    })}>
+                      {selectedAssetInfo.change > 0 ? '+' : ''}{selectedAssetInfo.changePercent?.toFixed(2)}%
+                    </span>
+                  )}
+                </div>
+                <div className={styles.selectedAssetInfo}>
+                  <span>{selectedAssetInfo.name}</span>
+                  <span>{selectedAssetInfo.sector}</span>
+                  <span>{selectedAssetInfo.exchange}</span>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Weight input with quick buttons */}
-          <div className={styles.weightField}>
+          {/* Weight input */}
+          <div className={styles.formGroup}>
+            <label className={styles.label}>
+              Weight (%) *
+            </label>
             <Input
-              type="text"
-              label="Weight (%) *"
-              placeholder="0"
+              type="number"
               value={formData.weight}
-              onChange={(e) => handleWeightChange(e.target.value)}
+              onChange={handleWeightChange}
               error={errors.weight}
-              min="0"
-              max="100"
-              step="0.1"
+              placeholder="15"
+              min="0.01"
+              max={remainingWeight}
+              step="0.01"
+              className={styles.weightInput}
             />
-
-            <div className={styles.quickWeights}>
-              <span className={styles.quickWeightsLabel}>Quick:</span>
-              {quickWeightButtons.map((btn) => (
-                <button
-                  key={btn.value}
-                  type="button"
-                  className={classNames(styles.quickWeightBtn, {
-                    [styles.active]: Number(formData.weight) === btn.value
-                  })}
-                  onClick={() => setFormData(prev => ({ ...prev, weight: btn.value.toString() }))}
-                  disabled={btn.value > remainingWeight}
-                >
-                  {btn.label}
-                </button>
-              ))}
-            </div>
 
             {remainingWeight < 100 && (
               <div className={styles.remainingInfo}>
-                Remaining: {remainingWeight.toFixed(1)}%
+                💡 Remaining: {remainingWeight.toFixed(1)}%
               </div>
             )}
           </div>
 
           {/* Asset class selector */}
-          <Select
-            label="Asset Type"
-            value={formData.assetClass}
-            onChange={(value) => setFormData(prev => ({ ...prev, assetClass: value }))}
-            options={QUICK_ASSET_CLASSES}
-          />
+          <div className={styles.formGroup}>
+            <Select
+              label="Asset Type"
+              value={formData.assetClass}
+              onChange={(value) => setFormData(prev => ({ ...prev, assetClass: value }))}
+              options={QUICK_ASSET_CLASSES}
+              className={styles.assetClassSelect}
+            />
+          </div>
         </div>
 
+        {/* Info box */}
         <div className={styles.infoBox}>
           <h4>💡 Quick Mode Benefits</h4>
           <ul>
             <li>✅ Auto-completion for popular tickers</li>
-            <li>📈 Current prices fetched automatically</li>
+            <li>📈 Real-time prices fetched automatically</li>
             <li>🏢 Company info filled automatically</li>
             <li>⚡ Only essential fields required</li>
           </ul>
         </div>
 
+        {/* Form actions */}
         <div className={styles.actions}>
           <div className={styles.leftActions}>
             {onCancel && (
@@ -309,6 +584,7 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
                 onClick={onSwitchToAdvanced}
                 variant="secondary"
                 disabled={loading}
+                className={styles.advancedButton}
               >
                 📝 Advanced Form
               </Button>
@@ -319,7 +595,8 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
             type="submit"
             variant="primary"
             loading={loading}
-            disabled={loading}
+            disabled={loading || !formData.ticker || !formData.weight}
+            className={styles.submitButton}
           >
             {loading ? 'Adding...' : 'Add Asset'} ✅
           </Button>
