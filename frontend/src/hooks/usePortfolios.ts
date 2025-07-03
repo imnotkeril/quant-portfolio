@@ -1,8 +1,10 @@
 /**
- * Hook for managing portfolios
+ * Hook for managing portfolios - Updated with template and import support
  */
 import { useState, useEffect, useCallback } from 'react';
 import { portfolioService } from '../services/portfolio/portfolioService';
+import { templateService, PortfolioTemplate } from '../services/portfolio/templateService';
+import { importService, ImportValidationResult } from '../services/portfolio/importService';
 import {
   Portfolio,
   PortfolioListItem,
@@ -22,22 +24,56 @@ interface UsePortfoliosState {
   updating: boolean;
   deleting: boolean;
   updatingPrices: boolean;
+
+  // Template state
+  templates: PortfolioTemplate[];
+  templatesLoading: boolean;
+  templatesError: string | null;
+
+  // Import state
+  importing: boolean;
+  importError: string | null;
+  lastImportResult: ImportValidationResult | null;
 }
 
 interface UsePortfoliosActions {
+  // Portfolio CRUD operations
   loadPortfolios: () => Promise<void>;
   loadPortfolio: (id: string) => Promise<void>;
   createPortfolio: (portfolio: PortfolioCreate) => Promise<Portfolio | null>;
   createPortfolioFromText: (portfolioText: TextPortfolioCreate) => Promise<Portfolio | null>;
   updatePortfolio: (id: string, updates: PortfolioUpdate) => Promise<Portfolio | null>;
   deletePortfolio: (id: string) => Promise<boolean>;
-  updatePortfolioPrices: (id: string) => Promise<UpdatePricesResponse | null>;
+
+  // Asset management
   addAssetToPortfolio: (portfolioId: string, asset: AssetCreate) => Promise<Portfolio | null>;
   removeAssetFromPortfolio: (portfolioId: string, ticker: string) => Promise<Portfolio | null>;
+  updatePortfolioPrices: (id: string) => Promise<UpdatePricesResponse | null>;
+
+  // Import/Export operations
   importFromCSV: (file: File, name?: string, description?: string) => Promise<Portfolio | null>;
   exportToCSV: (id: string) => Promise<void>;
+  importFromText: (text: string, name: string, description?: string) => Promise<Portfolio | null>;
+
+  // Template operations
+  loadTemplates: () => Promise<void>;
+  getTemplateById: (id: string) => PortfolioTemplate | null;
+  getTemplatesByCategory: (category: string) => PortfolioTemplate[];
+  getPopularTemplates: (limit?: number) => PortfolioTemplate[];
+  searchTemplates: (query: string) => PortfolioTemplate[];
+  createPortfolioFromTemplate: (template: PortfolioTemplate, name?: string, description?: string) => Promise<Portfolio | null>;
+
+  // Validation and utilities
+  validatePortfolio: (portfolio: PortfolioCreate) => { isValid: boolean; errors: string[]; warnings: string[] };
+  normalizePortfolioWeights: (portfolio: PortfolioCreate) => PortfolioCreate;
+  calculatePortfolioStats: (portfolio: Portfolio) => any;
+
+  // Error handling
   clearError: () => void;
+  clearImportError: () => void;
+  clearTemplatesError: () => void;
   clearCurrentPortfolio: () => void;
+  clearLastImportResult: () => void;
 }
 
 export const usePortfolios = (): UsePortfoliosState & UsePortfoliosActions => {
@@ -50,6 +86,16 @@ export const usePortfolios = (): UsePortfoliosState & UsePortfoliosActions => {
     updating: false,
     deleting: false,
     updatingPrices: false,
+
+    // Template state
+    templates: [],
+    templatesLoading: false,
+    templatesError: null,
+
+    // Import state
+    importing: false,
+    importError: null,
+    lastImportResult: null,
   });
 
   // Load all portfolios
@@ -210,7 +256,7 @@ export const usePortfolios = (): UsePortfoliosState & UsePortfoliosActions => {
     try {
       const result = await portfolioService.updatePortfolioPrices(id);
 
-      // Reload the current portfolio if it's the one being updated
+      // Reload the portfolio to get updated prices
       if (state.currentPortfolio?.id === id) {
         await loadPortfolio(id);
       }
@@ -290,14 +336,14 @@ export const usePortfolios = (): UsePortfoliosState & UsePortfoliosActions => {
     name?: string,
     description?: string
   ): Promise<Portfolio | null> => {
-    setState(prev => ({ ...prev, creating: true, error: null }));
+    setState(prev => ({ ...prev, importing: true, importError: null }));
 
     try {
       const newPortfolio = await portfolioService.importPortfolioFromCSV(file, name, description);
 
       setState(prev => ({
         ...prev,
-        creating: false,
+        importing: false,
         portfolios: [...prev.portfolios, {
           id: newPortfolio.id,
           name: newPortfolio.name,
@@ -311,7 +357,60 @@ export const usePortfolios = (): UsePortfoliosState & UsePortfoliosActions => {
       return newPortfolio;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to import portfolio from CSV';
-      setState(prev => ({ ...prev, creating: false, error: errorMessage }));
+      setState(prev => ({ ...prev, importing: false, importError: errorMessage }));
+      return null;
+    }
+  }, []);
+
+  // Import portfolio from text
+  const importFromText = useCallback(async (
+    text: string,
+    name: string,
+    description?: string
+  ): Promise<Portfolio | null> => {
+    setState(prev => ({ ...prev, importing: true, importError: null }));
+
+    try {
+      // Parse text using import service
+      const parseResult = importService.parseText(text, {
+        format: 'ticker-weight',
+        validateWeights: true,
+        normalizeWeights: true
+      });
+
+      setState(prev => ({ ...prev, lastImportResult: parseResult }));
+
+      if (!parseResult.isValid) {
+        throw new Error(parseResult.errors[0] || 'Failed to parse text');
+      }
+
+      // Convert to portfolio format
+      const assets = importService.parsedAssetsToAssetCreate(parseResult.assets);
+      const portfolioData: TextPortfolioCreate = {
+        name,
+        description,
+        text
+      };
+
+      const newPortfolio = await portfolioService.createPortfolioFromText(portfolioData);
+
+      setState(prev => ({
+        ...prev,
+        importing: false,
+        portfolios: [...prev.portfolios, {
+          id: newPortfolio.id,
+          name: newPortfolio.name,
+          description: newPortfolio.description,
+          assetCount: newPortfolio.assets.length,
+          tags: newPortfolio.tags || [],
+          lastUpdated: newPortfolio.lastUpdated
+        }]
+      }));
+
+      return newPortfolio;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to import portfolio from text';
+      setState(prev => ({ ...prev, importing: false, importError: errorMessage }));
       return null;
     }
   }, []);
@@ -328,9 +427,107 @@ export const usePortfolios = (): UsePortfoliosState & UsePortfoliosActions => {
     }
   }, []);
 
+  // Load templates
+  const loadTemplates = useCallback(async (): Promise<void> => {
+    setState(prev => ({ ...prev, templatesLoading: true, templatesError: null }));
+
+    try {
+      const templates = templateService.getTemplates();
+      setState(prev => ({ ...prev, templates, templatesLoading: false }));
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load templates';
+      setState(prev => ({ ...prev, templatesLoading: false, templatesError: errorMessage }));
+    }
+  }, []);
+
+  // Get template by ID
+  const getTemplateById = useCallback((id: string): PortfolioTemplate | null => {
+    return templateService.getTemplateById(id);
+  }, []);
+
+  // Get templates by category
+  const getTemplatesByCategory = useCallback((category: string): PortfolioTemplate[] => {
+    return templateService.getTemplatesByCategory(category);
+  }, []);
+
+  // Get popular templates
+  const getPopularTemplates = useCallback((limit?: number): PortfolioTemplate[] => {
+    return templateService.getPopularTemplates(limit);
+  }, []);
+
+  // Search templates
+  const searchTemplates = useCallback((query: string): PortfolioTemplate[] => {
+    return templateService.searchTemplates(query);
+  }, []);
+
+  // Create portfolio from template
+  const createPortfolioFromTemplate = useCallback(async (
+    template: PortfolioTemplate,
+    name?: string,
+    description?: string
+  ): Promise<Portfolio | null> => {
+    setState(prev => ({ ...prev, creating: true, error: null }));
+
+    try {
+      const assets = templateService.templateToAssets(template);
+      const portfolioData: PortfolioCreate = {
+        name: name || template.name,
+        description: description || template.description,
+        tags: template.tags,
+        assets
+      };
+
+      const newPortfolio = await portfolioService.createPortfolio(portfolioData);
+
+      setState(prev => ({
+        ...prev,
+        creating: false,
+        portfolios: [...prev.portfolios, {
+          id: newPortfolio.id,
+          name: newPortfolio.name,
+          description: newPortfolio.description,
+          assetCount: newPortfolio.assets.length,
+          tags: newPortfolio.tags || [],
+          lastUpdated: newPortfolio.lastUpdated
+        }]
+      }));
+
+      return newPortfolio;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create portfolio from template';
+      setState(prev => ({ ...prev, creating: false, error: errorMessage }));
+      return null;
+    }
+  }, []);
+
+  // Validate portfolio
+  const validatePortfolio = useCallback((portfolio: PortfolioCreate) => {
+    return portfolioService.validatePortfolio(portfolio);
+  }, []);
+
+  // Normalize portfolio weights
+  const normalizePortfolioWeights = useCallback((portfolio: PortfolioCreate) => {
+    return portfolioService.normalizePortfolioWeights(portfolio);
+  }, []);
+
+  // Calculate portfolio stats
+  const calculatePortfolioStats = useCallback((portfolio: Portfolio) => {
+    return portfolioService.calculatePortfolioStats(portfolio);
+  }, []);
+
   // Clear error
   const clearError = useCallback(() => {
     setState(prev => ({ ...prev, error: null }));
+  }, []);
+
+  // Clear import error
+  const clearImportError = useCallback(() => {
+    setState(prev => ({ ...prev, importError: null }));
+  }, []);
+
+  // Clear templates error
+  const clearTemplatesError = useCallback(() => {
+    setState(prev => ({ ...prev, templatesError: null }));
   }, []);
 
   // Clear current portfolio
@@ -338,10 +535,16 @@ export const usePortfolios = (): UsePortfoliosState & UsePortfoliosActions => {
     setState(prev => ({ ...prev, currentPortfolio: null }));
   }, []);
 
-  // Load portfolios on mount
+  // Clear last import result
+  const clearLastImportResult = useCallback(() => {
+    setState(prev => ({ ...prev, lastImportResult: null }));
+  }, []);
+
+  // Load portfolios and templates on mount
   useEffect(() => {
     loadPortfolios();
-  }, [loadPortfolios]);
+    loadTemplates();
+  }, [loadPortfolios, loadTemplates]);
 
   return {
     ...state,
@@ -355,9 +558,22 @@ export const usePortfolios = (): UsePortfoliosState & UsePortfoliosActions => {
     addAssetToPortfolio,
     removeAssetFromPortfolio,
     importFromCSV,
+    importFromText,
     exportToCSV,
+    loadTemplates,
+    getTemplateById,
+    getTemplatesByCategory,
+    getPopularTemplates,
+    searchTemplates,
+    createPortfolioFromTemplate,
+    validatePortfolio,
+    normalizePortfolioWeights,
+    calculatePortfolioStats,
     clearError,
+    clearImportError,
+    clearTemplatesError,
     clearCurrentPortfolio,
+    clearLastImportResult,
   };
 };
 

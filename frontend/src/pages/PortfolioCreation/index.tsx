@@ -12,6 +12,7 @@ import { Select } from '../../components/common/Select';
 import { Modal } from '../../components/common/Modal';
 import { Badge } from '../../components/common/Badge';
 import { usePortfolios } from '../../hooks/usePortfolios';
+import { useAssets } from '../../hooks/useAssets';
 import { AssetCreate, PortfolioCreate } from '../../types/portfolio';
 import styles from './PortfolioCreation.module.css';
 
@@ -136,43 +137,76 @@ const PORTFOLIO_TEMPLATES: PortfolioTemplate[] = [
   }
 ];
 
-// Quick Add Asset Modal Component - MOVED BEFORE MAIN COMPONENT
+// Quick Add Asset Modal Component with REAL API
 const QuickAddAssetModal: React.FC<{
   onAdd: (asset: AssetFormData) => void;
   onCancel: () => void;
   remainingWeight: number;
-}> = ({ onAdd, onCancel, remainingWeight }) => {
+  existingTickers: string[];
+}> = ({ onAdd, onCancel, remainingWeight, existingTickers }) => {
   const [ticker, setTicker] = useState('');
   const [weight, setWeight] = useState(Math.min(remainingWeight, 15));
-  const [assetInfo, setAssetInfo] = useState<any>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState<any>(null);
+
+  // REAL API integration
+  const { searchAssets, searchResults, searchLoading, getAssetInfo, searchError } = useAssets();
 
   const handleTickerChange = (value: string) => {
-    setTicker(value.toUpperCase());
+    const upperValue = value.toUpperCase();
+    setTicker(upperValue);
+    setSelectedAsset(null);
 
-    if (value.length >= 2) {
-      // Mock API call - replace with real API
-      setTimeout(() => {
-        setAssetInfo({
-          name: value === 'AAPL' ? 'Apple Inc.' : `${value} Company`,
-          price: 150.25,
-          sector: 'Technology'
-        });
-      }, 500);
+    if (upperValue.length >= 1) {
+      setShowSuggestions(true);
+      // REAL API call
+      searchAssets(upperValue, 10);
+    } else {
+      setShowSuggestions(false);
     }
   };
 
+  const handleSuggestionSelect = async (suggestion: any) => {
+    setTicker(suggestion.ticker);
+    setShowSuggestions(false);
+
+    // Get detailed asset info from API
+    const assetInfo = await getAssetInfo(suggestion.ticker);
+    setSelectedAsset(assetInfo || suggestion);
+  };
+
   const handleAdd = () => {
-    if (ticker && weight > 0) {
-      const asset: AssetFormData = {
-        id: `asset-${Date.now()}`,
-        ticker,
-        name: assetInfo?.name || `${ticker} Company`,
-        weight,
-        sector: assetInfo?.sector,
-        currentPrice: assetInfo?.price
-      };
-      onAdd(asset);
+    // Validation
+    if (!ticker.trim()) {
+      alert('Please enter a ticker symbol');
+      return;
     }
+
+    if (existingTickers.includes(ticker)) {
+      alert('This asset is already in your portfolio');
+      return;
+    }
+
+    if (weight <= 0) {
+      alert('Weight must be greater than 0');
+      return;
+    }
+
+    if (weight > remainingWeight) {
+      alert(`Weight cannot exceed remaining weight of ${remainingWeight}%`);
+      return;
+    }
+
+    const asset: AssetFormData = {
+      id: `asset-${Date.now()}`,
+      ticker,
+      name: selectedAsset?.name || `${ticker} Company`,
+      weight,
+      sector: selectedAsset?.sector || 'Unknown',
+      assetClass: selectedAsset?.assetClass || 'stocks',
+      currentPrice: selectedAsset?.currentPrice || selectedAsset?.price
+    };
+    onAdd(asset);
   };
 
   return (
@@ -186,13 +220,43 @@ const QuickAddAssetModal: React.FC<{
               onChange={(e) => handleTickerChange(e.target.value)}
               placeholder="AAPL"
             />
-            <Button variant="ghost" size="small">
-              🔍
-            </Button>
+            {searchLoading && <div className={styles.loading}>🔍</div>}
           </div>
-          {assetInfo && (
+
+          {/* Search suggestions */}
+          {showSuggestions && searchResults.length > 0 && (
+            <div className={styles.suggestions}>
+              {searchResults.slice(0, 5).map((suggestion) => (
+                <div
+                  key={suggestion.ticker}
+                  className={styles.suggestion}
+                  onClick={() => handleSuggestionSelect(suggestion)}
+                >
+                  <div className={styles.suggestionTicker}>{suggestion.ticker}</div>
+                  <div className={styles.suggestionName}>{suggestion.name}</div>
+                  {suggestion.sector && <div className={styles.suggestionSector}>{suggestion.sector}</div>}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* No results */}
+          {showSuggestions && searchResults.length === 0 && ticker.length > 0 && !searchLoading && (
+            <div className={styles.noResults}>
+              No assets found for "{ticker}"
+            </div>
+          )}
+
+          {/* Search error */}
+          {searchError && (
+            <div className={styles.searchError}>
+              Search error: {searchError}
+            </div>
+          )}
+
+          {selectedAsset && (
             <div className={styles.assetInfo}>
-              💡 {assetInfo.name} - ${assetInfo.price}
+              💡 {selectedAsset.name} - ${selectedAsset.currentPrice || selectedAsset.price || 'N/A'} - {selectedAsset.sector}
             </div>
           )}
         </div>
@@ -204,9 +268,11 @@ const QuickAddAssetModal: React.FC<{
             value={weight}
             onChange={(e) => setWeight(Number(e.target.value))}
             max={remainingWeight}
+            min={0.1}
+            step={0.1}
           />
           <div className={styles.remainingInfo}>
-            💡 Remaining: {remainingWeight}%
+            💡 Remaining: {remainingWeight.toFixed(1)}%
           </div>
         </div>
 
@@ -217,7 +283,6 @@ const QuickAddAssetModal: React.FC<{
           <Button
             variant="primary"
             onClick={handleAdd}
-            disabled={!ticker || weight <= 0 || weight > remainingWeight}
           >
             Add Asset ✅
           </Button>
@@ -280,10 +345,173 @@ const PortfolioTemplatesModal: React.FC<{
   );
 };
 
+// CSV Import Modal - REAL implementation
+const CSVImportModal: React.FC<{
+  onImport: (assets: AssetFormData[]) => void;
+  onCancel: () => void;
+}> = ({ onImport, onCancel }) => {
+  const [file, setFile] = useState<File | null>(null);
+  const [csvText, setCsvText] = useState('');
+  const [importing, setImporting] = useState(false);
+  const [errors, setErrors] = useState<string[]>([]);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      if (selectedFile.type === 'text/csv' || selectedFile.name.endsWith('.csv')) {
+        setFile(selectedFile);
+        setErrors([]);
+
+        // Read file content
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setCsvText(event.target?.result as string || '');
+        };
+        reader.readAsText(selectedFile);
+      } else {
+        setErrors(['Please select a valid CSV file']);
+      }
+    }
+  };
+
+  const handleImport = async () => {
+    if (!csvText.trim()) {
+      setErrors(['Please provide CSV data']);
+      return;
+    }
+
+    setImporting(true);
+    setErrors([]);
+
+    try {
+      // REAL CSV parsing using import service
+      const { importService } = await import('../../services/portfolio/importService');
+      const result = importService.parseCSV(csvText, {
+        hasHeaders: true,
+        validateWeights: true,
+        normalizeWeights: true,
+      });
+
+      if (result.isValid) {
+        const assets: AssetFormData[] = result.assets.map((asset, index) => ({
+          id: `csv-${index}`,
+          ticker: asset.ticker,
+          name: asset.name || asset.ticker,
+          weight: asset.weight || 0,
+          sector: asset.sector,
+          assetClass: asset.assetClass || 'stocks',
+          currentPrice: asset.currentPrice
+        }));
+
+        onImport(assets);
+      } else {
+        setErrors(result.errors);
+      }
+    } catch (error) {
+      console.error('CSV import error:', error);
+      setErrors(['Failed to parse CSV file']);
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const sampleCSV = `Ticker,Name,Weight
+AAPL,Apple Inc,25
+MSFT,Microsoft,20
+GOOGL,Alphabet,15`;
+
+  return (
+    <Modal open={true} onClose={onCancel} title="📁 Import from CSV">
+      <div className={styles.importModal}>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>CSV Data</label>
+          <textarea
+            value={csvText}
+            onChange={(e) => setCsvText(e.target.value)}
+            placeholder={sampleCSV}
+            rows={8}
+            className={styles.textInput}
+          />
+        </div>
+
+        <div className={styles.modalActions}>
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleImport}>
+            Import CSV
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+// Text Import Modal - Simple version
+const TextImportModal: React.FC<{
+  onImport: (assets: AssetFormData[]) => void;
+  onCancel: () => void;
+}> = ({ onImport, onCancel }) => {
+  const [text, setText] = useState('');
+
+  const handleImport = () => {
+    // Simple text parsing
+    const lines = text.split('\n').filter(line => line.trim());
+    const assets: AssetFormData[] = [];
+
+    lines.forEach((line, index) => {
+      const match = line.match(/([A-Z0-9.]+)\s+(\d+(?:\.\d+)?)%?/i);
+      if (match) {
+        const [, ticker, weight] = match;
+        assets.push({
+          id: `text-${index}`,
+          ticker: ticker.toUpperCase(),
+          name: `${ticker} Company`,
+          weight: parseFloat(weight),
+          sector: 'Unknown',
+          assetClass: 'stocks'
+        });
+      }
+    });
+
+    if (assets.length > 0) {
+      onImport(assets);
+    } else {
+      alert('No valid assets found in text');
+    }
+  };
+
+  return (
+    <Modal open={true} onClose={onCancel} title="📝 Import from Text">
+      <div className={styles.importModal}>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Asset List</label>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="AAPL 25%&#10;MSFT 20%&#10;GOOGL 15%"
+            rows={8}
+            className={styles.textInput}
+          />
+        </div>
+
+        <div className={styles.modalActions}>
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleImport}>
+            Import Text
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
 // MAIN COMPONENT
 const PortfolioCreation: React.FC = () => {
   const navigate = useNavigate();
-  const { createPortfolio, isLoading } = usePortfolios();
+  const { createPortfolio, loading: isLoading } = usePortfolios();
 
   const [mode, setMode] = useState<CreationMode | null>(null);
   const [step, setStep] = useState<CreationStep>('mode');
@@ -296,6 +524,8 @@ const PortfolioCreation: React.FC = () => {
 
   const [showAssetForm, setShowAssetForm] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [showCSVImport, setShowCSVImport] = useState(false);
+  const [showTextImport, setShowTextImport] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleModeSelect = (selectedMode: CreationMode) => {
@@ -361,14 +591,31 @@ const PortfolioCreation: React.FC = () => {
         description: formData.description,
         assets: formData.assets.map(asset => ({
           ticker: asset.ticker,
-          weight: asset.weight / 100
+          name: asset.name,
+          weight: asset.weight / 100 // Convert percentage to decimal
         })) as AssetCreate[]
       };
 
-      await createPortfolio(portfolioData);
-      navigate('/portfolios');
+      console.log('Creating portfolio:', portfolioData);
+      const newPortfolio = await createPortfolio(portfolioData);
+
+      if (newPortfolio) {
+        console.log('Portfolio created successfully:', newPortfolio);
+        // Try different navigation approaches
+        try {
+          navigate('/portfolios');
+        } catch (navError) {
+          console.error('Navigation error:', navError);
+          // Fallback navigation
+          window.location.href = '/portfolios';
+        }
+      } else {
+        console.error('Portfolio creation returned null');
+        alert('Failed to create portfolio. Please try again.');
+      }
     } catch (error) {
       console.error('Failed to create portfolio:', error);
+      alert(`Failed to create portfolio: ${error.message}`);
     }
   };
 
@@ -396,6 +643,10 @@ const PortfolioCreation: React.FC = () => {
       handleFormChange('assets', templateAssets);
       setShowTemplates(false);
     }
+  };
+
+  const getExistingTickers = (): string[] => {
+    return formData.assets.map(asset => asset.ticker.toUpperCase());
   };
 
   // Mode Selection Step
@@ -663,10 +914,18 @@ const PortfolioCreation: React.FC = () => {
                 <div className={styles.tabGroup}>
                   <h3>📁 Import</h3>
                   <div className={styles.importButtons}>
-                    <Button variant="outline" size="small">
+                    <Button
+                      variant="outline"
+                      size="small"
+                      onClick={() => setShowCSVImport(true)}
+                    >
                       From CSV
                     </Button>
-                    <Button variant="outline" size="small">
+                    <Button
+                      variant="outline"
+                      size="small"
+                      onClick={() => setShowTextImport(true)}
+                    >
                       From Text
                     </Button>
                   </div>
@@ -746,9 +1005,10 @@ const PortfolioCreation: React.FC = () => {
             <Button
               variant="primary"
               onClick={handleNext}
-              disabled={formData.assets.length === 0 || totalWeight !== 100}
+              disabled={formData.assets.length === 0 || totalWeight !== 100 || isLoading}
+              loading={isLoading}
             >
-              {mode === 'basic' ? 'Create Portfolio ✅' : 'Next: Strategy'}
+              {isLoading ? 'Creating...' : (mode === 'basic' ? 'Create Portfolio ✅' : 'Next: Strategy')}
             </Button>
           </div>
         </div>
@@ -759,6 +1019,7 @@ const PortfolioCreation: React.FC = () => {
             onAdd={handleAssetAdd}
             onCancel={() => setShowAssetForm(false)}
             remainingWeight={remainingWeight}
+            existingTickers={getExistingTickers()}
           />
         )}
 
@@ -766,6 +1027,26 @@ const PortfolioCreation: React.FC = () => {
           <PortfolioTemplatesModal
             onSelect={handleTemplateSelect}
             onCancel={() => setShowTemplates(false)}
+          />
+        )}
+
+        {showCSVImport && (
+          <CSVImportModal
+            onImport={(assets) => {
+              handleFormChange('assets', assets);
+              setShowCSVImport(false);
+            }}
+            onCancel={() => setShowCSVImport(false)}
+          />
+        )}
+
+        {showTextImport && (
+          <TextImportModal
+            onImport={(assets) => {
+              handleFormChange('assets', assets);
+              setShowTextImport(false);
+            }}
+            onCancel={() => setShowTextImport(false)}
           />
         )}
       </div>
