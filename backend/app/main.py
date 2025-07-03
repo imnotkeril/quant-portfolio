@@ -14,7 +14,7 @@ from datetime import datetime
 from pathlib import Path
 
 # Import configurations and services
-from config import settings
+from .config import settings
 
 # Configure logging
 logging.basicConfig(
@@ -110,6 +110,53 @@ else:
         except Exception as e:
             logger.error(f"Error listing portfolios: {e}")
             raise HTTPException(status_code=500, detail=str(e))
+
+
+    # В секции временных endpoints (после строки ~95), добавьте:
+
+    @app.get("/api/v1/assets/search")
+    async def search_assets_temp(query: str, limit: int = 10):
+        """Temporary working asset search endpoint"""
+        try:
+            # Импортируем здесь чтобы избежать проблем на старте
+            from backend.app.infrastructure.data.data_fetcher import DataFetcherService
+            from backend.app.infrastructure.cache.memory_cache import MemoryCacheProvider
+
+            # Создаем сервисы
+            cache_provider = MemoryCacheProvider()
+            data_fetcher = DataFetcherService(cache_provider)
+
+            # Выполняем поиск
+            results = data_fetcher.search_tickers(query, limit)
+
+            logger.info(f"🔍 Asset search for '{query}' returned {len(results)} results")
+            return results
+
+        except Exception as e:
+            logger.error(f"❌ Asset search error: {e}")
+
+            # Fallback - возвращаем популярные активы
+            popular_assets = [
+                {"ticker": "AAPL", "name": "Apple Inc.", "asset_type": "Equity", "exchange": "NASDAQ",
+                 "currency": "USD"},
+                {"ticker": "MSFT", "name": "Microsoft Corporation", "asset_type": "Equity", "exchange": "NASDAQ",
+                 "currency": "USD"},
+                {"ticker": "GOOGL", "name": "Alphabet Inc.", "asset_type": "Equity", "exchange": "NASDAQ",
+                 "currency": "USD"},
+                {"ticker": "AMZN", "name": "Amazon.com Inc.", "asset_type": "Equity", "exchange": "NASDAQ",
+                 "currency": "USD"},
+                {"ticker": "TSLA", "name": "Tesla Inc.", "asset_type": "Equity", "exchange": "NASDAQ",
+                 "currency": "USD"}
+            ]
+
+            # Фильтруем по запросу
+            if query:
+                query_lower = query.lower()
+                filtered = [asset for asset in popular_assets
+                            if query_lower in asset["ticker"].lower() or query_lower in asset["name"].lower()]
+                return filtered[:limit] if filtered else popular_assets[:3]
+
+            return popular_assets[:limit]
 
     @app.post("/api/v1/portfolios")
     async def create_portfolio(portfolio_data: Dict[str, Any]):

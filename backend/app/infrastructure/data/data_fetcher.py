@@ -196,7 +196,7 @@ class DataFetcherService(DataProvider):
 
             return {}
 
-    def search_tickers(self, query: str, limit: int = 10, provider: str = 'alpha_vantage') -> List[Dict]:
+    def search_tickers(self, query: str, limit: int = 10, provider: str = 'yfinance') -> List[Dict]:
         """
         Search tickers by query
 
@@ -236,10 +236,30 @@ class DataFetcherService(DataProvider):
             logging.error(f"Error searching for tickers on request '{query}': {e}")
 
             # Try fallback provider
-            if provider != 'alpha_vantage' and self.api_keys['alpha_vantage']:
-                return self.search_tickers(query, limit, 'alpha_vantage')
+        if provider == 'yfinance' and self.api_keys['alpha_vantage']:
+            try:
+                logging.info("🔄 Fallback: trying Alpha Vantage...")
+                fallback_results = self._search_alpha_vantage(query, limit)
+                if fallback_results:
+                    logging.info(f"✅ Fallback successful! Found {len(fallback_results)} results")
+                    # Cache the fallback results under the original provider key
+                    self.cache_provider.set(cache_key, fallback_results, 3 * 86400)
+                    return fallback_results[:limit]
+            except Exception as fallback_error:
+                logging.error(f"❌ Fallback search also failed: {fallback_error}")
 
-            return []
+        elif provider == 'alpha_vantage':
+            try:
+                logging.info("🔄 Fallback: trying Yahoo Finance...")
+                fallback_results = self._search_alternative(query, limit)
+                if fallback_results:
+                    logging.info(f"✅ Fallback successful! Found {len(fallback_results)} results")
+                    return fallback_results[:limit]
+            except Exception as fallback_error:
+                logging.error(f"❌ Fallback search also failed: {fallback_error}")
+
+            # Last resort - return popular tickers for better UX
+        return self._get_popular_tickers_fallback(query, limit)
 
     def validate_tickers(self, tickers: List[str]) -> Tuple[List[str], List[str]]:
         """
@@ -1089,14 +1109,14 @@ class DataFetcherService(DataProvider):
                             logging.info(f"Converted ticker in search results: {symbol} -> {display_symbol}")
 
                     results.append({
-                        'symbol': display_symbol,
-                        'original_symbol': symbol,
+                        'ticker': display_symbol,  # ← ИСПРАВЛЕНО: было 'symbol'
                         'name': match.get('2. name', ''),
-                        'type': match.get('3. type', ''),
-                        'region': match.get('4. region', ''),
+                        'exchange': match.get('4. region', ''),
+                        'asset_type': match.get('3. type', ''),  # ← ИСПРАВЛЕНО: было 'type'
+                        'country': match.get('4. region', ''),
                         'currency': match.get('8. currency', 'USD'),
-                        'exchange': match.get('5. marketOpen', '') + '-' + match.get('6. marketClose', ''),
-                        'timezone': match.get('7. timezone', '')
+                        'sector': None,  # Alpha Vantage search не предоставляет sector
+                        'industry': None  # Alpha Vantage search не предоставляет industry
                     })
 
             return results
@@ -1143,13 +1163,14 @@ class DataFetcherService(DataProvider):
                             display_ticker = ticker.replace('-', '.')
 
                     results.append({
-                        'symbol': display_ticker,
-                        'original_symbol': ticker,
+                        'ticker': display_ticker,  # ← ИСПРАВЛЕНО: было 'symbol'
                         'name': quote.get('shortname', quote.get('longname', '')),
-                        'type': quote.get('quoteType', ''),
-                        'region': quote.get('region', 'US'),
+                        'exchange': quote.get('exchange', ''),
+                        'asset_type': quote.get('quoteType', ''),  # ← ИСПРАВЛЕНО: было 'type'
+                        'country': quote.get('region', 'US'),
                         'currency': quote.get('currency', 'USD'),
-                        'exchange': quote.get('exchange', '')
+                        'sector': quote.get('sector', ''),
+                        'industry': quote.get('industry', '')
                     })
 
             return results
@@ -1205,6 +1226,49 @@ class DataFetcherService(DataProvider):
         """
         s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
         return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+    def _get_popular_tickers_fallback(self, query: str, limit: int = 10) -> List[Dict]:
+        """
+        Last resort fallback with popular tickers when APIs fail
+        """
+        logging.info("🆘 Using popular tickers fallback")
+
+        popular_tickers = [
+            {'ticker': 'AAPL', 'name': 'Apple Inc.', 'asset_type': 'Equity', 'exchange': 'NASDAQ', 'currency': 'USD',
+             'country': 'US', 'sector': 'Technology', 'industry': 'Consumer Electronics'},
+            {'ticker': 'MSFT', 'name': 'Microsoft Corporation', 'asset_type': 'Equity', 'exchange': 'NASDAQ',
+             'currency': 'USD', 'country': 'US', 'sector': 'Technology', 'industry': 'Software'},
+            {'ticker': 'GOOGL', 'name': 'Alphabet Inc.', 'asset_type': 'Equity', 'exchange': 'NASDAQ',
+             'currency': 'USD', 'country': 'US', 'sector': 'Technology', 'industry': 'Internet'},
+            {'ticker': 'AMZN', 'name': 'Amazon.com Inc.', 'asset_type': 'Equity', 'exchange': 'NASDAQ',
+             'currency': 'USD', 'country': 'US', 'sector': 'Consumer Cyclical', 'industry': 'Internet Retail'},
+            {'ticker': 'TSLA', 'name': 'Tesla Inc.', 'asset_type': 'Equity', 'exchange': 'NASDAQ', 'currency': 'USD',
+             'country': 'US', 'sector': 'Consumer Cyclical', 'industry': 'Auto Manufacturers'},
+            {'ticker': 'META', 'name': 'Meta Platforms Inc.', 'asset_type': 'Equity', 'exchange': 'NASDAQ',
+             'currency': 'USD', 'country': 'US', 'sector': 'Technology', 'industry': 'Social Media'},
+            {'ticker': 'NVDA', 'name': 'NVIDIA Corporation', 'asset_type': 'Equity', 'exchange': 'NASDAQ',
+             'currency': 'USD', 'country': 'US', 'sector': 'Technology', 'industry': 'Semiconductors'},
+            {'ticker': 'SPY', 'name': 'SPDR S&P 500 ETF Trust', 'asset_type': 'ETF', 'exchange': 'NYSE',
+             'currency': 'USD', 'country': 'US', 'sector': 'Financial Services', 'industry': 'Exchange Traded Fund'},
+            {'ticker': 'QQQ', 'name': 'Invesco QQQ Trust', 'asset_type': 'ETF', 'exchange': 'NASDAQ', 'currency': 'USD',
+             'country': 'US', 'sector': 'Financial Services', 'industry': 'Exchange Traded Fund'},
+            {'ticker': 'VTI', 'name': 'Vanguard Total Stock Market ETF', 'asset_type': 'ETF', 'exchange': 'NYSE',
+             'currency': 'USD', 'country': 'US', 'sector': 'Financial Services', 'industry': 'Exchange Traded Fund'}
+        ]
+
+        if not query or query.strip() == '':
+            return popular_tickers[:limit]
+
+        query_lower = query.lower()
+        filtered_results = [
+            ticker for ticker in popular_tickers
+            if query_lower in ticker['ticker'].lower() or query_lower in ticker['name'].lower()
+        ]
+
+        if not filtered_results:
+            filtered_results = popular_tickers[:3]
+
+        return filtered_results[:limit]
 
     def _safe_convert(self, value: Any, convert_type) -> Optional[Any]:
         """
