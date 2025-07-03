@@ -181,7 +181,7 @@ class TemplateEngine:
             import json
 
             # Convert to serializable format
-            from backend.app.utils.formatters import json_serializer
+            from app.utils.formatters import json_serializer
 
             # Save to file
             with open(output_path, 'w', encoding='utf-8') as f:

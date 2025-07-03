@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional, Dict, Any
 
-from backend.app.core.services.portfolio_comparison import PortfolioComparisonService
-from backend.app.schemas.comparison import (
+from app.core.services.portfolio_comparison import PortfolioComparisonService
+from app.schemas.comparison import (
     PortfolioComparisonRequest,
     PortfolioComparisonResponse,
     CompositionComparisonRequest,

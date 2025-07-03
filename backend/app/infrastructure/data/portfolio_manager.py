@@ -7,10 +7,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional, Union
 import re
-from backend.app.core.interfaces.storage_provider import StorageProvider
-from backend.app.core.interfaces.data_provider import DataProvider
-from backend.app.core.domain.portfolio import Portfolio
-from backend.app.core.domain.asset import Asset
+from app.core.interfaces.storage_provider import StorageProvider
+from app.core.interfaces.data_provider import DataProvider
+from app.core.domain.portfolio import Portfolio
+from app.core.domain.asset import Asset
 
 
 class PortfolioManagerService:

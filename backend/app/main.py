@@ -1,20 +1,21 @@
 """
-Investment Portfolio Management System - FastAPI Backend
-Main application entry point - ИСПРАВЛЕННАЯ ВЕРСИЯ
+Main FastAPI application module.
 """
-
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-import uvicorn
-from typing import Dict, Any
-import os
 import logging
+import json
+import traceback
 from datetime import datetime
 from pathlib import Path
+from typing import Dict, Any, List, Optional
 
-# Import configurations and services
-from .config import settings
+from fastapi import FastAPI, HTTPException, Request, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from contextlib import asynccontextmanager
+
+from app.config import settings
+from app.api.dependencies import validate_services_health
 
 # Configure logging
 logging.basicConfig(
@@ -23,307 +24,256 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Import API routers - with fallback for development
-ENDPOINTS_AVAILABLE = False
-try:
-    from app.api.endpoints import portfolios, analytics
-    from app.api.middleware import setup_middlewares
-    ENDPOINTS_AVAILABLE = True
-    logger.info("✅ Full API endpoints loaded successfully")
-except ImportError as e:
-    logger.warning(f"⚠️  API endpoints not fully implemented yet: {e}")
-    logger.info("🔄 Using temporary working endpoints")
+# Feature flags
+ENDPOINTS_AVAILABLE = True
 
-# Create FastAPI application
+# Global health status
+app_health_status = {
+    "startup_time": None,
+    "services_healthy": False,
+    "api_keys_configured": False,
+    "last_health_check": None
+}
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Application lifespan manager.
+    Handles startup and shutdown events.
+    """
+    # Startup
+    startup_time = datetime.now()
+    app_health_status["startup_time"] = startup_time.isoformat()
+
+    logger.info(f"🚀 Starting {settings.APP_NAME} v{settings.VERSION}")
+    logger.info(f"📍 Environment: {'Development' if settings.DEBUG else 'Production'}")
+    logger.info(f"🔧 Debug mode: {settings.DEBUG}")
+
+    # Validate services health
+    try:
+        health_status = validate_services_health()
+        app_health_status["services_healthy"] = all([
+            health_status["cache"],
+            health_status["file_storage"],
+            health_status["data_fetcher"]
+        ])
+        app_health_status["api_keys_configured"] = health_status["api_keys"]["alpha_vantage"]
+        app_health_status["last_health_check"] = datetime.now().isoformat()
+
+        if app_health_status["services_healthy"]:
+            logger.info("✅ All core services initialized successfully")
+        else:
+            logger.warning("⚠️  Some services failed initialization")
+
+        if app_health_status["api_keys_configured"]:
+            logger.info("🔑 Alpha Vantage API key configured")
+        else:
+            logger.warning("⚠️  Alpha Vantage API key not configured - limited functionality")
+
+    except Exception as e:
+        logger.error(f"❌ Service validation failed: {e}")
+        app_health_status["services_healthy"] = False
+
+    # Create required directories
+    try:
+        for directory in [settings.CACHE_DIR, settings.PORTFOLIO_DIR, settings.STORAGE_DIR, settings.REPORTS_DIR]:
+            Path(directory).mkdir(parents=True, exist_ok=True)
+        logger.info("📁 Required directories created/verified")
+    except Exception as e:
+        logger.error(f"❌ Failed to create directories: {e}")
+
+    logger.info(f"🎯 API available at: http://localhost:8000{settings.API_PREFIX}")
+    logger.info(f"📖 API docs at: http://localhost:8000/docs")
+
+    yield
+
+    # Shutdown
+    logger.info("🛑 Shutting down application")
+
+
+# Create FastAPI app
 app = FastAPI(
     title=settings.APP_NAME,
-    description="Advanced Quantitative Portfolio Analytics Platform",
+    description="Professional investment portfolio management and analytics platform",
     version=settings.VERSION,
     docs_url="/docs",
     redoc_url="/redoc",
-    debug=settings.DEBUG
+    openapi_url=f"{settings.API_PREFIX}/openapi.json",
+    lifespan=lifespan
 )
 
-# =============== MIDDLEWARE SETUP ===============
-
-# Configure CORS
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Add other middleware if available
-if ENDPOINTS_AVAILABLE:
+# Include API routers - только если файлы существуют
+try:
+    from app.api.endpoints import assets
+    app.include_router(assets.router, prefix=settings.API_PREFIX, tags=["assets"])
+    logger.info("✅ Assets router loaded")
+except ImportError as e:
+    logger.warning(f"⚠️ Assets router not available: {e}")
+
+try:
+    from app.api.endpoints import portfolios
+    app.include_router(portfolios.router, prefix=settings.API_PREFIX, tags=["portfolios"])
+    logger.info("✅ Portfolios router loaded")
+except ImportError as e:
+    logger.warning(f"⚠️ Portfolios router not available: {e}")
+
+try:
+    from app.api.endpoints import analytics
+    app.include_router(analytics.router, prefix=settings.API_PREFIX, tags=["analytics"])
+    logger.info("✅ Analytics router loaded")
+except ImportError as e:
+    logger.warning(f"⚠️ Analytics router not available: {e}")
+
+# =============== PORTFOLIO ENDPOINTS (BASIC IMPLEMENTATION) ===============
+
+@app.get("/api/v1/portfolios")
+async def list_portfolios():
+    """List all available portfolios"""
     try:
-        setup_middlewares(app)
-        logger.info("✅ Middleware setup completed")
-    except Exception as e:
-        logger.warning(f"⚠️  Middleware setup failed: {e}")
+        portfolios = []
+        portfolio_dir = Path(settings.PORTFOLIO_DIR)
 
-# =============== API ENDPOINTS ===============
-
-if ENDPOINTS_AVAILABLE:
-    # Include real routers when available
-    app.include_router(portfolios.router, prefix="/api/v1", tags=["portfolios"])
-    app.include_router(analytics.router, prefix="/api/v1", tags=["analytics"])
-    logger.info("✅ Real API routers included")
-else:
-    # Temporary working endpoints until full implementation is ready
-    logger.info("🔄 Setting up temporary working endpoints")
-
-    @app.get("/api/v1/portfolios")
-    async def list_portfolios():
-        """Temporary working portfolio list endpoint"""
-        try:
-            portfolios_dir = Path(settings.PORTFOLIO_DIR)
-            portfolios_dir.mkdir(parents=True, exist_ok=True)
-
-            portfolio_files = list(portfolios_dir.glob("*.json"))
-            portfolios = []
-
-            for file_path in portfolio_files:
+        if portfolio_dir.exists():
+            for file_path in portfolio_dir.glob("*.json"):
                 try:
-                    import json
                     with open(file_path, 'r', encoding='utf-8') as f:
                         portfolio_data = json.load(f)
                         portfolios.append({
-                            "id": portfolio_data.get("id", file_path.stem),
+                            "id": file_path.stem,
                             "name": portfolio_data.get("name", file_path.stem),
-                            "description": portfolio_data.get("description"),
-                            "assetCount": len(portfolio_data.get("assets", [])),
-                            "tags": portfolio_data.get("tags", []),
-                            "lastUpdated": portfolio_data.get("lastUpdated", datetime.now().isoformat())
+                            "description": portfolio_data.get("description", ""),
+                            "createdAt": portfolio_data.get("createdAt", datetime.now().isoformat()),
+                            "lastUpdated": portfolio_data.get("lastUpdated", datetime.now().isoformat()),
+                            "assetsCount": len(portfolio_data.get("assets", [])),
+                            "totalValue": portfolio_data.get("totalValue", 0)
                         })
                 except Exception as e:
                     logger.error(f"Error reading portfolio file {file_path}: {e}")
                     continue
 
-            logger.info(f"📋 Found {len(portfolios)} portfolios")
-            return {
-                "portfolios": portfolios,
-                "total": len(portfolios),
-                "status": "success"
-            }
-        except Exception as e:
-            logger.error(f"Error listing portfolios: {e}")
-            raise HTTPException(status_code=500, detail=str(e))
+        logger.info(f"📋 Found {len(portfolios)} portfolios")
+        return {
+            "portfolios": portfolios,
+            "total": len(portfolios),
+            "status": "success"
+        }
+    except Exception as e:
+        logger.error(f"Error listing portfolios: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-    # В секции временных endpoints (после строки ~95), добавьте:
+@app.post("/api/v1/portfolios")
+async def create_portfolio(portfolio_data: Dict[str, Any]):
+    """Create a new portfolio"""
+    try:
+        # Generate portfolio ID
+        portfolio_id = portfolio_data.get("id") or f"portfolio_{int(datetime.now().timestamp())}"
 
-    @app.get("/api/v1/assets/search")
-    async def search_assets_temp(query: str, limit: int = 10):
-        """Temporary working asset search endpoint"""
-        try:
-            # Импортируем здесь чтобы избежать проблем на старте
-            from backend.app.infrastructure.data.data_fetcher import DataFetcherService
-            from backend.app.infrastructure.cache.memory_cache import MemoryCacheProvider
+        # Add metadata
+        portfolio_data.update({
+            "id": portfolio_id,
+            "createdAt": datetime.now().isoformat(),
+            "lastUpdated": datetime.now().isoformat()
+        })
 
-            # Создаем сервисы
-            cache_provider = MemoryCacheProvider()
-            data_fetcher = DataFetcherService(cache_provider)
+        # Save to file
+        file_path = Path(settings.PORTFOLIO_DIR) / f"{portfolio_id}.json"
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(portfolio_data, f, indent=2, ensure_ascii=False)
 
-            # Выполняем поиск
-            results = data_fetcher.search_tickers(query, limit)
+        logger.info(f"💾 Portfolio created: ID {portfolio_id}")
+        return {
+            "message": "Portfolio created successfully",
+            "id": portfolio_id,
+            "portfolio": portfolio_data
+        }
+    except Exception as e:
+        logger.error(f"Error creating portfolio: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-            logger.info(f"🔍 Asset search for '{query}' returned {len(results)} results")
-            return results
 
-        except Exception as e:
-            logger.error(f"❌ Asset search error: {e}")
+@app.get("/api/v1/portfolios/{portfolio_id}")
+async def get_portfolio(portfolio_id: str):
+    """Get a specific portfolio by ID"""
+    try:
+        file_path = Path(settings.PORTFOLIO_DIR) / f"{portfolio_id}.json"
 
-            # Fallback - возвращаем популярные активы
-            popular_assets = [
-                {"ticker": "AAPL", "name": "Apple Inc.", "asset_type": "Equity", "exchange": "NASDAQ",
-                 "currency": "USD"},
-                {"ticker": "MSFT", "name": "Microsoft Corporation", "asset_type": "Equity", "exchange": "NASDAQ",
-                 "currency": "USD"},
-                {"ticker": "GOOGL", "name": "Alphabet Inc.", "asset_type": "Equity", "exchange": "NASDAQ",
-                 "currency": "USD"},
-                {"ticker": "AMZN", "name": "Amazon.com Inc.", "asset_type": "Equity", "exchange": "NASDAQ",
-                 "currency": "USD"},
-                {"ticker": "TSLA", "name": "Tesla Inc.", "asset_type": "Equity", "exchange": "NASDAQ",
-                 "currency": "USD"}
-            ]
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="Portfolio not found")
 
-            # Фильтруем по запросу
-            if query:
-                query_lower = query.lower()
-                filtered = [asset for asset in popular_assets
-                            if query_lower in asset["ticker"].lower() or query_lower in asset["name"].lower()]
-                return filtered[:limit] if filtered else popular_assets[:3]
+        with open(file_path, 'r', encoding='utf-8') as f:
+            portfolio_data = json.load(f)
 
-            return popular_assets[:limit]
+        logger.info(f"📖 Portfolio retrieved: ID {portfolio_id}")
+        return portfolio_data
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error retrieving portfolio {portfolio_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-    @app.post("/api/v1/portfolios")
-    async def create_portfolio(portfolio_data: Dict[str, Any]):
-        """Temporary working portfolio creation endpoint"""
-        try:
-            import json
-            import uuid
 
-            # Validate required fields
-            if not portfolio_data.get("name"):
-                raise HTTPException(status_code=400, detail="Portfolio name is required")
+@app.put("/api/v1/portfolios/{portfolio_id}")
+async def update_portfolio(portfolio_id: str, portfolio_data: Dict[str, Any]):
+    """Update an existing portfolio"""
+    try:
+        file_path = Path(settings.PORTFOLIO_DIR) / f"{portfolio_id}.json"
 
-            # Generate portfolio ID
-            portfolio_id = str(uuid.uuid4())
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="Portfolio not found")
 
-            # Prepare portfolio data
-            portfolio = {
-                "id": portfolio_id,
-                "name": portfolio_data.get("name"),
-                "description": portfolio_data.get("description", ""),
-                "assets": portfolio_data.get("assets", []),
-                "tags": portfolio_data.get("tags", []),
-                "created": datetime.now().isoformat(),
-                "lastUpdated": datetime.now().isoformat()
-            }
+        # Update metadata
+        portfolio_data.update({
+            "id": portfolio_id,
+            "lastUpdated": datetime.now().isoformat()
+        })
 
-            # Validate and normalize assets
-            if "assets" in portfolio_data and portfolio_data["assets"]:
-                total_weight = 0
-                valid_assets = []
+        # Save updated data
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(portfolio_data, f, indent=2, ensure_ascii=False)
 
-                for asset in portfolio_data["assets"]:
-                    if not asset.get("ticker"):
-                        continue
+        logger.info(f"✏️  Portfolio updated: ID {portfolio_id}")
+        return {
+            "message": "Portfolio updated successfully",
+            "id": portfolio_id,
+            "portfolio": portfolio_data
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating portfolio {portfolio_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-                    # Clean asset data
-                    clean_asset = {
-                        "ticker": asset["ticker"].upper().strip(),
-                        "name": asset.get("name", asset["ticker"]),
-                        "weight": float(asset.get("weight", 0)),
-                        "quantity": asset.get("quantity"),
-                        "purchasePrice": asset.get("purchasePrice"),
-                        "currentPrice": asset.get("currentPrice"),
-                        "sector": asset.get("sector"),
-                        "industry": asset.get("industry")
-                    }
 
-                    valid_assets.append(clean_asset)
-                    total_weight += clean_asset["weight"]
+@app.delete("/api/v1/portfolios/{portfolio_id}")
+async def delete_portfolio(portfolio_id: str):
+    """Delete a portfolio"""
+    try:
+        file_path = Path(settings.PORTFOLIO_DIR) / f"{portfolio_id}.json"
 
-                # Normalize weights if needed
-                if total_weight > 0 and abs(total_weight - 1.0) > 0.001:
-                    for asset in valid_assets:
-                        asset["weight"] = asset["weight"] / total_weight
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="Portfolio not found")
 
-                portfolio["assets"] = valid_assets
+        file_path.unlink()
+        logger.info(f"🗑️  Portfolio deleted: ID {portfolio_id}")
 
-            # Save to file
-            portfolios_dir = Path(settings.PORTFOLIO_DIR)
-            portfolios_dir.mkdir(parents=True, exist_ok=True)
+        return {"message": "Portfolio deleted successfully", "id": portfolio_id}
 
-            file_path = portfolios_dir / f"{portfolio_id}.json"
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(portfolio, f, indent=2, ensure_ascii=False)
-
-            logger.info(f"✅ Portfolio created: {portfolio['name']} (ID: {portfolio_id})")
-
-            return {
-                "id": portfolio_id,
-                "name": portfolio["name"],
-                "description": portfolio["description"],
-                "assets": portfolio["assets"],
-                "tags": portfolio["tags"],
-                "created": portfolio["created"],
-                "lastUpdated": portfolio["lastUpdated"],
-                "totalValue": 0,
-                "status": "created"
-            }
-
-        except HTTPException:
-            raise
-        except Exception as e:
-            logger.error(f"Error creating portfolio: {e}")
-            raise HTTPException(status_code=500, detail=f"Failed to create portfolio: {str(e)}")
-
-    @app.get("/api/v1/portfolios/{portfolio_id}")
-    async def get_portfolio(portfolio_id: str):
-        """Get specific portfolio by ID"""
-        try:
-            import json
-
-            file_path = Path(settings.PORTFOLIO_DIR) / f"{portfolio_id}.json"
-
-            if not file_path.exists():
-                raise HTTPException(status_code=404, detail="Portfolio not found")
-
-            with open(file_path, 'r', encoding='utf-8') as f:
-                portfolio = json.load(f)
-
-            logger.info(f"📖 Portfolio retrieved: {portfolio.get('name')} (ID: {portfolio_id})")
-            return portfolio
-
-        except HTTPException:
-            raise
-        except Exception as e:
-            logger.error(f"Error getting portfolio {portfolio_id}: {e}")
-            raise HTTPException(status_code=500, detail=str(e))
-
-    @app.put("/api/v1/portfolios/{portfolio_id}")
-    async def update_portfolio(portfolio_id: str, portfolio_data: Dict[str, Any]):
-        """Update existing portfolio"""
-        try:
-            import json
-
-            file_path = Path(settings.PORTFOLIO_DIR) / f"{portfolio_id}.json"
-
-            if not file_path.exists():
-                raise HTTPException(status_code=404, detail="Portfolio not found")
-
-            # Load existing portfolio
-            with open(file_path, 'r', encoding='utf-8') as f:
-                existing_portfolio = json.load(f)
-
-            # Update fields
-            existing_portfolio.update({
-                "name": portfolio_data.get("name", existing_portfolio["name"]),
-                "description": portfolio_data.get("description", existing_portfolio["description"]),
-                "tags": portfolio_data.get("tags", existing_portfolio["tags"]),
-                "lastUpdated": datetime.now().isoformat()
-            })
-
-            # Update assets if provided
-            if "assets" in portfolio_data:
-                existing_portfolio["assets"] = portfolio_data["assets"]
-
-            # Save updated portfolio
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(existing_portfolio, f, indent=2, ensure_ascii=False)
-
-            logger.info(f"✅ Portfolio updated: {existing_portfolio['name']} (ID: {portfolio_id})")
-            return existing_portfolio
-
-        except HTTPException:
-            raise
-        except Exception as e:
-            logger.error(f"Error updating portfolio {portfolio_id}: {e}")
-            raise HTTPException(status_code=500, detail=str(e))
-
-    @app.delete("/api/v1/portfolios/{portfolio_id}")
-    async def delete_portfolio(portfolio_id: str):
-        """Delete portfolio"""
-        try:
-            file_path = Path(settings.PORTFOLIO_DIR) / f"{portfolio_id}.json"
-
-            if not file_path.exists():
-                raise HTTPException(status_code=404, detail="Portfolio not found")
-
-            file_path.unlink()
-            logger.info(f"🗑️  Portfolio deleted: ID {portfolio_id}")
-
-            return {"message": "Portfolio deleted successfully", "id": portfolio_id}
-
-        except HTTPException:
-            raise
-        except Exception as e:
-            logger.error(f"Error deleting portfolio {portfolio_id}: {e}")
-            raise HTTPException(status_code=500, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting portfolio {portfolio_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # =============== SYSTEM ENDPOINTS ===============
 
@@ -344,6 +294,16 @@ async def root():
 async def health_check():
     """Health check endpoint for monitoring"""
     try:
+        # Update health status
+        health_status = validate_services_health()
+        app_health_status["services_healthy"] = all([
+            health_status["cache"],
+            health_status["file_storage"],
+            health_status["data_fetcher"]
+        ])
+        app_health_status["api_keys_configured"] = health_status["api_keys"]["alpha_vantage"]
+        app_health_status["last_health_check"] = datetime.now().isoformat()
+
         # Check directory access
         directories = {
             "cache": settings.CACHE_DIR,
@@ -361,7 +321,7 @@ async def health_check():
                 dir_status[name] = f"error: {str(e)}"
 
         return {
-            "status": "healthy",
+            "status": "healthy" if app_health_status["services_healthy"] else "degraded",
             "timestamp": datetime.now().isoformat(),
             "service": "backend",
             "version": settings.VERSION,
@@ -369,14 +329,17 @@ async def health_check():
                 "debug": settings.DEBUG,
                 "endpoints_available": ENDPOINTS_AVAILABLE,
                 "directories": dir_status,
-                "alpha_vantage_configured": bool(settings.ALPHA_VANTAGE_API_KEY and settings.ALPHA_VANTAGE_API_KEY != "demo"),
-                "features": {
-                    "portfolios": True,
-                    "analytics": ENDPOINTS_AVAILABLE,
-                    "optimization": ENDPOINTS_AVAILABLE,
-                    "risk_management": ENDPOINTS_AVAILABLE,
-                    "real_time_data": bool(settings.ALPHA_VANTAGE_API_KEY and settings.ALPHA_VANTAGE_API_KEY != "demo")
-                }
+                "alpha_vantage_configured": app_health_status["api_keys_configured"],
+                "api_prefix": settings.API_PREFIX
+            },
+            "services": health_status,
+            "uptime": app_health_status,
+            "features": {
+                "portfolios": True,
+                "analytics": ENDPOINTS_AVAILABLE,
+                "optimization": ENDPOINTS_AVAILABLE,
+                "risk_management": ENDPOINTS_AVAILABLE,
+                "real_time_data": app_health_status["api_keys_configured"]
             }
         }
     except Exception as e:
@@ -406,12 +369,13 @@ async def system_info():
             "risk_management": ENDPOINTS_AVAILABLE,
             "scenarios": ENDPOINTS_AVAILABLE,
             "reports": ENDPOINTS_AVAILABLE,
-            "real_time": bool(settings.ALPHA_VANTAGE_API_KEY and settings.ALPHA_VANTAGE_API_KEY != "demo")
+            "real_time": app_health_status["api_keys_configured"]
         },
         "api_docs": {
             "swagger": "/docs",
             "redoc": "/redoc"
-        }
+        },
+        "startup_info": app_health_status
     }
 
 # =============== ERROR HANDLERS ===============
@@ -424,7 +388,15 @@ async def not_found_handler(request: Request, exc):
             "message": "Endpoint not found",
             "status": "error",
             "timestamp": datetime.now().isoformat(),
-            "path": str(request.url.path)
+            "path": str(request.url.path),
+            "available_endpoints": [
+                "/api/v1/health",
+                "/api/v1/system/info",
+                "/api/v1/portfolios",
+                "/api/v1/assets/search",
+                "/api/v1/analytics",
+                "/docs"
+            ]
         }
     )
 
@@ -436,66 +408,51 @@ async def internal_error_handler(request: Request, exc):
         content={
             "message": "Internal server error",
             "status": "error",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
+            "path": str(request.url.path)
         }
     )
 
-@app.exception_handler(422)
-async def validation_error_handler(request: Request, exc):
-    logger.warning(f"Validation error on {request.url.path}: {exc}")
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(
-        status_code=422,
+        status_code=exc.status_code,
         content={
-            "message": "Validation error",
+            "message": exc.detail,
             "status": "error",
             "timestamp": datetime.now().isoformat(),
-            "details": str(exc)
+            "path": str(request.url.path),
+            "status_code": exc.status_code
         }
     )
 
-# =============== STARTUP/SHUTDOWN EVENTS ===============
+# =============== DEVELOPMENT HELPERS ===============
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize application on startup"""
-    try:
-        # Create necessary directories
-        directories = [
-            settings.CACHE_DIR,
-            settings.PORTFOLIO_DIR,
-            settings.STORAGE_DIR,
-            settings.REPORTS_DIR,
-            settings.TEMPLATES_DIR
-        ]
+if settings.DEBUG:
+    @app.get("/api/v1/debug/clear-cache")
+    async def clear_cache():
+        """Debug endpoint to clear cache (only in development)"""
+        try:
+            from app.api.dependencies import get_cache_service
+            cache_service = get_cache_service()
+            cache_service.clear()
+            return {"message": "Cache cleared successfully"}
+        except Exception as e:
+            logger.error(f"Error clearing cache: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
 
-        for directory in directories:
-            Path(directory).mkdir(parents=True, exist_ok=True)
+    @app.get("/api/v1/debug/services")
+    async def debug_services():
+        """Debug endpoint to check service status (only in development)"""
+        return validate_services_health()
 
-        logger.info(f"🚀 {settings.APP_NAME} v{settings.VERSION} started successfully")
-        logger.info(f"📁 Directories initialized: {[str(d) for d in directories]}")
-        logger.info(f"🔑 Alpha Vantage API: {'Configured' if settings.ALPHA_VANTAGE_API_KEY and settings.ALPHA_VANTAGE_API_KEY != 'demo' else 'Not configured (using demo)'}")
-        logger.info(f"🔧 Debug mode: {settings.DEBUG}")
-        logger.info(f"🌐 CORS origins: {settings.CORS_ORIGINS}")
-        logger.info(f"📊 Full endpoints available: {ENDPOINTS_AVAILABLE}")
-
-    except Exception as e:
-        logger.error(f"❌ Startup failed: {e}")
-        raise
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Cleanup on shutdown"""
-    logger.info("🛑 Application shutting down...")
-
-# =============== DEVELOPMENT SERVER ===============
-
+# Run the application
 if __name__ == "__main__":
-    logger.info(f"🔥 Starting {settings.APP_NAME} in development mode...")
+    import uvicorn
     uvicorn.run(
-        "main:app",
+        "app.main:app",
         host="0.0.0.0",
         port=8000,
-        reload=True,
-        log_level=settings.LOG_LEVEL.lower(),
-        access_log=True
+        reload=settings.DEBUG,
+        log_level=settings.LOG_LEVEL.lower()
     )

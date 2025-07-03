@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 import numpy as np
-from backend.app.core.services.optimization import OptimizationService
-from backend.app.infrastructure.data.portfolio_manager import PortfolioManagerService
-from backend.app.infrastructure.data.data_fetcher import DataFetcherService
+from app.core.services.optimization import OptimizationService
+from app.infrastructure.data.portfolio_manager import PortfolioManagerService
+from app.infrastructure.data.data_fetcher import DataFetcherService
 
 # Import Pydantic models (schemas)
-from backend.app.schemas.optimization import (
+from app.schemas.optimization import (
     OptimizationRequest,
     OptimizationResponse,
     EfficientFrontierRequest,
@@ -92,7 +92,7 @@ def optimize_portfolio(
 
         # Calculate returns for each asset
         import pandas as pd
-        from backend.app.core.services.analytics import AnalyticsService
+        from app.core.services.analytics import AnalyticsService
         analytics_service = AnalyticsService()
 
         returns_data = {}
@@ -276,7 +276,7 @@ def calculate_efficient_frontier(
 
         # Calculate returns for each asset
         import pandas as pd
-        from backend.app.core.services.analytics import AnalyticsService
+        from app.core.services.analytics import AnalyticsService
         analytics_service = AnalyticsService()
 
         returns_data = {}

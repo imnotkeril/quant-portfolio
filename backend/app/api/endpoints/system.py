@@ -10,7 +10,7 @@ import logging
 from datetime import datetime
 import psutil
 
-from backend.app.config import settings
+from app.config import settings
 
 router = APIRouter(prefix="/system", tags=["system"])
 logger = logging.getLogger("app.api.system")

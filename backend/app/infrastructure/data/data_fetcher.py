@@ -15,8 +15,8 @@ import pandas as pd
 import numpy as np
 import requests
 
-from backend.app.core.interfaces.data_provider import DataProvider
-from backend.app.core.interfaces.cache_provider import CacheProvider
+from app.core.interfaces.data_provider import DataProvider
+from app.core.interfaces.cache_provider import CacheProvider
 
 
 class DataFetcherService(DataProvider):
@@ -127,11 +127,11 @@ class DataFetcherService(DataProvider):
                 data = self.providers[provider](corrected_ticker, start_date, end_date, interval)
 
                 if data is not None and not data.empty:
-                    # Store in cache
+                    # Store in cache with timedelta
                     self.cache_provider.set(
                         cache_key,
                         data,
-                        self.cache_expiry_days * 86400  # Convert days to seconds
+                        timedelta(days=self.cache_expiry_days)
                     )
                     logging.info(f"Saved data {original_ticker} to cache")
 
@@ -181,8 +181,8 @@ class DataFetcherService(DataProvider):
                 raise ValueError(f"Unsupported provider for company information: {provider}")
 
             if info:
-                # Store in cache for 7 days (in seconds)
-                self.cache_provider.set(cache_key, info, 7 * 86400)
+                # Store in cache for 7 days
+                self.cache_provider.set(cache_key, info, timedelta(days=7))
                 logging.info(f"Saved information about {ticker} to cache")
 
             return info
@@ -227,8 +227,8 @@ class DataFetcherService(DataProvider):
                 raise ValueError(f"Unsupported provider for search: {provider}")
 
             if results:
-                # Store in cache for 3 days (in seconds)
-                self.cache_provider.set(cache_key, results, 3 * 86400)
+                # Store in cache for 3 days
+                self.cache_provider.set(cache_key, results, timedelta(days=3))
                 logging.info(f"Search results for '{query}' saved to cache")
 
             return results[:limit]
@@ -243,7 +243,7 @@ class DataFetcherService(DataProvider):
                 if fallback_results:
                     logging.info(f"✅ Fallback successful! Found {len(fallback_results)} results")
                     # Cache the fallback results under the original provider key
-                    self.cache_provider.set(cache_key, fallback_results, 3 * 86400)
+                    self.cache_provider.set(cache_key, fallback_results, timedelta(days=3))
                     return fallback_results[:limit]
             except Exception as fallback_error:
                 logging.error(f"❌ Fallback search also failed: {fallback_error}")
@@ -361,7 +361,7 @@ class DataFetcherService(DataProvider):
                     data = web.DataReader(fred_code, 'fred', start_date_dt, end_date_dt)
 
                     # Store in cache for 1 day
-                    self.cache_provider.set(cache_key, data, 86400)
+                    self.cache_provider.set(cache_key, data, timedelta(days=1))
 
                     results[indicator] = data
                     logging.info(f"Macroeconomic indicator loaded {indicator} ({fred_code})")
@@ -456,8 +456,8 @@ class DataFetcherService(DataProvider):
                                         })
 
             if constituents:
-                # Store in cache for 30 days (in seconds)
-                self.cache_provider.set(cache_key, constituents, 30 * 86400)
+                # Store in cache for 30 days
+                self.cache_provider.set(cache_key, constituents, timedelta(days=30))
 
             return constituents
         except Exception as e:
@@ -545,8 +545,8 @@ class DataFetcherService(DataProvider):
 
             result_df = pd.DataFrame(result_data)
 
-            # Store in cache for 1 day (in seconds)
-            self.cache_provider.set(cache_key, result_df, 86400)
+            # Store in cache for 1 day
+            self.cache_provider.set(cache_key, result_df, timedelta(days=1))
 
             return result_df
         except Exception as e:
@@ -636,7 +636,7 @@ class DataFetcherService(DataProvider):
 
                         if not ticker_data.empty:
                             cache_key = f"{original_ticker}_{start_date}_{end_date}_1d_{provider}"
-                            self.cache_provider.set(cache_key, ticker_data, self.cache_expiry_days * 86400)
+                            self.cache_provider.set(cache_key, ticker_data, timedelta(days=self.cache_expiry_days))
 
                             results[original_ticker] = ticker_data
                             logging.info(
@@ -705,8 +705,8 @@ class DataFetcherService(DataProvider):
                 logging.warning(f"No fundamental data {data_type} found for {ticker}")
                 return pd.DataFrame()
 
-            # Store in cache for 30 days (in seconds)
-            self.cache_provider.set(cache_key, df, 30 * 86400)
+            # Store in cache for 30 days
+            self.cache_provider.set(cache_key, df, timedelta(days=30))
 
             return df
         except ImportError:
@@ -732,7 +732,7 @@ class DataFetcherService(DataProvider):
             for ticker in tickers:
                 # Pattern matching for ticker-related cache keys
                 pattern = f"^{ticker}_"
-                keys_to_clear = self.cache_provider.get_keys_matching(pattern)
+                keys_to_clear = self.cache_provider.get_keys(pattern)
                 for key in keys_to_clear:
                     self.cache_provider.delete(key)
             logging.info(f"Cache cleared for tickers: {tickers}")

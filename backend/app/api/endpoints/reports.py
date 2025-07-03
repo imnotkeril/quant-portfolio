@@ -3,8 +3,8 @@ from typing import List, Optional, Dict, Any
 from fastapi.responses import FileResponse
 import os
 
-from backend.app.core.services.report_service import ReportService
-from backend.app.schemas.report import (
+from app.core.services.report_service import ReportService
+from app.schemas.report import (
     ReportRequest,
     ReportResponse,
     ComparisonReportRequest,

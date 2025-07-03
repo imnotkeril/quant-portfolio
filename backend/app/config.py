@@ -4,6 +4,28 @@ from typing import List, Optional, Dict, Any
 from pydantic_settings import BaseSettings
 from pydantic import Field
 
+# Load .env file explicitly
+try:
+    from dotenv import load_dotenv
+
+    # Try different .env locations
+    env_locations = [
+        Path(".env"),  # backend/.env
+        Path("../.env"),  # project_root/.env
+        Path("./backend/.env")  # if running from project root
+    ]
+
+    for env_path in env_locations:
+        if env_path.exists():
+            print(f"🔧 Loading .env from: {env_path.absolute()}")
+            load_dotenv(env_path, override=True)
+            break
+    else:
+        print("⚠️ No .env file found in standard locations")
+
+except ImportError:
+    print("⚠️ python-dotenv not installed - install with: pip install python-dotenv")
+
 
 class Settings(BaseSettings):
     """
@@ -100,6 +122,13 @@ class Settings(BaseSettings):
         self.PORTFOLIO_DIR.mkdir(parents=True, exist_ok=True)
         self.REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
+        # Debug info
+        print(f"🔧 Settings initialized:")
+        print(f"   DEBUG: {self.DEBUG}")
+        print(f"   ALPHA_VANTAGE_API_KEY: {'✅ Set' if self.ALPHA_VANTAGE_API_KEY else '❌ Not set'}")
+        if self.ALPHA_VANTAGE_API_KEY:
+            print(f"   API Key: {self.ALPHA_VANTAGE_API_KEY[:8]}...")
+
     @property
     def log_config(self) -> Dict[str, Any]:
         """Return logging configuration."""
@@ -152,8 +181,7 @@ class Settings(BaseSettings):
         Return database URI for SQLAlchemy.
         This can be extended if a database is needed in the future.
         """
-        return "sqlite:///./data/portfolio_management.db"
+        return "sqlite:///./portfolio.db"
 
 
-# Create settings instance
 settings = Settings()

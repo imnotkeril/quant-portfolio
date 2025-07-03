@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional, Dict, Any
 
-from backend.app.core.services.advanced_optimization import AdvancedOptimizationService
-from backend.app.schemas.optimization import (
+from app.core.services.advanced_optimization import AdvancedOptimizationService
+from app.schemas.optimization import (
     AdvancedOptimizationRequest,
     OptimizationResponse,
     RobustOptimizationRequest,

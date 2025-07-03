@@ -13,7 +13,7 @@ import time
 import requests
 from pathlib import Path
 
-from backend.app.infrastructure.data.market_data_provider import MarketDataProvider
+from app.infrastructure.data.market_data_provider import MarketDataProvider
 
 # Configure logging
 logger = logging.getLogger(__name__)

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional, Dict, Any
 
-from backend.app.core.services.scenario_service import ScenarioService
-from backend.app.schemas.scenario import (
+from app.core.services.scenario_service import ScenarioService
+from app.schemas.scenario import (
     ScenarioListResponse,
     ScenarioSimulationRequest,
     ScenarioSimulationResponse,

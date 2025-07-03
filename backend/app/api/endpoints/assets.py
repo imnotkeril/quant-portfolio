@@ -6,13 +6,13 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Query, Path, status
 from datetime import datetime, timedelta
 
-from backend.app.schemas.asset import (
+from app.schemas.asset import (
     AssetSearch,
     AssetHistoricalData,
     AssetPerformance
 )
-from backend.app.infrastructure.data.data_fetcher import DataFetcherService
-from backend.app.infrastructure.data.portfolio_manager import PortfolioManagerService
+from app.infrastructure.data.data_fetcher import DataFetcherService
+from app.infrastructure.data.portfolio_manager import PortfolioManagerService
 
 router = APIRouter(prefix="/assets", tags=["assets"])
 
@@ -20,13 +20,13 @@ router = APIRouter(prefix="/assets", tags=["assets"])
 def get_data_fetcher():
     """Dependency injection for data fetcher"""
     # This will be replaced with dependency injection in a real app
-    from backend.app.api.dependencies import get_data_fetcher_service
+    from app.api.dependencies import get_data_fetcher_service
     return get_data_fetcher_service()
 
 
 def get_portfolio_manager():
     """Dependency injection for portfolio manager"""
-    from backend.app.api.dependencies import get_portfolio_manager_service
+    from app.api.dependencies import get_portfolio_manager_service
     return get_portfolio_manager_service()
 
 
@@ -220,7 +220,7 @@ async def get_asset_performance(
             )
 
         # Calculate performance metrics
-        from backend.app.core.services.analytics import AnalyticsService
+        from app.core.services.analytics import AnalyticsService
         analytics_service = AnalyticsService()
 
         # Calculate returns

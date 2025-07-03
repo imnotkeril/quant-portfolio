@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional, Dict, Any
 
-from backend.app.core.services.risk_management import RiskManagementService
-from backend.app.schemas.risk import (
+from app.core.services.risk_management import RiskManagementService
+from app.schemas.risk import (
     VaRRequest,
     VaRResponse,
     StressTestRequest,

@@ -7,7 +7,7 @@ from typing import Dict, Any, Optional, List
 from pathlib import Path
 import base64
 
-from backend.app.infrastructure.reports.template_engine import TemplateEngine
+from app.infrastructure.reports.template_engine import TemplateEngine
 
 
 class PDFGenerator:

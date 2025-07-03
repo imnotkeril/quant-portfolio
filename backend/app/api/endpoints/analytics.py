@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
-from backend.app.core.services.analytics import AnalyticsService
-from backend.app.infrastructure.data.portfolio_manager import PortfolioManagerService
-from backend.app.infrastructure.data.data_fetcher import DataFetcherService
+from app.core.services.analytics import AnalyticsService
+from app.infrastructure.data.portfolio_manager import PortfolioManagerService
+from app.infrastructure.data.data_fetcher import DataFetcherService
 
 # Import Pydantic models (schemas)
-from backend.app.schemas.analytics import (
+from app.schemas.analytics import (
     AnalyticsRequest,
     PerformanceMetricsResponse,
     RiskMetricsResponse
@@ -506,7 +506,7 @@ def calculate_drawdowns(
         drawdown = (cumulative_returns / peak - 1)
 
         # Extract top 5 drawdowns
-        from backend.app.core.services.risk_management import RiskManagement
+        from app.core.services.risk_management import RiskManagement
         risk_service = RiskManagement()
         drawdown_periods = risk_service.analyze_drawdowns(portfolio_returns)
 
@@ -544,7 +544,7 @@ def compare_portfolios(
     """
     try:
         # Import the PortfolioComparisonService
-        from backend.app.core.services.portfolio_comparison import PortfolioComparisonService
+        from app.core.services.portfolio_comparison import PortfolioComparisonService
         comparison_service = PortfolioComparisonService()
 
         # Load the portfolios

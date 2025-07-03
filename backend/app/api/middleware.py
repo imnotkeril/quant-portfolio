@@ -8,7 +8,7 @@ import logging
 import json
 from typing import Callable, Dict
 
-from backend.app.config import settings
+from app.config import settings
 
 # Set up logging
 logger = logging.getLogger(__name__)

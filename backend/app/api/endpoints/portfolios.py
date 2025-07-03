@@ -6,7 +6,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Path, Query, status
 from fastapi.responses import FileResponse
 
-from backend.app.schemas.portfolio import (
+from app.schemas.portfolio import (
     PortfolioCreate,
     PortfolioUpdate,
     PortfolioResponse,
@@ -14,9 +14,9 @@ from backend.app.schemas.portfolio import (
     TextPortfolioCreate,
     AssetCreate
 )
-from backend.app.core.domain.portfolio import Portfolio
-from backend.app.core.domain.asset import Asset
-from backend.app.infrastructure.data.portfolio_manager import PortfolioManagerService
+from app.core.domain.portfolio import Portfolio
+from app.core.domain.asset import Asset
+from app.infrastructure.data.portfolio_manager import PortfolioManagerService
 
 router = APIRouter(prefix="/portfolios", tags=["portfolios"])
 
@@ -24,7 +24,7 @@ router = APIRouter(prefix="/portfolios", tags=["portfolios"])
 def get_portfolio_manager():
     """Dependency injection for portfolio manager"""
     # This will be replaced with dependency injection in a real app
-    from backend.app.api.dependencies import get_portfolio_manager_service
+    from app.api.dependencies import get_portfolio_manager_service
     return get_portfolio_manager_service()
 
 

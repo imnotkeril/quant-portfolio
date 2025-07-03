@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Union
 
-from backend.app.core.interfaces.storage_provider import StorageProvider
+from app.core.interfaces.storage_provider import StorageProvider
 
 
 class JsonStorageService(StorageProvider):

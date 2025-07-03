@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional, Pattern
 from pathlib import Path
 
-from backend.app.core.interfaces.cache_provider import CacheProvider
+from app.core.interfaces.cache_provider import CacheProvider
 
 # Configure logging
 logger = logging.getLogger(__name__)

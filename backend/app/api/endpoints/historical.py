@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional, Dict, Any
 
-from backend.app.core.services.historical_service import HistoricalService
-from backend.app.schemas.historical import (
+from app.core.services.historical_service import HistoricalService
+from app.schemas.historical import (
     HistoricalScenariosResponse,
     HistoricalContextRequest,
     HistoricalContextResponse,

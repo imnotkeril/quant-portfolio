@@ -11,7 +11,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Union, Pattern
 
-from backend.app.core.interfaces.storage_provider import StorageProvider
+from app.core.interfaces.storage_provider import StorageProvider
 
 
 class FileStorageService(StorageProvider):

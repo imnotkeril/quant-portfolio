@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 
-from backend.app.core.services.enhanced_analytics import EnhancedAnalyticsService
-from backend.app.infrastructure.data.portfolio_manager import PortfolioManagerService
-from backend.app.infrastructure.data.data_fetcher import DataFetcherService
+from app.core.services.enhanced_analytics import EnhancedAnalyticsService
+from app.infrastructure.data.portfolio_manager import PortfolioManagerService
+from app.infrastructure.data.data_fetcher import DataFetcherService
 
 # Import Pydantic models (schemas)
-from backend.app.schemas.analytics import (
+from app.schemas.analytics import (
     AnalyticsRequest,
     EnhancedAnalyticsRequest,
     RollingMetricsRequest,
@@ -74,7 +74,7 @@ def calculate_enhanced_metrics(
 
         # Calculate returns for each asset
         import pandas as pd
-        from backend.app.core.services.analytics import AnalyticsService
+        from app.core.services.analytics import AnalyticsService
         analytics_service = AnalyticsService()
 
         returns_data = {}
@@ -203,7 +203,7 @@ def calculate_rolling_metrics(
 
         # Calculate returns for each asset
         import pandas as pd
-        from backend.app.core.services.analytics import AnalyticsService
+        from app.core.services.analytics import AnalyticsService
         analytics_service = AnalyticsService()
 
         returns_data = {}
@@ -301,7 +301,7 @@ def analyze_seasonal_patterns(
 
         # Calculate returns for each asset
         import pandas as pd
-        from backend.app.core.services.analytics import AnalyticsService
+        from app.core.services.analytics import AnalyticsService
         analytics_service = AnalyticsService()
 
         returns_data = {}
@@ -389,7 +389,7 @@ def calculate_confidence_intervals(
 
         # Calculate returns for each asset
         import pandas as pd
-        from backend.app.core.services.analytics import AnalyticsService
+        from app.core.services.analytics import AnalyticsService
         analytics_service = AnalyticsService()
 
         returns_data = {}
@@ -473,7 +473,7 @@ def analyze_tail_risk(
 
         # Calculate returns for each asset
         import pandas as pd
-        from backend.app.core.services.analytics import AnalyticsService
+        from app.core.services.analytics import AnalyticsService
         analytics_service = AnalyticsService()
 
         returns_data = {}
