@@ -112,7 +112,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include API routers - только если файлы существуют
 try:
     from app.api.endpoints import assets
     app.include_router(assets.router, prefix=settings.API_PREFIX, tags=["assets"])
@@ -133,6 +132,80 @@ try:
     logger.info("✅ Analytics router loaded")
 except ImportError as e:
     logger.warning(f"⚠️ Analytics router not available: {e}")
+
+
+# Enhanced Analytics
+try:
+    from app.api.endpoints import enhanced_analytics
+    app.include_router(enhanced_analytics.router, prefix=settings.API_PREFIX, tags=["enhanced-analytics"])
+    logger.info("✅ Enhanced Analytics router loaded")
+except ImportError as e:
+    logger.warning(f"⚠️ Enhanced Analytics router not available: {e}")
+
+# Optimization
+try:
+    from app.api.endpoints import optimization
+    app.include_router(optimization.router, prefix=settings.API_PREFIX, tags=["optimization"])
+    logger.info("✅ Optimization router loaded")
+except ImportError as e:
+    logger.warning(f"⚠️ Optimization router not available: {e}")
+
+# Advanced Optimization
+try:
+    from app.api.endpoints import advanced_optimization
+    app.include_router(advanced_optimization.router, prefix=settings.API_PREFIX, tags=["advanced-optimization"])
+    logger.info("✅ Advanced Optimization router loaded")
+except ImportError as e:
+    logger.warning(f"⚠️ Advanced Optimization router not available: {e}")
+
+# Risk Management
+try:
+    from app.api.endpoints import risk
+    app.include_router(risk.router, prefix=settings.API_PREFIX, tags=["risk"])
+    logger.info("✅ Risk Management router loaded")
+except ImportError as e:
+    logger.warning(f"⚠️ Risk Management router not available: {e}")
+
+# Scenarios
+try:
+    from app.api.endpoints import scenarios
+    app.include_router(scenarios.router, prefix=settings.API_PREFIX, tags=["scenarios"])
+    logger.info("✅ Scenarios router loaded")
+except ImportError as e:
+    logger.warning(f"⚠️ Scenarios router not available: {e}")
+
+# Historical Analysis
+try:
+    from app.api.endpoints import historical
+    app.include_router(historical.router, prefix=settings.API_PREFIX, tags=["historical"])
+    logger.info("✅ Historical Analysis router loaded")
+except ImportError as e:
+    logger.warning(f"⚠️ Historical Analysis router not available: {e}")
+
+# Portfolio Comparison
+try:
+    from app.api.endpoints import comparison
+    app.include_router(comparison.router, prefix=settings.API_PREFIX, tags=["comparison"])
+    logger.info("✅ Portfolio Comparison router loaded")
+except ImportError as e:
+    logger.warning(f"⚠️ Portfolio Comparison router not available: {e}")
+
+# Reports
+try:
+    from app.api.endpoints import reports
+    app.include_router(reports.router, prefix=settings.API_PREFIX, tags=["reports"])
+    logger.info("✅ Reports router loaded")
+except ImportError as e:
+    logger.warning(f"⚠️ Reports router not available: {e}")
+
+
+try:
+    from app.api.endpoints import system
+    app.include_router(system.router, prefix=settings.API_PREFIX, tags=["system"])
+    logger.info("✅ System router loaded")
+except ImportError as e:
+    logger.warning(f"⚠️ System router not available: {e}")
+
 
 # =============== PORTFOLIO ENDPOINTS (BASIC IMPLEMENTATION) ===============
 
