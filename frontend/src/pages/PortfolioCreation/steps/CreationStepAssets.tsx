@@ -1,62 +1,64 @@
 /**
  * CreationStepAssets Component
- * Assets selection step for portfolio creation
+ * Assets selection step for portfolio creation (Easy/Professional modes)
  */
 import React, { useState, useEffect } from 'react';
 import Card from '../../../components/common/Card/Card';
 import { Button } from '../../../components/common/Button/Button';
-import { Modal } from '../../../components/common/Modal/Modal';
+import { Badge } from '../../../components/common/Badge/Badge';
 import { AssetForm } from '../../../components/portfolio/AssetForm/AssetForm';
 import { AssetTable } from '../../../components/portfolio/AssetTable/AssetTable';
 import { AssetCreate } from '../../../types/portfolio';
-import styles from '../styles.module.css';
+import styles from '../PortfolioCreation.module.css';
+
+interface AssetFormData {
+  id: string;
+  ticker: string;
+  name: string;
+  weight: number;
+  sector?: string;
+  assetClass?: string;
+  currentPrice?: number;
+  quantity?: number;
+  purchasePrice?: number;
+  purchaseDate?: string;
+}
+
+interface PortfolioFormData {
+  name: string;
+  description: string;
+  startingAmount: number;
+  assets: AssetFormData[];
+}
 
 interface CreationStepAssetsProps {
-  initialAssets: AssetCreate[];
-  onComplete: (assets: AssetCreate[]) => void;
-  onCancel: () => void;
+  mode: 'easy' | 'professional';
+  formData: PortfolioFormData;
+  onNext: (assets: AssetFormData[]) => void;
+  onBack: () => void;
   loading?: boolean;
   error?: string | null;
 }
 
 export const CreationStepAssets: React.FC<CreationStepAssetsProps> = ({
-  initialAssets,
-  onComplete,
-  onCancel,
+  mode,
+  formData,
+  onNext,
+  onBack,
   loading = false,
   error = null,
 }) => {
-  const [assets, setAssets] = useState<AssetCreate[]>(initialAssets);
-  const [showAssetForm, setShowAssetForm] = useState(false);
-  const [editingAsset, setEditingAsset] = useState<AssetCreate | null>(null);
+  const [assets, setAssets] = useState<AssetFormData[]>(formData.assets || []);
   const [validationError, setValidationError] = useState<string>('');
 
   useEffect(() => {
-    setAssets(initialAssets);
-  }, [initialAssets]);
+    setAssets(formData.assets || []);
+  }, [formData.assets]);
 
-  const handleAddAsset = () => {
-    setEditingAsset(null);
-    setShowAssetForm(true);
-    setValidationError('');
-  };
-
-  const handleEditAsset = (asset: AssetCreate) => {
-    setEditingAsset(asset);
-    setShowAssetForm(true);
-    setValidationError('');
-  };
-
-  const handleDeleteAsset = (ticker: string) => {
-    setAssets(prev => prev.filter(asset => asset.ticker !== ticker));
-    setValidationError('');
-  };
-
-  const handleAssetSubmit = (assetData: AssetCreate) => {
+  const handleAddAsset = (assetData: AssetCreate) => {
     // Check for duplicate ticker
     const existingAsset = assets.find(a =>
-      a.ticker.toUpperCase() === assetData.ticker.toUpperCase() &&
-      (!editingAsset || a.ticker !== editingAsset.ticker)
+      a.ticker.toUpperCase() === assetData.ticker.toUpperCase()
     );
 
     if (existingAsset) {
@@ -64,243 +66,272 @@ export const CreationStepAssets: React.FC<CreationStepAssetsProps> = ({
       return;
     }
 
-    let updatedAssets: AssetCreate[];
+    // Create new asset with ID
+    const newAsset: AssetFormData = {
+      id: `asset_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      ticker: assetData.ticker.toUpperCase(),
+      name: assetData.name || assetData.ticker,
+      weight: assetData.weight || 0,
+      sector: assetData.sector,
+      assetClass: assetData.assetClass,
+      currentPrice: assetData.currentPrice,
+      quantity: assetData.quantity,
+      purchasePrice: assetData.purchasePrice,
+      purchaseDate: assetData.purchaseDate,
+    };
 
-    if (editingAsset) {
-      // Update existing asset
-      updatedAssets = assets.map(asset =>
-        asset.ticker === editingAsset.ticker ? assetData : asset
-      );
-    } else {
-      // Add new asset
-      updatedAssets = [...assets, assetData];
-    }
-
-    setAssets(updatedAssets);
-    setShowAssetForm(false);
-    setEditingAsset(null);
+    setAssets(prev => [...prev, newAsset]);
     setValidationError('');
   };
 
-  const handleAssetCancel = () => {
-    setShowAssetForm(false);
-    setEditingAsset(null);
+  const handleEditAsset = (id: string, updatedData: Partial<AssetFormData>) => {
+    setAssets(prev => prev.map(asset =>
+      asset.id === id ? { ...asset, ...updatedData } : asset
+    ));
+    setValidationError('');
+  };
+
+  const handleDeleteAsset = (id: string) => {
+    setAssets(prev => prev.filter(asset => asset.id !== id));
     setValidationError('');
   };
 
   const normalizeWeights = () => {
-    const totalWeight = assets.reduce((sum, asset) => sum + (asset.weight || 0), 0);
+    const totalWeight = assets.reduce((sum, asset) => sum + asset.weight, 0);
 
     if (totalWeight === 0) return;
 
     const normalizedAssets = assets.map(asset => ({
       ...asset,
-      weight: asset.weight ? (asset.weight / totalWeight) * 100 : 0,
+      weight: (asset.weight / totalWeight) * 100,
     }));
 
     setAssets(normalizedAssets);
+    setValidationError('');
   };
 
-  const handleContinue = () => {
-    // Validate assets
+  const validatePortfolio = (): boolean => {
     if (assets.length === 0) {
       setValidationError('Please add at least one asset to your portfolio');
-      return;
+      return false;
     }
 
-    const totalWeight = assets.reduce((sum, asset) => sum + (asset.weight || 0), 0);
+    const totalWeight = assets.reduce((sum, asset) => sum + asset.weight, 0);
 
-    if (Math.abs(totalWeight - 100) > 0.01) {
-      setValidationError(
-        `Total weights must equal 100%. Current total: ${totalWeight.toFixed(2)}%`
-      );
-      return;
+    if (Math.abs(totalWeight - 100) > 0.1) {
+      setValidationError(`Total portfolio weight is ${totalWeight.toFixed(2)}%. Please adjust weights to total 100%.`);
+      return false;
     }
 
-    onComplete(assets);
+    // Professional mode additional validations
+    if (mode === 'professional') {
+      // Check for overly concentrated positions
+      const maxWeight = Math.max(...assets.map(a => a.weight));
+      if (maxWeight > 50) {
+        setValidationError(`Maximum position size (${maxWeight.toFixed(1)}%) exceeds recommended 50% limit. Consider diversifying.`);
+        return false;
+      }
+
+      // Check for minimum positions
+      const minWeight = Math.min(...assets.map(a => a.weight));
+      if (minWeight < 1) {
+        setValidationError(`Minimum position size (${minWeight.toFixed(1)}%) is below 1%. Consider consolidating small positions.`);
+        return false;
+      }
+    }
+
+    setValidationError('');
+    return true;
   };
 
-  const calculateTotalWeight = () => {
-    return assets.reduce((sum, asset) => sum + (asset.weight || 0), 0);
+  const handleSubmit = () => {
+    if (validatePortfolio()) {
+      onNext(assets);
+    }
   };
 
-  const getWeightStatus = () => {
-    const total = calculateTotalWeight();
-    if (Math.abs(total - 100) < 0.01) return 'valid';
-    if (total > 100) return 'over';
-    return 'under';
-  };
+  // Calculate portfolio metrics
+  const totalWeight = assets.reduce((sum, asset) => sum + asset.weight, 0);
+  const remainingWeight = Math.max(0, 100 - totalWeight);
+  const isComplete = Math.abs(totalWeight - 100) <= 0.1;
+  const existingTickers = assets.map(asset => asset.ticker);
 
-  const popularAssets = [
-    { ticker: 'AAPL', name: 'Apple Inc.', sector: 'Technology' },
-    { ticker: 'MSFT', name: 'Microsoft Corp.', sector: 'Technology' },
-    { ticker: 'GOOGL', name: 'Alphabet Inc.', sector: 'Technology' },
-    { ticker: 'AMZN', name: 'Amazon.com Inc.', sector: 'Consumer Discretionary' },
-    { ticker: 'TSLA', name: 'Tesla Inc.', sector: 'Consumer Discretionary' },
-    { ticker: 'NVDA', name: 'NVIDIA Corp.', sector: 'Technology' },
-    { ticker: 'META', name: 'Meta Platforms Inc.', sector: 'Technology' },
-    { ticker: 'BRK.B', name: 'Berkshire Hathaway', sector: 'Financial Services' },
-  ];
+  // Asset table columns configuration
+  const assetTableColumns = mode === 'easy'
+    ? ['ticker', 'name', 'weight', 'actions']  // Simple view for easy mode
+    : ['ticker', 'name', 'weight', 'sector', 'currentPrice', 'actions']; // Extended view for professional
 
-  const handleQuickAdd = (assetInfo: any) => {
-    const newAsset: AssetCreate = {
-      ticker: assetInfo.ticker,
-      name: assetInfo.name,
-      sector: assetInfo.sector,
-      weight: 0,
-      quantity: 0,
-      purchasePrice: 0,
-      currentPrice: 0,
-      purchaseDate: new Date().toISOString().split('T')[0],
-      assetClass: 'stocks',
-      currency: 'USD',
-    };
-
-    setAssets(prev => [...prev, newAsset]);
-  };
-
-  const weightStatus = getWeightStatus();
-  const totalWeight = calculateTotalWeight();
+  const isEasyMode = mode === 'easy';
+  const stepTitle = isEasyMode ? '📊 Add Your Assets' : '📊 Portfolio Assets Management';
+  const stepDescription = isEasyMode
+    ? 'Add stocks, ETFs, and other assets to build your portfolio'
+    : 'Configure detailed asset allocations and portfolio composition';
 
   return (
-    <Card className={styles.stepCard}>
-      <div className={styles.stepHeader}>
-        <h2>Add Assets</h2>
-        <p>Build your portfolio by adding assets and setting their weights</p>
-      </div>
-
-      {(error || validationError) && (
-        <div className={styles.errorMessage}>
-          {error || validationError}
+    <div className={styles.stepContainer}>
+      <Card className={styles.stepCard}>
+        <div className={styles.stepHeader}>
+          <div className={styles.stepTitleRow}>
+            <h2 className={styles.stepTitle}>{stepTitle}</h2>
+            <Badge variant={isEasyMode ? 'success' : 'primary'}>
+              {isEasyMode ? '⚡ Easy Mode' : '⚙️ Professional Mode'}
+            </Badge>
+          </div>
+          <p className={styles.stepDescription}>{stepDescription}</p>
         </div>
-      )}
 
-      <div className={styles.assetsContent}>
-        <div className={styles.assetsHeader}>
-          <div className={styles.weightsSummary}>
-            <div className={styles.totalWeight}>
-              <span className={styles.weightLabel}>Total Weight:</span>
-              <span className={`${styles.weightValue} ${styles[weightStatus]}`}>
-                {totalWeight.toFixed(2)}%
+        {error && (
+          <div className={styles.errorMessage}>
+            {error}
+          </div>
+        )}
+
+        {validationError && (
+          <div className={styles.errorMessage}>
+            {validationError}
+          </div>
+        )}
+
+        {/* Portfolio Progress */}
+        <div className={styles.portfolioProgress}>
+          <div className={styles.progressHeader}>
+            <h3 className={styles.progressTitle}>Portfolio Allocation</h3>
+            <div className={styles.progressStats}>
+              <span className={styles.totalWeight}>
+                {totalWeight.toFixed(1)}% allocated
               </span>
-            </div>
-            <div className={styles.weightStatus}>
-              {weightStatus === 'valid' && (
-                <span className={styles.statusValid}>✓ Weights balanced</span>
-              )}
-              {weightStatus === 'over' && (
-                <span className={styles.statusOver}>⚠ Over-allocated</span>
-              )}
-              {weightStatus === 'under' && (
-                <span className={styles.statusUnder}>⚠ Under-allocated</span>
-              )}
+              <span className={styles.remainingWeight}>
+                {remainingWeight.toFixed(1)}% remaining
+              </span>
             </div>
           </div>
 
-          <div className={styles.assetsActions}>
-            {Math.abs(totalWeight - 100) > 0.01 && assets.length > 0 && (
+          <div className={styles.progressBar}>
+            <div
+              className={styles.progressFill}
+              style={{
+                width: `${Math.min(totalWeight, 100)}%`,
+                backgroundColor: isComplete ? '#10B981' : totalWeight > 100 ? '#EF4444' : '#3B82F6'
+              }}
+            />
+          </div>
+
+          {totalWeight > 100 && (
+            <div className={styles.progressWarning}>
+              ⚠️ Portfolio is over-allocated. Please reduce some positions.
+            </div>
+          )}
+        </div>
+
+        {/* Asset Form */}
+        <div className={styles.addAssetsSection}>
+          <AssetForm
+            mode={mode}
+            onSubmit={handleAddAsset}
+            existingTickers={existingTickers}
+            remainingWeight={remainingWeight}
+            showTemplates={true}
+            showImport={true}
+            className={styles.assetForm}
+          />
+        </div>
+
+        {/* Current Portfolio Assets */}
+        <div className={styles.currentPortfolio}>
+          <div className={styles.portfolioHeader}>
+            <h3 className={styles.portfolioTitle}>
+              Current Portfolio ({assets.length} asset{assets.length !== 1 ? 's' : ''})
+            </h3>
+
+            {assets.length > 1 && totalWeight !== 100 && (
               <Button
                 variant="outline"
                 size="small"
                 onClick={normalizeWeights}
-                disabled={loading}
+                disabled={loading || assets.length === 0}
               >
-                Normalize Weights
+                🎯 Auto-Balance Weights
               </Button>
             )}
-            <Button
-              onClick={handleAddAsset}
-              disabled={loading}
-            >
-              Add Asset
-            </Button>
           </div>
+
+          {assets.length === 0 ? (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyIcon}>📊</div>
+              <h4>No assets added yet</h4>
+              <p>
+                {isEasyMode
+                  ? 'Use the form above to add your first asset, or try a template for quick setup.'
+                  : 'Add individual assets or import your existing portfolio to get started.'
+                }
+              </p>
+            </div>
+          ) : (
+            <div className={styles.portfolioTable}>
+              <AssetTable
+                assets={assets}
+                onEdit={handleEditAsset}
+                onDelete={handleDeleteAsset}
+                columns={assetTableColumns}
+                showAllocation={true}
+                loading={loading}
+                className={styles.assetsTable}
+              />
+            </div>
+          )}
         </div>
 
-        {assets.length > 0 ? (
-          <AssetTable
-            assets={assets}
-            onEdit={handleEditAsset}
-            onDelete={handleDeleteAsset}
-            loading={loading}
-            className={styles.assetsTable}
-          />
-        ) : (
-          <div className={styles.emptyAssets}>
-            <div className={styles.emptyContent}>
-              <div className={styles.emptyIcon}>
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                </svg>
+        {/* Portfolio Summary for Professional Mode */}
+        {!isEasyMode && assets.length > 0 && (
+          <div className={styles.portfolioSummary}>
+            <h4 className={styles.summaryTitle}>Portfolio Summary</h4>
+            <div className={styles.summaryGrid}>
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Total Assets:</span>
+                <span className={styles.summaryValue}>{assets.length}</span>
               </div>
-              <h3>No Assets Added</h3>
-              <p>Start building your portfolio by adding your first asset</p>
-
-              <div className={styles.quickAddSection}>
-                <h4>Popular Assets</h4>
-                <div className={styles.popularAssets}>
-                  {popularAssets.map((asset) => (
-                    <button
-                      key={asset.ticker}
-                      className={styles.popularAssetButton}
-                      onClick={() => handleQuickAdd(asset)}
-                      disabled={loading}
-                    >
-                      <div className={styles.assetInfo}>
-                        <span className={styles.assetTicker}>{asset.ticker}</span>
-                        <span className={styles.assetName}>{asset.name}</span>
-                        <span className={styles.assetSector}>{asset.sector}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Largest Position:</span>
+                <span className={styles.summaryValue}>
+                  {assets.length > 0 ? `${Math.max(...assets.map(a => a.weight)).toFixed(1)}%` : '-'}
+                </span>
               </div>
-
-              <Button
-                onClick={handleAddAsset}
-                disabled={loading}
-                className={styles.addFirstAsset}
-              >
-                Add Custom Asset
-              </Button>
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Smallest Position:</span>
+                <span className={styles.summaryValue}>
+                  {assets.length > 0 ? `${Math.min(...assets.map(a => a.weight)).toFixed(1)}%` : '-'}
+                </span>
+              </div>
+              <div className={styles.summaryItem}>
+                <span className={styles.summaryLabel}>Average Position:</span>
+                <span className={styles.summaryValue}>
+                  {assets.length > 0 ? `${(totalWeight / assets.length).toFixed(1)}%` : '-'}
+                </span>
+              </div>
             </div>
           </div>
         )}
-      </div>
 
-      <div className={styles.stepActions}>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={loading}
-        >
-          Back
-        </Button>
-        <Button
-          onClick={handleContinue}
-          loading={loading}
-          disabled={assets.length === 0 || Math.abs(totalWeight - 100) > 0.01}
-        >
-          Continue to Review
-        </Button>
-      </div>
-
-      {/* Asset Form Modal */}
-      <Modal
-        isOpen={showAssetForm}
-        onClose={handleAssetCancel}
-        title={editingAsset ? 'Edit Asset' : 'Add Asset'}
-        size="large"
-      >
-        <AssetForm
-          asset={editingAsset}
-          onSubmit={handleAssetSubmit}
-          onCancel={handleAssetCancel}
-          existingTickers={assets.map(a => a.ticker).filter(t => t !== editingAsset?.ticker)}
-          loading={loading}
-        />
-      </Modal>
-    </Card>
+        {/* Form Actions */}
+        <div className={styles.formActions}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onBack}
+            disabled={loading}
+          >
+            Back
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            loading={loading}
+            disabled={loading || !isComplete || assets.length === 0}
+          >
+            {isEasyMode ? 'Create Portfolio ✨' : 'Next: Review Portfolio'}
+          </Button>
+        </div>
+      </Card>
+    </div>
   );
 };

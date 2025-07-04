@@ -74,7 +74,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
   className,
   'data-testid': testId,
 }) => {
-  const [activeTab, setActiveTab] = useState<'form' | 'templates' | 'import'>('form');
+  const [activeTab, setActiveTab] = useState('form');
   const [formData, setFormData] = useState<AssetCreate>({
     ticker: '',
     name: '',
@@ -311,176 +311,8 @@ export const AssetForm: React.FC<AssetFormProps> = ({
   const isEasyMode = mode === 'easy';
   const hasMultipleTabs = showTemplates || showImport;
 
-  // If editing existing asset, only show form
-  if (asset) {
-    return (
-      <div className={containerClasses} data-testid={testId}>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.header}>
-            <h3>Edit Asset</h3>
-            {mode && (
-              <Badge variant={isEasyMode ? 'primary' : 'secondary'}>
-                {isEasyMode ? '⚡ Easy Mode' : '⚙️ Professional Mode'}
-              </Badge>
-            )}
-          </div>
-
-          {renderAssetForm()}
-
-          <div className={styles.actions}>
-            {onCancel && (
-              <Button
-                type="button"
-                onClick={onCancel}
-                variant="secondary"
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-            )}
-
-            <Button
-              type="submit"
-              variant="primary"
-              loading={loading}
-              disabled={loading || !formData.ticker || !formData.weight}
-            >
-              {loading ? 'Saving...' : 'Update Asset'}
-            </Button>
-          </div>
-        </form>
-      </div>
-    );
-  }
-
-  // For new assets, show tabs if templates/import are enabled
-  if (!hasMultipleTabs) {
-    return (
-      <div className={containerClasses} data-testid={testId}>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.header}>
-            <h3>Add Asset</h3>
-            {mode && (
-              <Badge variant={isEasyMode ? 'primary' : 'secondary'}>
-                {isEasyMode ? '⚡ Easy Mode' : '⚙️ Professional Mode'}
-              </Badge>
-            )}
-          </div>
-
-          {renderAssetForm()}
-
-          {/* Error Messages */}
-          {searchError && (
-            <div className={styles.errorMessage}>
-              Search error: {searchError}
-            </div>
-          )}
-
-          <div className={styles.actions}>
-            {onCancel && (
-              <Button
-                type="button"
-                onClick={onCancel}
-                variant="secondary"
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-            )}
-
-            <Button
-              type="submit"
-              variant="primary"
-              loading={loading}
-              disabled={loading || !formData.ticker || !formData.weight || (isEasyMode && !isTickerSelected)}
-            >
-              {loading ? 'Saving...' : 'Add Asset'}
-            </Button>
-          </div>
-        </form>
-      </div>
-    );
-  }
-
-  // Multi-tab interface
-  return (
-    <div className={containerClasses} data-testid={testId}>
-      <div className={styles.header}>
-        <h3>Add Assets to Portfolio</h3>
-        {mode && (
-          <Badge variant={isEasyMode ? 'primary' : 'secondary'}>
-            {isEasyMode ? '⚡ Easy Mode' : '⚙️ Professional Mode'}
-          </Badge>
-        )}
-      </div>
-
-      <Tabs
-        activeKey={activeTab}
-        onChange={(key) => setActiveTab(key as 'form' | 'templates' | 'import')}
-        type="line"
-        className={styles.assetTabs}
-      >
-        <Tabs.TabPane tab="⚡ Quick Add" key="form">
-          <form onSubmit={handleSubmit} className={styles.form}>
-            {renderAssetForm()}
-
-            {/* Error Messages */}
-            {searchError && (
-              <div className={styles.errorMessage}>
-                Search error: {searchError}
-              </div>
-            )}
-
-            <div className={styles.actions}>
-              {onCancel && (
-                <Button
-                  type="button"
-                  onClick={onCancel}
-                  variant="secondary"
-                  disabled={loading}
-                >
-                  Cancel
-                </Button>
-              )}
-
-              <Button
-                type="submit"
-                variant="primary"
-                loading={loading}
-                disabled={loading || !formData.ticker || !formData.weight || (isEasyMode && !isTickerSelected)}
-              >
-                {loading ? 'Saving...' : 'Add Asset'}
-              </Button>
-            </div>
-          </form>
-        </Tabs.TabPane>
-
-        {showTemplates && (
-          <Tabs.TabPane tab="📋 Templates" key="templates">
-            <TemplateSelector
-              onTemplateSelect={handleTemplateSelect}
-              onCancel={() => setActiveTab('form')}
-            />
-          </Tabs.TabPane>
-        )}
-
-        {showImport && (
-          <Tabs.TabPane tab="📁 Import" key="import">
-            <AssetImport
-              onImport={handleImport}
-              onCancel={() => setActiveTab('form')}
-              existingTickers={existingTickers}
-              isOpen={true}
-              onClose={() => setActiveTab('form')}
-            />
-          </Tabs.TabPane>
-        )}
-      </Tabs>
-    </div>
-  );
-
-  // Render asset form content
-  function renderAssetForm() {
+  // ✅ ФУНКЦИЯ ПЕРЕНЕСЕНА СЮДА - до использования!
+  const renderAssetForm = () => {
     return (
       <>
         <div className={styles.section}>
@@ -725,7 +557,176 @@ export const AssetForm: React.FC<AssetFormProps> = ({
         )}
       </>
     );
+  };
+
+  // If editing existing asset, only show form
+  if (asset) {
+    return (
+      <div className={containerClasses} data-testid={testId}>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.header}>
+            <h3>Edit Asset</h3>
+            {mode && (
+              <Badge variant={isEasyMode ? 'primary' : 'secondary'}>
+                {isEasyMode ? '⚡ Easy Mode' : '⚙️ Professional Mode'}
+              </Badge>
+            )}
+          </div>
+
+          {renderAssetForm()}
+
+          <div className={styles.actions}>
+            {onCancel && (
+              <Button
+                type="button"
+                onClick={onCancel}
+                variant="secondary"
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+            )}
+
+            <Button
+              type="submit"
+              variant="primary"
+              loading={loading}
+              disabled={loading || !formData.ticker || !formData.weight}
+            >
+              {loading ? 'Saving...' : 'Update Asset'}
+            </Button>
+          </div>
+        </form>
+      </div>
+    );
   }
+
+  // For new assets, show tabs if templates/import are enabled
+  if (!hasMultipleTabs) {
+    return (
+      <div className={containerClasses} data-testid={testId}>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.header}>
+            <h3>Add Asset</h3>
+            {mode && (
+              <Badge variant={isEasyMode ? 'primary' : 'secondary'}>
+                {isEasyMode ? '⚡ Easy Mode' : '⚙️ Professional Mode'}
+              </Badge>
+            )}
+          </div>
+
+          {renderAssetForm()}
+
+          {/* Error Messages */}
+          {searchError && (
+            <div className={styles.errorMessage}>
+              Search error: {searchError}
+            </div>
+          )}
+
+          <div className={styles.actions}>
+            {onCancel && (
+              <Button
+                type="button"
+                onClick={onCancel}
+                variant="secondary"
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+            )}
+
+            <Button
+              type="submit"
+              variant="primary"
+              loading={loading}
+              disabled={loading || !formData.ticker || !formData.weight || (isEasyMode && !isTickerSelected)}
+            >
+              {loading ? 'Saving...' : 'Add Asset'}
+            </Button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
+  // Multi-tab interface
+  return (
+    <div className={containerClasses} data-testid={testId}>
+      <div className={styles.header}>
+        <h3>Add Assets to Portfolio</h3>
+        {mode && (
+          <Badge variant={isEasyMode ? 'primary' : 'secondary'}>
+            {isEasyMode ? '⚡ Easy Mode' : '⚙️ Professional Mode'}
+          </Badge>
+        )}
+      </div>
+
+      <Tabs
+        activeKey={activeTab}
+        defaultActiveKey="form"
+        onChange={(key) => setActiveTab(key)}
+        type="line"
+        className={styles.assetTabs}
+      >
+        <Tabs.TabPane tab="⚡ Quick Add" key="form">
+          <form onSubmit={handleSubmit} className={styles.form}>
+            {renderAssetForm()}
+
+            {/* Error Messages */}
+            {searchError && (
+              <div className={styles.errorMessage}>
+                Search error: {searchError}
+              </div>
+            )}
+
+            <div className={styles.actions}>
+              {onCancel && (
+                <Button
+                  type="button"
+                  onClick={onCancel}
+                  variant="secondary"
+                  disabled={loading}
+                >
+                  Cancel
+                </Button>
+              )}
+
+              <Button
+                type="submit"
+                variant="primary"
+                loading={loading}
+                disabled={loading || !formData.ticker || !formData.weight || (isEasyMode && !isTickerSelected)}
+              >
+                {loading ? 'Saving...' : 'Add Asset'}
+              </Button>
+            </div>
+          </form>
+        </Tabs.TabPane>
+
+        {showTemplates && (
+          <Tabs.TabPane tab="📋 Templates" key="templates">
+            <TemplateSelector
+              onTemplateSelect={handleTemplateSelect}
+              onCancel={() => setActiveTab('form')}
+            />
+          </Tabs.TabPane>
+        )}
+
+        {showImport && (
+          <Tabs.TabPane tab="📁 Import" key="import">
+            <AssetImport
+              onImport={handleImport}
+              onCancel={() => setActiveTab('form')}
+              existingTickers={existingTickers}
+              isOpen={true}
+              onClose={() => setActiveTab('form')}
+            />
+          </Tabs.TabPane>
+        )}
+      </Tabs>
+    </div>
+  );
 };
 
 export default AssetForm;

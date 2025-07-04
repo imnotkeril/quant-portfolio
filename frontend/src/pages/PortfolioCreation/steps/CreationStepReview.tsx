@@ -1,34 +1,78 @@
 /**
  * CreationStepReview Component
- * Review and confirm portfolio creation
+ * Review and confirm portfolio creation (Easy/Professional modes)
  */
 import React from 'react';
 import Card from '../../../components/common/Card/Card';
 import { Button } from '../../../components/common/Button/Button';
+import { Badge } from '../../../components/common/Badge/Badge';
 import { PieChart } from '../../../components/charts/PieChart/PieChart';
 import { AssetTable } from '../../../components/portfolio/AssetTable/AssetTable';
-import { PortfolioCreate } from '../../../types/portfolio';
-import { formatPercentage } from '../../../utils/formatters';
+import { formatCurrency, formatPercentage } from '../../../utils/formatters';
 import { getChartColor } from '../../../utils/color';
-import styles from '../styles.module.css';
+import styles from '../PortfolioCreation.module.css';
+
+interface AssetFormData {
+  id: string;
+  ticker: string;
+  name: string;
+  weight: number;
+  sector?: string;
+  assetClass?: string;
+  currentPrice?: number;
+  quantity?: number;
+  purchasePrice?: number;
+  purchaseDate?: string;
+}
+
+interface ConstraintsData {
+  maxPositionSize: number;
+  minPositionSize: number;
+  sectorLimits: Record<string, number>;
+  allowedRegions: string[];
+  enableTaxOptimization: boolean;
+  enableESG: boolean;
+  enableCurrencyHedging: boolean;
+}
+
+interface PortfolioFormData {
+  name: string;
+  description: string;
+  startingAmount: number;
+  portfolioType?: string;
+  riskTolerance?: string;
+  investmentObjective?: string;
+  rebalancingFrequency?: string;
+  tags?: string[];
+  assets: AssetFormData[];
+  constraints?: ConstraintsData;
+}
 
 interface CreationStepReviewProps {
-  portfolioData: PortfolioCreate;
-  onComplete: (data?: any) => void;
-  onCancel: () => void;
+  mode: 'easy' | 'professional';
+  formData: PortfolioFormData;
+  onCreate: () => void;
+  onBack: () => void;
   loading?: boolean;
   error?: string | null;
 }
 
 export const CreationStepReview: React.FC<CreationStepReviewProps> = ({
-  portfolioData,
-  onComplete,
-  onCancel,
+  mode,
+  formData,
+  onCreate,
+  onBack,
   loading = false,
   error = null,
 }) => {
+  const isEasyMode = mode === 'easy';
+  const stepTitle = isEasyMode ? '✨ Ready to Create!' : '📋 Portfolio Review';
+  const stepDescription = isEasyMode
+    ? 'Your portfolio is ready! Review the details and create your portfolio.'
+    : 'Review all portfolio settings before creation. You can make changes later.';
+
   // Prepare chart data
-  const chartData = (portfolioData.assets || [])
+  const chartData = formData.assets
     .filter(asset => asset.weight && asset.weight > 0)
     .map((asset, index) => ({
       name: asset.ticker,
@@ -38,11 +82,17 @@ export const CreationStepReview: React.FC<CreationStepReviewProps> = ({
     .sort((a, b) => b.value - a.value);
 
   // Calculate summary statistics
-  const totalAssets = (portfolioData.assets || []).length;
-  const totalWeight = (portfolioData.assets || []).reduce((sum, asset) => sum + (asset.weight || 0), 0);
+  const totalAssets = formData.assets.length;
+  const totalWeight = formData.assets.reduce((sum, asset) => sum + asset.weight, 0);
+
+  // Calculate dollar amounts
+  const assetAmounts = formData.assets.map(asset => ({
+    ...asset,
+    amount: (asset.weight / 100) * formData.startingAmount,
+  }));
 
   // Sector allocation
-  const sectorAllocation = (portfolioData.assets || []).reduce((acc, asset) => {
+  const sectorAllocation = formData.assets.reduce((acc, asset) => {
     if (asset.sector && asset.weight) {
       acc[asset.sector] = (acc[asset.sector] || 0) + asset.weight;
     }
@@ -54,194 +104,265 @@ export const CreationStepReview: React.FC<CreationStepReviewProps> = ({
     .slice(0, 5);
 
   // Asset class allocation
-  const assetClassAllocation = (portfolioData.assets || []).reduce((acc, asset) => {
+  const assetClassAllocation = formData.assets.reduce((acc, asset) => {
     if (asset.assetClass && asset.weight) {
       acc[asset.assetClass] = (acc[asset.assetClass] || 0) + asset.weight;
     }
     return acc;
   }, {} as Record<string, number>);
 
+  // Risk metrics (simplified for display)
+  const largestPosition = Math.max(...formData.assets.map(a => a.weight));
+  const concentrationRisk = largestPosition > 25 ? 'High' : largestPosition > 15 ? 'Medium' : 'Low';
+  const diversificationScore = totalAssets >= 10 ? 'High' : totalAssets >= 5 ? 'Medium' : 'Low';
+
   return (
-    <Card className={styles.stepCard}>
-      <div className={styles.stepHeader}>
-        <h2>Review Portfolio</h2>
-        <p>Review your portfolio configuration before creating</p>
-      </div>
-
-      {error && (
-        <div className={styles.errorMessage}>
-          {error}
+    <div className={styles.stepContainer}>
+      <Card className={styles.stepCard}>
+        <div className={styles.stepHeader}>
+          <div className={styles.stepTitleRow}>
+            <h2 className={styles.stepTitle}>{stepTitle}</h2>
+            <Badge variant={isEasyMode ? 'success' : 'primary'}>
+              {isEasyMode ? '⚡ Easy Mode' : '⚙️ Professional Mode'}
+            </Badge>
+          </div>
+          <p className={styles.stepDescription}>{stepDescription}</p>
         </div>
-      )}
 
-      <div className={styles.reviewContent}>
-        {/* Portfolio Info */}
-        <Card className={styles.reviewSection}>
-          <h3>Portfolio Information</h3>
-          <div className={styles.portfolioInfo}>
-            <div className={styles.infoRow}>
-              <span className={styles.infoLabel}>Name:</span>
-              <span className={styles.infoValue}>{portfolioData.name}</span>
-            </div>
-            {portfolioData.description && (
-              <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>Description:</span>
-                <span className={styles.infoValue}>{portfolioData.description}</span>
+        {error && (
+          <div className={styles.errorMessage}>
+            {error}
+          </div>
+        )}
+
+        {/* Portfolio Summary */}
+        <div className={styles.reviewSummary}>
+          <h3 className={styles.reviewSectionTitle}>Portfolio Summary</h3>
+
+          <div className={styles.summaryGrid}>
+            <div className={styles.summaryCard}>
+              <h4 className={styles.summaryCardTitle}>Basic Information</h4>
+              <div className={styles.summaryDetails}>
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Name:</span>
+                  <span className={styles.summaryValue}>{formData.name}</span>
+                </div>
+                {formData.description && (
+                  <div className={styles.summaryItem}>
+                    <span className={styles.summaryLabel}>Description:</span>
+                    <span className={styles.summaryValue}>{formData.description}</span>
+                  </div>
+                )}
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Starting Amount:</span>
+                  <span className={styles.summaryValue}>{formatCurrency(formData.startingAmount)}</span>
+                </div>
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Number of Assets:</span>
+                  <span className={styles.summaryValue}>{totalAssets}</span>
+                </div>
               </div>
-            )}
-            {portfolioData.tags && portfolioData.tags.length > 0 && (
-              <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>Tags:</span>
-                <div className={styles.tagsList}>
-                  {portfolioData.tags.map((tag, index) => (
-                    <span key={index} className={styles.tag}>
-                      {tag}
-                    </span>
-                  ))}
+            </div>
+
+            {/* Professional Mode Additional Settings */}
+            {!isEasyMode && (
+              <div className={styles.summaryCard}>
+                <h4 className={styles.summaryCardTitle}>Portfolio Settings</h4>
+                <div className={styles.summaryDetails}>
+                  {formData.portfolioType && (
+                    <div className={styles.summaryItem}>
+                      <span className={styles.summaryLabel}>Type:</span>
+                      <span className={styles.summaryValue}>{formData.portfolioType}</span>
+                    </div>
+                  )}
+                  {formData.riskTolerance && (
+                    <div className={styles.summaryItem}>
+                      <span className={styles.summaryLabel}>Risk Tolerance:</span>
+                      <span className={styles.summaryValue}>{formData.riskTolerance}</span>
+                    </div>
+                  )}
+                  {formData.investmentObjective && (
+                    <div className={styles.summaryItem}>
+                      <span className={styles.summaryLabel}>Investment Objective:</span>
+                      <span className={styles.summaryValue}>{formData.investmentObjective}</span>
+                    </div>
+                  )}
+                  {formData.rebalancingFrequency && (
+                    <div className={styles.summaryItem}>
+                      <span className={styles.summaryLabel}>Rebalancing:</span>
+                      <span className={styles.summaryValue}>{formData.rebalancingFrequency}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
-          </div>
-        </Card>
 
-        {/* Portfolio Summary */}
-        <Card className={styles.reviewSection}>
-          <h3>Portfolio Summary</h3>
-          <div className={styles.summaryGrid}>
-            <div className={styles.summaryItem}>
-              <span className={styles.summaryLabel}>Total Assets</span>
-              <span className={styles.summaryValue}>{totalAssets}</span>
-            </div>
-            <div className={styles.summaryItem}>
-              <span className={styles.summaryLabel}>Total Weight</span>
-              <span className={styles.summaryValue}>
-                {formatPercentage(totalWeight / 100)}
-              </span>
-            </div>
-            <div className={styles.summaryItem}>
-              <span className={styles.summaryLabel}>Largest Holding</span>
-              <span className={styles.summaryValue}>
-                {chartData.length > 0
-                  ? `${chartData[0].name} (${formatPercentage(chartData[0].value / 100)})`
-                  : 'N/A'
-                }
-              </span>
-            </div>
-            <div className={styles.summaryItem}>
-              <span className={styles.summaryLabel}>Diversification</span>
-              <span className={styles.summaryValue}>
-                {totalAssets >= 10 ? 'High' : totalAssets >= 5 ? 'Medium' : 'Low'}
-              </span>
+            <div className={styles.summaryCard}>
+              <h4 className={styles.summaryCardTitle}>Risk Metrics</h4>
+              <div className={styles.summaryDetails}>
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Largest Position:</span>
+                  <span className={styles.summaryValue}>{formatPercentage(largestPosition / 100)}</span>
+                </div>
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Concentration Risk:</span>
+                  <Badge
+                    variant={concentrationRisk === 'High' ? 'warning' : concentrationRisk === 'Medium' ? 'neutral' : 'success'}
+                    size="small"
+                  >
+                    {concentrationRisk}
+                  </Badge>
+                </div>
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Diversification:</span>
+                  <Badge
+                    variant={diversificationScore === 'High' ? 'success' : diversificationScore === 'Medium' ? 'neutral' : 'warning'}
+                    size="small"
+                  >
+                    {diversificationScore}
+                  </Badge>
+                </div>
+              </div>
             </div>
           </div>
-        </Card>
 
-        {/* Asset Allocation Chart */}
-        <Card className={styles.reviewSection}>
-          <h3>Asset Allocation</h3>
-          <div className={styles.allocationContent}>
+          {/* Tags for Professional Mode */}
+          {!isEasyMode && formData.tags && formData.tags.length > 0 && (
+            <div className={styles.tagsSection}>
+              <h4 className={styles.tagsTitle}>Portfolio Tags</h4>
+              <div className={styles.tagsList}>
+                {formData.tags.map((tag, index) => (
+                  <Badge key={index} variant="outline" size="small">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Asset Allocation Chart and Table */}
+        <div className={styles.allocationSection}>
+          <h3 className={styles.reviewSectionTitle}>Asset Allocation</h3>
+
+          <div className={styles.allocationGrid}>
             <div className={styles.chartContainer}>
+              <h4 className={styles.chartTitle}>Portfolio Composition</h4>
               <PieChart
                 data={chartData}
                 height={300}
-                showLabels={true}
-                showLegend={true}
-                innerRadius={50}
-                labelFormatter={(entry) => {
-                  const percentage = entry.value;
-                  return percentage > 3 ? `${percentage.toFixed(1)}%` : '';
-                }}
+                showTooltip={true}
+                showLegend={false}
+                className={styles.allocationChart}
               />
             </div>
-            <div className={styles.allocationSummary}>
-              <div className={styles.topHoldings}>
-                <h4>Top Holdings</h4>
-                {chartData.slice(0, 5).map((asset, index) => (
-                  <div key={asset.name} className={styles.holdingItem}>
-                    <div
-                      className={styles.holdingColor}
-                      style={{ backgroundColor: asset.color }}
-                    />
-                    <span className={styles.holdingName}>{asset.name}</span>
-                    <span className={styles.holdingWeight}>
-                      {formatPercentage(asset.value / 100)}
-                    </span>
+
+            <div className={styles.allocationStats}>
+              <h4 className={styles.chartTitle}>Asset Details</h4>
+              <div className={styles.assetsList}>
+                {assetAmounts.map((asset, index) => (
+                  <div key={asset.id} className={styles.assetItem}>
+                    <div className={styles.assetInfo}>
+                      <div className={styles.assetTicker}>{asset.ticker}</div>
+                      <div className={styles.assetName}>{asset.name}</div>
+                    </div>
+                    <div className={styles.assetAllocation}>
+                      <div className={styles.assetWeight}>{formatPercentage(asset.weight / 100)}</div>
+                      <div className={styles.assetAmount}>{formatCurrency(asset.amount)}</div>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-        </Card>
+        </div>
 
-        {/* Sector Allocation */}
-        {topSectors.length > 0 && (
-          <Card className={styles.reviewSection}>
-            <h3>Sector Allocation</h3>
-            <div className={styles.sectorAllocation}>
+        {/* Sector Allocation for Professional Mode */}
+        {!isEasyMode && topSectors.length > 0 && (
+          <div className={styles.sectorSection}>
+            <h3 className={styles.reviewSectionTitle}>Sector Allocation</h3>
+            <div className={styles.sectorGrid}>
               {topSectors.map(([sector, weight]) => (
                 <div key={sector} className={styles.sectorItem}>
                   <span className={styles.sectorName}>{sector}</span>
-                  <div className={styles.sectorBar}>
-                    <div
-                      className={styles.sectorProgress}
-                      style={{ width: `${(weight / Math.max(...topSectors.map(([, w]) => w))) * 100}%` }}
-                    />
-                  </div>
-                  <span className={styles.sectorWeight}>
-                    {formatPercentage(weight / 100)}
-                  </span>
+                  <span className={styles.sectorWeight}>{formatPercentage(weight / 100)}</span>
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
         )}
 
-        {/* Asset Class Allocation */}
-        {Object.keys(assetClassAllocation).length > 1 && (
-          <Card className={styles.reviewSection}>
-            <h3>Asset Class Allocation</h3>
-            <div className={styles.assetClassGrid}>
-              {Object.entries(assetClassAllocation).map(([assetClass, weight]) => (
-                <div key={assetClass} className={styles.assetClassItem}>
-                  <span className={styles.assetClassName}>
-                    {assetClass.charAt(0).toUpperCase() + assetClass.slice(1)}
-                  </span>
-                  <span className={styles.assetClassWeight}>
-                    {formatPercentage(weight / 100)}
-                  </span>
+        {/* Constraints for Professional Mode */}
+        {!isEasyMode && formData.constraints && (
+          <div className={styles.constraintsSection}>
+            <h3 className={styles.reviewSectionTitle}>Portfolio Constraints</h3>
+            <div className={styles.constraintsGrid}>
+              <div className={styles.constraintItem}>
+                <span className={styles.constraintLabel}>Position Limits:</span>
+                <span className={styles.constraintValue}>
+                  {formatPercentage(formData.constraints.minPositionSize / 100)} - {formatPercentage(formData.constraints.maxPositionSize / 100)}
+                </span>
+              </div>
+
+              <div className={styles.constraintItem}>
+                <span className={styles.constraintLabel}>Geographic Regions:</span>
+                <span className={styles.constraintValue}>
+                  {formData.constraints.allowedRegions.join(', ')}
+                </span>
+              </div>
+
+              <div className={styles.constraintItem}>
+                <span className={styles.constraintLabel}>Advanced Options:</span>
+                <div className={styles.advancedOptionsList}>
+                  {formData.constraints.enableTaxOptimization && (
+                    <Badge variant="success" size="small">Tax Optimization</Badge>
+                  )}
+                  {formData.constraints.enableESG && (
+                    <Badge variant="success" size="small">ESG Screening</Badge>
+                  )}
+                  {formData.constraints.enableCurrencyHedging && (
+                    <Badge variant="success" size="small">Currency Hedging</Badge>
+                  )}
                 </div>
-              ))}
+              </div>
             </div>
-          </Card>
+          </div>
         )}
 
-        {/* Assets Table */}
-        <Card className={styles.reviewSection}>
-          <h3>Assets Details</h3>
-          <AssetTable
-            assets={portfolioData.assets || []}
-            showPerformance={false}
-            className={styles.reviewTable}
-          />
-        </Card>
-      </div>
+        {/* Warning Messages */}
+        {concentrationRisk === 'High' && (
+          <div className={styles.warningMessage}>
+            ⚠️ High concentration risk detected. Consider reducing your largest position for better diversification.
+          </div>
+        )}
 
-      <div className={styles.stepActions}>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={loading}
-        >
-          Back
-        </Button>
-        <Button
-          onClick={onComplete}
-          loading={loading}
-        >
-          Create Portfolio
-        </Button>
-      </div>
-    </Card>
+        {diversificationScore === 'Low' && (
+          <div className={styles.warningMessage}>
+            💡 Consider adding more assets to improve diversification and reduce risk.
+          </div>
+        )}
+
+        {/* Form Actions */}
+        <div className={styles.formActions}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onBack}
+            disabled={loading}
+          >
+            Back
+          </Button>
+          <Button
+            type="button"
+            onClick={onCreate}
+            loading={loading}
+            disabled={loading}
+            size="large"
+          >
+            {loading ? 'Creating Portfolio...' : '🚀 Create Portfolio'}
+          </Button>
+        </div>
+      </Card>
+    </div>
   );
 };
