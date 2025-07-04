@@ -30,7 +30,7 @@ const getEnvVar = (key: string, defaultValue: string): string => {
 };
 
 // API Base URL configuration
-export const API_BASE_URL = getEnvVar('REACT_APP_API_URL', 'http://localhost:8000/api/v1');
+export const API_BASE_URL = getEnvVar('REACT_APP_API_URL', 'http://localhost:8080/api/v1');
 
 // API timeout configuration
 export const API_TIMEOUT = 30000; // 30 seconds
