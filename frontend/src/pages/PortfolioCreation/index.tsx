@@ -226,17 +226,28 @@ const QuickAddAssetModal: React.FC<{
           {/* Search suggestions */}
           {showSuggestions && searchResults.length > 0 && (
             <div className={styles.suggestions}>
-              {searchResults.slice(0, 5).map((suggestion) => (
-                <div
-                  key={suggestion.ticker}
-                  className={styles.suggestion}
-                  onClick={() => handleSuggestionSelect(suggestion)}
-                >
-                  <div className={styles.suggestionTicker}>{suggestion.ticker}</div>
-                  <div className={styles.suggestionName}>{suggestion.name}</div>
-                  {suggestion.sector && <div className={styles.suggestionSector}>{suggestion.sector}</div>}
-                </div>
-              ))}
+              {searchResults
+                .filter(suggestion => {
+                  const ticker = suggestion.ticker.toUpperCase();
+                  return (
+                    ticker.startsWith(ticker.substring(0, ticker.indexOf('.') > 0 ? ticker.indexOf('.') : ticker.length)) &&
+                    !ticker.includes('.') &&
+                    ticker.length <= 6 &&
+                    !suggestion.name.toLowerCase().includes('cedear') &&
+                    !suggestion.name.toLowerCase().includes('drn') &&
+                    !suggestion.name.toLowerCase().includes('cdr')
+                  );
+                })
+                .slice(0, 3)
+                .map((suggestion) => (
+                  <div
+                    key={suggestion.ticker}
+                    className={styles.suggestion}
+                    onClick={() => handleSuggestionSelect(suggestion)}
+                  >
+                    <div className={styles.suggestionTicker}>{suggestion.ticker}</div>
+                  </div>
+                ))}
             </div>
           )}
 

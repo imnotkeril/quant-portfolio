@@ -62,13 +62,13 @@
 
 .suggestion {
   width: 100%;
-  padding: 12px 16px;
+  padding: 8px 16px;
   border: none;
   background: none;
   text-align: left;
   cursor: pointer;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   transition: background-color 0.2s ease;
   border-bottom: 1px solid var(--color-border-light);
@@ -95,8 +95,7 @@
 }
 
 .suggestionName {
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
+  display: none;
 }
 
 .assetInfo {

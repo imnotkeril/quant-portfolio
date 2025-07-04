@@ -1099,6 +1099,7 @@ class DataFetcherService(DataProvider):
             if 'bestMatches' in data:
                 for match in data['bestMatches'][:limit]:
                     symbol = match.get('1. symbol', '')
+                    name = match.get('2. name', '')
 
                     display_symbol = symbol
                     if '-' in symbol:
@@ -1108,16 +1109,18 @@ class DataFetcherService(DataProvider):
                             display_symbol = symbol.replace('-', '.')
                             logging.info(f"Converted ticker in search results: {symbol} -> {display_symbol}")
 
-                    results.append({
-                        'ticker': display_symbol,  # ← ИСПРАВЛЕНО: было 'symbol'
-                        'name': match.get('2. name', ''),
-                        'exchange': match.get('4. region', ''),
-                        'asset_type': match.get('3. type', ''),  # ← ИСПРАВЛЕНО: было 'type'
-                        'country': match.get('4. region', ''),
-                        'currency': match.get('8. currency', 'USD'),
-                        'sector': None,  # Alpha Vantage search не предоставляет sector
-                        'industry': None  # Alpha Vantage search не предоставляет industry
-                    })
+                    # Filter: only return results where ticker starts with query (case insensitive)
+                    if display_symbol.upper().startswith(query.upper()):
+                        results.append({
+                            'ticker': display_symbol,
+                            'name': name,
+                            'exchange': match.get('4. region', ''),
+                            'asset_type': match.get('3. type', ''),
+                            'country': match.get('4. region', ''),
+                            'currency': match.get('8. currency', 'USD'),
+                            'sector': None,
+                            'industry': None
+                        })
 
             return results
         except requests.exceptions.RequestException as e:
@@ -1156,22 +1159,26 @@ class DataFetcherService(DataProvider):
             if 'quotes' in data and data['quotes']:
                 for quote in data['quotes'][:limit]:
                     ticker = quote.get('symbol', '')
+                    short_name = quote.get('shortname', quote.get('longname', ''))
 
                     display_ticker = ticker
                     if '-' in ticker:
                         if len(ticker.split('-')) == 2 and len(ticker.split('-')[1]) == 1:
                             display_ticker = ticker.replace('-', '.')
+                            logging.info(f"Converted ticker in search results: {ticker} -> {display_ticker}")
 
-                    results.append({
-                        'ticker': display_ticker,  # ← ИСПРАВЛЕНО: было 'symbol'
-                        'name': quote.get('shortname', quote.get('longname', '')),
-                        'exchange': quote.get('exchange', ''),
-                        'asset_type': quote.get('quoteType', ''),  # ← ИСПРАВЛЕНО: было 'type'
-                        'country': quote.get('region', 'US'),
-                        'currency': quote.get('currency', 'USD'),
-                        'sector': quote.get('sector', ''),
-                        'industry': quote.get('industry', '')
-                    })
+                    # Filter: only return results where ticker starts with query (case insensitive)
+                    if display_ticker.upper().startswith(query.upper()):
+                        results.append({
+                            'ticker': display_ticker,
+                            'name': short_name,
+                            'exchange': quote.get('exchange', ''),
+                            'asset_type': quote.get('quoteType', ''),
+                            'country': 'US',  # Yahoo Finance API обычно возвращает US-активы
+                            'currency': 'USD',
+                            'sector': None,
+                            'industry': None
+                        })
 
             return results
         except Exception as e:

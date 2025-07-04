@@ -2,7 +2,7 @@
  * Enhanced QuickAssetForm Component
  * Simplified asset form with auto-completion and real-time price fetching
  */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import classNames from 'classnames';
 import { Input } from '../../common/Input/Input';
 import { Button } from '../../common/Button/Button';
@@ -100,6 +100,24 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
     clearAssetInfo
   } = useAssets();
 
+  // Filter search results to show only main tickers
+
+  // Простая фильтрация - только основные тикеры
+  const filteredSuggestions = useMemo(() => {
+    if (!searchResults || searchResults.length === 0) return [];
+
+    return searchResults
+      .filter(suggestion => {
+        // Показываем только тикеры без точек и коротких названий
+        return (
+          suggestion.ticker.toUpperCase().startsWith(searchQuery.toUpperCase()) &&
+          !suggestion.ticker.includes('.') &&
+          suggestion.ticker.length <= 5
+        );
+      })
+      .slice(0, 3);
+  }, [searchResults, searchQuery]);
+
   // Handle ticker input changes
   const handleTickerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase();
@@ -119,7 +137,7 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
 
       // Trigger search with debounce
       const timeoutId = setTimeout(() => {
-        searchAssets(value, 10);
+        searchAssets(value, 20); // Get more results for better filtering
       }, 300);
 
       return () => clearTimeout(timeoutId);
@@ -162,6 +180,26 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
         currency: info.currency || prev.currency,
         country: info.country || prev.country,
       }));
+    } else {
+      // Fallback: try to get price separately if asset info fails
+      const price = await getAssetPrice(suggestion.ticker);
+      if (price) {
+        setFormData(prev => ({
+          ...prev,
+          currentPrice: price,
+        }));
+        setSelectedAssetInfo({
+          ticker: suggestion.ticker,
+          name: suggestion.name,
+          sector: suggestion.sector || '',
+          industry: suggestion.industry || '',
+          country: suggestion.country || '',
+          currency: suggestion.currency || 'USD',
+          exchange: suggestion.exchange || '',
+          assetType: suggestion.assetType || 'stocks',
+          currentPrice: price
+        });
+      }
     }
   };
 
@@ -174,13 +212,13 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
 
   // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!showSuggestions || searchResults.length === 0) return;
+    if (!showSuggestions || filteredSuggestions.length === 0) return;
 
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
         setSelectedSuggestionIndex(prev =>
-          prev < searchResults.length - 1 ? prev + 1 : prev
+          prev < filteredSuggestions.length - 1 ? prev + 1 : prev
         );
         break;
       case 'ArrowUp':
@@ -190,7 +228,7 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
       case 'Enter':
         e.preventDefault();
         if (selectedSuggestionIndex >= 0) {
-          handleSuggestionSelect(searchResults[selectedSuggestionIndex]);
+          handleSuggestionSelect(filteredSuggestions[selectedSuggestionIndex]);
         }
         break;
       case 'Escape':
@@ -311,47 +349,37 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
               )}
 
               {/* Search Suggestions */}
-              {showSuggestions && searchResults.length > 0 && (
+              {/* Search Suggestions */}
+              {showSuggestions && filteredSuggestions.length > 0 && (
                 <div className={styles.suggestions}>
-                  {searchResults.map((suggestion, index) => (
-                    <div
-                      key={suggestion.ticker}
-                      ref={el => suggestionRefs.current[index] = el}
-                      className={classNames(
-                        styles.suggestion,
-                        index === selectedSuggestionIndex && styles.suggestionSelected
-                      )}
-                      onClick={() => handleSuggestionSelect(suggestion)}
-                    >
-                      <div className={styles.suggestionMain}>
-                        <span className={styles.suggestionTicker}>
-                          {suggestion.ticker}
-                        </span>
-                        <span className={styles.suggestionName}>
-                          {suggestion.name}
-                        </span>
-                      </div>
-                      <div className={styles.suggestionMeta}>
-                        {suggestion.sector && (
-                          <span className={styles.suggestionSector}>
-                            {suggestion.sector}
-                          </span>
+                  {(() => {
+                    console.log('🔍 Showing suggestions:', filteredSuggestions);
+                    console.log('🔍 Original results:', searchResults);
+                    return filteredSuggestions.map((suggestion, index) => (
+                      <div
+                        key={suggestion.ticker}
+                        ref={el => suggestionRefs.current[index] = el}
+                        className={classNames(
+                          styles.suggestion,
+                          index === selectedSuggestionIndex && styles.suggestionSelected
                         )}
-                        {suggestion.exchange && (
-                          <span className={styles.suggestionExchange}>
-                            {suggestion.exchange}
+                        onClick={() => handleSuggestionSelect(suggestion)}
+                      >
+                        <div className={styles.suggestionMain}>
+                          <span className={styles.suggestionTicker}>
+                            {suggestion.ticker}
                           </span>
-                        )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ));
+                  })()}
                 </div>
               )}
 
               {/* No Results */}
-              {showSuggestions && searchResults.length === 0 && searchQuery && !searchLoading && (
+              {showSuggestions && filteredSuggestions.length === 0 && searchQuery && !searchLoading && (
                 <div className={styles.noResults}>
-                  No assets found for "{searchQuery}"
+                  No main tickers found for "{searchQuery}"
                 </div>
               )}
             </div>

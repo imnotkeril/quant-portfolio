@@ -139,6 +139,139 @@ async def get_asset_info(
         data_fetcher: DataFetcherService = Depends(get_data_fetcher)
 ):
     """
+    Get detailed asset information including current price
+
+    Args:
+        ticker: Asset ticker symbol
+
+    Returns:
+        Detailed asset information with current price
+    """
+    try:
+        # Get company info from data fetcher
+        company_info = data_fetcher.get_company_info(ticker)
+
+        if not company_info:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Asset information not found for ticker: {ticker}"
+            )
+
+        # Try to get current price using yfinance
+        current_price = None
+        price_change = None
+        price_change_percent = None
+
+        try:
+            import yfinance as yf
+            stock = yf.Ticker(ticker)
+            info = stock.info
+
+            current_price = info.get('currentPrice') or info.get('regularMarketPrice')
+
+            if current_price:
+                previous_close = info.get('previousClose', info.get('regularMarketPreviousClose'))
+                if previous_close:
+                    price_change = current_price - previous_close
+                    price_change_percent = (price_change / previous_close) * 100
+
+        except Exception as price_error:
+            logging.warning(f"Could not fetch current price for {ticker}: {price_error}")
+
+        # Combine company info with price data
+        asset_info = {
+            'ticker': ticker.upper(),
+            'name': company_info.get('name', ticker),
+            'sector': company_info.get('sector', ''),
+            'industry': company_info.get('industry', ''),
+            'country': company_info.get('country', ''),
+            'currency': company_info.get('currency', 'USD'),
+            'exchange': company_info.get('exchange', ''),
+            'assetType': 'stocks',  # Default assumption
+            'currentPrice': current_price,
+            'priceChange': price_change,
+            'priceChangePercent': price_change_percent,
+            'marketCap': company_info.get('market_cap'),
+            'description': company_info.get('description'),
+            'peRatio': company_info.get('pe_ratio'),
+            'pbRatio': company_info.get('pb_ratio'),
+            'dividendYield': company_info.get('dividend_yield'),
+            'beta': company_info.get('beta'),
+            'lastUpdated': company_info.get('last_updated')
+        }
+
+        return asset_info
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error getting asset info for {ticker}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get asset information: {str(e)}"
+        )
+
+
+@router.get("/price/{ticker}")
+async def get_asset_price(
+        ticker: str = Path(..., description="Asset ticker symbol")
+):
+    """
+    Get current price for an asset
+
+    Args:
+        ticker: Asset ticker symbol
+
+    Returns:
+        Current price information
+    """
+    try:
+        import yfinance as yf
+
+        stock = yf.Ticker(ticker)
+        info = stock.info
+
+        current_price = info.get('currentPrice') or info.get('regularMarketPrice')
+
+        if current_price is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Price not found for ticker: {ticker}"
+            )
+
+        previous_close = info.get('previousClose', info.get('regularMarketPreviousClose'))
+        price_change = None
+        price_change_percent = None
+
+        if previous_close:
+            price_change = current_price - previous_close
+            price_change_percent = (price_change / previous_close) * 100
+
+        return {
+            'ticker': ticker.upper(),
+            'currentPrice': current_price,
+            'priceChange': price_change,
+            'priceChangePercent': price_change_percent,
+            'previousClose': previous_close,
+            'currency': info.get('currency', 'USD'),
+            'lastUpdated': datetime.now().isoformat()
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error getting price for {ticker}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get asset price: {str(e)}"
+        )
+
+@router.get("/info/{ticker}")
+async def get_asset_info(
+        ticker: str = Path(..., description="Asset ticker symbol"),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+):
+    """
     Get detailed information about an asset
 
     Args:

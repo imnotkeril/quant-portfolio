@@ -67,11 +67,11 @@ export const PORTFOLIO_API = {
   REMOVE_ASSET: (id: string, ticker: string) => `${API_BASE_URL}/portfolios/${id}/assets/${ticker}`,
 };
 
-// Asset endpoints
 export const ASSET_API = {
   SEARCH: `${API_BASE_URL}/assets/search`,
   HISTORICAL: (ticker: string) => `${API_BASE_URL}/assets/historical/${ticker}`,
   INFO: (ticker: string) => `${API_BASE_URL}/assets/info/${ticker}`,
+  PRICE: (ticker: string) => `${API_BASE_URL}/assets/price/${ticker}`,  //
   PERFORMANCE: (ticker: string) => `${API_BASE_URL}/assets/performance/${ticker}`,
   VALIDATE: (ticker: string) => `${API_BASE_URL}/assets/validate/${ticker}`,
   MARKET_STATUS: `${API_BASE_URL}/assets/market-status`,
