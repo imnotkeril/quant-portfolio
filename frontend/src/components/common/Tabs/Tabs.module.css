@@ -36,7 +36,6 @@
 .top .tabBar,
 .bottom .tabBar {
   border-radius: 2px;
-  animation: spin 1s linear infinite;
   margin-left: auto;
 }
 
