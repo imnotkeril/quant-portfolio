@@ -13,6 +13,20 @@
   gap: var(--spacing-l);
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-m);
+}
+
+.header h3 {
+  margin: 0;
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
 .section {
   display: flex;
   flex-direction: column;
@@ -43,10 +57,210 @@
   border-top: 1px solid var(--color-divider);
 }
 
+/* Ticker field with auto-complete */
+.tickerField {
+  position: relative;
+}
+
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: rgba(42, 46, 57, 0.95);
+  border: 1px solid var(--color-divider);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  max-height: 280px;
+  overflow-y: auto;
+  backdrop-filter: blur(8px);
+}
+
+.suggestions::-webkit-scrollbar {
+  width: 6px;
+}
+
+.suggestions::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.suggestions::-webkit-scrollbar-thumb {
+  background-color: var(--color-divider);
+  border-radius: 3px;
+}
+
+.loadingSuggestion {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  padding: var(--spacing-m);
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.suggestion {
+  width: 100%;
+  padding: var(--spacing-s) var(--spacing-m);
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  transition: background-color var(--transition-fast);
+  border-bottom: 1px solid rgba(var(--color-divider-rgb), 0.5);
+}
+
+.suggestion:hover,
+.selectedSuggestion {
+  background-color: rgba(191, 159, 251, 0.1);
+}
+
+.suggestion:last-child {
+  border-bottom: none;
+}
+
+.suggestionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.suggestionTicker {
+  font-weight: var(--font-weight-bold);
+  font-size: 0.95rem;
+  color: var(--color-text-light);
+}
+
+.suggestionName {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  line-height: 1.2;
+}
+
+.suggestionExchange {
+  font-size: 0.75rem;
+  color: var(--color-neutral-gray);
+  font-weight: var(--font-weight-medium);
+}
+
+.assetInfo {
+  margin-top: var(--spacing-s);
+  padding: var(--spacing-s) var(--spacing-m);
+  background-color: rgba(116, 241, 116, 0.1);
+  border: 1px solid rgba(116, 241, 116, 0.3);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--color-positive);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  flex-wrap: wrap;
+}
+
+.assetInfo strong {
+  color: var(--color-text-light);
+}
+
+/* Weight field with quick buttons */
+.weightField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.quickWeights {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-xs);
+}
+
+.quickWeightsLabel {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  min-width: fit-content;
+  margin-right: var(--spacing-xs);
+}
+
+.quickWeightBtn {
+  padding: 4px 10px;
+  border: 1px solid var(--color-divider);
+  border-radius: 6px;
+  background-color: rgba(42, 46, 57, 0.3);
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  min-width: 40px;
+  text-align: center;
+}
+
+.quickWeightBtn:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background-color: rgba(191, 159, 251, 0.1);
+}
+
+.quickWeightBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  color: var(--color-text-disabled);
+}
+
+.quickWeightBtn.active {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+  color: var(--color-text-light);
+  box-shadow: 0 0 8px rgba(191, 159, 251, 0.3);
+}
+
+.remainingInfo {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* Asset Tabs */
+.assetTabs {
+  margin-bottom: var(--spacing-l);
+}
+
+.assetTabs .tabPane {
+  padding: var(--spacing-l) 0;
+}
+
+/* Error messages */
+.errorMessage {
+  padding: var(--spacing-s) var(--spacing-m);
+  background-color: rgba(250, 161, 164, 0.1);
+  border: 1px solid rgba(250, 161, 164, 0.3);
+  border-radius: 6px;
+  color: var(--color-negative);
+  font-size: 0.9rem;
+  margin-top: var(--spacing-s);
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .container {
     max-width: 100%;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-s);
   }
 
   .row {
@@ -62,6 +276,20 @@
   .actions button {
     width: 100%;
   }
+
+  .quickWeights {
+    justify-content: flex-start;
+  }
+
+  .quickWeightsLabel {
+    width: 100%;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .remainingInfo {
+    margin-left: 0;
+    margin-top: var(--spacing-xs);
+  }
 }
 
 @media (max-width: 480px) {
@@ -71,6 +299,24 @@
 
   .section {
     gap: var(--spacing-s);
+  }
+
+  .quickWeights {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .quickWeightsLabel {
+    margin-right: 0;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .suggestions {
+    max-height: 200px;
+  }
+
+  .suggestion {
+    padding: var(--spacing-m);
   }
 }
 
@@ -82,5 +328,75 @@
 
   .actions {
     border-top-width: 2px;
+  }
+
+  .suggestions {
+    border-width: 2px;
+    border-top: none;
+  }
+
+  .suggestion {
+    border-bottom-width: 2px;
+  }
+}
+
+/* Dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+  .suggestions {
+    background-color: rgba(42, 46, 57, 0.98);
+    backdrop-filter: blur(12px);
+  }
+
+  .assetInfo {
+    background-color: rgba(116, 241, 116, 0.08);
+  }
+
+  .errorMessage {
+    background-color: rgba(250, 161, 164, 0.08);
+  }
+
+  .quickWeightBtn {
+    background-color: rgba(42, 46, 57, 0.5);
+  }
+}
+
+/* Focus and accessibility */
+.suggestion:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.quickWeightBtn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Animation for suggestions */
+.suggestions {
+  animation: slideDown 0.15s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading state */
+.loadingSuggestion {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
   }
 }
