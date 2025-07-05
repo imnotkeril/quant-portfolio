@@ -86,10 +86,14 @@ export const Tabs: React.FC<TabsProps> & { TabPane: typeof TabPane } = ({
   const tabBarRef = useRef<HTMLDivElement>(null);
   const inkBarRef = useRef<HTMLDivElement>(null);
 
-  // Get tabs from children
+  // ✅ FIXED: Get tabs from children - better filtering
   const tabs = React.Children.toArray(children).filter(
-    (child): child is React.ReactElement<TabPaneProps> =>
-      React.isValidElement(child) && child.type === TabPane
+    (child): child is React.ReactElement<TabPaneProps> => {
+      return React.isValidElement(child) &&
+             typeof child.type !== 'string' && // Exclude HTML elements
+             child.props &&
+             'tab' in child.props; // Check for tab prop instead of type
+    }
   );
 
   // Initialize active key
@@ -97,7 +101,9 @@ export const Tabs: React.FC<TabsProps> & { TabPane: typeof TabPane } = ({
     if (!internalActiveKey && tabs.length > 0) {
       const firstEnabledTab = tabs.find(tab => !tab.props.disabled);
       if (firstEnabledTab) {
-        setInternalActiveKey(defaultActiveKey || firstEnabledTab.props.key || '');
+        // ✅ FIXED: Use React element key properly
+        const firstKey = firstEnabledTab.key || defaultActiveKey || 'tab-0';
+        setInternalActiveKey(firstKey.toString());
       }
     }
   }, [tabs, defaultActiveKey, internalActiveKey]);
@@ -180,7 +186,7 @@ export const Tabs: React.FC<TabsProps> & { TabPane: typeof TabPane } = ({
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       e.preventDefault();
 
-      const currentIndex = tabs.findIndex(tab => tab.props.key === currentActiveKey);
+      const currentIndex = tabs.findIndex(tab => (tab.key || '').toString() === currentActiveKey);
       const isVertical = tabPosition === 'left' || tabPosition === 'right';
       const isNext = (isVertical && e.key === 'ArrowDown') || (!isVertical && e.key === 'ArrowRight');
 
@@ -200,7 +206,8 @@ export const Tabs: React.FC<TabsProps> & { TabPane: typeof TabPane } = ({
       }
 
       if (!tabs[nextIndex]?.props.disabled) {
-        handleTabClick(tabs[nextIndex].props.key, e as any);
+        const newKey = (tabs[nextIndex].key || '').toString();
+        handleTabClick(newKey, e as any);
       }
     }
   };
@@ -308,15 +315,17 @@ export const Tabs: React.FC<TabsProps> & { TabPane: typeof TabPane } = ({
     );
   };
 
-  // Render tab button
-  const renderTab = (tab: React.ReactElement<TabPaneProps>) => {
-    const { key, tab: tabNode, disabled, closable, closeIcon } = tab.props;
-    const isActive = key === currentActiveKey;
+  // ✅ FIXED: Render tab button with proper key handling
+  const renderTab = (tab: React.ReactElement<TabPaneProps>, index: number) => {
+    // ✅ FIXED: Get key from React element, not from props
+    const tabKey = (tab.key || `tab-${index}`).toString();
+    const { tab: tabNode, disabled, closable, closeIcon } = tab.props;
+    const isActive = tabKey === currentActiveKey;
 
     return (
       <div
-        key={key}
-        data-key={key}
+        key={tabKey} // ✅ FIXED: Proper unique key
+        data-key={tabKey}
         className={classNames(
           styles.tab,
           styles[size],
@@ -326,8 +335,8 @@ export const Tabs: React.FC<TabsProps> & { TabPane: typeof TabPane } = ({
             [styles.closable]: closable,
           }
         )}
-        onClick={disabled ? undefined : (e) => handleTabClick(key, e)}
-        onKeyDown={disabled ? undefined : (e) => handleKeyDown(e, key)}
+        onClick={disabled ? undefined : (e) => handleTabClick(tabKey, e)}
+        onKeyDown={disabled ? undefined : (e) => handleKeyDown(e, tabKey)}
         role="tab"
         tabIndex={disabled ? -1 : isActive ? 0 : -1}
         aria-selected={isActive}
@@ -342,8 +351,8 @@ export const Tabs: React.FC<TabsProps> & { TabPane: typeof TabPane } = ({
           <button
             type="button"
             className={styles.tabCloseButton}
-            onClick={(e) => handleTabClose(key, e)}
-            aria-label={`Close ${key}`}
+            onClick={(e) => handleTabClose(tabKey, e)}
+            aria-label={`Close ${tabKey}`}
           >
             {closeIcon || (
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -357,9 +366,9 @@ export const Tabs: React.FC<TabsProps> & { TabPane: typeof TabPane } = ({
     );
   };
 
-  // Render tab content
+  // ✅ FIXED: Render tab content with proper key handling
   const renderTabContent = () => {
-    const activeTab = tabs.find(tab => tab.props.key === currentActiveKey);
+    const activeTab = tabs.find(tab => (tab.key || '').toString() === currentActiveKey);
 
     if (!activeTab) return null;
 
@@ -371,15 +380,16 @@ export const Tabs: React.FC<TabsProps> & { TabPane: typeof TabPane } = ({
       );
     }
 
-    return tabs.map(tab => {
-      const { key, forceRender, children } = tab.props;
-      const isActive = key === currentActiveKey;
+    return tabs.map((tab, index) => {
+      const tabKey = (tab.key || `tab-${index}`).toString();
+      const { forceRender, children } = tab.props;
+      const isActive = tabKey === currentActiveKey;
 
       if (!isActive && !forceRender) return null;
 
       return (
         <div
-          key={key}
+          key={tabKey} // ✅ FIXED: Proper unique key
           className={classNames(styles.tabPane, {
             [styles.hidden]: !isActive,
             [styles.animated]: animationConfig.tabPane,
@@ -425,7 +435,8 @@ export const Tabs: React.FC<TabsProps> & { TabPane: typeof TabPane } = ({
             className={styles.tabList}
             role="tablist"
           >
-            {tabs.map(renderTab)}
+            {/* ✅ FIXED: Map with index for proper keys */}
+            {tabs.map((tab, index) => renderTab(tab, index))}
 
             {type === 'line' && (
               <div
