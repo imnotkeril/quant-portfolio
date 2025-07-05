@@ -1,6 +1,6 @@
 /**
- * PortfolioForm Component
- * Form for creating and editing portfolios
+ * PortfolioForm Component - FIXED
+ * Form for creating and editing portfolios with working Edit/Delete handlers
  */
 import React, { useState, useEffect } from 'react';
 import classNames from 'classnames';
@@ -42,6 +42,7 @@ export const PortfolioForm: React.FC<PortfolioFormProps> = ({
     description: '',
     tags: [],
     assets: [],
+    initialValue: 100000, // Default starting value
   });
 
   const [assets, setAssets] = useState<AssetCreate[]>([]);
@@ -56,18 +57,17 @@ export const PortfolioForm: React.FC<PortfolioFormProps> = ({
         name: portfolio.name,
         description: portfolio.description || '',
         tags: portfolio.tags || [],
+        initialValue: portfolio.initialValue || 100000,
         assets: portfolio.assets.map(asset => ({
           ticker: asset.ticker,
           name: asset.name,
           weight: asset.weight,
-          quantity: asset.quantity,
           purchasePrice: asset.purchasePrice,
           purchaseDate: asset.purchaseDate,
           currentPrice: asset.currentPrice,
           sector: asset.sector,
           industry: asset.industry,
           assetClass: asset.assetClass,
-          currency: asset.currency,
           country: asset.country,
           exchange: asset.exchange,
         })),
@@ -76,14 +76,12 @@ export const PortfolioForm: React.FC<PortfolioFormProps> = ({
         ticker: asset.ticker,
         name: asset.name,
         weight: asset.weight,
-        quantity: asset.quantity,
         purchasePrice: asset.purchasePrice,
         purchaseDate: asset.purchaseDate,
         currentPrice: asset.currentPrice,
         sector: asset.sector,
         industry: asset.industry,
         assetClass: asset.assetClass,
-        currency: asset.currency,
         country: asset.country,
         exchange: asset.exchange,
       })));
@@ -119,17 +117,43 @@ export const PortfolioForm: React.FC<PortfolioFormProps> = ({
   };
 
   const handleEditAsset = (asset: AssetCreate) => {
+    console.log('Editing asset:', asset);
     setEditingAsset(asset);
     setShowAssetForm(true);
   };
 
   const handleDeleteAsset = (ticker: string) => {
+    console.log('Deleting asset:', ticker);
+
+    // Show confirmation
+    if (!window.confirm(`Are you sure you want to delete ${ticker}?`)) {
+      return;
+    }
+
     const updatedAssets = assets.filter(asset => asset.ticker !== ticker);
     setAssets(updatedAssets);
     setFormData(prev => ({ ...prev, assets: updatedAssets }));
+
+    console.log(`Asset ${ticker} deleted. Remaining assets:`, updatedAssets.length);
+  };
+
+  const handleDeleteAllAssets = () => {
+    console.log('Deleting all assets');
+
+    // Show confirmation
+    if (!window.confirm(`Are you sure you want to delete all ${assets.length} assets?`)) {
+      return;
+    }
+
+    setAssets([]);
+    setFormData(prev => ({ ...prev, assets: [] }));
+
+    console.log('All assets deleted');
   };
 
   const handleAssetSubmit = (assetData: AssetCreate) => {
+    console.log('Asset submitted:', assetData);
+
     let updatedAssets: AssetCreate[];
 
     if (editingAsset) {
@@ -137,21 +161,30 @@ export const PortfolioForm: React.FC<PortfolioFormProps> = ({
       updatedAssets = assets.map(asset =>
         asset.ticker === editingAsset.ticker ? assetData : asset
       );
+      console.log('Updated existing asset');
     } else {
       // Add new asset
       updatedAssets = [...assets, assetData];
+      console.log('Added new asset');
     }
 
     setAssets(updatedAssets);
     setFormData(prev => ({ ...prev, assets: updatedAssets }));
     setShowAssetForm(false);
     setEditingAsset(null);
+
+    console.log('Total assets now:', updatedAssets.length);
   };
 
   const handleAssetCancel = () => {
+    console.log('Asset form cancelled');
     setShowAssetForm(false);
     setEditingAsset(null);
   };
+
+  // Calculate remaining weight
+  const totalWeight = assets.reduce((sum, asset) => sum + (asset.weight || 0), 0);
+  const remainingWeight = Math.max(0, 100 - totalWeight);
 
   // Handle form submission
   const handleSubmit = (event: React.FormEvent) => {
@@ -210,25 +243,56 @@ export const PortfolioForm: React.FC<PortfolioFormProps> = ({
                 fullWidth
               />
 
-              <Input
-                label="Tags"
-                placeholder="Enter tags separated by commas"
-                value={Array.isArray(formData.tags) ? formData.tags.join(', ') : ''}
-                onChange={handleTagsChange}
-                fullWidth
-                helperText="Use tags to categorize and organize your portfolios"
-              />
+              <div className={styles.row}>
+                <Input
+                  label="Initial Value"
+                  type="number"
+                  placeholder="100000"
+                  value={formData.initialValue}
+                  onChange={(e) => handleFieldChange('initialValue', Number(e.target.value))}
+                  min={1000}
+                  step={1000}
+                  required
+                />
+
+                <Input
+                  label="Tags"
+                  placeholder="Enter tags separated by commas"
+                  value={Array.isArray(formData.tags) ? formData.tags.join(', ') : ''}
+                  onChange={handleTagsChange}
+                  helperText="Use tags to categorize and organize your portfolios"
+                />
+              </div>
             </div>
           </div>
 
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h3 className={styles.sectionTitle}>Assets</h3>
+              <div className={styles.sectionInfo}>
+                <h3 className={styles.sectionTitle}>Assets</h3>
+                <div className={styles.allocationInfo}>
+                  <span className={styles.totalAllocation}>
+                    Total: {totalWeight.toFixed(1)}%
+                  </span>
+                  {remainingWeight > 0 && (
+                    <span className={styles.remainingAllocation}>
+                      Remaining: {remainingWeight.toFixed(1)}%
+                    </span>
+                  )}
+                  {totalWeight > 100 && (
+                    <span className={styles.overAllocation}>
+                      Over-allocated by {(totalWeight - 100).toFixed(1)}%
+                    </span>
+                  )}
+                </div>
+              </div>
+
               <Button
                 type="button"
                 onClick={handleAddAsset}
                 variant="primary"
                 size="small"
+                disabled={loading}
               >
                 Add Asset
               </Button>
@@ -245,11 +309,16 @@ export const PortfolioForm: React.FC<PortfolioFormProps> = ({
                 assets={assets}
                 onEdit={handleEditAsset}
                 onDelete={handleDeleteAsset}
-                showActions
+                onDeleteAll={handleDeleteAllAssets}
+                showActions={true}
+                showPnL={false}
+                showDeleteAll={true}
+                loading={loading}
               />
             ) : (
               <div className={styles.emptyAssets}>
-                <p>No assets added yet</p>
+                <div className={styles.emptyIcon}>📊</div>
+                <h4>No assets added yet</h4>
                 <p className={styles.emptyDescription}>
                   Click "Add Asset" to start building your portfolio
                 </p>
@@ -273,7 +342,7 @@ export const PortfolioForm: React.FC<PortfolioFormProps> = ({
               type="submit"
               variant="primary"
               loading={loading}
-              disabled={loading}
+              disabled={loading || assets.length === 0}
             >
               {loading ? 'Saving...' : submitText}
             </Button>
@@ -286,14 +355,19 @@ export const PortfolioForm: React.FC<PortfolioFormProps> = ({
         <Modal
           isOpen={showAssetForm}
           onClose={handleAssetCancel}
-          title={editingAsset ? 'Edit Asset' : 'Add Asset'}
-          maxWidth="md"
+          title={editingAsset ? `Edit ${editingAsset.ticker}` : 'Add Asset'}
+          maxWidth="lg"
         >
           <AssetForm
             asset={editingAsset}
             onSubmit={handleAssetSubmit}
             onCancel={handleAssetCancel}
             existingTickers={assets.map(a => a.ticker)}
+            loading={loading}
+            mode="professional" // Default to professional mode in form
+            remainingWeight={remainingWeight}
+            showTemplates={!editingAsset} // Only show templates when adding new assets
+            showImport={!editingAsset} // Only show import when adding new assets
           />
         </Modal>
       )}

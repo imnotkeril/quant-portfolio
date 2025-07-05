@@ -1,6 +1,6 @@
 /**
- * CreationStepReview Component
- * Review and confirm portfolio creation (Easy/Professional modes)
+ * CreationStepReview Component - FIXED
+ * Review and confirm portfolio creation - TAGS HIDDEN IN PROFESSIONAL MODE
  */
 import React from 'react';
 import Card from '../../../components/common/Card/Card';
@@ -10,6 +10,7 @@ import { PieChart } from '../../../components/charts/PieChart/PieChart';
 import { AssetTable } from '../../../components/portfolio/AssetTable/AssetTable';
 import { formatCurrency, formatPercentage } from '../../../utils/formatters';
 import { getChartColor } from '../../../utils/color';
+import { calculateQuantity } from '../../../types/portfolio';
 import styles from '../PortfolioCreation.module.css';
 
 interface AssetFormData {
@@ -20,7 +21,6 @@ interface AssetFormData {
   sector?: string;
   assetClass?: string;
   currentPrice?: number;
-  quantity?: number;
   purchasePrice?: number;
   purchaseDate?: string;
 }
@@ -71,143 +71,166 @@ export const CreationStepReview: React.FC<CreationStepReviewProps> = ({
     ? 'Your portfolio is ready! Review the details and create your portfolio.'
     : 'Review all portfolio settings before creation. You can make changes later.';
 
-  // Prepare chart data
-  const chartData = formData.assets
-    .filter(asset => asset.weight && asset.weight > 0)
-    .map((asset, index) => ({
-      name: asset.ticker,
-      value: asset.weight || 0,
-      color: getChartColor(index),
-    }))
-    .sort((a, b) => b.value - a.value);
-
-  // Calculate summary statistics
-  const totalAssets = formData.assets.length;
+  // Calculate total weight and amounts
   const totalWeight = formData.assets.reduce((sum, asset) => sum + asset.weight, 0);
+  const isOverAllocated = totalWeight > 100;
+  const isUnderAllocated = totalWeight < 100;
 
-  // Calculate dollar amounts
-  const assetAmounts = formData.assets.map(asset => ({
-    ...asset,
-    amount: (asset.weight / 100) * formData.startingAmount,
+  // Calculate asset amounts with automatic quantity calculation
+  const assetAmounts = formData.assets.map(asset => {
+    const targetAmount = (formData.startingAmount * asset.weight) / 100;
+    const quantity = asset.purchasePrice && asset.purchasePrice > 0
+      ? calculateQuantity(asset.weight, formData.startingAmount, asset.purchasePrice)
+      : 0;
+
+    return {
+      ...asset,
+      targetAmount,
+      calculatedQuantity: quantity,
+    };
+  });
+
+  // Chart data for pie chart
+  const chartData = formData.assets.map((asset, index) => ({
+    name: asset.ticker,
+    value: asset.weight,
+    color: getChartColor(index),
   }));
 
-  // Sector allocation
-  const sectorAllocation = formData.assets.reduce((acc, asset) => {
-    if (asset.sector && asset.weight) {
-      acc[asset.sector] = (acc[asset.sector] || 0) + asset.weight;
-    }
+  // Portfolio analysis
+  const sectorDistribution = formData.assets.reduce((acc, asset) => {
+    const sector = asset.sector || 'Unknown';
+    acc[sector] = (acc[sector] || 0) + asset.weight;
     return acc;
   }, {} as Record<string, number>);
 
-  const topSectors = Object.entries(sectorAllocation)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 5);
+  const topSector = Object.entries(sectorDistribution).reduce((top, [sector, weight]) =>
+    weight > top.weight ? { sector, weight } : top, { sector: '', weight: 0 });
 
-  // Asset class allocation
-  const assetClassAllocation = formData.assets.reduce((acc, asset) => {
-    if (asset.assetClass && asset.weight) {
-      acc[asset.assetClass] = (acc[asset.assetClass] || 0) + asset.weight;
-    }
-    return acc;
-  }, {} as Record<string, number>);
+  // Risk assessment
+  const getConcentrationRisk = () => {
+    const maxWeight = Math.max(...formData.assets.map(a => a.weight));
+    if (maxWeight > 50) return 'High';
+    if (maxWeight > 30) return 'Medium';
+    return 'Low';
+  };
 
-  // Risk metrics (simplified for display)
-  const largestPosition = Math.max(...formData.assets.map(a => a.weight));
-  const concentrationRisk = largestPosition > 25 ? 'High' : largestPosition > 15 ? 'Medium' : 'Low';
-  const diversificationScore = totalAssets >= 10 ? 'High' : totalAssets >= 5 ? 'Medium' : 'Low';
+  const getDiversificationScore = () => {
+    const uniqueSectors = new Set(formData.assets.map(a => a.sector || 'Unknown')).size;
+    if (uniqueSectors >= 5) return 'High';
+    if (uniqueSectors >= 3) return 'Medium';
+    return 'Low';
+  };
+
+  const concentrationRisk = getConcentrationRisk();
+  const diversificationScore = getDiversificationScore();
 
   return (
     <div className={styles.stepContainer}>
       <Card className={styles.stepCard}>
         <div className={styles.stepHeader}>
-          <div className={styles.stepTitleRow}>
-            <h2 className={styles.stepTitle}>{stepTitle}</h2>
-            <Badge variant={isEasyMode ? 'success' : 'primary'}>
-              {isEasyMode ? '⚡ Easy Mode' : '⚙️ Professional Mode'}
-            </Badge>
-          </div>
+          <h2 className={styles.stepTitle}>{stepTitle}</h2>
           <p className={styles.stepDescription}>{stepDescription}</p>
         </div>
 
+        {/* Error Display */}
         {error && (
-          <div className={styles.errorMessage}>
-            {error}
+          <div className={styles.errorSection}>
+            <div className={styles.errorMessage}>
+              {error}
+            </div>
           </div>
         )}
 
         {/* Portfolio Summary */}
-        <div className={styles.reviewSummary}>
-          <h3 className={styles.reviewSectionTitle}>Portfolio Summary</h3>
+        <div className={styles.reviewContent}>
+          <div className={styles.summarySection}>
+            <h3 className={styles.reviewSectionTitle}>Portfolio Summary</h3>
 
-          <div className={styles.summaryGrid}>
-            <div className={styles.summaryCard}>
-              <h4 className={styles.summaryCardTitle}>Basic Information</h4>
-              <div className={styles.summaryDetails}>
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Name:</span>
-                  <span className={styles.summaryValue}>{formData.name}</span>
-                </div>
+            <div className={styles.summaryGrid}>
+              <div className={styles.summaryCard}>
+                <h4 className={styles.summaryLabel}>Portfolio Name</h4>
+                <p className={styles.summaryValue}>{formData.name}</p>
                 {formData.description && (
-                  <div className={styles.summaryItem}>
-                    <span className={styles.summaryLabel}>Description:</span>
-                    <span className={styles.summaryValue}>{formData.description}</span>
-                  </div>
+                  <p className={styles.summaryDescription}>{formData.description}</p>
                 )}
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Starting Amount:</span>
-                  <span className={styles.summaryValue}>{formatCurrency(formData.startingAmount)}</span>
-                </div>
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Number of Assets:</span>
-                  <span className={styles.summaryValue}>{totalAssets}</span>
-                </div>
+              </div>
+
+              <div className={styles.summaryCard}>
+                <h4 className={styles.summaryLabel}>Starting Amount</h4>
+                <p className={styles.summaryValue}>{formatCurrency(formData.startingAmount)}</p>
+              </div>
+
+              <div className={styles.summaryCard}>
+                <h4 className={styles.summaryLabel}>Total Assets</h4>
+                <p className={styles.summaryValue}>{formData.assets.length}</p>
+              </div>
+
+              <div className={styles.summaryCard}>
+                <h4 className={styles.summaryLabel}>Allocation</h4>
+                <p className={styles.summaryValue}>
+                  {formatPercentage(totalWeight)}
+                  {isOverAllocated && (
+                    <Badge variant="error" size="small" className={styles.allocationBadge}>
+                      Over-allocated
+                    </Badge>
+                  )}
+                  {isUnderAllocated && (
+                    <Badge variant="warning" size="small" className={styles.allocationBadge}>
+                      Under-allocated
+                    </Badge>
+                  )}
+                </p>
               </div>
             </div>
 
-            {/* Professional Mode Additional Settings */}
+            {/* Professional Mode - Additional Configuration Display */}
             {!isEasyMode && (
-              <div className={styles.summaryCard}>
-                <h4 className={styles.summaryCardTitle}>Portfolio Settings</h4>
-                <div className={styles.summaryDetails}>
+              <div className={styles.configurationSection}>
+                <h4 className={styles.configTitle}>Portfolio Configuration</h4>
+                <div className={styles.configGrid}>
                   {formData.portfolioType && (
-                    <div className={styles.summaryItem}>
-                      <span className={styles.summaryLabel}>Type:</span>
-                      <span className={styles.summaryValue}>{formData.portfolioType}</span>
+                    <div className={styles.configItem}>
+                      <span className={styles.configLabel}>Type:</span>
+                      <span className={styles.configValue}>{formData.portfolioType}</span>
                     </div>
                   )}
                   {formData.riskTolerance && (
-                    <div className={styles.summaryItem}>
-                      <span className={styles.summaryLabel}>Risk Tolerance:</span>
-                      <span className={styles.summaryValue}>{formData.riskTolerance}</span>
+                    <div className={styles.configItem}>
+                      <span className={styles.configLabel}>Risk Tolerance:</span>
+                      <span className={styles.configValue}>{formData.riskTolerance}</span>
                     </div>
                   )}
                   {formData.investmentObjective && (
-                    <div className={styles.summaryItem}>
-                      <span className={styles.summaryLabel}>Investment Objective:</span>
-                      <span className={styles.summaryValue}>{formData.investmentObjective}</span>
+                    <div className={styles.configItem}>
+                      <span className={styles.configLabel}>Objective:</span>
+                      <span className={styles.configValue}>{formData.investmentObjective}</span>
                     </div>
                   )}
                   {formData.rebalancingFrequency && (
-                    <div className={styles.summaryItem}>
-                      <span className={styles.summaryLabel}>Rebalancing:</span>
-                      <span className={styles.summaryValue}>{formData.rebalancingFrequency}</span>
+                    <div className={styles.configItem}>
+                      <span className={styles.configLabel}>Rebalancing:</span>
+                      <span className={styles.configValue}>{formData.rebalancingFrequency}</span>
                     </div>
                   )}
                 </div>
               </div>
             )}
 
-            <div className={styles.summaryCard}>
-              <h4 className={styles.summaryCardTitle}>Risk Metrics</h4>
-              <div className={styles.summaryDetails}>
+            {/* Portfolio Analysis */}
+            <div className={styles.analysisSection}>
+              <h4 className={styles.analysisTitle}>Portfolio Analysis</h4>
+              <div className={styles.analysisGrid}>
                 <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Largest Position:</span>
-                  <span className={styles.summaryValue}>{formatPercentage(largestPosition / 100)}</span>
+                  <span className={styles.summaryLabel}>Top Sector:</span>
+                  <span className={styles.summaryValue}>
+                    {topSector.sector} ({formatPercentage(topSector.weight)})
+                  </span>
                 </div>
                 <div className={styles.summaryItem}>
                   <span className={styles.summaryLabel}>Concentration Risk:</span>
                   <Badge
-                    variant={concentrationRisk === 'High' ? 'warning' : concentrationRisk === 'Medium' ? 'neutral' : 'success'}
+                    variant={concentrationRisk === 'High' ? 'error' : concentrationRisk === 'Medium' ? 'warning' : 'success'}
                     size="small"
                   >
                     {concentrationRisk}
@@ -216,7 +239,7 @@ export const CreationStepReview: React.FC<CreationStepReviewProps> = ({
                 <div className={styles.summaryItem}>
                   <span className={styles.summaryLabel}>Diversification:</span>
                   <Badge
-                    variant={diversificationScore === 'High' ? 'success' : diversificationScore === 'Medium' ? 'neutral' : 'warning'}
+                    variant={diversificationScore === 'High' ? 'success' : diversificationScore === 'Medium' ? 'warning' : 'error'}
                     size="small"
                   >
                     {diversificationScore}
@@ -226,137 +249,144 @@ export const CreationStepReview: React.FC<CreationStepReviewProps> = ({
             </div>
           </div>
 
-          {/* Tags for Professional Mode */}
-          {!isEasyMode && formData.tags && formData.tags.length > 0 && (
+          {/* TAGS SECTION - ONLY FOR EASY MODE */}
+          {isEasyMode && formData.tags && formData.tags.length > 0 && (
             <div className={styles.tagsSection}>
               <h4 className={styles.tagsTitle}>Portfolio Tags</h4>
               <div className={styles.tagsList}>
                 {formData.tags.map((tag, index) => (
-                  <Badge key={index} variant="outline" size="small">
+                  <Badge key={index} variant="secondary" size="small">
                     {tag}
                   </Badge>
                 ))}
               </div>
             </div>
           )}
-        </div>
 
-        {/* Asset Allocation Chart and Table */}
-        <div className={styles.allocationSection}>
-          <h3 className={styles.reviewSectionTitle}>Asset Allocation</h3>
+          {/* Asset Allocation Chart and Table */}
+          <div className={styles.allocationSection}>
+            <h3 className={styles.reviewSectionTitle}>Asset Allocation</h3>
 
-          <div className={styles.allocationGrid}>
-            <div className={styles.chartContainer}>
-              <h4 className={styles.chartTitle}>Portfolio Composition</h4>
-              <PieChart
-                data={chartData}
-                height={300}
-                showTooltip={true}
-                showLegend={false}
-                className={styles.allocationChart}
+            <div className={styles.allocationGrid}>
+              <div className={styles.chartContainer}>
+                <h4 className={styles.chartTitle}>Portfolio Composition</h4>
+                <PieChart
+                  data={chartData}
+                  height={300}
+                  showTooltip={true}
+                  showLegend={false}
+                  className={styles.allocationChart}
+                />
+              </div>
+
+              <div className={styles.allocationStats}>
+                <h4 className={styles.chartTitle}>Asset Details</h4>
+                <div className={styles.assetsList}>
+                  {assetAmounts.map((asset, index) => (
+                    <div key={asset.id} className={styles.assetItem}>
+                      <div className={styles.assetHeader}>
+                        <div className={styles.assetTicker}>{asset.ticker}</div>
+                        <div className={styles.assetWeight}>{formatPercentage(asset.weight)}</div>
+                      </div>
+                      <div className={styles.assetDetails}>
+                        <div className={styles.assetName}>{asset.name}</div>
+                        <div className={styles.assetAmount}>
+                          {formatCurrency(asset.targetAmount)}
+                          {asset.calculatedQuantity > 0 && (
+                            <span className={styles.assetQuantity}>
+                              ({asset.calculatedQuantity} shares)
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {asset.sector && (
+                        <div className={styles.assetSector}>{asset.sector}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Detailed Asset Table */}
+            <div className={styles.detailedTable}>
+              <AssetTable
+                assets={formData.assets}
+                showActions={false}
+                showPnL={false}
+                showDeleteAll={false}
               />
             </div>
+          </div>
 
-            <div className={styles.allocationStats}>
-              <h4 className={styles.chartTitle}>Asset Details</h4>
-              <div className={styles.assetsList}>
-                {assetAmounts.map((asset, index) => (
-                  <div key={asset.id} className={styles.assetItem}>
-                    <div className={styles.assetInfo}>
-                      <div className={styles.assetTicker}>{asset.ticker}</div>
-                      <div className={styles.assetName}>{asset.name}</div>
-                    </div>
-                    <div className={styles.assetAllocation}>
-                      <div className={styles.assetWeight}>{formatPercentage(asset.weight / 100)}</div>
-                      <div className={styles.assetAmount}>{formatCurrency(asset.amount)}</div>
-                    </div>
+          {/* Professional Mode - Constraints Summary */}
+          {!isEasyMode && formData.constraints && (
+            <div className={styles.constraintsSection}>
+              <h3 className={styles.reviewSectionTitle}>Risk Constraints</h3>
+              <div className={styles.constraintsGrid}>
+                <div className={styles.constraintItem}>
+                  <span className={styles.constraintLabel}>Max Position Size:</span>
+                  <span className={styles.constraintValue}>
+                    {formatPercentage(formData.constraints.maxPositionSize)}
+                  </span>
+                </div>
+                <div className={styles.constraintItem}>
+                  <span className={styles.constraintLabel}>Min Position Size:</span>
+                  <span className={styles.constraintValue}>
+                    {formatPercentage(formData.constraints.minPositionSize)}
+                  </span>
+                </div>
+                {formData.constraints.enableTaxOptimization && (
+                  <div className={styles.constraintItem}>
+                    <Badge variant="success" size="small">Tax Optimization Enabled</Badge>
                   </div>
-                ))}
+                )}
+                {formData.constraints.enableESG && (
+                  <div className={styles.constraintItem}>
+                    <Badge variant="success" size="small">ESG Screening Enabled</Badge>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Warnings */}
+          {(isOverAllocated || isUnderAllocated) && (
+            <div className={styles.warningSection}>
+              <h4 className={styles.warningTitle}>⚠️ Allocation Warnings</h4>
+              {isOverAllocated && (
+                <div className={styles.warningItem}>
+                  Your portfolio is over-allocated by {formatPercentage(totalWeight - 100)}.
+                  Consider reducing some positions.
+                </div>
+              )}
+              {isUnderAllocated && (
+                <div className={styles.warningItem}>
+                  Your portfolio is under-allocated by {formatPercentage(100 - totalWeight)}.
+                  Consider increasing positions or adding more assets.
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Sector Allocation for Professional Mode */}
-        {!isEasyMode && topSectors.length > 0 && (
-          <div className={styles.sectorSection}>
-            <h3 className={styles.reviewSectionTitle}>Sector Allocation</h3>
-            <div className={styles.sectorGrid}>
-              {topSectors.map(([sector, weight]) => (
-                <div key={sector} className={styles.sectorItem}>
-                  <span className={styles.sectorName}>{sector}</span>
-                  <span className={styles.sectorWeight}>{formatPercentage(weight / 100)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Constraints for Professional Mode */}
-        {!isEasyMode && formData.constraints && (
-          <div className={styles.constraintsSection}>
-            <h3 className={styles.reviewSectionTitle}>Portfolio Constraints</h3>
-            <div className={styles.constraintsGrid}>
-              <div className={styles.constraintItem}>
-                <span className={styles.constraintLabel}>Position Limits:</span>
-                <span className={styles.constraintValue}>
-                  {formatPercentage(formData.constraints.minPositionSize / 100)} - {formatPercentage(formData.constraints.maxPositionSize / 100)}
-                </span>
-              </div>
-
-              <div className={styles.constraintItem}>
-                <span className={styles.constraintLabel}>Geographic Regions:</span>
-                <span className={styles.constraintValue}>
-                  {formData.constraints.allowedRegions.join(', ')}
-                </span>
-              </div>
-
-              <div className={styles.constraintItem}>
-                <span className={styles.constraintLabel}>Advanced Options:</span>
-                <div className={styles.advancedOptionsList}>
-                  {formData.constraints.enableTaxOptimization && (
-                    <Badge variant="success" size="small">Tax Optimization</Badge>
-                  )}
-                  {formData.constraints.enableESG && (
-                    <Badge variant="success" size="small">ESG Screening</Badge>
-                  )}
-                  {formData.constraints.enableCurrencyHedging && (
-                    <Badge variant="success" size="small">Currency Hedging</Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Warning Messages */}
-        {concentrationRisk === 'High' && (
-          <div className={styles.warningMessage}>
-            ⚠️ High concentration risk detected. Consider reducing your largest position for better diversification.
-          </div>
-        )}
-
-        {diversificationScore === 'Low' && (
-          <div className={styles.warningMessage}>
-            💡 Consider adding more assets to improve diversification and reduce risk.
-          </div>
-        )}
-
         {/* Form Actions */}
-        <div className={styles.formActions}>
+        <div className={styles.stepActions}>
           <Button
             type="button"
             variant="secondary"
             onClick={onBack}
             disabled={loading}
           >
-            Back
+            ← Back
           </Button>
+
           <Button
             type="button"
+            variant="primary"
             onClick={onCreate}
             loading={loading}
-            disabled={loading}
+            disabled={loading || formData.assets.length === 0}
             size="large"
           >
             {loading ? 'Creating Portfolio...' : '🚀 Create Portfolio'}
@@ -366,3 +396,5 @@ export const CreationStepReview: React.FC<CreationStepReviewProps> = ({
     </div>
   );
 };
+
+export default CreationStepReview;

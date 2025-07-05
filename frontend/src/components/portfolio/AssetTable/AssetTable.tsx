@@ -1,10 +1,10 @@
 /**
- * AssetTable Component
- * Table for displaying portfolio assets with actions
+ * AssetTable Component - FIXED
+ * Table for displaying portfolio assets with working Edit/Delete actions
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import classNames from 'classnames';
-import { Table, TableColumn } from '../../common/Table';
+import { Table } from '../../common/Table';
 import { Button } from '../../common/Button';
 import { Badge } from '../../common/Badge';
 import { Asset, AssetCreate } from '../../../types/portfolio';
@@ -16,194 +16,295 @@ interface AssetTableProps {
   loading?: boolean;
   onEdit?: (asset: Asset | AssetCreate) => void;
   onDelete?: (ticker: string) => void;
+  onDeleteAll?: () => void;
   onRowClick?: (asset: Asset | AssetCreate) => void;
-  showPerformance?: boolean;
+  showActions?: boolean;
+  showPnL?: boolean;
+  showDeleteAll?: boolean;
   className?: string;
   'data-testid'?: string;
 }
 
+interface TableColumn {
+  key: string;
+  title: string;
+  dataIndex?: string;
+  width?: number;
+  render?: (value: any, record: Asset | AssetCreate) => React.ReactNode;
+  sorter?: boolean;
+}
+
 export const AssetTable: React.FC<AssetTableProps> = ({
-  assets,
+  assets = [],
   loading = false,
   onEdit,
   onDelete,
+  onDeleteAll,
   onRowClick,
-  showPerformance = false,
+  showActions = true,
+  showPnL = true,
+  showDeleteAll = true,
   className,
   'data-testid': testId,
 }) => {
-  const hasPerformanceData = showPerformance && assets.some((asset): asset is Asset =>
-    'profitLoss' in asset && asset.profitLoss !== undefined
+  // Check if assets have P&L data
+  const hasPositionValue = assets.some(asset =>
+    'positionValue' in asset || 'profitLoss' in asset
   );
 
-  const columns: TableColumn<Asset | AssetCreate>[] = [
-    {
-      key: 'ticker',
-      title: 'Symbol',
-      dataIndex: 'ticker',
-      width: 100,
-      render: (value: string, record) => (
-        <div className={styles.tickerCell}>
-          <span className={styles.ticker}>{value}</span>
-          {record.name && (
-            <span className={styles.assetName}>{record.name}</span>
-          )}
-        </div>
-      ),
-    },
-    {
-      key: 'weight',
-      title: 'Weight',
-      dataIndex: 'weight',
-      width: 80,
-      align: 'right',
-      render: (value: number) => (
-        value ? formatPercentage(value / 100) : '-'
-      ),
-    },
-    {
-      key: 'quantity',
-      title: 'Quantity',
-      dataIndex: 'quantity',
-      width: 100,
-      align: 'right',
-      render: (value: number) => (
-        value ? value.toLocaleString() : '-'
-      ),
-    },
-    {
-      key: 'currentPrice',
-      title: 'Price',
-      dataIndex: 'currentPrice',
-      width: 100,
-      align: 'right',
-      render: (value: number) => (
-        value ? formatCurrency(value) : '-'
-      ),
-    },
-  ];
+  const showPnLColumn = showPnL && hasPositionValue;
 
-  // Add performance columns if needed
-  if (hasPerformanceData) {
-    columns.push(
+  // Calculate total allocation
+  const totalWeight = useMemo(() => {
+    return assets.reduce((sum, asset) => sum + (asset.weight || 0), 0);
+  }, [assets]);
+
+  // Define table columns
+  const columns: TableColumn[] = useMemo(() => {
+    const cols: TableColumn[] = [
       {
-        key: 'positionValue',
-        title: 'Value',
-        dataIndex: 'positionValue',
-        width: 120,
-        align: 'right',
-        render: (value: number) => (
-          value ? formatCurrency(value) : '-'
+        key: 'ticker',
+        title: 'Asset',
+        width: 180,
+        render: (_, record) => (
+          <div className={styles.tickerCell}>
+            <div className={styles.ticker}>{record.ticker}</div>
+            <div className={styles.assetName}>{record.name || record.ticker}</div>
+          </div>
         ),
+        sorter: true,
       },
       {
-        key: 'profitLoss',
-        title: 'P&L',
-        dataIndex: 'profitLoss',
-        width: 120,
-        align: 'right',
-        render: (value: number, record: Asset) => {
-          if (value === undefined) return '-';
+        key: 'weight',
+        title: 'Weight',
+        width: 100,
+        render: (_, record) => (
+          <span className={styles.weight}>
+            {formatPercentage(record.weight || 0)}
+          </span>
+        ),
+        sorter: true,
+      },
+    ];
 
-          const isPositive = value >= 0;
-          const pnlPct = record.profitLossPct;
+    // Add quantity column if assets have quantity data
+    const hasQuantity = assets.some(asset => 'quantity' in asset && asset.quantity);
+    if (hasQuantity) {
+      cols.push({
+        key: 'quantity',
+        title: 'Quantity',
+        width: 100,
+        render: (_, record) => (
+          'quantity' in record && record.quantity !== undefined
+            ? record.quantity.toLocaleString()
+            : '-'
+        ),
+        sorter: true,
+      });
+    }
+
+    // Add price columns
+    cols.push(
+      {
+        key: 'price',
+        title: 'Price',
+        width: 120,
+        render: (_, record) => (
+          <div className={styles.priceCell}>
+            <div className={styles.currentPrice}>
+              {record.currentPrice ? formatCurrency(record.currentPrice) : '-'}
+            </div>
+            {'purchasePrice' in record && record.purchasePrice && (
+              <div className={styles.purchasePrice}>
+                Bought: {formatCurrency(record.purchasePrice)}
+              </div>
+            )}
+          </div>
+        ),
+      }
+    );
+
+    // Add P&L column if applicable
+    if (showPnLColumn) {
+      cols.push({
+        key: 'pnl',
+        title: 'P&L',
+        width: 140,
+        render: (_, record) => {
+          if (!('profitLoss' in record) || record.profitLoss === undefined) {
+            return '-';
+          }
+
+          const isPositive = record.profitLoss >= 0;
+          const pnlClasses = classNames(styles.pnlCell, {
+            [styles.positive]: isPositive,
+            [styles.negative]: !isPositive,
+          });
 
           return (
-            <div className={classNames(
-              styles.pnlCell,
-              { [styles.positive]: isPositive, [styles.negative]: !isPositive }
-            )}>
-              <span className={styles.pnlValue}>
-                {formatCurrency(value)}
-              </span>
-              {pnlPct !== undefined && (
-                <span className={styles.pnlPercent}>
-                  ({formatPercentage(pnlPct / 100)})
-                </span>
+            <div className={pnlClasses}>
+              <div className={styles.pnlValue}>
+                {formatCurrency(record.profitLoss)}
+              </div>
+              {'profitLossPct' in record && record.profitLossPct !== undefined && (
+                <div className={styles.pnlPercent}>
+                  {formatPercentage(record.profitLossPct)}
+                </div>
               )}
             </div>
           );
         },
-      }
-    );
-  }
+        sorter: true,
+      });
+    }
 
-  // Add sector/industry column
-  columns.push({
-    key: 'sector',
-    title: 'Sector',
-    dataIndex: 'sector',
-    width: 120,
-    render: (value: string, record) => (
-      <div className={styles.sectorCell}>
-        {value && (
-          <Badge variant="neutral" size="small">
-            {value}
-          </Badge>
-        )}
-        {record.industry && (
-          <span className={styles.industry}>{record.industry}</span>
-        )}
-      </div>
-    ),
-  });
-
-  // Add purchase date column
-  columns.push({
-    key: 'purchaseDate',
-    title: 'Purchase Date',
-    dataIndex: 'purchaseDate',
-    width: 120,
-    render: (value: string) => (
-      value ? formatDate(value, 'short') : '-'
-    ),
-  });
-
-  // Add actions column
-  if (onEdit || onDelete) {
-    columns.push({
-      key: 'actions',
-      title: 'Actions',
-      width: 120,
+    // Add sector column
+    cols.push({
+      key: 'sector',
+      title: 'Sector',
+      width: 150,
       render: (_, record) => (
-        <div className={styles.actions}>
-          {onEdit && (
-            <Button
-              variant="text"
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(record);
-              }}
-              aria-label={`Edit ${record.ticker}`}
-            >
-              Edit
-            </Button>
-          )}
-          {onDelete && (
-            <Button
-              variant="text"
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(record.ticker);
-              }}
-              aria-label={`Delete ${record.ticker}`}
-            >
-              Delete
-            </Button>
+        <div className={styles.sectorCell}>
+          <div className={styles.sector}>{record.sector || 'Unknown'}</div>
+          {'industry' in record && record.industry && (
+            <div className={styles.industry}>{record.industry}</div>
           )}
         </div>
       ),
     });
-  }
+
+    // Add purchase date column if available
+    const hasPurchaseDate = assets.some(asset =>
+      'purchaseDate' in asset && asset.purchaseDate
+    );
+    if (hasPurchaseDate) {
+      cols.push({
+        key: 'purchaseDate',
+        title: 'Purchase Date',
+        width: 120,
+        render: (_, record) => (
+          'purchaseDate' in record && record.purchaseDate
+            ? formatDate(record.purchaseDate, 'short')
+            : '-'
+        ),
+        sorter: true,
+      });
+    }
+
+    return cols;
+  }, [assets, showPnLColumn]);
+
+  // Add actions column if edit/delete handlers provided
+  const finalColumns = useMemo(() => {
+    const cols = [...columns];
+
+    if (showActions && (onEdit || onDelete)) {
+      cols.push({
+        key: 'actions',
+        title: 'Actions',
+        width: 120,
+        render: (_, record) => (
+          <div className={styles.actions}>
+            {onEdit && (
+              <Button
+                variant="text"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(record);
+                }}
+                aria-label={`Edit ${record.ticker}`}
+                className={styles.editButton}
+              >
+                Edit
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                variant="text"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Confirm deletion
+                  if (window.confirm(`Are you sure you want to delete ${record.ticker}?`)) {
+                    onDelete(record.ticker);
+                  }
+                }}
+                aria-label={`Delete ${record.ticker}`}
+                className={styles.deleteButton}
+              >
+                Delete
+              </Button>
+            )}
+          </div>
+        ),
+      });
+    }
+
+    return cols;
+  }, [columns, showActions, onEdit, onDelete]);
 
   const tableClasses = classNames(styles.table, className);
 
+  // Custom table header with Delete All button
+  const tableHeader = useMemo(() => {
+    if (!showDeleteAll || !onDeleteAll || assets.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className={styles.tableHeader}>
+        <div className={styles.headerInfo}>
+          <span className={styles.assetCount}>
+            {assets.length} assets
+          </span>
+          <span className={styles.totalWeight}>
+            Total allocation: {formatPercentage(totalWeight)}
+            {totalWeight !== 100 && (
+              <Badge
+                variant={totalWeight > 100 ? 'error' : 'warning'}
+                size="small"
+                className={styles.allocationBadge}
+              >
+                {totalWeight > 100 ? 'Over-allocated' : 'Under-allocated'}
+              </Badge>
+            )}
+          </span>
+        </div>
+
+        <div className={styles.headerActions}>
+          <Button
+            variant="text"
+            size="small"
+            onClick={() => {
+              if (window.confirm(`Are you sure you want to delete all ${assets.length} assets?`)) {
+                onDeleteAll();
+              }
+            }}
+            className={styles.deleteAllButton}
+            disabled={assets.length === 0}
+          >
+            🗑️ Delete All
+          </Button>
+        </div>
+      </div>
+    );
+  }, [showDeleteAll, onDeleteAll, assets.length, totalWeight]);
+
+  const emptyState = (
+    <div className={styles.emptyState}>
+      <div className={styles.emptyIcon}>📊</div>
+      <h3>No assets found</h3>
+      <p>Add some assets to start building your portfolio</p>
+    </div>
+  );
+
   return (
     <div className={tableClasses} data-testid={testId}>
+      {tableHeader}
+
       <Table
-        columns={columns}
+        columns={finalColumns}
         data={assets}
         rowKey="ticker"
         loading={loading}
@@ -216,8 +317,9 @@ export const AssetTable: React.FC<AssetTableProps> = ({
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} of ${total} assets`,
         } : false}
-        emptyText="No assets found"
+        emptyText={emptyState}
         size="middle"
+        className={styles.tableContent}
       />
     </div>
   );

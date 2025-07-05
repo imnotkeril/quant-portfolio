@@ -1,5 +1,6 @@
 /**
- * Portfolio types
+ * Portfolio types - UPDATED
+ * Currency and Quantity fields removed as requested
  */
 import { ApiResponse } from './common';
 
@@ -13,47 +14,45 @@ export interface AssetBase {
 }
 
 /**
- * Asset create request
+ * Asset create request - NO CURRENCY, NO QUANTITY
  */
 export interface AssetCreate extends AssetBase {
-  quantity?: number;
   purchasePrice?: number;
   purchaseDate?: string;
   currentPrice?: number;
   sector?: string;
   industry?: string;
   assetClass?: string;
-  currency?: string;
   country?: string;
   exchange?: string;
 }
 
 /**
- * Asset update request
+ * Asset update request - NO CURRENCY, NO QUANTITY
  */
 export interface AssetUpdate {
   name?: string;
   weight?: number;
-  quantity?: number;
   purchasePrice?: number;
   purchaseDate?: string;
   currentPrice?: number;
   sector?: string;
   industry?: string;
   assetClass?: string;
-  currency?: string;
   country?: string;
   exchange?: string;
 }
 
 /**
- * Asset in portfolio response
+ * Asset in portfolio response - QUANTITY CALCULATED AUTOMATICALLY
  */
 export interface Asset extends AssetCreate {
   lastUpdated?: string;
   positionValue?: number;
   profitLoss?: number;
   profitLossPct?: number;
+  // quantity calculated automatically: (portfolioValue * weight/100) / purchasePrice
+  calculatedQuantity?: number;
 }
 
 /**
@@ -70,6 +69,7 @@ export interface PortfolioBase {
  */
 export interface PortfolioCreate extends PortfolioBase {
   assets?: AssetCreate[];
+  initialValue?: number; // Starting portfolio value for quantity calculations
 }
 
 /**
@@ -82,6 +82,7 @@ export interface PortfolioUpdate {
   assets?: AssetCreate[];
   resetAssets?: boolean;
   assetsToDelete?: string[];
+  initialValue?: number;
 }
 
 /**
@@ -93,6 +94,7 @@ export interface Portfolio extends PortfolioBase {
   created: string;
   lastUpdated: string;
   totalValue?: number;
+  initialValue?: number;
   performance?: Record<string, number>;
 }
 
@@ -113,6 +115,7 @@ export interface PortfolioListItem {
  */
 export interface TextPortfolioCreate extends PortfolioBase {
   text: string;
+  initialValue?: number;
 }
 
 /**
@@ -144,9 +147,9 @@ export interface AssetSearch {
   exchange?: string;
   assetType?: string;
   country?: string;
-  currency?: string;
   sector?: string;
   industry?: string;
+  // Currency determined automatically by exchange
 }
 
 /**
@@ -163,41 +166,181 @@ export interface AssetHistoricalData {
     adjClose: number[];
   };
   volumes?: number[];
-  startDate: string;
-  endDate: string;
-  interval: string;
+  currency: string; // Auto-determined by API
 }
 
 /**
- * Asset Performance
+ * Asset Performance Data
  */
 export interface AssetPerformance {
   ticker: string;
-  totalReturn: number;
-  annualizedReturn: number;
+  returns: {
+    daily: number;
+    weekly: number;
+    monthly: number;
+    quarterly: number;
+    yearly: number;
+    ytd: number;
+  };
   volatility: number;
+  sharpe: number;
   maxDrawdown: number;
-  sharpeRatio?: number;
-  sortinoRatio?: number;
   beta?: number;
-  alpha?: number;
-  periodReturns: Record<string, number>;
-  startDate: string;
-  endDate: string;
-  benchmarkId?: string;
+  currency: string; // Auto-determined by API
 }
 
 /**
- * API Portfolio Response
+ * Portfolio Analytics Request
  */
-export type ApiPortfolioResponse = ApiResponse<Portfolio>;
+export interface AnalyticsRequest {
+  portfolioId: string;
+  startDate?: string;
+  endDate?: string;
+  benchmark?: string;
+}
 
 /**
- * API Portfolio List Response
+ * Performance Metrics Response
  */
-export type ApiPortfolioListResponse = ApiResponse<PortfolioListItem[]>;
+export interface PerformanceMetricsResponse {
+  portfolioId: string;
+  metrics: {
+    totalReturn: number;
+    annualizedReturn: number;
+    volatility: number;
+    sharpeRatio: number;
+    maxDrawdown: number;
+    calmarRatio: number;
+    sortinoRatio: number;
+    beta?: number;
+    alpha?: number;
+    informationRatio?: number;
+  };
+  periodStart: string;
+  periodEnd: string;
+  benchmark?: string;
+}
 
 /**
- * API Asset Search Response
+ * Risk Metrics Response
  */
-export type ApiAssetSearchResponse = ApiResponse<AssetSearch[]>;
+export interface RiskMetricsResponse {
+  portfolioId: string;
+  riskMetrics: {
+    valueAtRisk: number;
+    conditionalVaR: number;
+    standardDeviation: number;
+    downside_deviation: number;
+    trackingError?: number;
+    correlation?: number;
+  };
+  confidence: number;
+  timeHorizon: number;
+}
+
+/**
+ * Portfolio Comparison Response
+ */
+export interface PortfolioComparisonResponse {
+  portfolio1: string;
+  portfolio2: string;
+  comparison: {
+    performance: {
+      returns: Record<string, number>;
+      volatility: Record<string, number>;
+      sharpe: Record<string, number>;
+    };
+    allocation: {
+      sectorDifferences: Record<string, number>;
+      assetClassDifferences: Record<string, number>;
+      geographicDifferences: Record<string, number>;
+    };
+    risk: {
+      var: Record<string, number>;
+      correlation: number;
+      tracking_error: number;
+    };
+  };
+}
+
+/**
+ * Asset Form Data Interface (for forms only)
+ */
+export interface AssetFormData {
+  id: string;
+  ticker: string;
+  name: string;
+  weight: number;
+  sector?: string;
+  assetClass?: string;
+  currentPrice?: number;
+  purchasePrice?: number;
+  purchaseDate?: string;
+  industry?: string;
+  country?: string;
+  exchange?: string;
+}
+
+/**
+ * Currency Auto-Detection Map
+ * Currency is automatically determined by exchange
+ */
+export const EXCHANGE_CURRENCY_MAP: Record<string, string> = {
+  'NASDAQ': 'USD',
+  'NYSE': 'USD',
+  'LSE': 'GBP',
+  'TSE': 'JPY',
+  'HKSE': 'HKD',
+  'ASX': 'AUD',
+  'TSX': 'CAD',
+  'FRA': 'EUR',
+  'AMS': 'EUR',
+  'SWX': 'CHF',
+  'BSE': 'INR',
+  'NSE': 'INR',
+  'SSE': 'CNY',
+  'SZSE': 'CNY',
+  'KRX': 'KRW',
+  'BMV': 'MXN',
+  'B3': 'BRL',
+};
+
+/**
+ * Get currency for exchange
+ */
+export const getCurrencyForExchange = (exchange: string): string => {
+  return EXCHANGE_CURRENCY_MAP[exchange.toUpperCase()] || 'USD';
+};
+
+/**
+ * Calculate quantity from weight and portfolio value
+ */
+export const calculateQuantity = (
+  weight: number, // in percentage (0-100)
+  portfolioValue: number,
+  pricePerShare: number
+): number => {
+  if (pricePerShare <= 0) return 0;
+  return Math.floor((portfolioValue * weight / 100) / pricePerShare);
+};
+
+/**
+ * Calculate position value from quantity and current price
+ */
+export const calculatePositionValue = (
+  quantity: number,
+  currentPrice: number
+): number => {
+  return quantity * currentPrice;
+};
+
+/**
+ * Calculate weight from position value and total portfolio value
+ */
+export const calculateWeight = (
+  positionValue: number,
+  totalPortfolioValue: number
+): number => {
+  if (totalPortfolioValue <= 0) return 0;
+  return (positionValue / totalPortfolioValue) * 100;
+};
