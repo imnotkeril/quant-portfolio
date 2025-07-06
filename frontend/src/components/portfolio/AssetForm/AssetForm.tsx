@@ -124,36 +124,22 @@ export const AssetForm: React.FC<AssetFormProps> = ({
         return (
           suggestion.ticker.toUpperCase().startsWith(searchQuery.toUpperCase()) &&
           !suggestion.ticker.includes('.') &&
-          suggestion.ticker.length <= 5 &&
           !existingTickers.includes(suggestion.ticker.toUpperCase())
         );
       })
       .slice(0, 8);
   }, [searchResults, searchQuery, existingTickers]);
 
-  // Initialize form data when asset prop changes
+  // Initialize form data for editing
   useEffect(() => {
     if (asset) {
-      setFormData({
-        ticker: asset.ticker || '',
-        name: asset.name || '',
-        weight: asset.weight || 0,
-        quantity: asset.quantity || 0,
-        purchasePrice: asset.purchasePrice || 0,
-        purchaseDate: asset.purchaseDate || formatDate(new Date(), 'input'),
-        currentPrice: asset.currentPrice || 0,
-        sector: asset.sector || '',
-        industry: asset.industry || '',
-        assetClass: asset.assetClass || 'stocks',
-        currency: asset.currency || 'USD',
-        country: asset.country || '',
-        exchange: asset.exchange || '',
-      });
+      setFormData(asset);
+      setSearchQuery(asset.ticker);
       setIsTickerSelected(true);
-      setSearchQuery(asset.ticker || '');
     }
   }, [asset]);
 
+  // Handle field changes
   const handleFieldChange = (field: keyof AssetCreate, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
 
@@ -166,67 +152,57 @@ export const AssetForm: React.FC<AssetFormProps> = ({
     }
   };
 
-  // Handle ticker search with autocomplete
+  // Handle ticker input change
   const handleTickerChange = (value: string) => {
-    const upperValue = value.toUpperCase();
-    setSearchQuery(upperValue);
-    handleFieldChange('ticker', upperValue);
-    setSelectedAssetInfo(null);
+    setSearchQuery(value.toUpperCase());
+    setFormData(prev => ({ ...prev, ticker: value.toUpperCase() }));
     setIsTickerSelected(false);
+    setSelectedAssetInfo(null);
+    setSelectedSuggestionIndex(-1);
 
-    if (upperValue.length >= 1) {
+    // Clear previous search results
+    clearSearch();
+    clearAssetInfo();
+
+    // Search for assets if value is not empty
+    if (value.trim()) {
+      searchAssets(value);
       setShowSuggestions(true);
-      searchAssets(upperValue, 10);
     } else {
       setShowSuggestions(false);
-      clearSearch();
     }
   };
 
   // Handle suggestion selection
   const handleSuggestionSelect = async (suggestion: AssetSearch) => {
     setSearchQuery(suggestion.ticker);
-    handleFieldChange('ticker', suggestion.ticker);
-    setShowSuggestions(false);
+    setFormData(prev => ({
+      ...prev,
+      ticker: suggestion.ticker,
+      name: suggestion.name || suggestion.ticker,
+      sector: suggestion.sector || '',
+      assetClass: suggestion.assetType || 'stocks',
+    }));
     setIsTickerSelected(true);
+    setShowSuggestions(false);
+    setSelectedSuggestionIndex(-1);
 
-    // Auto-fill data from suggestion
-    if (suggestion.name) {
-      handleFieldChange('name', suggestion.name);
-    }
-    if (suggestion.sector) {
-      handleFieldChange('sector', suggestion.sector);
-    }
-    if (suggestion.exchange) {
-      handleFieldChange('exchange', suggestion.exchange);
-    }
-    if (suggestion.country) {
-      handleFieldChange('country', suggestion.country);
-    }
-    if (suggestion.currency) {
-      handleFieldChange('currency', suggestion.currency);
-    }
-
-    // Get detailed asset info and current price
+    // Get additional asset information
     try {
-      const assetInfo = await getAssetInfo(suggestion.ticker);
-      setSelectedAssetInfo(assetInfo);
-
+      await getAssetInfo(suggestion.ticker);
       if (assetInfo) {
-        if (assetInfo.sector) handleFieldChange('sector', assetInfo.sector);
-        if (assetInfo.industry) handleFieldChange('industry', assetInfo.industry);
-        if (assetInfo.exchange) handleFieldChange('exchange', assetInfo.exchange);
-        if (assetInfo.currency) handleFieldChange('currency', assetInfo.currency);
-        if (assetInfo.country) handleFieldChange('country', assetInfo.country);
-      }
-
-      // Get current price
-      const price = await getAssetPrice(suggestion.ticker);
-      if (price) {
-        handleFieldChange('currentPrice', price);
+        setSelectedAssetInfo(assetInfo);
+        setFormData(prev => ({
+          ...prev,
+          currentPrice: assetInfo.currentPrice || 0,
+          sector: assetInfo.sector || prev.sector,
+          industry: assetInfo.industry || prev.industry,
+          country: assetInfo.country || prev.country,
+          exchange: assetInfo.exchange || prev.exchange,
+        }));
       }
     } catch (error) {
-      console.error('Error fetching asset info:', error);
+      console.warn('Failed to fetch asset info:', error);
     }
   };
 
@@ -280,38 +256,70 @@ export const AssetForm: React.FC<AssetFormProps> = ({
     });
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  // FIXED SUBMIT HANDLER
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    // Validate asset data
-    const validation = validateAsset(formData, existingTickers);
+    if (loading) return;
+
+    // Validation
+    const validation = validateAsset(formData);
     if (!validation.isValid) {
-      const errors: Record<string, string> = {};
-      validation.errors.forEach(error => {
-        if (error.includes('ticker')) errors.ticker = error;
-        if (error.includes('name')) errors.name = error;
-        if (error.includes('weight')) errors.weight = error;
-        if (error.includes('quantity')) errors.quantity = error;
-        if (error.includes('price')) {
-          if (error.includes('purchase')) {
-            errors.purchasePrice = error;
-          } else {
-            errors.currentPrice = error;
-          }
-        }
-      });
-      setValidationErrors(errors);
+      setValidationErrors(validation.errors);
       return;
     }
 
-    onSubmit(formData);
+    // Check for duplicate ticker (only for new assets)
+    if (!asset && existingTickers.includes(formData.ticker.toUpperCase())) {
+      setValidationErrors({ ticker: 'Asset already exists in portfolio' });
+      return;
+    }
+
+    try {
+      // Ensure weight is a number and keep as percentage (not decimal)
+      const submitData: AssetCreate = {
+        ...formData,
+        ticker: formData.ticker.toUpperCase(),
+        weight: formData.weight, // Keep weight as is for easy mode
+      };
+
+      console.log('Submitting asset:', submitData); // Debug log
+
+      await onSubmit(submitData);
+
+      // Reset form for new assets
+      if (!asset) {
+        setFormData({
+          ticker: '',
+          name: '',
+          weight: 0,
+          quantity: 0,
+          purchasePrice: 0,
+          purchaseDate: formatDate(new Date(), 'input'),
+          currentPrice: 0,
+          sector: '',
+          industry: '',
+          assetClass: 'stocks',
+          currency: 'USD',
+          country: '',
+          exchange: '',
+        });
+        setSearchQuery('');
+        setIsTickerSelected(false);
+        setSelectedAssetInfo(null);
+        setValidationErrors({});
+      }
+    } catch (error) {
+      console.error('Error submitting asset:', error);
+      setValidationErrors({ general: error instanceof Error ? error.message : 'Failed to add asset' });
+    }
   };
 
   const containerClasses = classNames(styles.container, className);
   const isEasyMode = mode === 'easy';
   const hasMultipleTabs = showTemplates || showImport;
 
-  // ✅ ФУНКЦИЯ ПЕРЕНЕСЕНА СЮДА - до использования!
+  // Render asset form
   const renderAssetForm = () => {
     return (
       <>
@@ -332,11 +340,11 @@ export const AssetForm: React.FC<AssetFormProps> = ({
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 error={validationErrors.ticker}
                 required
-                disabled={!!asset} // Disable editing ticker for existing assets
+                disabled={!!asset}
               />
 
-              {/* Search Suggestions */}
-              {showSuggestions && filteredSuggestions.length > 0 && (
+              {/* Suggestions Dropdown */}
+              {showSuggestions && (searchLoading || filteredSuggestions.length > 0) && (
                 <div className={styles.suggestions}>
                   {searchLoading && (
                     <div className={styles.loadingSuggestion}>
@@ -350,20 +358,16 @@ export const AssetForm: React.FC<AssetFormProps> = ({
                       key={suggestion.ticker}
                       ref={el => suggestionRefs.current[index] = el}
                       className={classNames(styles.suggestion, {
-                        [styles.selectedSuggestion]: index === selectedSuggestionIndex
+                        [styles.highlighted]: index === selectedSuggestionIndex
                       })}
                       onClick={() => handleSuggestionSelect(suggestion)}
                     >
                       <div className={styles.suggestionInfo}>
-                        <div className={styles.suggestionTicker}>
-                          {suggestion.ticker}
-                        </div>
-                        <div className={styles.suggestionName}>
-                          {suggestion.name}
-                        </div>
-                        {suggestion.exchange && (
-                          <div className={styles.suggestionExchange}>
-                            {suggestion.exchange}
+                        <div className={styles.suggestionTicker}>{suggestion.ticker}</div>
+                        <div className={styles.suggestionName}>{suggestion.name}</div>
+                        {suggestion.currentPrice && (
+                          <div className={styles.suggestionPrice}>
+                            ${suggestion.currentPrice.toFixed(2)}
                           </div>
                         )}
                       </div>
@@ -371,24 +375,11 @@ export const AssetForm: React.FC<AssetFormProps> = ({
                   ))}
                 </div>
               )}
-
-              {/* Asset Info Display */}
-              {selectedAssetInfo && (
-                <div className={styles.assetInfo}>
-                  <strong>{selectedAssetInfo.name}</strong>
-                  {selectedAssetInfo.currentPrice && (
-                    <span>Price: ${selectedAssetInfo.currentPrice.toFixed(2)}</span>
-                  )}
-                  {selectedAssetInfo.sector && (
-                    <Badge variant="secondary">{selectedAssetInfo.sector}</Badge>
-                  )}
-                </div>
-              )}
             </div>
 
             <Input
               label="Asset Name"
-              placeholder="e.g., Apple Inc."
+              placeholder="Asset name will be filled automatically"
               value={formData.name}
               onChange={(e) => handleFieldChange('name', e.target.value)}
               error={validationErrors.name}
@@ -421,7 +412,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
           <h4 className={styles.sectionTitle}>Position Details</h4>
 
           <div className={styles.row}>
-            <div className={styles.weightField}>
+            <div className={styles.weightGroup}>
               <Input
                 type="number"
                 label="Weight (%)"
@@ -490,6 +481,16 @@ export const AssetForm: React.FC<AssetFormProps> = ({
                 />
 
                 <Input
+                  type="date"
+                  label="Purchase Date"
+                  value={formData.purchaseDate}
+                  onChange={(e) => handleFieldChange('purchaseDate', e.target.value)}
+                  error={validationErrors.purchaseDate}
+                />
+              </div>
+
+              <div className={styles.row}>
+                <Input
                   type="number"
                   label="Current Price"
                   placeholder="0.00"
@@ -498,25 +499,35 @@ export const AssetForm: React.FC<AssetFormProps> = ({
                   error={validationErrors.currentPrice}
                   min="0"
                   step="0.01"
-                />
-              </div>
-
-              <div className={styles.row}>
-                <Input
-                  type="date"
-                  label="Purchase Date"
-                  value={formData.purchaseDate}
-                  onChange={(e) => handleFieldChange('purchaseDate', e.target.value)}
-                  max={formatDate(new Date(), 'input')}
+                  disabled={assetInfoLoading}
                 />
               </div>
             </>
           )}
         </div>
 
+        {/* Asset Information Display */}
+        {selectedAssetInfo && (
+          <div className={styles.assetInfo}>
+            <div className={styles.assetInfoRow}>
+              <span className={styles.assetInfoLabel}>Sector:</span>
+              <span className={styles.assetInfoValue}>{selectedAssetInfo.sector || 'N/A'}</span>
+            </div>
+            <div className={styles.assetInfoRow}>
+              <span className={styles.assetInfoLabel}>Country:</span>
+              <span className={styles.assetInfoValue}>{selectedAssetInfo.country || 'N/A'}</span>
+            </div>
+            <div className={styles.assetInfoRow}>
+              <span className={styles.assetInfoLabel}>Exchange:</span>
+              <span className={styles.assetInfoValue}>{selectedAssetInfo.exchange || 'N/A'}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Professional Mode Additional Fields */}
         {!isEasyMode && (
           <div className={styles.section}>
-            <h4 className={styles.sectionTitle}>Additional Information (Optional)</h4>
+            <h4 className={styles.sectionTitle}>Additional Information</h4>
 
             <div className={styles.row}>
               <Input

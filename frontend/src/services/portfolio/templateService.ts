@@ -91,8 +91,8 @@ class TemplateService {
           weight: 20,
           sector: 'Technology',
           assetClass: 'stocks',
-          description: 'Technology giant with strong moat',
-          rationale: 'Dominant market position and consistent cash flow'
+          description: 'Technology giant with strong brand moat',
+          rationale: 'Buffett\'s largest holding with strong fundamentals'
         },
         {
           ticker: 'KO',
@@ -101,7 +101,7 @@ class TemplateService {
           sector: 'Consumer Defensive',
           assetClass: 'stocks',
           description: 'Global beverage leader',
-          rationale: 'Strong brand moat and dividend history'
+          rationale: 'Classic Buffett holding with predictable cash flows'
         },
         {
           ticker: 'PG',
@@ -109,8 +109,8 @@ class TemplateService {
           weight: 10,
           sector: 'Consumer Defensive',
           assetClass: 'stocks',
-          description: 'Consumer staples giant',
-          rationale: 'Defensive characteristics and dividend aristocrat'
+          description: 'Consumer goods giant',
+          rationale: 'Dividend aristocrat with strong brands'
         },
         {
           ticker: 'JNJ',
@@ -118,8 +118,8 @@ class TemplateService {
           weight: 10,
           sector: 'Healthcare',
           assetClass: 'stocks',
-          description: 'Diversified healthcare company',
-          rationale: 'Stable cash flows and dividend growth'
+          description: 'Healthcare conglomerate',
+          rationale: 'Defensive characteristics with dividend growth'
         },
         {
           ticker: 'BAC',
@@ -128,7 +128,7 @@ class TemplateService {
           sector: 'Financial Services',
           assetClass: 'stocks',
           description: 'Major US bank',
-          rationale: 'Strong capital position and improving efficiency'
+          rationale: 'Buffett\'s preferred bank exposure'
         },
         {
           ticker: 'KHC',
@@ -137,38 +137,39 @@ class TemplateService {
           sector: 'Consumer Defensive',
           assetClass: 'stocks',
           description: 'Food and beverage company',
-          rationale: 'Turnaround story with strong brands'
+          rationale: 'Value play in consumer staples'
         },
         {
           ticker: 'AMZN',
-          name: 'Amazon.com',
+          name: 'Amazon',
           weight: 5,
           sector: 'Consumer Cyclical',
           assetClass: 'stocks',
           description: 'E-commerce and cloud leader',
-          rationale: 'Dominant market position and growth potential'
+          rationale: 'Growth component to the portfolio'
         }
       ]
     },
+
     {
       id: 'tech_giants',
       name: 'Tech Giants',
-      description: 'Growth-focused portfolio concentrated in major technology companies',
+      description: 'Growth-focused portfolio with leading technology companies',
       category: 'Growth',
       riskLevel: 'Aggressive',
       expectedReturn: '15-25% annually',
-      volatility: '20-30%',
-      tags: ['technology', 'growth', 'innovation', 'high-risk'],
+      volatility: '18-25%',
+      tags: ['growth', 'technology', 'high-risk', 'innovation'],
       created: '2024-01-01',
       popularity: 88,
       minInvestment: 5000,
-      rebalancingFrequency: 'Monthly',
-      targetAudience: 'Growth-oriented investors with high risk tolerance',
+      rebalancingFrequency: 'Semi-annually',
+      targetAudience: 'Growth-oriented investors',
       features: [
-        'Focus on technological innovation',
+        'Focus on technology leaders',
         'High growth potential',
-        'Market-leading companies',
-        'Digital transformation plays'
+        'Innovation-driven companies',
+        'Higher volatility'
       ],
       assets: [
         {
@@ -178,25 +179,25 @@ class TemplateService {
           sector: 'Technology',
           assetClass: 'stocks',
           description: 'Consumer electronics and services',
-          rationale: 'Ecosystem lock-in and strong cash generation'
+          rationale: 'Largest tech company by market cap'
         },
         {
           ticker: 'MSFT',
           name: 'Microsoft Corporation',
-          weight: 20,
+          weight: 25,
           sector: 'Technology',
           assetClass: 'stocks',
-          description: 'Cloud computing and productivity software',
-          rationale: 'Leading cloud platform and recurring revenue model'
+          description: 'Software and cloud services',
+          rationale: 'Enterprise software leader with cloud growth'
         },
         {
           ticker: 'GOOGL',
           name: 'Alphabet Inc.',
-          weight: 15,
+          weight: 20,
           sector: 'Technology',
           assetClass: 'stocks',
-          description: 'Search engine and digital advertising',
-          rationale: 'Dominant search market position and AI leadership'
+          description: 'Search and advertising giant',
+          rationale: 'Dominant position in digital advertising'
         },
         {
           ticker: 'AMZN',
@@ -204,17 +205,8 @@ class TemplateService {
           weight: 15,
           sector: 'Consumer Cyclical',
           assetClass: 'stocks',
-          description: 'E-commerce and cloud services',
-          rationale: 'Market leadership in e-commerce and cloud computing'
-        },
-        {
-          ticker: 'TSLA',
-          name: 'Tesla Inc.',
-          weight: 10,
-          sector: 'Consumer Cyclical',
-          assetClass: 'stocks',
-          description: 'Electric vehicles and clean energy',
-          rationale: 'Electric vehicle market leader and innovation'
+          description: 'E-commerce and cloud computing',
+          rationale: 'Leader in e-commerce and AWS cloud services'
         },
         {
           ticker: 'META',
@@ -231,143 +223,82 @@ class TemplateService {
           weight: 5,
           sector: 'Technology',
           assetClass: 'stocks',
-          description: 'Graphics processing and AI chips',
-          rationale: 'AI and machine learning hardware leader'
+          description: 'Graphics and AI chips',
+          rationale: 'AI and gaming hardware leader'
         }
       ]
     },
+
     {
-      id: 'sp500_top10',
-      name: 'S&P 500 Top 10',
-      description: 'Largest companies in the S&P 500 by market capitalization',
+      id: 'sp500_etf',
+      name: 'S&P 500 Index',
+      description: 'Simple and effective broad market exposure through ETFs',
       category: 'Market Cap Weighted',
       riskLevel: 'Moderate',
       expectedReturn: '8-12% annually',
       volatility: '15-20%',
-      tags: ['large-cap', 'diversified', 'market-cap-weighted', 'blue-chip'],
+      tags: ['index', 'diversified', 'low-cost', 'passive'],
       created: '2024-01-01',
       popularity: 92,
       minInvestment: 1000,
-      rebalancingFrequency: 'Quarterly',
-      targetAudience: 'Investors seeking broad market exposure',
+      rebalancingFrequency: 'Annually',
+      targetAudience: 'Beginner and long-term investors',
       features: [
-        'Market cap weighted allocation',
-        'Largest US companies',
-        'Sector diversification',
-        'Liquid and stable'
+        'Broad market exposure',
+        'Low fees',
+        'Passive management',
+        'Tax efficient'
       ],
       assets: [
         {
-          ticker: 'AAPL',
-          name: 'Apple Inc.',
-          weight: 12,
-          sector: 'Technology',
-          assetClass: 'stocks',
-          description: 'Largest US company by market cap',
-          rationale: 'Market leadership and strong fundamentals'
+          ticker: 'SPY',
+          name: 'SPDR S&P 500 ETF',
+          weight: 60,
+          sector: 'Diversified',
+          assetClass: 'etf',
+          description: 'Tracks S&P 500 index',
+          rationale: 'Core US large-cap exposure'
         },
         {
-          ticker: 'MSFT',
-          name: 'Microsoft Corporation',
-          weight: 10,
-          sector: 'Technology',
-          assetClass: 'stocks',
-          description: 'Cloud computing leader',
-          rationale: 'Strong competitive position in cloud services'
+          ticker: 'VTI',
+          name: 'Vanguard Total Stock Market ETF',
+          weight: 25,
+          sector: 'Diversified',
+          assetClass: 'etf',
+          description: 'Total US stock market',
+          rationale: 'Broader market exposure including small caps'
         },
         {
-          ticker: 'GOOGL',
-          name: 'Alphabet Inc.',
-          weight: 8,
-          sector: 'Technology',
-          assetClass: 'stocks',
-          description: 'Search and advertising giant',
-          rationale: 'Dominant search market position'
-        },
-        {
-          ticker: 'AMZN',
-          name: 'Amazon.com Inc.',
-          weight: 6,
-          sector: 'Consumer Cyclical',
-          assetClass: 'stocks',
-          description: 'E-commerce and cloud leader',
-          rationale: 'Market leadership in multiple segments'
-        },
-        {
-          ticker: 'TSLA',
-          name: 'Tesla Inc.',
-          weight: 4,
-          sector: 'Consumer Cyclical',
-          assetClass: 'stocks',
-          description: 'Electric vehicle pioneer',
-          rationale: 'Innovation leader in electric vehicles'
-        },
-        {
-          ticker: 'BRK.B',
-          name: 'Berkshire Hathaway',
-          weight: 3,
-          sector: 'Financial Services',
-          assetClass: 'stocks',
-          description: 'Diversified conglomerate',
-          rationale: 'Proven investment management track record'
-        },
-        {
-          ticker: 'META',
-          name: 'Meta Platforms',
-          weight: 3,
-          sector: 'Technology',
-          assetClass: 'stocks',
-          description: 'Social media leader',
-          rationale: 'Dominant social media platforms'
-        },
-        {
-          ticker: 'UNH',
-          name: 'UnitedHealth Group',
-          weight: 3,
-          sector: 'Healthcare',
-          assetClass: 'stocks',
-          description: 'Healthcare services leader',
-          rationale: 'Growing healthcare market exposure'
-        },
-        {
-          ticker: 'JNJ',
-          name: 'Johnson & Johnson',
-          weight: 3,
-          sector: 'Healthcare',
-          assetClass: 'stocks',
-          description: 'Diversified healthcare',
-          rationale: 'Stable healthcare cash flows'
-        },
-        {
-          ticker: 'NVDA',
-          name: 'NVIDIA Corporation',
-          weight: 3,
-          sector: 'Technology',
-          assetClass: 'stocks',
-          description: 'AI and graphics chips',
-          rationale: 'AI revolution beneficiary'
+          ticker: 'VXUS',
+          name: 'Vanguard Total International Stock ETF',
+          weight: 15,
+          sector: 'Diversified',
+          assetClass: 'etf',
+          description: 'International stocks',
+          rationale: 'Global diversification outside US'
         }
       ]
     },
+
     {
-      id: 'dividend_aristocrats',
-      name: 'Dividend Aristocrats',
-      description: 'Companies with 25+ years of consecutive dividend increases',
+      id: 'dividend_growth',
+      name: 'Dividend Growth',
+      description: 'Companies with consistent dividend increases and strong fundamentals',
       category: 'Dividend Growth',
       riskLevel: 'Conservative',
-      expectedReturn: '6-10% annually',
-      volatility: '8-12%',
-      tags: ['dividend', 'income', 'conservative', 'aristocrats'],
+      expectedReturn: '7-12% annually',
+      volatility: '10-15%',
+      tags: ['dividend', 'income', 'growth', 'defensive'],
       created: '2024-01-01',
-      popularity: 78,
-      minInvestment: 15000,
-      rebalancingFrequency: 'Semi-annually',
-      targetAudience: 'Income-focused investors seeking stability',
+      popularity: 85,
+      minInvestment: 10000,
+      rebalancingFrequency: 'Quarterly',
+      targetAudience: 'Income-focused investors',
       features: [
         'Consistent dividend growth',
-        'Established companies',
-        'Lower volatility',
-        'Inflation protection'
+        'Quality companies',
+        'Income generation',
+        'Lower volatility'
       ],
       assets: [
         {
@@ -376,8 +307,8 @@ class TemplateService {
           weight: 15,
           sector: 'Healthcare',
           assetClass: 'stocks',
-          description: 'Healthcare conglomerate',
-          rationale: '59 years of consecutive dividend increases'
+          description: 'Healthcare products and pharmaceuticals',
+          rationale: 'Dividend King with 59 years of increases'
         },
         {
           ticker: 'PG',
@@ -385,8 +316,8 @@ class TemplateService {
           weight: 15,
           sector: 'Consumer Defensive',
           assetClass: 'stocks',
-          description: 'Consumer products giant',
-          rationale: '66 years of consecutive dividend increases'
+          description: 'Consumer goods',
+          rationale: 'Dividend King with 67 years of increases'
         },
         {
           ticker: 'KO',
@@ -394,8 +325,8 @@ class TemplateService {
           weight: 12,
           sector: 'Consumer Defensive',
           assetClass: 'stocks',
-          description: 'Beverage leader',
-          rationale: '59 years of consecutive dividend increases'
+          description: 'Beverage company',
+          rationale: 'Dividend King with 61 years of increases'
         },
         {
           ticker: 'PEP',
@@ -403,8 +334,8 @@ class TemplateService {
           weight: 12,
           sector: 'Consumer Defensive',
           assetClass: 'stocks',
-          description: 'Food and beverage company',
-          rationale: '49 years of consecutive dividend increases'
+          description: 'Food and beverage',
+          rationale: 'Dividend Aristocrat with strong brands'
         },
         {
           ticker: 'WMT',
@@ -413,7 +344,7 @@ class TemplateService {
           sector: 'Consumer Defensive',
           assetClass: 'stocks',
           description: 'Retail giant',
-          rationale: '48 years of consecutive dividend increases'
+          rationale: 'Defensive retail with dividend growth'
         },
         {
           ticker: 'MCD',
@@ -421,8 +352,8 @@ class TemplateService {
           weight: 8,
           sector: 'Consumer Cyclical',
           assetClass: 'stocks',
-          description: 'Fast food chain',
-          rationale: '45 years of consecutive dividend increases'
+          description: 'Fast food restaurants',
+          rationale: 'Dividend Aristocrat with global presence'
         },
         {
           ticker: 'HD',
@@ -430,17 +361,17 @@ class TemplateService {
           weight: 8,
           sector: 'Consumer Cyclical',
           assetClass: 'stocks',
-          description: 'Home improvement retailer',
-          rationale: '33 years of consecutive dividend increases'
+          description: 'Home improvement retail',
+          rationale: 'Strong dividend growth and market position'
         },
         {
           ticker: 'MMM',
           name: '3M Company',
           weight: 7,
-          sector: 'Industrial',
+          sector: 'Industrials',
           assetClass: 'stocks',
           description: 'Diversified industrial',
-          rationale: '63 years of consecutive dividend increases'
+          rationale: 'Dividend King with innovation focus'
         },
         {
           ticker: 'CVX',
@@ -448,34 +379,96 @@ class TemplateService {
           weight: 7,
           sector: 'Energy',
           assetClass: 'stocks',
-          description: 'Oil and gas company',
-          rationale: '35 years of consecutive dividend increases'
+          description: 'Integrated oil company',
+          rationale: 'Energy exposure with dividend reliability'
         },
         {
           ticker: 'CAT',
           name: 'Caterpillar',
           weight: 6,
-          sector: 'Industrial',
+          sector: 'Industrials',
           assetClass: 'stocks',
-          description: 'Construction equipment',
-          rationale: '28 years of consecutive dividend increases'
+          description: 'Heavy machinery',
+          rationale: 'Cyclical play with dividend growth'
+        }
+      ]
+    },
+
+    {
+      id: 'balanced_portfolio',
+      name: 'Balanced Portfolio',
+      description: 'Mix of stocks, bonds, and other assets for moderate risk',
+      category: 'Risk Balanced',
+      riskLevel: 'Moderate',
+      expectedReturn: '6-10% annually',
+      volatility: '8-12%',
+      tags: ['balanced', 'diversified', 'moderate', 'allocation'],
+      created: '2024-01-01',
+      popularity: 90,
+      minInvestment: 5000,
+      rebalancingFrequency: 'Quarterly',
+      targetAudience: 'Moderate risk investors',
+      features: [
+        'Asset diversification',
+        'Risk management',
+        'Steady returns',
+        'Rebalancing strategy'
+      ],
+      assets: [
+        {
+          ticker: 'VTI',
+          name: 'Vanguard Total Stock Market ETF',
+          weight: 40,
+          sector: 'Diversified',
+          assetClass: 'etf',
+          description: 'US total stock market',
+          rationale: 'Core equity exposure'
+        },
+        {
+          ticker: 'VXUS',
+          name: 'Vanguard Total International Stock ETF',
+          weight: 20,
+          sector: 'Diversified',
+          assetClass: 'etf',
+          description: 'International stocks',
+          rationale: 'International diversification'
+        },
+        {
+          ticker: 'BND',
+          name: 'Vanguard Total Bond Market ETF',
+          weight: 25,
+          sector: 'Fixed Income',
+          assetClass: 'bonds',
+          description: 'US bond market',
+          rationale: 'Fixed income stability'
+        },
+        {
+          ticker: 'VTEB',
+          name: 'Vanguard Tax-Exempt Bond ETF',
+          weight: 10,
+          sector: 'Fixed Income',
+          assetClass: 'bonds',
+          description: 'Municipal bonds',
+          rationale: 'Tax-efficient income'
+        },
+        {
+          ticker: 'VNQ',
+          name: 'Vanguard Real Estate ETF',
+          weight: 5,
+          sector: 'Real Estate',
+          assetClass: 'etf',
+          description: 'Real estate investment trusts',
+          rationale: 'Real estate diversification'
         }
       ]
     }
   ];
 
   /**
-   * Get all available templates
+   * Get all templates
    */
   getTemplates(): PortfolioTemplate[] {
-    return [...this.templates];
-  }
-
-  /**
-   * Get templates by category
-   */
-  getTemplatesByCategory(category: string): PortfolioTemplate[] {
-    return this.templates.filter(template => template.category === category);
+    return this.templates;
   }
 
   /**
@@ -486,9 +479,16 @@ class TemplateService {
   }
 
   /**
+   * Get templates by category
+   */
+  getTemplatesByCategory(category: string): PortfolioTemplate[] {
+    return this.templates.filter(template => template.category === category);
+  }
+
+  /**
    * Get template categories
    */
-  getCategories(): TemplateCategory[] {
+  getTemplateCategories(): TemplateCategory[] {
     const categories = new Map<string, TemplateCategory>();
 
     this.templates.forEach(template => {
@@ -542,15 +542,23 @@ class TemplateService {
   }
 
   /**
-   * Convert template to asset creation format
+   * FIXED: Convert template to asset creation format
+   * Weights are already in percentage format (0-100), no need to divide by 100
    */
   templateToAssets(template: PortfolioTemplate): AssetCreate[] {
     return template.assets.map(asset => ({
       ticker: asset.ticker,
       name: asset.name,
-      weight: asset.weight / 100, // Convert percentage to decimal
+      weight: asset.weight, // Keep weight as percentage (DO NOT divide by 100)
       sector: asset.sector,
       assetClass: asset.assetClass,
+      quantity: 0,
+      purchasePrice: 0,
+      currentPrice: 0,
+      purchaseDate: new Date().toISOString().split('T')[0],
+      currency: 'USD',
+      country: 'United States',
+      exchange: 'NASDAQ',
     }));
   }
 

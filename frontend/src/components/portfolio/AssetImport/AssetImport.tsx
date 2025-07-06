@@ -1,6 +1,6 @@
 /**
- * AssetImport Component
- * Import assets from CSV file or text paste
+ * AssetImport Component - FIXED
+ * Import assets from CSV file or text paste with proper method selection
  */
 import React, { useState, useRef } from 'react';
 import classNames from 'classnames';
@@ -40,7 +40,7 @@ export const AssetImport: React.FC<AssetImportProps> = ({
 }) => {
   const [importText, setImportText] = useState('');
   const [parsedAssets, setParsedAssets] = useState<ParsedAsset[]>([]);
-  const [importMethod, setImportMethod] = useState<'csv' | 'text'>('text');
+  const [importMethod, setImportMethod] = useState<'csv' | 'text'>('text'); // FIXED: Default to text
   const [errors, setErrors] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -196,6 +196,7 @@ export const AssetImport: React.FC<AssetImportProps> = ({
     reader.onload = (e) => {
       const content = e.target?.result as string;
       setImportMethod('csv');
+      setImportText(content);
       handleTextChange(content);
     };
     reader.readAsText(file);
@@ -253,24 +254,25 @@ AMZN 10%`;
       <div className={styles.methodSelector}>
         <div className={styles.methodButtons}>
           <Button
-            variant={importMethod === 'text' ? 'primary' : 'ghost'}
+            variant={importMethod === 'text' ? 'primary' : 'secondary'}
             onClick={() => setImportMethod('text')}
             size="small"
           >
-            📝 Paste Text
+            📝 Text Import
           </Button>
           <Button
-            variant={importMethod === 'csv' ? 'primary' : 'ghost'}
+            variant={importMethod === 'csv' ? 'primary' : 'secondary'}
             onClick={() => setImportMethod('csv')}
             size="small"
           >
-            📄 CSV File
+            📊 CSV Import
           </Button>
         </div>
       </div>
 
       <div className={styles.importArea}>
-        {importMethod === 'csv' ? (
+        {/* CSV File Upload Section */}
+        {importMethod === 'csv' && (
           <div className={styles.fileUpload}>
             <input
               ref={fileInputRef}
@@ -290,8 +292,9 @@ AMZN 10%`;
               Or paste CSV data below
             </p>
           </div>
-        ) : null}
+        )}
 
+        {/* Text Area for Both Methods */}
         <div className={styles.textArea}>
           <Input
             label={importMethod === 'csv' ? 'CSV Data' : 'Asset List'}
@@ -304,6 +307,7 @@ AMZN 10%`;
           />
         </div>
 
+        {/* Example Format */}
         <div className={styles.example}>
           <h4>Example Format:</h4>
           <pre className={styles.exampleText}>
@@ -312,6 +316,7 @@ AMZN 10%`;
         </div>
       </div>
 
+      {/* Error Messages */}
       {errors.length > 0 && (
         <div className={styles.errors}>
           {errors.map((error, index) => (
@@ -322,6 +327,7 @@ AMZN 10%`;
         </div>
       )}
 
+      {/* Assets Preview */}
       {parsedAssets.length > 0 && (
         <div className={styles.preview}>
           <h3>Preview ({parsedAssets.length} assets)</h3>
@@ -354,7 +360,7 @@ AMZN 10%`;
                     <span className={styles.assetTicker}>{asset.ticker}</span>
                     <div className={styles.assetErrors}>
                       {asset.errors.map((error, i) => (
-                        <Badge key={i} color="error" size="small">
+                        <Badge key={i} variant="error" size="small">
                           {error}
                         </Badge>
                       ))}
@@ -367,10 +373,11 @@ AMZN 10%`;
         </div>
       )}
 
+      {/* Action Buttons */}
       <div className={styles.actions}>
         <Button
           onClick={onCancel || onClose}
-          variant="ghost"
+          variant="secondary"
         >
           Cancel
         </Button>
@@ -384,6 +391,11 @@ AMZN 10%`;
       </div>
     </div>
   );
+
+  // Don't render Modal if used as standalone component
+  if (!isOpen) {
+    return content;
+  }
 
   return (
     <Modal
