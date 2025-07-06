@@ -1,9 +1,10 @@
-/* src/components/common/Table/Table.module.css */
+/* src/components/common/Table/Table.module.css - ORIGINAL WITH REMOVED CONTAINER BORDER */
 .tableContainer {
-  background-color: rgba(42, 46, 57, 0.3);
-  border-radius: var(--border-radius-m);
+  background-color: transparent;
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: var(--shadow-card);
+  box-shadow: none;
+  border: none;
 }
 
 .tableTitle {

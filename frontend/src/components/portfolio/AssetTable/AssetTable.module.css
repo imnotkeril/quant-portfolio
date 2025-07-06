@@ -1,18 +1,70 @@
 /**
- * AssetTable Styles for Wild Market Capital
+ * AssetTable Styles for Wild Market Capital - NO CONTAINER BORDERS
  */
 
 .table {
   width: 100%;
-  background-color: var(--card-background);
-  border-radius: var(--border-radius-s);
-  overflow: hidden;
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+  box-shadow: none;
 }
 
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-m);
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-light);
+}
+
+.headerStats {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+}
+
+.totalWeight {
+  font-size: var(--font-size-body);
+  color: var(--color-text-secondary);
+}
+
+.totalWeight strong {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semi-bold);
+}
+
+.totalStats {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+}
+
+.statValue {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+.deleteAllButton {
+  font-size: var(--font-size-caption);
+}
+
+/* Asset cells */
 .tickerCell {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
+  padding: var(--spacing-s) 0;
 }
 
 .ticker {
@@ -29,6 +81,17 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 150px;
+}
+
+.weight {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+}
+
+.price, .value, .quantity {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  font-family: var(--font-family-mono, monospace);
 }
 
 .pnlCell {
@@ -86,6 +149,10 @@
   padding: var(--spacing-xs);
   min-width: auto;
   height: auto;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: color var(--transition-fast);
 }
 
 .actions button:hover {
@@ -94,6 +161,24 @@
 
 .actions button:last-child:hover {
   color: var(--color-negative);
+}
+
+/* Loading and empty states */
+.loadingState, .emptyState {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--color-text-secondary);
+}
+
+.emptyState h4 {
+  margin: 0 0 var(--spacing-s) 0;
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: var(--font-size-body);
 }
 
 /* Responsive design */
@@ -114,6 +199,12 @@
   .actions button {
     font-size: 10px;
     padding: 2px var(--spacing-xs);
+  }
+
+  .headerStats {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--spacing-xs);
   }
 }
 

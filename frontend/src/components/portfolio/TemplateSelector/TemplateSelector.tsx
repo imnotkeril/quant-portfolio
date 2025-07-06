@@ -38,11 +38,15 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   const [showPreview, setShowPreview] = useState<PortfolioTemplate | null>(null);
 
   const handleUseTemplate = (template: PortfolioTemplate) => {
-    // Convert template assets to AssetCreate format
+    // Calculate total weight to normalize if needed
+    const totalWeight = template.assets.reduce((sum, asset) => sum + asset.weight, 0);
+
+    // Convert template assets to AssetCreate format with normalized weights
     const assets: AssetCreate[] = template.assets.map((asset, index) => ({
       ticker: asset.ticker,
       name: asset.name,
-      weight: asset.weight,
+      // Normalize weight to ensure total is 100%
+      weight: totalWeight > 0 ? (asset.weight / totalWeight) * 100 : 0,
       sector: asset.sector,
       assetClass: asset.assetClass,
       currency: 'USD',
@@ -82,43 +86,51 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
           <div className={styles.previewHeader}>
             <div className={styles.previewIcon}>{showPreview.icon}</div>
             <div className={styles.previewInfo}>
+              <h4 className={styles.previewTitle}>{showPreview.name}</h4>
               <p className={styles.previewDescription}>{showPreview.description}</p>
-              <div className={styles.previewStats}>
-                <Badge color={getRiskColor(showPreview.riskLevel)}>
-                  {showPreview.riskLevel.toUpperCase()} RISK
+              <div className={styles.previewTags}>
+                <Badge variant={getRiskColor(showPreview.riskLevel)} size="small">
+                  {showPreview.riskLevel} risk
                 </Badge>
-                <span className={styles.previewReturn}>{showPreview.expectedReturn}</span>
+                <Badge variant="default" size="small">
+                  {showPreview.timeHorizon}
+                </Badge>
+                <Badge variant="default" size="small">
+                  {showPreview.expectedReturn}
+                </Badge>
               </div>
             </div>
           </div>
 
-          <div className={styles.assetsList}>
-            <h4>Portfolio Assets ({showPreview.assets.length})</h4>
-            <div className={styles.assetsTable}>
-              <div className={styles.tableHeader}>
-                <span>Symbol</span>
-                <span>Name</span>
-                <span>Weight</span>
-                <span>Sector</span>
-              </div>
+          <div className={styles.previewAssets}>
+            <h5>Assets ({showPreview.assets.length} holdings)</h5>
+            <div className={styles.assetsList}>
               {showPreview.assets.map((asset, index) => (
-                <div key={index} className={styles.assetRow}>
-                  <span className={styles.assetTicker}>{asset.ticker}</span>
-                  <span className={styles.assetName}>{asset.name}</span>
-                  <span className={styles.assetWeight}>{asset.weight}%</span>
-                  <span className={styles.assetSector}>
-                    <Badge variant="secondary" size="small">{asset.sector}</Badge>
-                  </span>
+                <div key={index} className={styles.previewAsset}>
+                  <div className={styles.assetInfo}>
+                    <span className={styles.assetTicker}>{asset.ticker}</span>
+                    <span className={styles.assetName}>{asset.name}</span>
+                  </div>
+                  <div className={styles.assetDetails}>
+                    <span className={styles.assetWeight}>{asset.weight}%</span>
+                    <span className={styles.assetSector}>{asset.sector}</span>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
           <div className={styles.previewActions}>
-            <Button variant="secondary" onClick={() => setShowPreview(null)}>
+            <Button
+              variant="secondary"
+              onClick={() => setShowPreview(null)}
+            >
               Back
             </Button>
-            <Button variant="primary" onClick={() => handleUseTemplate(showPreview)}>
+            <Button
+              variant="primary"
+              onClick={() => handleUseTemplate(showPreview)}
+            >
               Use This Template
             </Button>
           </div>
@@ -130,12 +142,12 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   return (
     <div className={containerClasses} data-testid={testId}>
       <div className={styles.header}>
-        <h3>Choose a Portfolio Template</h3>
-        <p>Select a pre-built portfolio strategy to get started quickly</p>
+        <h3>Choose a Template</h3>
+        <p>Start with a pre-built portfolio strategy</p>
       </div>
 
       <div className={styles.templatesGrid}>
-        {PORTFOLIO_TEMPLATES.map((template) => (
+        {PORTFOLIO_TEMPLATES.map(template => (
           <div
             key={template.id}
             className={classNames(styles.templateCard, {
@@ -149,22 +161,22 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                 <h4 className={styles.cardTitle}>{template.name}</h4>
                 <p className={styles.cardDescription}>{template.description}</p>
               </div>
-              <Badge
-                color={getRiskColor(template.riskLevel)}
-                size="small"
-              >
-                {template.riskLevel.charAt(0).toUpperCase() + template.riskLevel.slice(1)}
-              </Badge>
             </div>
 
             <div className={styles.cardStats}>
               <div className={styles.stat}>
-                <span className={styles.statLabel}>Expected Return</span>
+                <span className={styles.statLabel}>Risk</span>
+                <Badge variant={getRiskColor(template.riskLevel)} size="small">
+                  {template.riskLevel}
+                </Badge>
+              </div>
+              <div className={styles.stat}>
+                <span className={styles.statLabel}>Return</span>
                 <span className={styles.statValue}>{template.expectedReturn}</span>
               </div>
               <div className={styles.stat}>
-                <span className={styles.statLabel}>Assets</span>
-                <span className={styles.statValue}>{template.assets.length}</span>
+                <span className={styles.statLabel}>Timeline</span>
+                <span className={styles.statValue}>{template.timeHorizon}</span>
               </div>
             </div>
 

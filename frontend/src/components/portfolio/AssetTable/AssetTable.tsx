@@ -1,18 +1,20 @@
 /**
- * AssetTable Component - FIXED
- * Table for displaying portfolio assets with working Edit/Delete actions
+ * AssetTable Component - ENHANCED WITH REAL API PRICES
+ * Table for displaying portfolio assets with Price, Value, Quantity columns
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { Table } from '../../common/Table';
 import { Button } from '../../common/Button';
 import { Badge } from '../../common/Badge';
 import { Asset, AssetCreate } from '../../../types/portfolio';
 import { formatCurrency, formatPercentage, formatDate } from '../../../utils/formatters';
+import { useAssets } from '../../../hooks/useAssets';
 import styles from './AssetTable.module.css';
 
 interface AssetTableProps {
   assets: Asset[] | AssetCreate[];
+  portfolioValue?: number; // Total portfolio value for calculations
   loading?: boolean;
   onEdit?: (asset: Asset | AssetCreate) => void;
   onDelete?: (ticker: string) => void;
@@ -31,11 +33,12 @@ interface TableColumn {
   dataIndex?: string;
   width?: number;
   render?: (value: any, record: Asset | AssetCreate) => React.ReactNode;
-  sorter?: boolean;
+  sortable?: boolean;
 }
 
 export const AssetTable: React.FC<AssetTableProps> = ({
   assets = [],
+  portfolioValue = 100000, // Default $100k portfolio
   loading = false,
   onEdit,
   onDelete,
@@ -47,6 +50,78 @@ export const AssetTable: React.FC<AssetTableProps> = ({
   className,
   'data-testid': testId,
 }) => {
+  const { getMultipleAssetPrices } = useAssets();
+  const [assetPrices, setAssetPrices] = useState<Record<string, number>>({});
+  const [pricesLoading, setPricesLoading] = useState(false);
+
+  // Load prices for assets that don't have currentPrice
+  useEffect(() => {
+    const assetsNeedingPrices = assets.filter(asset =>
+      !('currentPrice' in asset && asset.currentPrice && asset.currentPrice > 0) &&
+      !('purchasePrice' in asset && asset.purchasePrice && asset.purchasePrice > 0)
+    );
+
+    console.log('Assets needing prices:', assetsNeedingPrices.map(a => a.ticker));
+
+    if (assetsNeedingPrices.length > 0) {
+      const loadPrices = async () => {
+        setPricesLoading(true);
+        try {
+          const tickers = assetsNeedingPrices.map(asset => asset.ticker);
+          console.log('Fetching prices for tickers:', tickers);
+
+          const prices = await getMultipleAssetPrices(tickers);
+          console.log('Received prices from API:', prices);
+
+          // Filter out null prices and convert to our format
+          const validPrices: Record<string, number> = {};
+          Object.entries(prices).forEach(([ticker, price]) => {
+            if (price !== null && price > 0) {
+              validPrices[ticker.toUpperCase()] = price;
+            }
+          });
+
+          console.log('Valid prices after filtering:', validPrices);
+          setAssetPrices(validPrices);
+        } catch (error) {
+          console.error('Error loading asset prices:', error);
+        } finally {
+          setPricesLoading(false);
+        }
+      };
+
+      loadPrices();
+    }
+  }, [assets, getMultipleAssetPrices]);
+
+  // Helper function to get asset price (use record data first)
+  const getAssetPrice = (record: Asset | AssetCreate): number => {
+    const ticker = record.ticker.toUpperCase();
+
+    // PRIORITY 1: currentPrice from record data
+    if ('currentPrice' in record && record.currentPrice && record.currentPrice > 0) {
+      console.log(`Using currentPrice for ${ticker}:`, record.currentPrice);
+      return record.currentPrice;
+    }
+
+    // PRIORITY 2: purchasePrice from record data
+    if ('purchasePrice' in record && record.purchasePrice && record.purchasePrice > 0) {
+      console.log(`Using purchasePrice for ${ticker}:`, record.purchasePrice);
+      return record.purchasePrice;
+    }
+
+    // PRIORITY 3: loaded API price (if available)
+    const apiPrice = assetPrices[ticker];
+    if (apiPrice && apiPrice > 0) {
+      console.log(`Using API price for ${ticker}:`, apiPrice);
+      return apiPrice;
+    }
+
+    // FALLBACK: $100 (only if no data available)
+    console.log(`Using fallback price for ${ticker}: $100`);
+    return 100;
+  };
+
   // Check if assets have P&L data
   const hasPositionValue = assets.some(asset =>
     'positionValue' in asset || 'profitLoss' in asset
@@ -59,65 +134,110 @@ export const AssetTable: React.FC<AssetTableProps> = ({
     return assets.reduce((sum, asset) => sum + (asset.weight || 0), 0);
   }, [assets]);
 
+  // Helper function to calculate quantity (whole shares only)
+  const calculateQuantity = (weight: number, price: number) => {
+    if (!price || price <= 0) return 0;
+    const targetValue = (weight / 100) * portfolioValue;
+    return Math.floor(targetValue / price);
+  };
+
+  // Helper function to calculate ACTUAL value (quantity × price)
+  const calculateActualValue = (weight: number, price: number) => {
+    const quantity = calculateQuantity(weight, price);
+    return quantity * price;
+  };
+
   // Define table columns
   const columns: TableColumn[] = useMemo(() => {
     const cols: TableColumn[] = [
       {
-        key: 'ticker',
+        key: 'asset',
         title: 'Asset',
         width: 180,
-        render: (_, record) => (
+        render: (value, record) => (
           <div className={styles.tickerCell}>
             <div className={styles.ticker}>{record.ticker}</div>
             <div className={styles.assetName}>{record.name || record.ticker}</div>
           </div>
         ),
-        sorter: true,
+        sortable: true,
       },
       {
         key: 'weight',
         title: 'Weight',
-        width: 100,
-        render: (_, record) => (
+        width: 80,
+        render: (value, record) => (
           <span className={styles.weight}>
-            {formatPercentage(record.weight || 0)}
+            {formatPercentage((record.weight || 0) / 100)}
           </span>
         ),
-        sorter: true,
+        sortable: true,
       },
-    ];
-
-    // Add quantity column if assets have quantity data
-    const hasQuantity = assets.some(asset => 'quantity' in asset && asset.quantity);
-    if (hasQuantity) {
-      cols.push({
-        key: 'quantity',
-        title: 'Quantity',
-        width: 100,
-        render: (_, record) => (
-          'quantity' in record && record.quantity !== undefined
-            ? record.quantity.toLocaleString()
-            : '-'
-        ),
-        sorter: true,
-      });
-    }
-
-    // Add current price column if assets have price data
-    const hasCurrentPrice = assets.some(asset => 'currentPrice' in asset && asset.currentPrice);
-    if (hasCurrentPrice) {
-      cols.push({
-        key: 'currentPrice',
+      {
+        key: 'price',
         title: 'Price',
         width: 100,
-        render: (_, record) => (
-          'currentPrice' in record && record.currentPrice !== undefined
-            ? formatCurrency(record.currentPrice, record.currency || 'USD')
-            : '-'
-        ),
-        sorter: true,
-      });
-    }
+        render: (value, record) => {
+          const price = getAssetPrice(record);
+          const isLoadingPrice = pricesLoading &&
+            !('currentPrice' in record && record.currentPrice) &&
+            !assetPrices[record.ticker.toUpperCase()];
+
+          return (
+            <span className={styles.price}>
+              {isLoadingPrice ? '...' : formatCurrency(price, record.currency || 'USD')}
+            </span>
+          );
+        },
+        sortable: true,
+      },
+      {
+        key: 'value',
+        title: 'Value',
+        width: 120,
+        render: (value, record) => {
+          const price = getAssetPrice(record);
+          const isLoadingPrice = pricesLoading &&
+            !('currentPrice' in record && record.currentPrice) &&
+            !assetPrices[record.ticker.toUpperCase()];
+
+          if (isLoadingPrice) {
+            return <span className={styles.value}>...</span>;
+          }
+
+          const actualValue = calculateActualValue(record.weight || 0, price);
+          return (
+            <span className={styles.value}>
+              {formatCurrency(actualValue, 'USD')}
+            </span>
+          );
+        },
+        sortable: true,
+      },
+      {
+        key: 'quantity',
+        title: 'Shares',
+        width: 100,
+        render: (value, record) => {
+          const price = getAssetPrice(record);
+          const isLoadingPrice = pricesLoading &&
+            !('currentPrice' in record && record.currentPrice) &&
+            !assetPrices[record.ticker.toUpperCase()];
+
+          if (isLoadingPrice) {
+            return <span className={styles.quantity}>...</span>;
+          }
+
+          const quantity = calculateQuantity(record.weight || 0, price);
+          return (
+            <span className={styles.quantity}>
+              {quantity.toLocaleString()}
+            </span>
+          );
+        },
+        sortable: true,
+      },
+    ];
 
     // Add sector column
     const hasSector = assets.some(asset => asset.sector);
@@ -126,7 +246,7 @@ export const AssetTable: React.FC<AssetTableProps> = ({
         key: 'sector',
         title: 'Sector',
         width: 140,
-        render: (_, record) => (
+        render: (value, record) => (
           <div className={styles.sectorCell}>
             <div>{record.sector || '-'}</div>
             {record.industry && (
@@ -134,7 +254,7 @@ export const AssetTable: React.FC<AssetTableProps> = ({
             )}
           </div>
         ),
-        sorter: true,
+        sortable: true,
       });
     }
 
@@ -144,7 +264,7 @@ export const AssetTable: React.FC<AssetTableProps> = ({
         key: 'pnl',
         title: 'P&L',
         width: 120,
-        render: (_, record) => {
+        render: (value, record) => {
           if (!('profitLoss' in record) || record.profitLoss === undefined) {
             return '-';
           }
@@ -162,163 +282,123 @@ export const AssetTable: React.FC<AssetTableProps> = ({
               </div>
               {profitLossPercent !== null && (
                 <div className={styles.pnlPercent}>
-                  {formatPercentage(profitLossPercent)}
+                  {formatPercentage(profitLossPercent / 100)}
                 </div>
               )}
             </div>
           );
         },
-        sorter: true,
+        sortable: true,
       });
     }
 
-    // Add purchase date column if available
-    const hasPurchaseDate = assets.some(asset => 'purchaseDate' in asset && asset.purchaseDate);
-    if (hasPurchaseDate) {
+    // Add actions column
+    if (showActions && (onEdit || onDelete)) {
       cols.push({
-        key: 'purchaseDate',
-        title: 'Purchase Date',
+        key: 'actions',
+        title: 'Actions',
         width: 120,
-        render: (_, record) => (
-          'purchaseDate' in record && record.purchaseDate
-            ? formatDate(record.purchaseDate, 'short')
-            : '-'
+        render: (value, record) => (
+          <div className={styles.actions}>
+            {onEdit && (
+              <Button
+                variant="ghost"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(record);
+                }}
+              >
+                Edit
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                variant="ghost"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(record.ticker);
+                }}
+              >
+                Delete
+              </Button>
+            )}
+          </div>
         ),
-        sorter: true,
       });
     }
 
     return cols;
-  }, [assets, showPnLColumn]);
+  }, [assets, portfolioValue, showPnLColumn, showActions, onEdit, onDelete, assetPrices, pricesLoading]);
 
-    // FIXED: Add actions column if edit/delete handlers provided
-    const finalColumns = useMemo(() => {
-      const cols = [...columns];
-
-      if (showActions && (onEdit || onDelete)) {
-        cols.push({
-          key: 'actions',
-          title: 'Actions',
-          width: 120,
-          render: (_, record) => (
-            <div className={styles.actions}>
-              {onEdit && (
-                <Button
-                  variant="text"
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    console.log('Edit clicked for:', record); // Debug log
-                    onEdit(record); // Pass the whole record object
-                  }}
-                  aria-label={`Edit ${record.ticker}`}
-                  className={styles.editButton}
-                >
-                  Edit
-                </Button>
-              )}
-              {onDelete && (
-                <Button
-                  variant="text"
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    console.log('Delete clicked for:', record.ticker); // Debug log
-                    // Confirm deletion
-                    if (window.confirm(`Are you sure you want to delete ${record.ticker}?`)) {
-                      onDelete(record.ticker); // Pass only the ticker string
-                    }
-                  }}
-                  aria-label={`Delete ${record.ticker}`}
-                  className={styles.deleteButton}
-                >
-                  Delete
-                </Button>
-              )}
-            </div>
-          ),
-        });
-      }
-
-      return cols;
-    }, [columns, showActions, onEdit, onDelete]);
-
-  const tableClasses = classNames(styles.table, className);
-
-  // Custom table header with Delete All button
-  const tableHeader = useMemo(() => {
-    if (!showDeleteAll || !onDeleteAll || assets.length === 0) {
-      return null;
+  // Handle row click
+  const handleRowClick = (record: Asset | AssetCreate) => {
+    if (onRowClick) {
+      onRowClick(record);
     }
+  };
 
+  // Calculate total portfolio value (actual, not target)
+  const totalPortfolioValue = useMemo(() => {
+    return assets.reduce((sum, asset) => {
+      const price = getAssetPrice(asset);
+      return sum + calculateActualValue(asset.weight || 0, price);
+    }, 0);
+  }, [assets, portfolioValue, assetPrices]);
+
+  if (loading) {
     return (
-      <div className={styles.tableHeader}>
-        <div className={styles.headerInfo}>
-          <span className={styles.assetCount}>
-            {assets.length} assets
-          </span>
-          <span className={styles.totalWeight}>
-            Total allocation: {formatPercentage(totalWeight)}
-            {totalWeight !== 100 && (
-              <Badge
-                variant={totalWeight > 100 ? 'error' : 'warning'}
-                size="small"
-                className={styles.allocationBadge}
-              >
-                {totalWeight > 100 ? 'Over-allocated' : 'Under-allocated'}
-              </Badge>
-            )}
-          </span>
-        </div>
-
-        <div className={styles.headerActions}>
-          <Button
-            variant="text"
-            size="small"
-            onClick={() => {
-              if (window.confirm(`Are you sure you want to delete all ${assets.length} assets?`)) {
-                onDeleteAll();
-              }
-            }}
-            className={styles.deleteAllButton}
-            disabled={assets.length === 0}
-          >
-            🗑️ Delete All
-          </Button>
+      <div className={classNames(styles.table, className)}>
+        <div className={styles.loadingState}>
+          Loading assets...
         </div>
       </div>
     );
-  }, [showDeleteAll, onDeleteAll, assets.length, totalWeight]);
+  }
 
-  const emptyState = (
-    <div className={styles.emptyState}>
-      <div className={styles.emptyIcon}>📊</div>
-      <h3>No assets found</h3>
-      <p>Add some assets to start building your portfolio</p>
-    </div>
-  );
+  if (assets.length === 0) {
+    return (
+      <div className={classNames(styles.table, className)}>
+        <div className={styles.emptyState}>
+          <h4>No assets yet</h4>
+          <p>Add your first asset to get started</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className={tableClasses} data-testid={testId}>
-      {tableHeader}
+    <div className={classNames(styles.table, className)} data-testid={testId}>
+      {/* Header with portfolio stats */}
+      <div className={styles.header}>
+        <h3>Current Portfolio ({assets.length} assets)</h3>
+        <div className={styles.headerStats}>
+          <span className={styles.totalStats}>
+            Total Weight: <span className={styles.statValue}>{formatPercentage(totalWeight / 100)}</span> Total Value: <span className={styles.statValue}>{pricesLoading ? '...' : formatCurrency(totalPortfolioValue, 'USD')}</span>
+          </span>
+          {showDeleteAll && onDeleteAll && assets.length > 0 && (
+            <Button
+              variant="outline"
+              size="small"
+              onClick={onDeleteAll}
+              className={styles.deleteAllButton}
+            >
+              Clear All
+            </Button>
+          )}
+        </div>
+      </div>
 
+      {/* Table without any additional header */}
       <Table
-        columns={finalColumns}
         data={assets}
+        columns={columns}
         rowKey="ticker"
-        loading={loading}
-        onRowClick={onRowClick ? (record) => onRowClick(record) : undefined}
-        pagination={assets.length > 10 ? {
-          current: 1,
-          pageSize: 10,
-          total: assets.length,
-          showSizeChanger: true,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} assets`,
-        } : false}
-        emptyText={emptyState}
-        size="middle"
-        className={styles.tableContent}
+        onRowClick={handleRowClick ? (record, index, event) => handleRowClick(record) : undefined}
+        pagination={false}
+        size="small"
+        showHeader={true}
       />
     </div>
   );
