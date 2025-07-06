@@ -731,7 +731,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
               onImport={handleImport}
               onCancel={() => setActiveTab('form')}
               existingTickers={existingTickers}
-              isOpen={true}
+              isOpen={false}
               onClose={() => setActiveTab('form')}
             />
           </Tabs.TabPane>

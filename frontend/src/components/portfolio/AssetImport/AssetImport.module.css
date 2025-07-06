@@ -1,8 +1,10 @@
-/* AssetImport.module.css */
+/* AssetImport.module.css - FIXED */
 
 .container {
   max-width: 700px;
   margin: 0 auto;
+  padding: 0 var(--spacing-m); /* ✅ FIXED: Add padding for better centering */
+  width: 100%; /* ✅ FIXED: Ensure full width */
 }
 
 .header {
@@ -101,10 +103,10 @@
 
 .error {
   padding: 8px 12px;
-  background-color: rgba(var(--color-error-rgb), 0.1);
-  border: 1px solid var(--color-error);
+  background-color: rgba(250, 161, 164, 0.1);
+  border: 1px solid rgba(250, 161, 164, 0.3);
   border-radius: 6px;
-  color: var(--color-error);
+  color: var(--color-negative);
   font-size: 0.85rem;
   margin-bottom: 8px;
 }
@@ -181,10 +183,11 @@
   min-width: 60px;
 }
 
+/* ✅ FIXED: Change weight color to be visible */
 .assetWeight {
   font-weight: 600;
   font-size: 0.85rem;
-  color: var(--color-primary);
+  color: var(--color-accent); /* ✅ Use accent color instead of primary */
   min-width: 50px;
 }
 
@@ -211,7 +214,8 @@
 /* Responsive design */
 @media (max-width: 768px) {
   .container {
-    padding: 0;
+    padding: 0 var(--spacing-s); /* ✅ FIXED: Smaller padding on mobile */
+    max-width: 100%; /* ✅ FIXED: Full width on mobile */
   }
 
   .header {

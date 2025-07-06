@@ -40,7 +40,7 @@ export const AssetImport: React.FC<AssetImportProps> = ({
 }) => {
   const [importText, setImportText] = useState('');
   const [parsedAssets, setParsedAssets] = useState<ParsedAsset[]>([]);
-  const [importMethod, setImportMethod] = useState<'csv' | 'text'>('text'); // FIXED: Default to text
+  const [importMethod, setImportMethod] = useState<'csv' | 'text'>('text');
   const [errors, setErrors] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -93,14 +93,35 @@ export const AssetImport: React.FC<AssetImportProps> = ({
     return parsed;
   };
 
-  // Text parsing function (simple format)
+  // ✅ FIXED: Text parsing function to support single line with multiple assets
   const parseText = (text: string): ParsedAsset[] => {
-    const lines = text.trim().split('\n');
     const parsed: ParsedAsset[] = [];
 
-    lines.forEach(line => {
-      line = line.trim();
-      if (!line) return;
+    // Support both line format and single line format
+    let items: string[] = [];
+
+    // Check if it's a single line with multiple assets
+    if (text.includes('\n')) {
+      // Multi-line format: each asset on separate line
+      items = text.trim().split('\n').filter(line => line.trim());
+    } else {
+      // Single line format: split by ticker pattern
+      // Match patterns like "MSFT 20%" or "GOOGL 15%"
+      const matches = text.match(/([A-Z0-9.]+\s+\d+(?:\.\d+)?%?)/g);
+      if (matches && matches.length > 1) {
+        items = matches;
+      } else {
+        // Fallback: treat as single item
+        items = [text.trim()];
+      }
+    }
+
+    items.forEach(item => {
+      item = item.trim();
+      if (!item) return;
+
+      let ticker = '';
+      let weight: number | undefined;
 
       // Try different formats:
       // 1. "AAPL 25%" or "AAPL 25"
@@ -108,17 +129,14 @@ export const AssetImport: React.FC<AssetImportProps> = ({
       // 3. "AAPL - 25%"
       // 4. Just "AAPL"
 
-      let ticker = '';
-      let weight: number | undefined;
-
       // Format: AAPL 25% or AAPL: 25%
-      const match1 = line.match(/^([A-Z.]+)[\s:-]+(\d+(?:\.\d+)?)%?/i);
+      const match1 = item.match(/^([A-Z0-9.]+)[\s:-]+(\d+(?:\.\d+)?)%?/i);
       if (match1) {
         ticker = match1[1].toUpperCase();
         weight = parseFloat(match1[2]);
       } else {
         // Just ticker
-        const match2 = line.match(/^([A-Z.]+)/i);
+        const match2 = item.match(/^([A-Z0-9.]+)/i);
         if (match2) {
           ticker = match2[1].toUpperCase();
         }
