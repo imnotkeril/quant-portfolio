@@ -249,9 +249,8 @@ export const CreationStepAssets: React.FC<CreationStepAssetsProps> = ({
           />
         </div>
 
-        {/* Current Portfolio Assets - REMOVED DUPLICATE HEADER */}
+        {/* Current Portfolio Assets */}
         <div className={styles.currentPortfolio}>
-          {/* Removed duplicate portfolioHeader block that was causing duplication */}
 
           {assets.length === 0 ? (
             <div className={styles.emptyState}>
@@ -265,9 +264,10 @@ export const CreationStepAssets: React.FC<CreationStepAssetsProps> = ({
               </p>
             </div>
           ) : (
-            <div className={styles.portfolioTable}>
+            <div>
               <AssetTable
                 assets={assets}
+                portfolioValue={formData.startingAmount}
                 onEdit={handleEditAsset}
                 onDelete={handleDeleteAsset}
                 showActions={true}
