@@ -56,6 +56,8 @@ export const CreationStepAssets: React.FC<CreationStepAssetsProps> = ({
   }, [formData.assets]);
 
   const handleAddAsset = (assetData: AssetCreate) => {
+    console.log('handleAddAsset called with:', assetData); // Debug log
+
     // Check for duplicate ticker
     const existingAsset = assets.find(a =>
       a.ticker.toUpperCase() === assetData.ticker.toUpperCase()
@@ -66,12 +68,12 @@ export const CreationStepAssets: React.FC<CreationStepAssetsProps> = ({
       return;
     }
 
-    // Create new asset with ID
+    // Create new asset with ID - FIXED: ensure weight is a number
     const newAsset: AssetFormData = {
       id: `asset_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       ticker: assetData.ticker.toUpperCase(),
       name: assetData.name || assetData.ticker,
-      weight: assetData.weight || 0,
+      weight: Number(assetData.weight) || 0, // FIXED: ensure numeric weight
       sector: assetData.sector,
       assetClass: assetData.assetClass,
       currentPrice: assetData.currentPrice,
@@ -80,19 +82,30 @@ export const CreationStepAssets: React.FC<CreationStepAssetsProps> = ({
       purchaseDate: assetData.purchaseDate,
     };
 
-    setAssets(prev => [...prev, newAsset]);
+    console.log('Adding new asset:', newAsset); // Debug log
+    setAssets(prev => {
+      const updated = [...prev, newAsset];
+      console.log('Updated assets:', updated); // Debug log
+      return updated;
+    });
     setValidationError('');
   };
 
-  const handleEditAsset = (id: string, updatedData: Partial<AssetFormData>) => {
-    setAssets(prev => prev.map(asset =>
-      asset.id === id ? { ...asset, ...updatedData } : asset
+  const handleEditAsset = (asset: AssetFormData) => {
+    console.log('handleEditAsset called with:', asset); // Debug log
+    setAssets(prev => prev.map(a =>
+      a.id === asset.id ? { ...a, ...asset } : a
     ));
     setValidationError('');
   };
 
-  const handleDeleteAsset = (id: string) => {
-    setAssets(prev => prev.filter(asset => asset.id !== id));
+  const handleDeleteAsset = (ticker: string) => {
+    console.log('handleDeleteAsset called with ticker:', ticker); // Debug log
+    setAssets(prev => {
+      const updated = prev.filter(asset => asset.ticker !== ticker);
+      console.log('Assets after deletion:', updated); // Debug log
+      return updated;
+    });
     setValidationError('');
   };
 
@@ -226,13 +239,13 @@ export const CreationStepAssets: React.FC<CreationStepAssetsProps> = ({
         {/* Asset Form */}
         <div className={styles.addAssetsSection}>
           <AssetForm
-            mode={mode}
             onSubmit={handleAddAsset}
-            existingTickers={existingTickers}
+            onCancel={() => setActiveTab('form')}
+            existingTickers={assets.map(a => a.ticker)}
+            mode={mode}
             remainingWeight={remainingWeight}
             showTemplates={true}
             showImport={true}
-            className={styles.assetForm}
           />
         </div>
 
@@ -272,8 +285,8 @@ export const CreationStepAssets: React.FC<CreationStepAssetsProps> = ({
                 assets={assets}
                 onEdit={handleEditAsset}
                 onDelete={handleDeleteAsset}
-                columns={assetTableColumns}
-                showAllocation={true}
+                showActions={true}
+                showPnL={false}
                 loading={loading}
                 className={styles.assetsTable}
               />

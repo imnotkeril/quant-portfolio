@@ -678,6 +678,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
         defaultActiveKey="form"
         onChange={(key) => setActiveTab(key)}
         type="line"
+        centered={true}
         className={styles.assetTabs}
       >
         <Tabs.TabPane tab="⚡ Quick Add" key="form">

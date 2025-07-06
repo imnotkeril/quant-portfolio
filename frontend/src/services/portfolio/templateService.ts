@@ -549,7 +549,7 @@ class TemplateService {
     return template.assets.map(asset => ({
       ticker: asset.ticker,
       name: asset.name,
-      weight: asset.weight, // Keep weight as percentage (DO NOT divide by 100)
+      weight: asset.weight, // Keep as percentage (DO NOT divide by 100)
       sector: asset.sector,
       assetClass: asset.assetClass,
       quantity: 0,
