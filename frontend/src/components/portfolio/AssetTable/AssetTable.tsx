@@ -58,114 +58,91 @@ export const AssetTable: React.FC<AssetTableProps> = ({
   useEffect(() => {
     const assetsNeedingPrices = assets.filter(asset =>
       !('currentPrice' in asset && asset.currentPrice && asset.currentPrice > 0) &&
-      !('purchasePrice' in asset && asset.purchasePrice && asset.purchasePrice > 0)
+      !assetPrices[asset.ticker?.toUpperCase()]
     );
 
-    console.log('Assets needing prices:', assetsNeedingPrices.map(a => a.ticker));
-
     if (assetsNeedingPrices.length > 0) {
-      const loadPrices = async () => {
-        setPricesLoading(true);
-        try {
-          const tickers = assetsNeedingPrices.map(asset => asset.ticker);
-          console.log('Fetching prices for tickers:', tickers);
+      setPricesLoading(true);
+      const tickers = assetsNeedingPrices.map(asset => asset.ticker.toUpperCase());
 
-          const prices = await getMultipleAssetPrices(tickers);
-          console.log('Received prices from API:', prices);
-
-          // Filter out null prices and convert to our format
-          const validPrices: Record<string, number> = {};
-          Object.entries(prices).forEach(([ticker, price]) => {
-            if (price !== null && price > 0) {
-              validPrices[ticker.toUpperCase()] = price;
-            }
-          });
-
-          console.log('Valid prices after filtering:', validPrices);
-          setAssetPrices(validPrices);
-        } catch (error) {
-          console.error('Error loading asset prices:', error);
-        } finally {
+      getMultipleAssetPrices(tickers)
+        .then(prices => {
+          setAssetPrices(prev => ({ ...prev, ...prices }));
+        })
+        .catch(error => {
+          console.error('Failed to fetch asset prices:', error);
+        })
+        .finally(() => {
           setPricesLoading(false);
-        }
-      };
-
-      loadPrices();
+        });
     }
-  }, [assets, getMultipleAssetPrices]);
+  }, [assets, getMultipleAssetPrices, assetPrices]);
 
-  // Helper function to get asset price (use record data first)
-  const getAssetPrice = (record: Asset | AssetCreate): number => {
-    const ticker = record.ticker.toUpperCase();
-
-    // PRIORITY 1: currentPrice from record data
-    if ('currentPrice' in record && record.currentPrice && record.currentPrice > 0) {
-      console.log(`Using currentPrice for ${ticker}:`, record.currentPrice);
-      return record.currentPrice;
+  // Helper function to get asset price
+  const getAssetPrice = (asset: Asset | AssetCreate): number => {
+    if ('currentPrice' in asset && asset.currentPrice && asset.currentPrice > 0) {
+      return asset.currentPrice;
     }
-
-    // PRIORITY 2: purchasePrice from record data
-    if ('purchasePrice' in record && record.purchasePrice && record.purchasePrice > 0) {
-      console.log(`Using purchasePrice for ${ticker}:`, record.purchasePrice);
-      return record.purchasePrice;
-    }
-
-    // PRIORITY 3: loaded API price (if available)
-    const apiPrice = assetPrices[ticker];
-    if (apiPrice && apiPrice > 0) {
-      console.log(`Using API price for ${ticker}:`, apiPrice);
-      return apiPrice;
-    }
-
-    // FALLBACK: $100 (only if no data available)
-    console.log(`Using fallback price for ${ticker}: $100`);
-    return 100;
+    return assetPrices[asset.ticker?.toUpperCase()] || 0;
   };
 
-  // Check if assets have P&L data
-  const hasPositionValue = assets.some(asset =>
-    'positionValue' in asset || 'profitLoss' in asset
-  );
+  // Helper function to calculate ACTUAL quantity (rounded down)
+  const calculateActualQuantity = (weight: number, price: number): number => {
+    if (!price || !portfolioValue) return 0;
+    const targetAmount = (weight / 100) * portfolioValue;
+    return Math.floor(targetAmount / price); // Round down to get actual shares
+  };
 
-  const showPnLColumn = showPnL && hasPositionValue;
+  // Helper function to calculate ACTUAL value (quantity * price)
+  const calculateActualValue = (weight: number, price: number): number => {
+    if (!price || !portfolioValue) return 0;
+    const quantity = calculateActualQuantity(weight, price);
+    return quantity * price; // Actual value used
+  };
 
-  // Calculate total allocation
+  // Calculate metrics
   const totalWeight = useMemo(() => {
     return assets.reduce((sum, asset) => sum + (asset.weight || 0), 0);
   }, [assets]);
 
-  // Helper function to calculate quantity (whole shares only)
-  const calculateQuantity = (weight: number, price: number) => {
-    if (!price || price <= 0) return 0;
-    const targetValue = (weight / 100) * portfolioValue;
-    return Math.floor(targetValue / price);
-  };
+  // Calculate total ACTUAL portfolio value (sum of actual values)
+  const totalActualValue = useMemo(() => {
+    return assets.reduce((sum, asset) => {
+      const price = getAssetPrice(asset);
+      return sum + calculateActualValue(asset.weight || 0, price);
+    }, 0);
+  }, [assets, portfolioValue, assetPrices]);
 
-  // Helper function to calculate ACTUAL value (quantity × price)
-  const calculateActualValue = (weight: number, price: number) => {
-    const quantity = calculateQuantity(weight, price);
-    return quantity * price;
-  };
+  // Calculate cash remaining
+  const cashRemaining = useMemo(() => {
+    return portfolioValue - totalActualValue;
+  }, [portfolioValue, totalActualValue]);
+
+  const showPnLColumn = showPnL && assets.some(asset => 'profitLoss' in asset);
 
   // Define table columns
-  const columns: TableColumn[] = useMemo(() => {
+  const columns = useMemo<TableColumn[]>(() => {
     const cols: TableColumn[] = [
+      // Ticker and Name column
       {
-        key: 'asset',
+        key: 'ticker',
         title: 'Asset',
-        width: 180,
+        width: 200,
         render: (value, record) => (
           <div className={styles.tickerCell}>
             <div className={styles.ticker}>{record.ticker}</div>
-            <div className={styles.assetName}>{record.name || record.ticker}</div>
+            <div className={styles.assetName}>
+              {record.name || record.ticker}
+            </div>
           </div>
         ),
         sortable: true,
       },
+      // Weight column
       {
         key: 'weight',
         title: 'Weight',
-        width: 80,
+        width: 100,
         render: (value, record) => (
           <span className={styles.weight}>
             {formatPercentage((record.weight || 0) / 100)}
@@ -173,24 +150,30 @@ export const AssetTable: React.FC<AssetTableProps> = ({
         ),
         sortable: true,
       },
+      // Price column
       {
         key: 'price',
         title: 'Price',
-        width: 100,
+        width: 120,
         render: (value, record) => {
-          const price = getAssetPrice(record);
           const isLoadingPrice = pricesLoading &&
             !('currentPrice' in record && record.currentPrice) &&
             !assetPrices[record.ticker.toUpperCase()];
 
+          if (isLoadingPrice) {
+            return <span className={styles.price}>...</span>;
+          }
+
+          const price = getAssetPrice(record);
           return (
             <span className={styles.price}>
-              {isLoadingPrice ? '...' : formatCurrency(price, record.currency || 'USD')}
+              {price > 0 ? formatCurrency(price, record.currency || 'USD') : '-'}
             </span>
           );
         },
         sortable: true,
       },
+      // Value column (FIXED: calculated with actual quantity)
       {
         key: 'value',
         title: 'Value',
@@ -205,15 +188,17 @@ export const AssetTable: React.FC<AssetTableProps> = ({
             return <span className={styles.value}>...</span>;
           }
 
+          // FIXED: Use actual value calculation
           const actualValue = calculateActualValue(record.weight || 0, price);
           return (
             <span className={styles.value}>
-              {formatCurrency(actualValue, 'USD')}
+              {actualValue > 0 ? formatCurrency(actualValue, 'USD') : '-'}
             </span>
           );
         },
         sortable: true,
       },
+      // Quantity column (FIXED: calculated with floor)
       {
         key: 'quantity',
         title: 'Shares',
@@ -228,7 +213,8 @@ export const AssetTable: React.FC<AssetTableProps> = ({
             return <span className={styles.quantity}>...</span>;
           }
 
-          const quantity = calculateQuantity(record.weight || 0, price);
+          // FIXED: Use actual quantity calculation with floor
+          const quantity = calculateActualQuantity(record.weight || 0, price);
           return (
             <span className={styles.quantity}>
               {quantity.toLocaleString()}
@@ -292,45 +278,31 @@ export const AssetTable: React.FC<AssetTableProps> = ({
       });
     }
 
-    // Add actions column
-    if (showActions && (onEdit || onDelete)) {
+    // Add actions column - ONLY DELETE BUTTON (NO EDIT)
+    if (showActions && onDelete) {
       cols.push({
         key: 'actions',
         title: 'Actions',
         width: 120,
         render: (value, record) => (
           <div className={styles.actions}>
-            {onEdit && (
-              <Button
-                variant="ghost"
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit(record);
-                }}
-              >
-                Edit
-              </Button>
-            )}
-            {onDelete && (
-              <Button
-                variant="ghost"
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(record.ticker);
-                }}
-              >
-                Delete
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(record.ticker);
+              }}
+            >
+              Delete
+            </Button>
           </div>
         ),
       });
     }
 
     return cols;
-  }, [assets, portfolioValue, showPnLColumn, showActions, onEdit, onDelete, assetPrices, pricesLoading]);
+  }, [assets, portfolioValue, showPnLColumn, showActions, onDelete, assetPrices, pricesLoading]);
 
   // Handle row click
   const handleRowClick = (record: Asset | AssetCreate) => {
@@ -338,14 +310,6 @@ export const AssetTable: React.FC<AssetTableProps> = ({
       onRowClick(record);
     }
   };
-
-  // Calculate total portfolio value (actual, not target)
-  const totalPortfolioValue = useMemo(() => {
-    return assets.reduce((sum, asset) => {
-      const price = getAssetPrice(asset);
-      return sum + calculateActualValue(asset.weight || 0, price);
-    }, 0);
-  }, [assets, portfolioValue, assetPrices]);
 
   if (loading) {
     return (
@@ -375,7 +339,7 @@ export const AssetTable: React.FC<AssetTableProps> = ({
         <h3>Current Portfolio ({assets.length} assets)</h3>
         <div className={styles.headerStats}>
           <span className={styles.totalStats}>
-            Total Weight: <span className={styles.statValue}>{formatPercentage(totalWeight / 100)}</span> Total Value: <span className={styles.statValue}>{pricesLoading ? '...' : formatCurrency(totalPortfolioValue, 'USD')}</span>
+            Total Weight: <span className={styles.statValue}>{formatPercentage(totalWeight / 100)}</span> Total Value: <span className={styles.statValue}>{pricesLoading ? '...' : formatCurrency(totalActualValue, 'USD')}</span>
           </span>
           {showDeleteAll && onDeleteAll && assets.length > 0 && (
             <Button
@@ -390,16 +354,26 @@ export const AssetTable: React.FC<AssetTableProps> = ({
         </div>
       </div>
 
-      {/* Table without any additional header */}
-      <Table
-        data={assets}
-        columns={columns}
-        rowKey="ticker"
-        onRowClick={handleRowClick ? (record, index, event) => handleRowClick(record) : undefined}
-        pagination={false}
-        size="small"
-        showHeader={true}
-      />
+      {/* Table and Cash wrapped with borders */}
+      <div className={styles.tableWrapper}>
+        <Table
+          data={assets}
+          columns={columns}
+          rowKey="ticker"
+          onRowClick={handleRowClick ? (record, index, event) => handleRowClick(record) : undefined}
+          pagination={false}
+          size="small"
+          showHeader={true}
+        />
+
+        {/* Cash remaining display - ALWAYS SHOW */}
+        <div className={styles.cashRow}>
+          <div className={styles.cashInfo}>
+            <span className={styles.cashLabel}>Cash Remaining:</span>
+            <span className={styles.cashValue}>{formatCurrency(cashRemaining, 'USD')}</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

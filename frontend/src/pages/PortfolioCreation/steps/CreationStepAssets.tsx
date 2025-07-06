@@ -249,24 +249,9 @@ export const CreationStepAssets: React.FC<CreationStepAssetsProps> = ({
           />
         </div>
 
-        {/* Current Portfolio Assets */}
+        {/* Current Portfolio Assets - REMOVED DUPLICATE HEADER */}
         <div className={styles.currentPortfolio}>
-          <div className={styles.portfolioHeader}>
-            <h3 className={styles.portfolioTitle}>
-              Current Portfolio ({assets.length} asset{assets.length !== 1 ? 's' : ''})
-            </h3>
-
-            {assets.length > 1 && totalWeight !== 100 && (
-              <Button
-                variant="outline"
-                size="small"
-                onClick={normalizeWeights}
-                disabled={loading || assets.length === 0}
-              >
-                🎯 Auto-Balance Weights
-              </Button>
-            )}
-          </div>
+          {/* Removed duplicate portfolioHeader block that was causing duplication */}
 
           {assets.length === 0 ? (
             <div className={styles.emptyState}>
@@ -290,6 +275,19 @@ export const CreationStepAssets: React.FC<CreationStepAssetsProps> = ({
                 loading={loading}
                 className={styles.assetsTable}
               />
+
+              {assets.length > 1 && totalWeight !== 100 && (
+                <div className={styles.tableActions}>
+                  <Button
+                    variant="outline"
+                    size="small"
+                    onClick={normalizeWeights}
+                    disabled={loading || assets.length === 0}
+                  >
+                    🎯 Auto-Balance Weights
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>
