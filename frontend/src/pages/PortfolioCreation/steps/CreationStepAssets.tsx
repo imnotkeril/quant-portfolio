@@ -73,7 +73,7 @@ export const CreationStepAssets: React.FC<CreationStepAssetsProps> = ({
       id: `asset_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       ticker: assetData.ticker.toUpperCase(),
       name: assetData.name || assetData.ticker,
-      weight: Number(assetData.weight) || 0, // FIXED: ensure numeric weight
+      weight: Number(assetData.weight) || 0,
       sector: assetData.sector,
       assetClass: assetData.assetClass,
       currentPrice: assetData.currentPrice,

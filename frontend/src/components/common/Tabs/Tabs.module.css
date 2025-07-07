@@ -36,7 +36,7 @@
 .top .tabBar,
 .bottom .tabBar {
   border-radius: 2px;
-  margin-left: auto;
+
 }
 
 @keyframes spin {
@@ -156,9 +156,7 @@
 
 /* Tab content */
 .tabContent {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
+
 }
 
 /* Tab close button */

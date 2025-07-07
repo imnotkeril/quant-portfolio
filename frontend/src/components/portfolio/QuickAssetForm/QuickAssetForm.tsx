@@ -265,15 +265,18 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
 
     const asset: AssetCreate = {
       ticker: formData.ticker.toUpperCase(),
-      name: formData.name,
-      weight: formData.weight, // ← ИСПРАВЛЕНО: убрал деление на 100
-      currentPrice: formData.currentPrice,
-      sector: formData.sector,
-      industry: formData.industry,
-      assetClass: formData.assetClass,
-      exchange: formData.exchange,
-      currency: formData.currency,
-      country: formData.country,
+      name: formData.name || selectedAssetInfo?.name || formData.ticker,
+      weight: formData.weight,
+      currentPrice: formData.currentPrice || selectedAssetInfo?.currentPrice || 0,
+      sector: formData.sector || selectedAssetInfo?.sector || '',
+      industry: formData.industry || selectedAssetInfo?.industry || '',
+      assetClass: formData.assetClass || selectedAssetInfo?.assetType || 'stocks',
+      exchange: formData.exchange || selectedAssetInfo?.exchange || '',
+      currency: formData.currency || selectedAssetInfo?.currency || 'USD',
+      country: formData.country || selectedAssetInfo?.country || 'United States',
+      quantity: 0,
+      purchasePrice: 0,
+      purchaseDate: new Date().toISOString().split('T')[0],
     };
 
     onSubmit(asset);
@@ -343,7 +346,6 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
                 </div>
               )}
 
-              {/* Search Suggestions */}
               {/* Search Suggestions */}
               {showSuggestions && filteredSuggestions.length > 0 && (
                 <div className={styles.suggestions}>
