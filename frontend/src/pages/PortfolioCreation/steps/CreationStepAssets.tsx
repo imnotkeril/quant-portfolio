@@ -240,7 +240,6 @@ export const CreationStepAssets: React.FC<CreationStepAssetsProps> = ({
         <div className={styles.addAssetsSection}>
           <AssetForm
             onSubmit={handleAddAsset}
-            onCancel={() => setActiveTab('form')}
             existingTickers={assets.map(a => a.ticker)}
             mode={mode}
             remainingWeight={remainingWeight}

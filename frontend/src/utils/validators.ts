@@ -94,8 +94,21 @@ export const validateNumberRange = (
 /**
  * Validate percentage (0-100)
  */
-export const validatePercentage = (value: number, fieldName: string): ValidationResult => {
-  return validateNumberRange(value, 0, 100, fieldName);
+export const validatePercentage = (value: number, fieldName: string = 'Percentage'): ValidationResult => {
+  const errors: string[] = [];
+
+  if (typeof value !== 'number' || isNaN(value)) {
+    errors.push(`${fieldName} must be a valid number`);
+  } else if (value < 0) {
+    errors.push(`${fieldName} cannot be negative`);
+  } else if (value > 100) {
+    errors.push(`${fieldName} cannot exceed 100%`);
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
 };
 
 /**
@@ -182,7 +195,7 @@ export const validateAsset = (asset: Partial<Asset>): ValidationResult => {
     errors.push('Asset name is required');
   }
 
-  // Validate weight
+  // Validate weight как проценты (0-100)
   if (asset.weight === undefined || asset.weight === null) {
     errors.push('Weight is required');
   } else {
