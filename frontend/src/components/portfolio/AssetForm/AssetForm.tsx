@@ -114,6 +114,13 @@ export const AssetForm: React.FC<AssetFormProps> = ({
     clearAssetInfo
   } = useAssets();
 
+  // Sync assetInfo from hook with selectedAssetInfo state
+  useEffect(() => {
+    if (assetInfo) {
+      setSelectedAssetInfo(assetInfo);
+    }
+  }, [assetInfo]);
+
   // Filter search results
   const filteredSuggestions = useMemo(() => {
     if (!searchResults || searchResults.length === 0) return [];
@@ -152,21 +159,26 @@ export const AssetForm: React.FC<AssetFormProps> = ({
 
   // Handle ticker input change
   const handleTickerChange = (value: string) => {
-    setSearchQuery(value.toUpperCase());
-    setFormData(prev => ({ ...prev, ticker: value.toUpperCase() }));
+    const upperValue = value.toUpperCase();
+
+    setSearchQuery(upperValue);
+    setFormData(prev => ({ ...prev, ticker: upperValue }));
+
+    // ПОЛНЫЙ сброс состояний поиска
     setSelectedAssetInfo(null);
     setSelectedSuggestionIndex(-1);
+    setShowSuggestions(false);
+    setValidationErrors(prev => ({ ...prev, ticker: undefined }));
 
-    // Clear previous search results
     clearSearch();
     clearAssetInfo();
 
-    // Search for assets if value is not empty
-    if (value.trim()) {
-      searchAssets(value);
-      setShowSuggestions(true);
-    } else {
-      setShowSuggestions(false);
+    if (upperValue.trim()) {
+      // Небольшая задержка для предотвращения конфликтов
+      setTimeout(() => {
+        searchAssets(upperValue);
+        setShowSuggestions(true);
+      }, 100);
     }
   };
 
@@ -180,25 +192,25 @@ export const AssetForm: React.FC<AssetFormProps> = ({
       sector: suggestion.sector || '',
       assetClass: suggestion.assetType || 'stocks',
     }));
+
     setShowSuggestions(false);
     setSelectedSuggestionIndex(-1);
 
-    // Get additional asset information
+    // Очищаем старую информацию
+    setSelectedAssetInfo(null);
+    clearAssetInfo();
+
     try {
       await getAssetInfo(suggestion.ticker);
-      if (assetInfo) {
-        setSelectedAssetInfo(assetInfo);
-        setFormData(prev => ({
-          ...prev,
-          currentPrice: assetInfo.currentPrice || 0,
-          sector: assetInfo.sector || prev.sector,
-          industry: assetInfo.industry || prev.industry,
-          country: assetInfo.country || prev.country,
-          exchange: assetInfo.exchange || prev.exchange,
-        }));
-      }
+      // selectedAssetInfo обновится через useEffect
     } catch (error) {
       console.warn('Failed to fetch asset info:', error);
+      setSelectedAssetInfo({
+        name: suggestion.name,
+        ticker: suggestion.ticker,
+        sector: suggestion.sector,
+        currentPrice: null
+      });
     }
   };
 
@@ -305,6 +317,10 @@ export const AssetForm: React.FC<AssetFormProps> = ({
         setSearchQuery('');
         setSelectedAssetInfo(null);
         setValidationErrors({});
+        setShowSuggestions(false);
+        setSelectedSuggestionIndex(-1);
+        clearSearch();
+        clearAssetInfo();
       }
     } catch (error) {
       console.error('Error submitting asset:', error);
@@ -505,18 +521,21 @@ export const AssetForm: React.FC<AssetFormProps> = ({
 
         {/* Asset Information Display */}
         {selectedAssetInfo && (
-          <div className={styles.assetInfo}>
-            <div className={styles.assetInfoRow}>
-              <span className={styles.assetInfoLabel}>Sector:</span>
-              <span className={styles.assetInfoValue}>{selectedAssetInfo.sector || 'N/A'}</span>
-            </div>
-            <div className={styles.assetInfoRow}>
-              <span className={styles.assetInfoLabel}>Country:</span>
-              <span className={styles.assetInfoValue}>{selectedAssetInfo.country || 'N/A'}</span>
-            </div>
-            <div className={styles.assetInfoRow}>
-              <span className={styles.assetInfoLabel}>Exchange:</span>
-              <span className={styles.assetInfoValue}>{selectedAssetInfo.exchange || 'N/A'}</span>
+          <div className={styles.assetConfirmation}>
+            <div className={styles.assetConfirmationInfo}>
+              <span className={styles.assetConfirmationName}>
+                {selectedAssetInfo.name || formData.name || formData.ticker}
+              </span>
+              {selectedAssetInfo.currentPrice && (
+                <span className={styles.assetConfirmationPrice}>
+                  Price: ${selectedAssetInfo.currentPrice.toFixed(2)}
+                </span>
+              )}
+              {selectedAssetInfo.sector && (
+                <span className={styles.assetConfirmationSector}>
+                  {selectedAssetInfo.sector}
+                </span>
+              )}
             </div>
           </div>
         )}

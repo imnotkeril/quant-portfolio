@@ -146,33 +146,68 @@
 }
 
 /* Asset Info Display */
-.assetInfo {
+
+.assetConfirmation {
   margin-top: var(--spacing-s);
   padding: var(--spacing-m);
-  background-color: rgba(191, 159, 251, 0.05);
-  border: 1px solid rgba(191, 159, 251, 0.2);
+  background-color: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
   border-radius: 8px;
-  font-size: 0.85rem;
-}
-
-.assetInfoRow {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: var(--spacing-xs);
+  align-items: center;
+  gap: var(--spacing-s);
+  font-size: 0.9rem;
 }
 
-.assetInfoRow:last-child {
-  margin-bottom: 0;
+.assetConfirmationIcon {
+  font-size: 1.2rem;
+  color: #22c55e;
+  flex-shrink: 0;
 }
 
-.assetInfoLabel {
+.assetConfirmationInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.assetConfirmationName {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-right: var(--spacing-xs);
+}
+
+.assetConfirmationPrice {
+  font-weight: var(--font-weight-medium);
+  color: #22c55e;
+  margin-right: var(--spacing-xs);
+}
+
+.assetConfirmationSector {
+  font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
-  font-weight: var(--font-weight-medium);
+  background-color: rgba(34, 197, 94, 0.15);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
 }
 
-.assetInfoValue {
-  color: var(--color-text-light);
-  font-weight: var(--font-weight-medium);
+
+@media (max-width: 768px) {
+  .assetConfirmationInfo {
+    flex-wrap: wrap;
+    white-space: normal;
+    overflow: visible;
+  }
+
+  .assetConfirmationName,
+  .assetConfirmationPrice {
+    margin-right: 0;
+    margin-bottom: var(--spacing-xs);
+  }
 }
 
 /* Weight input with quick buttons */
