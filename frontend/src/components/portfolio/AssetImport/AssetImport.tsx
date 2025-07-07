@@ -1,5 +1,5 @@
 /**
- * AssetImport Component - FIXED
+ * AssetImport Component - FIXED WITH IMPROVED VALIDATION MESSAGES
  * Import assets from CSV file or text paste with proper method selection
  */
 import React, { useState, useRef } from 'react';
@@ -71,20 +71,20 @@ export const AssetImport: React.FC<AssetImportProps> = ({
         errors: []
       };
 
-      // Validation
+      // ✅ IMPROVED: Updated validation messages
       if (!asset.ticker || asset.ticker.length < 1) {
         asset.isValid = false;
-        asset.errors.push('Invalid ticker');
+        asset.errors.push('Invalid ticker symbol');
       }
 
       if (existingTickers.includes(asset.ticker)) {
         asset.isValid = false;
-        asset.errors.push('Already in portfolio');
+        asset.errors.push('Asset exists in portfolio');
       }
 
       if (asset.weight !== undefined && (asset.weight <= 0 || asset.weight > 100)) {
         asset.isValid = false;
-        asset.errors.push('Invalid weight (must be 1-100%)');
+        asset.errors.push('Weight must be between 1-100%');
       }
 
       parsed.push(asset);
@@ -152,15 +152,15 @@ export const AssetImport: React.FC<AssetImportProps> = ({
         errors: []
       };
 
-      // Validation
+      // ✅ IMPROVED: Updated validation messages
       if (existingTickers.includes(ticker)) {
         asset.isValid = false;
-        asset.errors.push('Already in portfolio');
+        asset.errors.push('Asset exists in portfolio');
       }
 
       if (weight !== undefined && (weight <= 0 || weight > 100)) {
         asset.isValid = false;
-        asset.errors.push('Invalid weight');
+        asset.errors.push('Weight must be between 1-100%');
       }
 
       parsed.push(asset);
@@ -352,7 +352,7 @@ AMZN 10%`;
 
           {validAssets.length > 0 && (
             <div className={styles.validAssets}>
-              <h4 className={styles.validTitle}>✅ Valid Assets ({validAssets.length})</h4>
+              <h4 className={styles.validTitle}>✅ Assets Found ({validAssets.length})</h4>
               <div className={styles.assetsList}>
                 {validAssets.map((asset, index) => (
                   <div key={index} className={styles.assetItem}>
@@ -371,7 +371,7 @@ AMZN 10%`;
 
           {invalidAssets.length > 0 && (
             <div className={styles.invalidAssets}>
-              <h4 className={styles.invalidTitle}>❌ Invalid Assets ({invalidAssets.length})</h4>
+              <h4 className={styles.invalidTitle}>❌ Issues Found ({invalidAssets.length})</h4>
               <div className={styles.assetsList}>
                 {invalidAssets.map((asset, index) => (
                   <div key={index} className={styles.assetItem}>

@@ -47,17 +47,10 @@
 }
 
 /* Modal Sizes */
-.modal-sm {
-  width: 300px;
-}
-
-.modal-lg {
-  width: 800px;
-}
-
-.modal-xl {
-  width: 1000px;
-}
+.modal-sm { width: 300px; }
+.modal-lg { width: 800px; }
+.modal-xl { width: 1000px; }
+.modal-xxl { width: 1400px; }
 
 /* Modal Header */
 .modal-header {

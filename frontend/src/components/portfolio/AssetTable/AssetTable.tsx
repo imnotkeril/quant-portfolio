@@ -1,6 +1,7 @@
 /**
- * AssetTable Component - ENHANCED WITH REAL API PRICES
+ * AssetTable Component - ENHANCED WITH REAL API PRICES AND AUTO-ENRICHMENT
  * Table for displaying portfolio assets with Price, Value, Quantity columns
+ * Now automatically enriches assets with missing name/sector data
  */
 import React, { useMemo, useEffect, useState } from 'react';
 import classNames from 'classnames';
@@ -50,13 +51,78 @@ export const AssetTable: React.FC<AssetTableProps> = ({
   className,
   'data-testid': testId,
 }) => {
-  const { getMultipleAssetPrices } = useAssets();
+  const { getMultipleAssetPrices, getAssetInfo } = useAssets();
   const [assetPrices, setAssetPrices] = useState<Record<string, number>>({});
   const [pricesLoading, setPricesLoading] = useState(false);
 
-  // Load prices for assets that don't have currentPrice
+  // ✅ NEW: Add auto-enrichment functionality
+  const [enrichedAssets, setEnrichedAssets] = useState<(Asset | AssetCreate)[]>([]);
+  const [enrichmentLoading, setEnrichmentLoading] = useState(false);
+
+  // ✅ NEW: Auto-enrich assets that only have ticker + weight
   useEffect(() => {
-    const assetsNeedingPrices = assets.filter(asset =>
+    const enrichAssets = async () => {
+      // Find assets missing company name or sector
+      const assetsNeedingEnrichment = assets.filter(asset =>
+        !asset.name || asset.name === asset.ticker || !asset.sector
+      );
+
+      if (assetsNeedingEnrichment.length === 0) {
+        setEnrichedAssets(assets);
+        return;
+      }
+
+      setEnrichmentLoading(true);
+
+      try {
+        // Enrich data for each asset
+        const enrichedData = await Promise.all(
+          assets.map(async (asset) => {
+            // If asset has name and sector, keep as is (Templates)
+            if (asset.name && asset.name !== asset.ticker && asset.sector) {
+              return asset;
+            }
+
+            // Otherwise get info via API (QuickAdd/Import)
+            try {
+              const assetInfo = await getAssetInfo(asset.ticker);
+
+              if (assetInfo) {
+                return {
+                  ...asset,
+                  name: assetInfo.name || asset.name || asset.ticker,
+                  sector: assetInfo.sector || asset.sector,
+                  industry: assetInfo.industry || asset.industry,
+                  currentPrice: assetInfo.currentPrice || asset.currentPrice,
+                  currency: assetInfo.currency || asset.currency || 'USD',
+                  country: assetInfo.country || asset.country,
+                  exchange: assetInfo.exchange || asset.exchange,
+                };
+              }
+            } catch (error) {
+              console.warn(`Failed to enrich data for ${asset.ticker}:`, error);
+            }
+
+            // If failed to get data, return original asset
+            return asset;
+          })
+        );
+
+        setEnrichedAssets(enrichedData);
+      } catch (error) {
+        console.error('Error enriching asset data:', error);
+        setEnrichedAssets(assets);
+      } finally {
+        setEnrichmentLoading(false);
+      }
+    };
+
+    enrichAssets();
+  }, [assets, getAssetInfo]);
+
+  // ✅ UPDATED: Load prices for enriched assets
+  useEffect(() => {
+    const assetsNeedingPrices = enrichedAssets.filter(asset =>
       !('currentPrice' in asset && asset.currentPrice && asset.currentPrice > 0) &&
       !assetPrices[asset.ticker?.toUpperCase()]
     );
@@ -76,7 +142,7 @@ export const AssetTable: React.FC<AssetTableProps> = ({
           setPricesLoading(false);
         });
     }
-  }, [assets, getMultipleAssetPrices, assetPrices]);
+  }, [enrichedAssets, getMultipleAssetPrices, assetPrices]);
 
   // Helper function to get asset price
   const getAssetPrice = (asset: Asset | AssetCreate): number => {
@@ -100,27 +166,27 @@ export const AssetTable: React.FC<AssetTableProps> = ({
     return quantity * price; // Actual value used
   };
 
-  // Calculate metrics
+  // ✅ UPDATED: Calculate metrics using enriched assets
   const totalWeight = useMemo(() => {
-    return assets.reduce((sum, asset) => sum + (asset.weight || 0), 0);
-  }, [assets]);
+    return enrichedAssets.reduce((sum, asset) => sum + (asset.weight || 0), 0);
+  }, [enrichedAssets]);
 
   // Calculate total ACTUAL portfolio value (sum of actual values)
   const totalActualValue = useMemo(() => {
-    return assets.reduce((sum, asset) => {
+    return enrichedAssets.reduce((sum, asset) => {
       const price = getAssetPrice(asset);
       return sum + calculateActualValue(asset.weight || 0, price);
     }, 0);
-  }, [assets, portfolioValue, assetPrices]);
+  }, [enrichedAssets, portfolioValue, assetPrices]);
 
   // Calculate cash remaining
   const cashRemaining = useMemo(() => {
     return portfolioValue - totalActualValue;
   }, [portfolioValue, totalActualValue]);
 
-  const showPnLColumn = showPnL && assets.some(asset => 'profitLoss' in asset);
+  const showPnLColumn = showPnL && enrichedAssets.some(asset => 'profitLoss' in asset);
 
-  // Define table columns
+  // ✅ UPDATED: Define table columns using enriched assets
   const columns = useMemo<TableColumn[]>(() => {
     const cols: TableColumn[] = [
       // Ticker and Name column
@@ -226,7 +292,7 @@ export const AssetTable: React.FC<AssetTableProps> = ({
     ];
 
     // Add sector column
-    const hasSector = assets.some(asset => asset.sector);
+    const hasSector = enrichedAssets.some(asset => asset.sector);
     if (hasSector) {
       cols.push({
         key: 'sector',
@@ -302,7 +368,7 @@ export const AssetTable: React.FC<AssetTableProps> = ({
     }
 
     return cols;
-  }, [assets, portfolioValue, showPnLColumn, showActions, onDelete, assetPrices, pricesLoading]);
+  }, [enrichedAssets, portfolioValue, showPnLColumn, showActions, onDelete, assetPrices, pricesLoading]);
 
   // Handle row click
   const handleRowClick = (record: Asset | AssetCreate) => {
@@ -311,7 +377,10 @@ export const AssetTable: React.FC<AssetTableProps> = ({
     }
   };
 
-  if (loading) {
+  // ✅ UPDATED: Show loading if enriching or loading prices
+  const isLoading = loading || enrichmentLoading || pricesLoading;
+
+  if (isLoading && enrichedAssets.length === 0) {
     return (
       <div className={classNames(styles.table, className)}>
         <div className={styles.loadingState}>
@@ -321,7 +390,7 @@ export const AssetTable: React.FC<AssetTableProps> = ({
     );
   }
 
-  if (assets.length === 0) {
+  if (enrichedAssets.length === 0) {
     return (
       <div className={classNames(styles.table, className)}>
         <div className={styles.emptyState}>
@@ -336,12 +405,12 @@ export const AssetTable: React.FC<AssetTableProps> = ({
     <div className={classNames(styles.table, className)} data-testid={testId}>
       {/* Header with portfolio stats */}
       <div className={styles.header}>
-        <h3>Current Portfolio ({assets.length} assets)</h3>
+        <h3>Current Portfolio ({enrichedAssets.length} assets)</h3>
         <div className={styles.headerStats}>
           <span className={styles.totalStats}>
-            Total Weight: <span className={styles.statValue}>{formatPercentage(totalWeight / 100)}</span> Total Value: <span className={styles.statValue}>{pricesLoading ? '...' : formatCurrency(totalActualValue, 'USD')}</span>
+            Total Weight: <span className={styles.statValue}>{formatPercentage(totalWeight / 100)}</span> Total Value: <span className={styles.statValue}>{isLoading ? '...' : formatCurrency(totalActualValue, 'USD')}</span>
           </span>
-          {showDeleteAll && onDeleteAll && assets.length > 0 && (
+          {showDeleteAll && onDeleteAll && enrichedAssets.length > 0 && (
             <Button
               variant="outline"
               size="small"
@@ -357,7 +426,7 @@ export const AssetTable: React.FC<AssetTableProps> = ({
       {/* Table and Cash wrapped with borders */}
       <div className={styles.tableWrapper}>
         <Table
-          data={assets}
+          data={enrichedAssets}
           columns={columns}
           rowKey="ticker"
           onRowClick={handleRowClick ? (record, index, event) => handleRowClick(record) : undefined}

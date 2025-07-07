@@ -356,7 +356,7 @@ export const PortfolioForm: React.FC<PortfolioFormProps> = ({
           isOpen={showAssetForm}
           onClose={handleAssetCancel}
           title={editingAsset ? `Edit ${editingAsset.ticker}` : 'Add Asset'}
-          maxWidth="lg"
+          maxWidth="xl"
         >
           <AssetForm
             asset={editingAsset}

@@ -1,5 +1,5 @@
 /**
- * TemplateSelector Component - FIXED: Added spacing between ticker and name
+ * TemplateSelector Component - FIXED: Now sends only ticker + weight (like QuickAdd/Import)
  * File: frontend/src/components/portfolio/TemplateSelector/TemplateSelector.tsx
  */
 import React, { useState } from 'react';
@@ -37,21 +37,17 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   const [selectedTemplate, setSelectedTemplate] = useState<PortfolioTemplate | null>(null);
   const [showPreview, setShowPreview] = useState<PortfolioTemplate | null>(null);
 
+  // ✅ FIXED: Now sends only ticker + weight (like QuickAdd/Import)
   const handleUseTemplate = (template: PortfolioTemplate) => {
     // Calculate total weight to normalize if needed
     const totalWeight = template.assets.reduce((sum, asset) => sum + asset.weight, 0);
 
-    // Convert template assets to AssetCreate format with normalized weights
-    const assets: AssetCreate[] = template.assets.map((asset, index) => ({
+    // ✅ FIXED: Send only ticker + weight (like QuickAdd/Import)
+    // AssetTable will auto-enrich with company name, sector, and prices
+    const assets: AssetCreate[] = template.assets.map((asset) => ({
       ticker: asset.ticker,
-      name: asset.name,
       // Normalize weight to ensure total is 100%
       weight: totalWeight > 0 ? (asset.weight / totalWeight) * 100 : 0,
-      sector: asset.sector,
-      assetClass: asset.assetClass,
-      currency: 'USD',
-      country: 'United States',
-      exchange: 'NASDAQ', // Default exchange
     }));
 
     onTemplateSelect(assets);
