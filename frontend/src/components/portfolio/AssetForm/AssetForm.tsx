@@ -258,10 +258,13 @@ export const AssetForm: React.FC<AssetFormProps> = ({
 
     if (loading) return;
 
-    // Validation
-    const validation = validateAsset(formData);
-    if (!validation.isValid) {
-      setValidationErrors(validation.errors);
+    if (!formData.ticker.trim()) {
+      setValidationErrors({ ticker: 'Ticker is required' });
+      return;
+    }
+
+    if (!formData.weight || formData.weight <= 0) {
+      setValidationErrors({ weight: 'Weight must be greater than 0' });
       return;
     }
 
@@ -272,14 +275,13 @@ export const AssetForm: React.FC<AssetFormProps> = ({
     }
 
     try {
-      // Ensure weight is a number and keep as percentage (not decimal)
+
       const submitData: AssetCreate = {
-        ...formData,
         ticker: formData.ticker.toUpperCase(),
-        weight: formData.weight, // Keep weight as is for easy mode
+        weight: formData.weight
       };
 
-      console.log('Submitting asset:', submitData); // Debug log
+      console.log('Submitting asset (import-like):', submitData);
 
       await onSubmit(submitData);
 
@@ -306,7 +308,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
       }
     } catch (error) {
       console.error('Error submitting asset:', error);
-      setValidationErrors({ general: error instanceof Error ? error.message : 'Failed to add asset' });
+      setValidationErrors({ general: error instanceof Error ? error.message : 'Unknown error' });
     }
   };
 
