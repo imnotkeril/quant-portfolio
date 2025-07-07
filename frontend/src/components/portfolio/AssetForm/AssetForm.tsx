@@ -129,7 +129,6 @@ export const AssetForm: React.FC<AssetFormProps> = ({
       .filter(suggestion => {
         return (
           suggestion.ticker.toUpperCase().startsWith(searchQuery.toUpperCase()) &&
-          !suggestion.ticker.includes('.') &&
           !existingTickers.includes(suggestion.ticker.toUpperCase())
         );
       })

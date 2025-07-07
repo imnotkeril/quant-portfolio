@@ -64,16 +64,16 @@ export const PORTFOLIO_API = {
   EXPORT_CSV: (id: string) => `${API_BASE_URL}/portfolios/${id}/export-csv`,
   UPDATE_PRICES: (id: string) => `${API_BASE_URL}/portfolios/${id}/update-prices`,
   ADD_ASSET: (id: string) => `${API_BASE_URL}/portfolios/${id}/assets`,
-  REMOVE_ASSET: (id: string, ticker: string) => `${API_BASE_URL}/portfolios/${id}/assets/${ticker}`,
+  REMOVE_ASSET: (id: string, ticker: string) => `${API_BASE_URL}/portfolios/${id}/assets/${encodeURIComponent(ticker)}`,
 };
 
 export const ASSET_API = {
   SEARCH: `${API_BASE_URL}/assets/search`,
-  HISTORICAL: (ticker: string) => `${API_BASE_URL}/assets/historical/${ticker}`,
-  INFO: (ticker: string) => `${API_BASE_URL}/assets/info/${ticker}`,
-  PRICE: (ticker: string) => `${API_BASE_URL}/assets/price/${ticker}`,  //
-  PERFORMANCE: (ticker: string) => `${API_BASE_URL}/assets/performance/${ticker}`,
-  VALIDATE: (ticker: string) => `${API_BASE_URL}/assets/validate/${ticker}`,
+  HISTORICAL: (ticker: string) => `${API_BASE_URL}/assets/historical/${encodeURIComponent(ticker)}`,
+  INFO: (ticker: string) => `${API_BASE_URL}/assets/info/${encodeURIComponent(ticker)}`,
+  PRICE: (ticker: string) => `${API_BASE_URL}/assets/price/${encodeURIComponent(ticker)}`,
+  PERFORMANCE: (ticker: string) => `${API_BASE_URL}/assets/performance/${encodeURIComponent(ticker)}`,
+  VALIDATE: (ticker: string) => `${API_BASE_URL}/assets/validate/${encodeURIComponent(ticker)}`,
   MARKET_STATUS: `${API_BASE_URL}/assets/market-status`,
   SECTOR_PERFORMANCE: `${API_BASE_URL}/assets/sector-performance`,
 };

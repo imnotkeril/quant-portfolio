@@ -164,7 +164,12 @@ async def get_asset_info(
 
         try:
             import yfinance as yf
-            stock = yf.Ticker(ticker)
+            # Convert ticker for yfinance API (BRK.B -> BRK-B)
+            corrected_ticker = ticker.replace('.', '-') if '.' in ticker else ticker
+            if corrected_ticker != ticker:
+                logging.info(f"Using corrected ticker {corrected_ticker} to query {ticker}")
+
+            stock = yf.Ticker(corrected_ticker)
             info = stock.info
 
             current_price = info.get('currentPrice') or info.get('regularMarketPrice')
@@ -227,8 +232,12 @@ async def get_asset_price(
     """
     try:
         import yfinance as yf
+        # Convert ticker for yfinance API (BRK.B -> BRK-B)
+        corrected_ticker = ticker.replace('.', '-') if '.' in ticker else ticker
+        if corrected_ticker != ticker:
+            logging.info(f"Using corrected ticker {corrected_ticker} to query {ticker}")
 
-        stock = yf.Ticker(ticker)
+        stock = yf.Ticker(corrected_ticker)
         info = stock.info
 
         current_price = info.get('currentPrice') or info.get('regularMarketPrice')

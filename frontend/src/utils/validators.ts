@@ -139,8 +139,8 @@ export const validateTicker = (ticker: string): ValidationResult => {
     errors.push('Ticker symbol is required');
   } else {
     const trimmed = ticker.trim().toUpperCase();
-    if (!/^[A-Z]{1,5}$/.test(trimmed)) {
-      errors.push('Ticker symbol must be 1-5 uppercase letters');
+    if (!/^[A-Z0-9.-]{1,10}$/.test(trimmed)) {
+      errors.push('Ticker symbol must be 1-10 characters (letters, numbers, dots, dashes)');
     }
   }
 
