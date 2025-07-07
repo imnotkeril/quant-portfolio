@@ -131,8 +131,8 @@ export const CreationStepAssets: React.FC<CreationStepAssetsProps> = ({
 
     const totalWeight = assets.reduce((sum, asset) => sum + asset.weight, 0);
 
-    if (Math.abs(totalWeight - 100) > 0.1) {
-      setValidationError(`Total portfolio weight is ${totalWeight.toFixed(2)}%. Please adjust weights to total 100%.`);
+    if (totalWeight > 100) {
+      setValidationError(`Portfolio is over-allocated by ${(totalWeight - 100).toFixed(2)}%. Cannot exceed 100%.`);
       return false;
     }
 
@@ -166,7 +166,7 @@ export const CreationStepAssets: React.FC<CreationStepAssetsProps> = ({
   // Calculate portfolio metrics
   const totalWeight = assets.reduce((sum, asset) => sum + asset.weight, 0);
   const remainingWeight = Math.max(0, 100 - totalWeight);
-  const isComplete = Math.abs(totalWeight - 100) <= 0.1;
+  const isComplete = totalWeight > 0 && totalWeight <= 100;
   const existingTickers = assets.map(asset => asset.ticker);
 
   // Asset table columns configuration
@@ -336,7 +336,7 @@ export const CreationStepAssets: React.FC<CreationStepAssetsProps> = ({
             type="button"
             onClick={handleSubmit}
             loading={loading}
-            disabled={loading || !isComplete || assets.length === 0}
+            disabled={loading || totalWeight > 100 || assets.length === 0}
           >
             {isEasyMode ? 'Create Portfolio ✨' : 'Next: Review Portfolio'}
           </Button>

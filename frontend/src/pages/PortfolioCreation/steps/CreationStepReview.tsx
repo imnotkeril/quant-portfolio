@@ -2,7 +2,7 @@
  * CreationStepReview Component - FIXED
  * Review and confirm portfolio creation
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '../../../components/common/Card/Card';
 import { Button } from '../../../components/common/Button/Button';
 import { Badge } from '../../../components/common/Badge/Badge';
@@ -11,6 +11,7 @@ import { AssetTable } from '../../../components/portfolio/AssetTable/AssetTable'
 import { formatCurrency, formatPercentage } from '../../../utils/formatters';
 import { getChartColor } from '../../../utils/color';
 import styles from '../PortfolioCreation.module.css';
+import { useAssets } from '../../../hooks/useAssets';
 
 interface AssetFormData {
   id: string;
@@ -69,6 +70,33 @@ export const CreationStepReview: React.FC<CreationStepReviewProps> = ({
   const stepDescription = isEasyMode
     ? 'Your portfolio is ready! Review the details and create your portfolio.'
     : 'Review all portfolio settings before creation. You can make changes later.';
+
+  const [enrichedAssets, setEnrichedAssets] = useState<AssetFormData[]>(formData.assets);
+  const { getAssetInfo } = useAssets();
+
+  useEffect(() => {
+    const enrichAssets = async () => {
+      const enrichedData = await Promise.all(
+        formData.assets.map(async (asset) => {
+          if (asset.sector) return asset;
+
+          try {
+            const assetInfo = await getAssetInfo(asset.ticker);
+            return {
+              ...asset,
+              sector: assetInfo?.sector || 'Other'
+            };
+          } catch {
+            return { ...asset, sector: 'Other' };
+          }
+        })
+      );
+      setEnrichedAssets(enrichedData);
+    };
+
+    enrichAssets();
+  }, [formData.assets, getAssetInfo]);
+
 
   // Calculate total weight and amounts
   const totalWeight = formData.assets.reduce((sum, asset) => sum + asset.weight, 0);
@@ -167,7 +195,7 @@ export const CreationStepReview: React.FC<CreationStepReviewProps> = ({
                     ...(cashWeight > 0 ? [{
                       name: 'Cash',
                       value: cashWeight,
-                      color: getChartColor(formData.assets.length), // Next color for cash
+                      color: '#6B7280',
                     }] : [])
                   ]}
                   width={300}
@@ -184,8 +212,8 @@ export const CreationStepReview: React.FC<CreationStepReviewProps> = ({
                   data={[
                     // Group assets by sector
                     ...Object.entries(
-                      formData.assets.reduce((acc, asset) => {
-                        const sector = asset.sector || 'Other';
+                      enrichedAssets.reduce((acc, asset) => {
+                        const sector = (asset.sector && asset.sector.trim() !== '') ? asset.sector : 'Other';
                         acc[sector] = (acc[sector] || 0) + asset.weight;
                         return acc;
                       }, {} as Record<string, number>)
@@ -198,13 +226,7 @@ export const CreationStepReview: React.FC<CreationStepReviewProps> = ({
                     ...(cashWeight > 0 ? [{
                       name: 'Cash',
                       value: cashWeight,
-                      color: getChartColor(Object.keys(
-                        formData.assets.reduce((acc, asset) => {
-                          const sector = asset.sector || 'Other';
-                          acc[sector] = true;
-                          return acc;
-                        }, {} as Record<string, boolean>)
-                      ).length), // Color after all sectors
+                      color: '#6B7280',
                     }] : [])
                   ]}
                   width={300}
@@ -215,6 +237,7 @@ export const CreationStepReview: React.FC<CreationStepReviewProps> = ({
           </div>
 
           {/* Detailed Asset Table - WITH ACTIONS=FALSE */}
+          <div className={styles.detailedTable} style={{ marginTop: '2rem' }}>
           <div className={styles.detailedTable}>
             <AssetTable
               assets={formData.assets}
@@ -223,6 +246,7 @@ export const CreationStepReview: React.FC<CreationStepReviewProps> = ({
               showPnL={false}
               showDeleteAll={false}
             />
+          </div>
           </div>
         </div>
 
@@ -289,7 +313,7 @@ export const CreationStepReview: React.FC<CreationStepReviewProps> = ({
             onClick={onBack}
             disabled={loading}
           >
-            ← Back
+            Back
           </Button>
 
           <Button
@@ -298,9 +322,8 @@ export const CreationStepReview: React.FC<CreationStepReviewProps> = ({
             onClick={onCreate}
             loading={loading}
             disabled={loading || formData.assets.length === 0}
-            size="large"
           >
-            {loading ? 'Creating Portfolio...' : '🚀 Create Portfolio'}
+            {loading ? 'Creating Portfolio...' : 'Create Portfolio'}
           </Button>
         </div>
       </Card>
