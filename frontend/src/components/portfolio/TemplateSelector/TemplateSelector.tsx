@@ -1,6 +1,6 @@
 /**
- * TemplateSelector Component
- * Simple selector for portfolio templates in AssetForm context
+ * TemplateSelector Component - FIXED: Added spacing between ticker and name
+ * File: frontend/src/components/portfolio/TemplateSelector/TemplateSelector.tsx
  */
 import React, { useState } from 'react';
 import classNames from 'classnames';
@@ -92,9 +92,11 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                 <Badge variant={getRiskColor(showPreview.riskLevel)} size="small">
                   {showPreview.riskLevel} risk
                 </Badge>
+                {' '}
                 <Badge variant="default" size="small">
                   {showPreview.timeHorizon}
                 </Badge>
+                {' '}
                 <Badge variant="default" size="small">
                   {showPreview.expectedReturn}
                 </Badge>
@@ -104,17 +106,19 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
 
           <div className={styles.previewAssets}>
             <h5>Assets ({showPreview.assets.length} holdings)</h5>
-            <div className={styles.assetsList}>
+            <div className={styles.assetsTable}>
+              <div className={styles.tableHeader}>
+                <span>Ticker</span>
+                <span>Company</span>
+                <span>Weight</span>
+                <span>Sector</span>
+              </div>
               {showPreview.assets.map((asset, index) => (
-                <div key={index} className={styles.previewAsset}>
-                  <div className={styles.assetInfo}>
-                    <span className={styles.assetTicker}>{asset.ticker}</span>
-                    <span className={styles.assetName}>{asset.name}</span>
-                  </div>
-                  <div className={styles.assetDetails}>
-                    <span className={styles.assetWeight}>{asset.weight}%</span>
-                    <span className={styles.assetSector}>{asset.sector}</span>
-                  </div>
+                <div key={index} className={styles.assetRow}>
+                  <span className={styles.assetTicker}>{asset.ticker}</span>
+                  <span className={styles.assetName}>{asset.name}</span>
+                  <span className={styles.assetWeight}>{asset.weight}%</span>
+                  <span className={styles.assetSector}>{asset.sector}</span>
                 </div>
               ))}
             </div>

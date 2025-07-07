@@ -30,6 +30,10 @@
   margin-bottom: 24px;
 }
 
+.methodSelector {
+  text-align: center;
+}
+
 .methodButtons {
   display: flex;
   gap: 8px;

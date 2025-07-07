@@ -95,7 +95,6 @@ export const AssetForm: React.FC<AssetFormProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedAssetInfo, setSelectedAssetInfo] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isTickerSelected, setIsTickerSelected] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -135,7 +134,6 @@ export const AssetForm: React.FC<AssetFormProps> = ({
     if (asset) {
       setFormData(asset);
       setSearchQuery(asset.ticker);
-      setIsTickerSelected(true);
     }
   }, [asset]);
 
@@ -156,7 +154,6 @@ export const AssetForm: React.FC<AssetFormProps> = ({
   const handleTickerChange = (value: string) => {
     setSearchQuery(value.toUpperCase());
     setFormData(prev => ({ ...prev, ticker: value.toUpperCase() }));
-    setIsTickerSelected(false);
     setSelectedAssetInfo(null);
     setSelectedSuggestionIndex(-1);
 
@@ -183,7 +180,6 @@ export const AssetForm: React.FC<AssetFormProps> = ({
       sector: suggestion.sector || '',
       assetClass: suggestion.assetType || 'stocks',
     }));
-    setIsTickerSelected(true);
     setShowSuggestions(false);
     setSelectedSuggestionIndex(-1);
 
@@ -305,7 +301,6 @@ export const AssetForm: React.FC<AssetFormProps> = ({
           exchange: '',
         });
         setSearchQuery('');
-        setIsTickerSelected(false);
         setSelectedAssetInfo(null);
         setValidationErrors({});
       }
@@ -651,7 +646,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
               type="submit"
               variant="primary"
               loading={loading}
-              disabled={loading || !formData.ticker || !formData.weight || (isEasyMode && !isTickerSelected)}
+              disabled={loading || !formData.ticker || !formData.weight}
             >
               {loading ? 'Saving...' : 'Add Asset'}
             </Button>
@@ -708,7 +703,7 @@ export const AssetForm: React.FC<AssetFormProps> = ({
                 type="submit"
                 variant="primary"
                 loading={loading}
-                disabled={loading || !formData.ticker || !formData.weight || (isEasyMode && !isTickerSelected)}
+                disabled={loading || !formData.ticker || !formData.weight}
               >
                 {loading ? 'Saving...' : 'Add Asset'}
               </Button>

@@ -80,7 +80,6 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedAssetInfo, setSelectedAssetInfo] = useState<AssetInfo | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isTickerSelected, setIsTickerSelected] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -123,7 +122,6 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
     const value = e.target.value.toUpperCase();
     setFormData(prev => ({ ...prev, ticker: value }));
     setSearchQuery(value);
-    setIsTickerSelected(false);
     setSelectedAssetInfo(null);
     setErrors(prev => ({ ...prev, ticker: undefined }));
 
@@ -162,7 +160,6 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
     }));
 
     setSearchQuery(suggestion.ticker);
-    setIsTickerSelected(true);
     setShowSuggestions(false);
     setSelectedSuggestionIndex(-1);
 
@@ -247,8 +244,6 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
       newErrors.ticker = 'Ticker is required';
     } else if (existingTickers.includes(formData.ticker.toUpperCase())) {
       newErrors.ticker = 'This asset is already in your portfolio';
-    } else if (!isTickerSelected) {
-      newErrors.ticker = 'Please select a ticker from the suggestions';
     }
 
     // Validate weight
@@ -271,7 +266,7 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
     const asset: AssetCreate = {
       ticker: formData.ticker.toUpperCase(),
       name: formData.name,
-      weight: formData.weight / 100, // Convert percentage to decimal
+      weight: formData.weight, // ← ИСПРАВЛЕНО: убрал деление на 100
       currentPrice: formData.currentPrice,
       sector: formData.sector,
       industry: formData.industry,
@@ -501,10 +496,9 @@ export const QuickAssetForm: React.FC<QuickAssetFormProps> = ({
             type="submit"
             variant="primary"
             loading={loading}
-            disabled={loading || !formData.ticker || !formData.weight || !isTickerSelected}
-            className={styles.submitButton}
+            disabled={loading || !formData.ticker || !formData.weight}
           >
-            {loading ? 'Adding...' : 'Add Asset'} ✅
+            {loading ? 'Saving...' : 'Add Asset'}
           </Button>
         </div>
       </form>

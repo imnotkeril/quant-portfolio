@@ -1,15 +1,16 @@
 /**
- * PortfolioSummary Component
- * Summary card showing key portfolio metrics and performance
+ * PortfolioSummary Component - FIXED: Cash as automatic remainder
+ * File: frontend/src/components/portfolio/PortfolioSummary/PortfolioSummary.tsx
  */
 import React from 'react';
 import classNames from 'classnames';
-import Card from '../../common/Card';
-import { Button } from '../../common/Button';
-import { Badge } from '../../common/Badge';
-import { PieChart, PieChartDataPoint } from '../../charts/PieChart';
+import { Card } from '../../common/Card/Card';
+import { Badge } from '../../common/Badge/Badge';
+import { Button } from '../../common/Button/Button';
+import { PieChart, PieChartDataPoint } from '../../charts/PieChart/PieChart';
 import { Portfolio } from '../../../types/portfolio';
-import { formatCurrency, formatPercentage, formatDate, formatNumber } from '../../../utils/formatters';
+import { formatCurrency, formatPercentage } from '../../../utils/formatters';
+import { getChartColor } from '../../../utils/color';
 import styles from './PortfolioSummary.module.css';
 
 interface PortfolioSummaryProps {
@@ -44,30 +45,45 @@ export const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({
 
   const totalPnLPercent = totalValue > 0 ? (totalPnL / (totalValue - totalPnL)) * 100 : 0;
 
-  // Prepare asset allocation data for pie chart
+  // FIXED: Calculate total allocated weight and cash remainder
+  const totalAllocatedWeight = portfolio.assets.reduce(
+    (sum, asset) => sum + (asset.weight || 0), 0
+  );
+  const cashWeight = Math.max(0, 100 - totalAllocatedWeight);
+
+  // FIXED: Prepare asset allocation data for pie chart INCLUDING CASH
   const allocationData: PieChartDataPoint[] = portfolio.assets
     .filter(asset => asset.weight && asset.weight > 0)
-    .map(asset => ({
+    .map((asset, index) => ({
       name: asset.ticker,
       value: asset.weight || 0,
+      color: getChartColor(index),
     }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 8); // Show top 8 assets
+    .sort((a, b) => b.value - a.value);
 
-  // Group smaller assets
-  const remainingWeight = portfolio.assets
-    .filter(asset => asset.weight && asset.weight > 0)
-    .slice(8)
-    .reduce((sum, asset) => sum + (asset.weight || 0), 0);
-
-  if (remainingWeight > 0) {
+  // FIXED: Add cash as separate item if there's any remainder
+  if (cashWeight > 0) {
     allocationData.push({
-      name: 'Others',
-      value: remainingWeight,
+      name: 'Cash',
+      value: cashWeight,
+      color: getChartColor(allocationData.length), // Next available color
     });
   }
 
-  // Calculate sector allocation
+  // Group smaller assets (keep top 8 + cash)
+  const topAssets = allocationData.slice(0, 8);
+  const remainingWeight = allocationData.slice(8).reduce((sum, item) => sum + item.value, 0);
+
+  let finalAllocationData = [...topAssets];
+  if (remainingWeight > 0) {
+    finalAllocationData.push({
+      name: 'Others',
+      value: remainingWeight,
+      color: getChartColor(topAssets.length),
+    });
+  }
+
+  // Calculate sector allocation (excluding cash)
   const sectorAllocation = portfolio.assets.reduce((acc, asset) => {
     if (asset.sector && asset.weight) {
       acc[asset.sector] = (acc[asset.sector] || 0) + asset.weight;
@@ -111,125 +127,106 @@ export const PortfolioSummary: React.FC<PortfolioSummaryProps> = ({
           <div className={styles.actions}>
             {onUpdatePrices && (
               <Button
-                variant="outline"
+                variant="secondary"
                 size="small"
-                loading={updatingPrices}
                 onClick={onUpdatePrices}
+                loading={updatingPrices}
                 disabled={updatingPrices}
               >
-                Update Prices
+                {updatingPrices ? 'Updating...' : '🔄 Update Prices'}
               </Button>
             )}
+
             {onOptimize && (
               <Button
                 variant="secondary"
                 size="small"
                 onClick={onOptimize}
               >
-                Optimize
+                ⚖️ Optimize
               </Button>
             )}
+
             {onAnalyze && (
               <Button
                 variant="primary"
                 size="small"
                 onClick={onAnalyze}
               >
-                Analyze
+                📊 Analyze
               </Button>
             )}
           </div>
         </div>
 
         <div className={styles.content}>
-          <div className={styles.metricsSection}>
-            <div className={styles.primaryMetrics}>
-              <div className={styles.metric}>
-                <span className={styles.metricLabel}>Total Value</span>
-                <span className={styles.metricValue}>
-                  {formatCurrency(totalValue)}
-                </span>
-              </div>
+          {/* Portfolio Value */}
+          <div className={styles.valueSection}>
+            <div className={styles.totalValue}>
+              <span className={styles.valueLabel}>Total Value</span>
+              <span className={styles.valueAmount}>
+                {formatCurrency(totalValue)}
+              </span>
+            </div>
 
-              <div className={styles.metric}>
-                <span className={styles.metricLabel}>Total P&L</span>
-                <span className={classNames(
-                  styles.metricValue,
-                  styles.pnlValue,
-                  {
-                    [styles.positive]: totalPnL >= 0,
-                    [styles.negative]: totalPnL < 0
-                  }
-                )}>
-                  {formatCurrency(totalPnL)}
-                  <span className={styles.pnlPercent}>
-                    ({formatPercentage(totalPnLPercent / 100)})
+            <div className={styles.pnlSection}>
+              <span className={styles.pnlLabel}>Total P&L</span>
+              <span className={classNames(
+                styles.pnlAmount,
+                { [styles.positive]: totalPnL >= 0, [styles.negative]: totalPnL < 0 }
+              )}>
+                {formatCurrency(totalPnL)} ({formatPercentage(totalPnLPercent / 100)})
+              </span>
+            </div>
+          </div>
+
+          {/* Asset Allocation Chart */}
+          <div className={styles.allocationSection}>
+            <h3 className={styles.sectionTitle}>Asset Allocation</h3>
+
+            <div className={styles.chartContainer}>
+              <PieChart
+                data={finalAllocationData}
+                height={200}
+                showLegend={false}
+                innerRadius={60}
+                outerRadius={90}
+              />
+            </div>
+
+            {/* FIXED: Asset list including cash */}
+            <div className={styles.assetList}>
+              {finalAllocationData.map((item, index) => (
+                <div key={index} className={styles.assetItem}>
+                  <div
+                    className={styles.assetColor}
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className={styles.assetName}>{item.name}</span>
+                  <span className={styles.assetWeight}>
+                    {formatPercentage(item.value / 100)}
                   </span>
-                </span>
-              </div>
-            </div>
-
-            <div className={styles.secondaryMetrics}>
-              <div className={styles.metricSmall}>
-                <span className={styles.metricSmallLabel}>Assets</span>
-                <span className={styles.metricSmallValue}>
-                  {formatNumber(portfolio.assets.length)}
-                </span>
-              </div>
-
-              <div className={styles.metricSmall}>
-                <span className={styles.metricSmallLabel}>Last Updated</span>
-                <span className={styles.metricSmallValue}>
-                  {formatDate(portfolio.lastUpdated, 'relative')}
-                </span>
-              </div>
-
-              <div className={styles.metricSmall}>
-                <span className={styles.metricSmallLabel}>Created</span>
-                <span className={styles.metricSmallValue}>
-                  {formatDate(portfolio.created, 'short')}
-                </span>
-              </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          <div className={styles.chartSection}>
-            <div className={styles.allocationChart}>
-              <h3 className={styles.chartTitle}>Asset Allocation</h3>
-              {allocationData.length > 0 ? (
-                <PieChart
-                  data={allocationData}
-                  height={200}
-                  showLegend={false}
-                  innerRadius={40}
-                  labelFormatter={(entry) => {
-                    const percentage = entry.value;
-                    return percentage > 5 ? `${percentage.toFixed(1)}%` : '';
-                  }}
-                />
-              ) : (
-                <div className={styles.noChart}>
-                  <p>No allocation data available</p>
-                </div>
-              )}
-            </div>
-
-            {topSectors.length > 0 && (
-              <div className={styles.sectorsSection}>
-                <h3 className={styles.chartTitle}>Top Sectors</h3>
-                <div className={styles.sectors}>
-                  {topSectors.map(([sector, weight]) => (
-                    <div key={sector} className={styles.sector}>
-                      <span className={styles.sectorName}>{sector}</span>
-                      <span className={styles.sectorWeight}>
-                        {formatPercentage(weight / 100)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+          {/* Top Sectors */}
+          {topSectors.length > 0 && (
+            <div className={styles.sectorsSection}>
+              <h3 className={styles.sectionTitle}>Top Sectors</h3>
+              <div className={styles.sectorsList}>
+                {topSectors.map(([sector, weight], index) => (
+                  <div key={sector} className={styles.sectorItem}>
+                    <span className={styles.sectorName}>{sector}</span>
+                    <span className={styles.sectorWeight}>
+                      {formatPercentage(weight / 100)}
+                    </span>
+                  </div>
+                ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </Card>
     </div>
