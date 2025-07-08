@@ -8,18 +8,18 @@ export const ROUTES = {
 
   // Portfolio routes
   PORTFOLIO: {
-    ROOT: '/portfolio',
-    LIST: '/portfolio/list',
-    CREATE: '/portfolio/create',
-    DETAILS: '/portfolio/:id',
-    EDIT: '/portfolio/:id/edit',
-    ANALYZE: '/portfolio/:id/analyze',
-    ANALYSIS: '/portfolio/:id/analysis',
-    ANALYSIS_ROOT: '/portfolio/analysis', // ДОБАВЛЕНО: общий роут для выбора портфеля для анализа
-    DETAILED_PATH: (id: string) => `/portfolio/${id}`,
-    EDIT_PATH: (id: string) => `/portfolio/${id}/edit`,
-    ANALYZE_PATH: (id: string) => `/portfolio/${id}/analyze`,
-    ANALYSIS_PATH: (id: string) => `/portfolio/${id}/analysis`, // ДОБАВЛЕНО: путь для анализа конкретного портфеля
+    ROOT: '/portfolios',
+    LIST: '/portfolios',
+    CREATE: '/portfolios/create',
+    DETAILS: '/portfolios/:id',
+    EDIT: '/portfolios/:id/edit',
+    ANALYZE: '/portfolios/:id/analyze',
+    ANALYSIS: '/portfolios/:id/analysis',
+    ANALYSIS_ROOT: '/portfolios/analysis',
+    DETAILED_PATH: (id: string) => `/portfolios/${id}`,
+    EDIT_PATH: (id: string) => `/portfolios/${id}/edit`,
+    ANALYZE_PATH: (id: string) => `/portfolios/${id}/analyze`,
+    ANALYSIS_PATH: (id: string) => `/portfolios/${id}/analysis`,
   },
 
   // Analytics routes

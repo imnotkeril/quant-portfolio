@@ -13,7 +13,7 @@ import { CreationStepAssets } from './steps/CreationStepAssets';
 import { CreationStepConstraints } from './steps/CreationStepConstraints';
 import { CreationStepReview } from './steps/CreationStepReview';
 import styles from './PortfolioCreation.module.css';
-
+import ROUTES from '../../constants/routes';
 // Types
 type CreationMode = 'easy' | 'professional';
 type CreationStep = 'mode' | 'basic' | 'assets' | 'constraints' | 'review';
@@ -140,12 +140,24 @@ const PortfolioCreation: React.FC = () => {
     try {
       setErrors({});
 
+      // Validate form data
+      if (!formData.name.trim()) {
+        setErrors({ general: 'Portfolio name is required' });
+        return;
+      }
+
+      if (!formData.assets || formData.assets.length === 0) {
+        setErrors({ general: 'At least one asset is required' });
+        return;
+      }
+
       // Prepare portfolio data for API
       const portfolioData: PortfolioCreate = {
-        name: formData.name,
-        description: formData.description,
+        name: formData.name.trim(),
+        description: formData.description?.trim() || '',
+        tags: formData.tags || [],
         assets: formData.assets.map(asset => ({
-          ticker: asset.ticker,
+          ticker: asset.ticker.toUpperCase(),
           name: asset.name,
           weight: asset.weight / 100, // Convert percentage to decimal
           quantity: asset.quantity,
@@ -153,7 +165,7 @@ const PortfolioCreation: React.FC = () => {
           purchaseDate: asset.purchaseDate,
           sector: asset.sector,
           assetClass: asset.assetClass,
-        })) as AssetCreate[],
+        })) as AssetCreate[]
       };
 
       console.log('Creating portfolio:', portfolioData);
@@ -161,18 +173,19 @@ const PortfolioCreation: React.FC = () => {
 
       if (newPortfolio) {
         console.log('Portfolio created successfully:', newPortfolio);
-        navigate('/portfolios', {
+        navigate(ROUTES.PORTFOLIO.LIST, {
           state: {
             message: `Portfolio "${formData.name}" created successfully!`,
             portfolioId: newPortfolio.id
           }
         });
+      } else {
+        setErrors({ general: 'Failed to create portfolio. Please try again.' });
       }
     } catch (err) {
       console.error('Portfolio creation error:', err);
-      setErrors({
-        general: 'Failed to create portfolio. Please check your data and try again.'
-      });
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create portfolio. Please check your data and try again.';
+      setErrors({ general: errorMessage });
     }
   };
 

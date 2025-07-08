@@ -120,7 +120,7 @@ const Dashboard: React.FC = () => {
   ];
 
   const handleCreatePortfolio = () => {
-    navigate('/portfolio/create');
+    navigate('/portfolios/create');
   };
 
   const handleExploreDemo = () => {

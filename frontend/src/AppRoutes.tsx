@@ -89,13 +89,13 @@ const AppRoutes: React.FC = () => {
 
         {/* Portfolio Routes */}
         <Route path={ROUTES.PORTFOLIO.ROOT} element={<Navigate to={ROUTES.PORTFOLIO.LIST} replace />} />
-        <Route path={ROUTES.PORTFOLIO.LIST} element={<Dashboard />} /> {/* Reuse dashboard for now */}
+        <Route path={ROUTES.PORTFOLIO.LIST} element={<ComingSoon pageName="All Portfolios" />} />
         <Route path={ROUTES.PORTFOLIO.CREATE} element={<PortfolioCreation />} />
 
         {/* NEW: Portfolio Creation Mode Selector */}
         <Route path="/portfolios/create/mode" element={<PortfolioModeSelector />} />
 
-        <Route path={ROUTES.PORTFOLIO.ANALYSIS_ROOT} element={<PortfolioAnalysis />} /> {/* ДОБАВЛЕНО: роут для выбора портфеля для анализа */}
+        <Route path={ROUTES.PORTFOLIO.ANALYSIS_ROOT} element={<PortfolioAnalysis />} />
         <Route path={ROUTES.PORTFOLIO.ANALYSIS} element={<PortfolioAnalysis />} />
         <Route path={ROUTES.PORTFOLIO.EDIT} element={<PortfolioCreation />} />
 

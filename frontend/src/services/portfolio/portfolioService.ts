@@ -74,15 +74,20 @@ class PortfolioService {
     }
   }
 
-  /**
-   * Create new portfolio
-   */
+
   async createPortfolio(portfolio: PortfolioCreate): Promise<Portfolio> {
     try {
-      const response = await apiClient.post<Portfolio>(
+      const response = await apiClient.post<any>(
         portfolioEndpoints.create(),
         portfolio
       );
+
+      // Handle API response structure: {message, id, portfolio}
+      if (response.portfolio) {
+        return response.portfolio;
+      }
+
+      // Fallback: if response is direct portfolio object
       return response;
     } catch (error) {
       console.error('Error creating portfolio:', error);
