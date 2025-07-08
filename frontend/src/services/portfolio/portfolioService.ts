@@ -77,10 +77,15 @@ class PortfolioService {
 
   async createPortfolio(portfolio: PortfolioCreate): Promise<Portfolio> {
     try {
+      console.log('🌐 portfolioService: Making API call to:', portfolioEndpoints.create());
+      console.log('📦 portfolioService: Sending data:', portfolio);
+
       const response = await apiClient.post<any>(
         portfolioEndpoints.create(),
         portfolio
       );
+
+      console.log('📥 portfolioService: API response:', response);
 
       // Handle API response structure: {message, id, portfolio}
       if (response.portfolio) {
@@ -90,7 +95,7 @@ class PortfolioService {
       // Fallback: if response is direct portfolio object
       return response;
     } catch (error) {
-      console.error('Error creating portfolio:', error);
+      console.error('❌ portfolioService: API error:', error);
       throw error;
     }
   }

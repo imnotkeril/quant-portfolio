@@ -27,10 +27,9 @@ def get_cache_service() -> MemoryCacheService:
 def get_file_storage_service() -> FileStorageService:
     """
     Dependency for getting a FileStorageService instance.
-
-    This service handles file storage operations like saving and loading portfolios, reports, etc.
     """
-    return FileStorageService(storage_dir=settings.STORAGE_DIR)
+
+    return FileStorageService(str(settings.PORTFOLIO_DIR.parent))
 
 
 # Core services (определяем после базовых)
@@ -53,12 +52,10 @@ def get_portfolio_manager_service(
 ) -> PortfolioManagerService:
     """
     Dependency for getting a PortfolioManagerService instance.
-
-    This service handles portfolio storage, loading, and management operations.
     """
     return PortfolioManagerService(
-        data_fetcher=data_fetcher,
-        storage_service=storage_service
+        data_provider=data_fetcher,
+        storage_provider=storage_service
     )
 
 

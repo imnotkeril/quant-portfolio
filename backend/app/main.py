@@ -83,8 +83,8 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"❌ Failed to create directories: {e}")
 
-    logger.info(f"🎯 API available at: http://localhost:8000{settings.API_PREFIX}")
-    logger.info(f"📖 API docs at: http://localhost:8000/docs")
+    logger.info(f"🎯 API available at: http://localhost:8080{settings.API_PREFIX}")
+    logger.info(f"📖 API docs at: http://localhost:8080/docs")
 
     yield
 
@@ -118,14 +118,14 @@ try:
     logger.info("✅ Assets router loaded")
 except ImportError as e:
     logger.warning(f"⚠️ Assets router not available: {e}")
-
+"""
 try:
     from app.api.endpoints import portfolios
     app.include_router(portfolios.router, prefix=settings.API_PREFIX, tags=["portfolios"])
     logger.info("✅ Portfolios router loaded")
 except ImportError as e:
     logger.warning(f"⚠️ Portfolios router not available: {e}")
-
+"""
 try:
     from app.api.endpoints import analytics
     app.include_router(analytics.router, prefix=settings.API_PREFIX, tags=["analytics"])

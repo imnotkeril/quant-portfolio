@@ -52,7 +52,7 @@
   margin-left: 0;
 }
 
-/* Header - ФИКСИРОВАННЫЙ с правильным z-index */
+
 .header {
   position: fixed;
   top: 0;
@@ -65,7 +65,7 @@
   padding: 0 var(--spacing-l);
   background-color: var(--color-background);
   border-bottom: 2px solid var(--color-divider);
-  z-index: 998; /* НИЖЕ SIDEBAR, НО ВЫШЕ CONTENT */
+  z-index: var(--z-index-header);
   transition: left var(--transition-medium);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);

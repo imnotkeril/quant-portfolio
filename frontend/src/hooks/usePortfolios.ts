@@ -134,6 +134,8 @@ export const usePortfolios = (): UsePortfoliosState & UsePortfoliosActions => {
     setState(prev => ({ ...prev, creating: true, error: null }));
 
     try {
+      console.log('🚀 usePortfolios: Creating portfolio:', portfolio);
+
       // Validate portfolio before creating
       const validation = portfolioService.validatePortfolio(portfolio);
       if (!validation.isValid) {
@@ -142,8 +144,10 @@ export const usePortfolios = (): UsePortfoliosState & UsePortfoliosActions => {
 
       // Normalize weights
       const normalizedPortfolio = portfolioService.normalizePortfolioWeights(portfolio);
+      console.log('🔧 usePortfolios: Normalized portfolio:', normalizedPortfolio);
 
       const newPortfolio = await portfolioService.createPortfolio(normalizedPortfolio);
+      console.log('✅ usePortfolios: Portfolio created:', newPortfolio);
 
       setState(prev => ({
         ...prev,
@@ -160,6 +164,7 @@ export const usePortfolios = (): UsePortfoliosState & UsePortfoliosActions => {
 
       return newPortfolio;
     } catch (error) {
+      console.error('❌ usePortfolios: Create portfolio error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to create portfolio';
       setState(prev => ({ ...prev, creating: false, error: errorMessage }));
       return null;

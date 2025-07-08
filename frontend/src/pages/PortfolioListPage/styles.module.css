@@ -11,7 +11,7 @@
 /* Success Message */
 .successMessage {
   position: fixed;
-  top: 20px;
+  top: 80px;
   right: 20px;
   z-index: 1070;
   animation: slideInRight 0.3s ease-out;
