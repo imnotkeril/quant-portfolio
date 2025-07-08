@@ -52,20 +52,22 @@ const PortfolioListPage: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Load portfolios on mount
-  useEffect(() => {
-    dispatch(loadPortfolios());
-  }, [dispatch]);
-
   // Handle success message from portfolio creation
   useEffect(() => {
     if (location.state?.message) {
       setSuccessMessage(location.state.message);
+
+      if (location.state?.portfolioId) {
+        console.log('Reloading portfolios after creation:', location.state.portfolioId);
+        dispatch(loadPortfolios());
+      }
+
       // Clear message after 5 seconds
       setTimeout(() => setSuccessMessage(null), 5000);
       // Clear location state
       navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state, navigate, location.pathname]);
+  }, [location.state, navigate, location.pathname, dispatch]);
 
   // Filter and sort portfolios
   const filteredPortfolios = React.useMemo(() => {
