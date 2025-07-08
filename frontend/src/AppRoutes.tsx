@@ -1,3 +1,7 @@
+/**
+ * App Routes Configuration - Updated with PortfolioListPage
+ * File: frontend/src/AppRoutes.tsx
+ */
 import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from './constants/routes';
@@ -12,6 +16,9 @@ import ScenarioAnalysis from './pages/ScenarioAnalysis';
 import HistoricalAnalogies from './pages/HistoricalAnalogies';
 import PortfolioComparison from './pages/PortfolioComparison';
 import ReportGeneration from './pages/ReportGeneration';
+
+// NEW: Portfolio List Page
+import PortfolioListPage from './pages/PortfolioListPage';
 
 // NEW: Import new components (lazy loaded)
 const PortfolioModeSelector = React.lazy(() => import('./pages/PortfolioCreation/PortfolioModeSelector'));
@@ -89,7 +96,10 @@ const AppRoutes: React.FC = () => {
 
         {/* Portfolio Routes */}
         <Route path={ROUTES.PORTFOLIO.ROOT} element={<Navigate to={ROUTES.PORTFOLIO.LIST} replace />} />
-        <Route path={ROUTES.PORTFOLIO.LIST} element={<ComingSoon pageName="All Portfolios" />} />
+
+        {/* UPDATED: Use PortfolioListPage instead of ComingSoon */}
+        <Route path={ROUTES.PORTFOLIO.LIST} element={<PortfolioListPage />} />
+
         <Route path={ROUTES.PORTFOLIO.CREATE} element={<PortfolioCreation />} />
 
         {/* NEW: Portfolio Creation Mode Selector */}

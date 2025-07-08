@@ -1,19 +1,23 @@
 /**
- * Portfolio Creation Component - Updated with Easy/Professional modes
+ * Portfolio Creation Component - Updated with proper redirect
  * File: frontend/src/pages/PortfolioCreation/index.tsx
  */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import classNames from 'classnames';
 import { Card } from '../../components/common/Card/Card';
 import { Button } from '../../components/common/Button/Button';
-import { usePortfolios } from '../../hooks/usePortfolios';
-import { PortfolioCreate, AssetCreate } from '../../types/portfolio';
 import { CreationStepBasic } from './steps/CreationStepBasic';
 import { CreationStepAssets } from './steps/CreationStepAssets';
 import { CreationStepConstraints } from './steps/CreationStepConstraints';
 import { CreationStepReview } from './steps/CreationStepReview';
+import { usePortfolios } from '../../hooks/usePortfolios';
+import { createPortfolio } from '../../store/portfolio/actions';
+import { PortfolioCreate, AssetCreate } from '../../types/portfolio';
+import { ROUTES } from '../../constants/routes';
 import styles from './PortfolioCreation.module.css';
-import ROUTES from '../../constants/routes';
+
 // Types
 type CreationMode = 'easy' | 'professional';
 type CreationStep = 'mode' | 'basic' | 'assets' | 'constraints' | 'review';
@@ -54,22 +58,33 @@ interface PortfolioFormData {
   constraints?: ConstraintsData;
 }
 
+interface ErrorsState {
+  general?: string;
+  step?: string;
+  [key: string]: string | undefined;
+}
+
 const PortfolioCreation: React.FC = () => {
   const navigate = useNavigate();
-  const { createPortfolio, loading, error } = usePortfolios();
+  const dispatch = useDispatch();
+  const { createPortfolio } = usePortfolios();
 
-  // State management
+  // State
   const [mode, setMode] = useState<CreationMode | null>(null);
   const [step, setStep] = useState<CreationStep>('mode');
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<ErrorsState>({});
+
+  // Form data
   const [formData, setFormData] = useState<PortfolioFormData>({
     name: '',
     description: '',
     startingAmount: 100000,
+    tags: [],
     assets: [],
   });
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Step navigation
+  // Get next step logic
   const getNextStep = (currentStep: CreationStep, currentMode: CreationMode): CreationStep => {
     switch (currentStep) {
       case 'mode':
@@ -138,16 +153,19 @@ const PortfolioCreation: React.FC = () => {
 
   const handleCreatePortfolio = async () => {
     try {
+      setLoading(true);
       setErrors({});
 
       // Validate form data
       if (!formData.name.trim()) {
         setErrors({ general: 'Portfolio name is required' });
+        setLoading(false);
         return;
       }
 
       if (!formData.assets || formData.assets.length === 0) {
         setErrors({ general: 'At least one asset is required' });
+        setLoading(false);
         return;
       }
 
@@ -160,19 +178,23 @@ const PortfolioCreation: React.FC = () => {
           ticker: asset.ticker.toUpperCase(),
           name: asset.name,
           weight: asset.weight / 100, // Convert percentage to decimal
-          quantity: asset.quantity,
           purchasePrice: asset.purchasePrice,
           purchaseDate: asset.purchaseDate,
           sector: asset.sector,
           assetClass: asset.assetClass,
-        })) as AssetCreate[]
+        })) as AssetCreate[],
+        initialValue: formData.startingAmount,
       };
 
       console.log('Creating portfolio:', portfolioData);
+
+      // Create portfolio using hook
       const newPortfolio = await createPortfolio(portfolioData);
 
       if (newPortfolio) {
         console.log('Portfolio created successfully:', newPortfolio);
+
+        // Navigate to portfolio list with success message
         navigate(ROUTES.PORTFOLIO.LIST, {
           state: {
             message: `Portfolio "${formData.name}" created successfully!`,
@@ -182,10 +204,13 @@ const PortfolioCreation: React.FC = () => {
       } else {
         setErrors({ general: 'Failed to create portfolio. Please try again.' });
       }
-    } catch (err) {
-      console.error('Portfolio creation error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create portfolio. Please check your data and try again.';
-      setErrors({ general: errorMessage });
+    } catch (error) {
+      console.error('Error creating portfolio:', error);
+      setErrors({
+        general: error instanceof Error ? error.message : 'Failed to create portfolio. Please try again.'
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -196,39 +221,42 @@ const PortfolioCreation: React.FC = () => {
         <div className={styles.header}>
           <h1 className={styles.title}>Create New Portfolio</h1>
           <p className={styles.subtitle}>
-            Choose your preferred creation method to get started
+            Choose how you'd like to build your portfolio
           </p>
         </div>
 
         <div className={styles.modeSelection}>
-          {/* Easy Mode Card */}
-          <Card className={`${styles.modeCard} ${styles.basicMode}`}>
-            <div className={styles.modeIcon}>⚡</div>
-            <h2 className={styles.modeTitle}>Easy Mode</h2>
+          <Card className={classNames(styles.modeCard, styles.basicMode)}>
+            <div className={styles.modeIcon}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+            </div>
+            <h3 className={styles.modeTitle}>Easy Mode</h3>
             <div className={styles.modeFeatures}>
               <div className={styles.feature}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="20,6 9,17 4,12" />
                 </svg>
-                Quick setup with smart defaults
+                Quick setup
               </div>
               <div className={styles.feature}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="20,6 9,17 4,12" />
                 </svg>
-                Ready-made templates
+                Simple asset selection
+              </div>
+              <div className={styles.feature}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="20,6 9,17 4,12" />
+                </svg>
+                Automatic optimization
               </div>
               <div className={styles.feature}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="20,6 9,17 4,12" />
                 </svg>
                 Perfect for beginners
-              </div>
-              <div className={styles.feature}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="20,6 9,17 4,12" />
-                </svg>
-                2-3 steps to completion
               </div>
             </div>
             <Button
@@ -240,22 +268,27 @@ const PortfolioCreation: React.FC = () => {
             </Button>
           </Card>
 
-          {/* Professional Mode Card */}
-          <Card className={`${styles.modeCard} ${styles.advancedMode}`}>
-            <div className={styles.modeIcon}>⚙️</div>
-            <h2 className={styles.modeTitle}>Professional Mode</h2>
+          <Card className={classNames(styles.modeCard, styles.advancedMode)}>
+            <div className={styles.modeIcon}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5"/>
+                <line x1="12" y1="8" x2="12" y2="16"/>
+                <line x1="8" y1="12" x2="16" y2="12"/>
+              </svg>
+            </div>
+            <h3 className={styles.modeTitle}>Professional Mode</h3>
             <div className={styles.modeFeatures}>
               <div className={styles.feature}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="20,6 9,17 4,12" />
                 </svg>
-                Full control over settings
+                Advanced constraints
               </div>
               <div className={styles.feature}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="20,6 9,17 4,12" />
                 </svg>
-                Advanced constraints
+                Risk management
               </div>
               <div className={styles.feature}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -312,7 +345,7 @@ const PortfolioCreation: React.FC = () => {
             onNext={handleAssetsNext}
             onBack={handleBack}
             loading={loading}
-            error={error}
+            error={errors.general}
           />
         );
 
@@ -323,7 +356,7 @@ const PortfolioCreation: React.FC = () => {
             onNext={handleConstraintsNext}
             onBack={handleBack}
             loading={loading}
-            error={error}
+            error={errors.general}
           />
         ) : null;
 
@@ -335,7 +368,7 @@ const PortfolioCreation: React.FC = () => {
             onCreate={handleCreatePortfolio}
             onBack={handleBack}
             loading={loading}
-            error={error}
+            error={errors.general}
           />
         );
 

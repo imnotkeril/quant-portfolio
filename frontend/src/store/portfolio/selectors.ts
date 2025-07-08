@@ -101,7 +101,7 @@ export const selectPortfolioSort = createSelector(
   (state) => state.portfolioSort
 );
 
-// Filtered and sorted portfolios
+// ИСПРАВЛЕНО: Filtered and sorted portfolios
 export const selectFilteredPortfolios = createSelector(
   [selectPortfolios, selectPortfolioFilters, selectPortfolioSort],
   (portfolios, filters, sort) => {
@@ -118,10 +118,10 @@ export const selectFilteredPortfolios = createSelector(
       );
     }
 
-    // Apply tags filter
+    // ИСПРАВЛЕНО: Apply tags filter - используем some вместо every
     if (filters.tags.length > 0) {
       filtered = filtered.filter(p =>
-        filters.tags.every(tag => p.tags.includes(tag))
+        filters.tags.some(tag => p.tags.includes(tag))
       );
     }
 
@@ -175,9 +175,14 @@ export const selectPortfolioStats = createSelector(
     totalPortfolios: portfolios.length,
     totalAssets: portfolios.reduce((sum, p) => sum + p.assetCount, 0),
     avgAssetsPerPortfolio: portfolios.length > 0
-      ? portfolios.reduce((sum, p) => sum + p.assetCount, 0) / portfolios.length
+      ? Math.round(portfolios.reduce((sum, p) => sum + p.assetCount, 0) / portfolios.length)
       : 0,
-    allTags: Array.from(new Set(portfolios.flatMap(p => p.tags))),
+    allTags: Array.from(new Set(portfolios.flatMap(p => p.tags))).sort(),
+    lastUpdated: portfolios.length > 0
+      ? portfolios.reduce((latest, p) =>
+          new Date(p.lastUpdated) > new Date(latest.lastUpdated) ? p : latest
+        ).lastUpdated
+      : null
   })
 );
 
@@ -187,3 +192,26 @@ export const selectPortfolioById = (id: string) =>
     selectPortfolios,
     (portfolios) => portfolios.find(p => p.id === id) || null
   );
+
+// ДОБАВЛЕНО: Additional helper selectors for PortfolioListPage
+export const selectIsAnyPortfolioLoading = createSelector(
+  selectPortfolioState,
+  (state) => state.portfoliosLoading || state.creating || state.updating || state.deleting
+);
+
+export const selectHasAnyPortfolioError = createSelector(
+  selectPortfolioState,
+  (state) => !!(state.portfoliosError || state.createError || state.updateError || state.deleteError)
+);
+
+// ДОБАВЛЕНО: Selector for getting portfolio count by status
+export const selectPortfolioStatsByStatus = createSelector(
+  [selectPortfolios, selectPortfolioOperations],
+  (portfolios, operations) => ({
+    total: portfolios.length,
+    loaded: portfolios.length,
+    creating: operations.creating,
+    updating: operations.updating,
+    deleting: operations.deleting,
+  })
+);

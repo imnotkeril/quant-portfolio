@@ -72,6 +72,33 @@ const portfolioSlice = createSlice({
       state.deleteError = null;
       state.priceUpdateError = null;
     },
+    // ДОБАВЛЕНО: Additional UI actions for better UX
+    resetPortfolioFilters: (state) => {
+      state.portfolioFilters = {
+        search: '',
+        tags: [],
+        assetCountRange: null,
+        lastUpdatedRange: null,
+      };
+    },
+    resetPortfolioSort: (state) => {
+      state.portfolioSort = {
+        field: 'lastUpdated',
+        direction: 'desc',
+      };
+    },
+    // ДОБАВЛЕНО: Clear current portfolio
+    clearCurrentPortfolio: (state) => {
+      state.currentPortfolio = null;
+      state.currentPortfolioError = null;
+    },
+    // ДОБАВЛЕНО: Set portfolios loading manually (for refresh UX)
+    setPortfoliosLoading: (state, action: PayloadAction<boolean>) => {
+      state.portfoliosLoading = action.payload;
+      if (action.payload) {
+        state.portfoliosError = null;
+      }
+    },
   },
   extraReducers: (builder) => {
     // Load portfolios
@@ -83,6 +110,8 @@ const portfolioSlice = createSlice({
       .addCase(loadPortfolios.fulfilled, (state, action) => {
         state.portfoliosLoading = false;
         state.portfolios = action.payload;
+        // ДОБАВЛЕНО: Clear errors on successful load
+        state.portfoliosError = null;
       })
       .addCase(loadPortfolios.rejected, (state, action) => {
         state.portfoliosLoading = false;
@@ -98,6 +127,7 @@ const portfolioSlice = createSlice({
       .addCase(loadPortfolio.fulfilled, (state, action) => {
         state.currentPortfolioLoading = false;
         state.currentPortfolio = action.payload;
+        state.currentPortfolioError = null;
       })
       .addCase(loadPortfolio.rejected, (state, action) => {
         state.currentPortfolioLoading = false;
@@ -121,6 +151,9 @@ const portfolioSlice = createSlice({
           lastUpdated: action.payload.lastUpdated,
         });
         state.currentPortfolio = action.payload;
+        state.createError = null;
+        // ДОБАВЛЕНО: Automatically select newly created portfolio
+        state.selectedPortfolioId = action.payload.id;
       })
       .addCase(createPortfolio.rejected, (state, action) => {
         state.creating = false;
@@ -149,6 +182,7 @@ const portfolioSlice = createSlice({
         if (state.currentPortfolio?.id === action.payload.id) {
           state.currentPortfolio = action.payload;
         }
+        state.updateError = null;
       })
       .addCase(updatePortfolio.rejected, (state, action) => {
         state.updating = false;
@@ -170,6 +204,7 @@ const portfolioSlice = createSlice({
         if (state.selectedPortfolioId === action.payload) {
           state.selectedPortfolioId = null;
         }
+        state.deleteError = null;
       })
       .addCase(deletePortfolio.rejected, (state, action) => {
         state.deleting = false;
@@ -185,6 +220,14 @@ const portfolioSlice = createSlice({
       .addCase(updatePortfolioPrices.fulfilled, (state, action) => {
         state.updatingPrices = false;
         state.lastPriceUpdate = action.payload;
+        state.priceUpdateError = null;
+        // ДОБАВЛЕНО: Update lastUpdated for affected portfolio in list
+        if (action.payload?.portfolioId) {
+          const portfolioIndex = state.portfolios.findIndex(p => p.id === action.payload.portfolioId);
+          if (portfolioIndex !== -1) {
+            state.portfolios[portfolioIndex].lastUpdated = action.payload.timestamp;
+          }
+        }
       })
       .addCase(updatePortfolioPrices.rejected, (state, action) => {
         state.updatingPrices = false;
@@ -193,11 +236,16 @@ const portfolioSlice = createSlice({
   },
 });
 
+// ОБНОВЛЕНО: Export all actions including new ones
 export const {
   setSelectedPortfolio,
   setPortfolioFilters,
   setPortfolioSort,
   clearPortfolioErrors,
+  resetPortfolioFilters,
+  resetPortfolioSort,
+  clearCurrentPortfolio,
+  setPortfoliosLoading,
 } = portfolioSlice.actions;
 
 export default portfolioSlice.reducer;
