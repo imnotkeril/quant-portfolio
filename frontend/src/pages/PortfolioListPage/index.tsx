@@ -14,7 +14,7 @@ import { Input } from '../../components/common/Input/Input';
 import { Select } from '../../components/common/Select/Select';
 import { Badge } from '../../components/common/Badge/Badge';
 import { Modal } from '../../components/common/Modal/Modal';
-import { loadPortfolios } from '../../store/portfolio/actions';
+import { loadPortfolios, deletePortfolio } from '../../store/portfolio/actions';
 import {
   selectPortfolios,
   selectPortfoliosLoading,
@@ -169,30 +169,34 @@ const PortfolioListPage: React.FC = () => {
     setDeleteConfirmId(portfolioId);
   };
 
-  // ИСПРАВЛЕНО: Добавлен более подробный обработчик удаления
+
   const confirmDelete = async () => {
     if (!deleteConfirmId) return;
 
     try {
       console.log('Deleting portfolio:', deleteConfirmId);
 
-      // TODO: Раскомментировать когда будет подключен бэкенд
-      // await dispatch(deletePortfolio({ id: deleteConfirmId }));
+      // ИСПРАВЛЕНО: Используем реальный API вызов через Redux action
+      await dispatch(deletePortfolio({ id: deleteConfirmId }));
 
-      // ВРЕМЕННОЕ РЕШЕНИЕ: имитируем успешное удаление
+      // Закрыть модальное окно подтверждения
       setDeleteConfirmId(null);
 
       // Показать сообщение об успехе
       setSuccessMessage('Portfolio deleted successfully');
       setTimeout(() => setSuccessMessage(null), 3000);
 
-      // Перезагрузить список портфелей
-      dispatch(loadPortfolios());
+      console.log('Portfolio deleted successfully:', deleteConfirmId);
 
     } catch (error) {
       console.error('Error deleting portfolio:', error);
-      // TODO: Показать toast с ошибкой
-      // toast.error('Failed to delete portfolio');
+
+      // Закрыть модальное окно даже при ошибке
+      setDeleteConfirmId(null);
+
+      // Показать сообщение об ошибке
+      setSuccessMessage('Failed to delete portfolio. Please try again.');
+      setTimeout(() => setSuccessMessage(null), 3000);
     }
   };
 
