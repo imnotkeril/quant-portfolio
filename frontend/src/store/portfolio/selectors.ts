@@ -3,7 +3,6 @@
  */
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../index';
-import { PortfolioListItem } from '../../types/portfolio';
 
 // Base selectors
 export const selectPortfolioState = (state: RootState) => state.portfolio;
@@ -101,7 +100,7 @@ export const selectPortfolioSort = createSelector(
   (state) => state.portfolioSort
 );
 
-// ИСПРАВЛЕНО: Filtered and sorted portfolios
+// Filtered and sorted portfolios
 export const selectFilteredPortfolios = createSelector(
   [selectPortfolios, selectPortfolioFilters, selectPortfolioSort],
   (portfolios, filters, sort) => {
@@ -118,7 +117,7 @@ export const selectFilteredPortfolios = createSelector(
       );
     }
 
-    // ИСПРАВЛЕНО: Apply tags filter - используем some вместо every
+    // Apply tags filter
     if (filters.tags.length > 0) {
       filtered = filtered.filter(p =>
         filters.tags.some(tag => p.tags.includes(tag))
@@ -168,19 +167,19 @@ export const selectFilteredPortfolios = createSelector(
   }
 );
 
-// Portfolio statistics selectors
+// Portfolio statistics selectors - ИСПРАВЛЕНО: защита от undefined
 export const selectPortfolioStats = createSelector(
   selectPortfolios,
   (portfolios) => ({
     totalPortfolios: portfolios.length,
-    totalAssets: portfolios.reduce((sum, p) => sum + p.assetCount, 0),
+    totalAssets: portfolios.reduce((sum, p) => sum + (p.assetCount || 0), 0),
     avgAssetsPerPortfolio: portfolios.length > 0
-      ? Math.round(portfolios.reduce((sum, p) => sum + p.assetCount, 0) / portfolios.length)
+      ? Math.round(portfolios.reduce((sum, p) => sum + (p.assetCount || 0), 0) / portfolios.length)
       : 0,
-    allTags: Array.from(new Set(portfolios.flatMap(p => p.tags))).sort(),
+    allTags: Array.from(new Set(portfolios.flatMap(p => p.tags || []))).sort(),
     lastUpdated: portfolios.length > 0
       ? portfolios.reduce((latest, p) =>
-          new Date(p.lastUpdated) > new Date(latest.lastUpdated) ? p : latest
+          new Date(p.lastUpdated || new Date()) > new Date(latest.lastUpdated || new Date()) ? p : latest
         ).lastUpdated
       : null
   })
@@ -193,7 +192,7 @@ export const selectPortfolioById = (id: string) =>
     (portfolios) => portfolios.find(p => p.id === id) || null
   );
 
-// ДОБАВЛЕНО: Additional helper selectors for PortfolioListPage
+// Additional helper selectors
 export const selectIsAnyPortfolioLoading = createSelector(
   selectPortfolioState,
   (state) => state.portfoliosLoading || state.creating || state.updating || state.deleting
@@ -204,7 +203,7 @@ export const selectHasAnyPortfolioError = createSelector(
   (state) => !!(state.portfoliosError || state.createError || state.updateError || state.deleteError)
 );
 
-// ДОБАВЛЕНО: Selector for getting portfolio count by status
+// Portfolio count by status
 export const selectPortfolioStatsByStatus = createSelector(
   [selectPortfolios, selectPortfolioOperations],
   (portfolios, operations) => ({

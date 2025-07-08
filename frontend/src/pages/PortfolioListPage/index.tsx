@@ -211,7 +211,14 @@ const PortfolioListPage: React.FC = () => {
 
   // Statistics
   const totalPortfolios = portfolios.length;
-  const totalAssets = portfolios.reduce((sum, p) => sum + (p.assetCount || 0), 0);
+  const totalAssets = portfolios.reduce((sum, p) => {
+    const assetCount = p.assetCount || 0;
+
+    if (p.assetCount === undefined || p.assetCount === null) {
+      console.warn(`⚠️ Portfolio ${p.name} has undefined/null assetCount`);
+    }
+    return sum + assetCount;
+  }, 0);
   const avgAssetsPerPortfolio = totalPortfolios > 0 ? Math.round(totalAssets / totalPortfolios) : 0;
   const lastUpdated = portfolios && portfolios.length > 0
     ? portfolios.reduce((latest, p) =>
