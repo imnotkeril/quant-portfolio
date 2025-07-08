@@ -29,17 +29,6 @@ import { ROUTES } from '../../constants/routes';
 import { formatDate } from '../../utils/formatters';
 import styles from './styles.module.css';
 
-// Redux selectors
-const portfoliosRaw = useSelector(selectPortfolios);
-const portfolios = Array.isArray(portfoliosRaw) ? portfoliosRaw : [];
-const loading = useSelector(selectPortfoliosLoading);
-const error = useSelector(selectPortfoliosError);
-
-// ДОБАВИТЬ DEBUG:
-console.log('🔍 PortfolioListPage - portfoliosRaw:', portfoliosRaw);
-console.log('🔍 PortfolioListPage - portfolios:', portfolios);
-console.log('🔍 PortfolioListPage - portfolios type:', typeof portfolios);
-
 const PortfolioListPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -52,6 +41,11 @@ const PortfolioListPage: React.FC = () => {
   const error = useSelector(selectPortfoliosError);
   const filters = useSelector(selectPortfolioFilters);
   const sort = useSelector(selectPortfolioSort);
+
+  // ДОБАВИТЬ DEBUG:
+  console.log('🔍 PortfolioListPage - portfoliosRaw:', portfoliosRaw);
+  console.log('🔍 PortfolioListPage - portfolios:', portfolios);
+  console.log('🔍 PortfolioListPage - portfolios type:', typeof portfolios);
 
   // Local state
   const [searchValue, setSearchValue] = useState(filters?.search || '');
@@ -94,14 +88,14 @@ const PortfolioListPage: React.FC = () => {
       filtered = filtered.filter(portfolio =>
         portfolio.name.toLowerCase().includes(search) ||
         portfolio.description?.toLowerCase().includes(search) ||
-        portfolio.tags.some(tag => tag.toLowerCase().includes(search))
+        (Array.isArray(portfolio.tags) && portfolio.tags.some(tag => tag.toLowerCase().includes(search)))
       );
     }
 
     // Tags filter
     if (filters?.tags && filters.tags.length > 0) {
       filtered = filtered.filter(portfolio =>
-        filters.tags.some(tag => portfolio.tags.includes(tag))
+        Array.isArray(portfolio.tags) && filters.tags.some(tag => portfolio.tags.includes(tag))
       );
     }
 
@@ -386,7 +380,7 @@ const PortfolioListPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {portfolio.tags.length > 0 && (
+                  {Array.isArray(portfolio.tags) && portfolio.tags.length > 0 && (
                     <div className={styles.portfolioTags}>
                       {portfolio.tags.map((tag) => (
                         <Badge key={tag} variant="outline" size="small">
@@ -467,7 +461,7 @@ const PortfolioListPage: React.FC = () => {
                   </div>
                 </div>
 
-                {selectedPortfolio.tags.length > 0 && (
+                {Array.isArray(selectedPortfolio.tags) && selectedPortfolio.tags.length > 0 && (
                   <div className={styles.modalTags}>
                     <span className={styles.detailLabel}>Tags:</span>
                     <div className={styles.tagsContainer}>
