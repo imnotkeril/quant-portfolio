@@ -134,7 +134,7 @@ const AppLayout: React.FC = () => {
           style={{
             flex: 1,
             overflow: 'auto',
-            paddingTop: 'var(--header-height)', // ОТСТУП ОТ ФИКСИРОВАННОГО HEADER
+            paddingTop: 'calc(var(--header-height) + var(--spacing-m))', // ✅ Как везде
             backgroundColor: 'var(--color-background)',
             minHeight: 'calc(100vh - var(--header-height))', // МИНИМУМ ПОЛНАЯ ВЫСОТА
             position: 'relative',
