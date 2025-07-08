@@ -516,3 +516,190 @@
     max-width: 100%;
   }
 }
+
+/* =============== PORTFOLIO DETAILS MODAL STYLES =============== */
+
+/* Review Summary */
+.reviewSummary {
+  margin-bottom: var(--spacing-xl);
+}
+
+.reviewSectionTitle {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-l) 0;
+  padding-bottom: var(--spacing-s);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.summaryCard {
+  background: rgba(42, 46, 57, 0.3);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  padding: var(--spacing-l);
+}
+
+.summaryCardTitle {
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-m) 0;
+  padding-bottom: var(--spacing-s);
+  border-bottom: 1px solid rgba(75, 85, 99, 0.3);
+}
+
+.summaryDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-s) 0;
+  border-bottom: 1px solid rgba(75, 85, 99, 0.2);
+}
+
+.summaryItem:last-child {
+  border-bottom: none;
+}
+
+.summaryLabel {
+  font-size: var(--font-size-body);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.summaryValue {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  text-align: right;
+  max-width: 60%;
+  word-break: break-word;
+}
+
+/* Asset Allocation */
+.allocationSection {
+  margin-bottom: var(--spacing-xl);
+}
+
+.allocationGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-l);
+}
+
+.chartContainer {
+  background: rgba(42, 46, 57, 0.3);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  padding: var(--spacing-l);
+}
+
+.chartTitle {
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-m) 0;
+  text-align: center;
+}
+
+.allocationChart {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+}
+
+.detailedTable {
+  background: rgba(42, 46, 57, 0.3);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  padding: var(--spacing-l);
+  margin-top: var(--spacing-l);
+}
+
+/* Cash Section */
+.cashSection {
+  margin-bottom: var(--spacing-l);
+  background: rgba(42, 46, 57, 0.3);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--border-radius-s);
+  padding: var(--spacing-l);
+}
+
+.cashInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-s) 0;
+}
+
+.cashLabel {
+  font-size: var(--font-size-body);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.cashValue {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+/* Modal Content Adjustments */
+.modalContent {
+  padding: var(--spacing-l);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* Responsive for Modal */
+@media (max-width: 1024px) {
+  .allocationGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-l);
+  }
+}
+
+@media (max-width: 768px) {
+  .modalContent {
+    padding: var(--spacing-m);
+  }
+
+  .summaryItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .summaryValue {
+    text-align: left;
+    max-width: 100%;
+  }
+
+  .cashInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .chartContainer {
+    padding: var(--spacing-m);
+  }
+
+  .detailedTable {
+    padding: var(--spacing-m);
+  }
+
+  .cashSection {
+    padding: var(--spacing-m);
+  }
+}

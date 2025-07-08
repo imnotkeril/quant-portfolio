@@ -29,6 +29,11 @@ import { PortfolioFilters, PortfolioSort } from '../../store/portfolio/types';
 import { ROUTES } from '../../constants/routes';
 import { formatDate } from '../../utils/formatters';
 import styles from './styles.module.css';
+import { PieChart } from '../../components/charts/PieChart/PieChart';
+import { AssetTable } from '../../components/portfolio/AssetTable/AssetTable';
+import { formatCurrency, formatPercentage } from '../../utils/formatters';
+import { getChartColor } from '../../utils/color';
+
 
 const PortfolioListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -148,11 +153,19 @@ const PortfolioListPage: React.FC = () => {
     navigate(ROUTES.PORTFOLIO.CREATE);
   };
 
-  const handleViewPortfolio = (portfolioId: string) => {
-    const portfolio = portfolios.find(p => p.id === portfolioId);
-    if (portfolio) {
-      setSelectedPortfolio(portfolio);
+  const handleViewPortfolio = async (portfolioId: string) => {
+    try {
+      const fullPortfolio = await fetch(`/api/v1/portfolios/${portfolioId}`).then(r => r.json());
+      setSelectedPortfolio(fullPortfolio);
       setShowPortfolioModal(true);
+    } catch (error) {
+      console.error('Error loading portfolio:', error);
+      // Fallback: используем данные из списка
+      const portfolioFromList = portfolios.find(p => p.id === portfolioId);
+      if (portfolioFromList) {
+        setSelectedPortfolio(portfolioFromList);
+        setShowPortfolioModal(true);
+      }
     }
   };
 
@@ -448,45 +461,149 @@ const PortfolioListPage: React.FC = () => {
             size="large"
           >
             <div className={styles.modalContent}>
-              <div className={styles.portfolioDetails}>
-                <h4>Portfolio Details</h4>
-                <div className={styles.detailsGrid}>
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Name:</span>
-                    <span className={styles.detailValue}>{selectedPortfolio.name}</span>
+              {/* Portfolio Overview */}
+              <div className={styles.reviewSummary}>
+                <h3 className={styles.reviewSectionTitle}>Portfolio Overview</h3>
+
+                <div className={styles.summaryCard}>
+                  <div className={styles.summaryCardTitle}>
+                    {selectedPortfolio.name}
                   </div>
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Description:</span>
-                    <span className={styles.detailValue}>
-                      {selectedPortfolio.description || 'No description'}
-                    </span>
+                  <div className={styles.summaryDetails}>
+                    <div className={styles.summaryItem}>
+                      <span className={styles.summaryLabel}>Starting Amount:</span>
+                      <span className={styles.summaryValue}>
+                        {formatCurrency(selectedPortfolio.startingAmount || selectedPortfolio.totalValue || 0, 'USD')}
+                      </span>
+                    </div>
+                    <div className={styles.summaryItem}>
+                      <span className={styles.summaryLabel}>Total Assets:</span>
+                      <span className={styles.summaryValue}>{selectedPortfolio.assets?.length || 0}</span>
+                    </div>
+                    <div className={styles.summaryItem}>
+                      <span className={styles.summaryLabel}>Total Weight:</span>
+                      <span className={styles.summaryValue}>
+                        {formatPercentage((selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0) / 100)}
+                      </span>
+                    </div>
+                    <div className={styles.summaryItem}>
+                      <span className={styles.summaryLabel}>Last Updated:</span>
+                      <span className={styles.summaryValue}>
+                        {formatDate(selectedPortfolio.lastUpdated, 'full')}
+                      </span>
+                    </div>
+                    {selectedPortfolio.description && (
+                      <div className={styles.summaryItem}>
+                        <span className={styles.summaryLabel}>Description:</span>
+                        <span className={styles.summaryValue}>{selectedPortfolio.description}</span>
+                      </div>
+                    )}
                   </div>
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Assets:</span>
-                    <span className={styles.detailValue}>{selectedPortfolio.assetCount}</span>
+                </div>
+              </div>
+
+              {/* Asset Allocation */}
+              <div className={styles.allocationSection}>
+                <h3 className={styles.reviewSectionTitle}>Asset Allocation</h3>
+
+                <div className={styles.allocationGrid}>
+                  {/* Assets Chart */}
+                  <div className={styles.chartContainer}>
+                    <div className={styles.chartTitle}>By Assets</div>
+                    <div className={styles.allocationChart}>
+                      <PieChart
+                        data={[
+                          // Add all assets
+                          ...(selectedPortfolio.assets?.map((asset, index) => ({
+                            name: asset.ticker,
+                            value: asset.weight || 0,
+                            color: getChartColor(index),
+                          })) || []),
+                          // Add cash if there's any
+                          ...((100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0)) > 0 ? [{
+                            name: 'Cash',
+                            value: 100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0),
+                            color: '#6B7280',
+                          }] : [])
+                        ]}
+                        width={300}
+                        height={300}
+                      />
+                    </div>
                   </div>
-                  <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Last Updated:</span>
-                    <span className={styles.detailValue}>
-                      {formatDate(selectedPortfolio.lastUpdated, 'full')}
-                    </span>
+
+                  {/* Sectors Chart */}
+                  <div className={styles.chartContainer}>
+                    <div className={styles.chartTitle}>By Sectors</div>
+                    <div className={styles.allocationChart}>
+                      <PieChart
+                        data={[
+                          // Group assets by sector
+                          ...Object.entries(
+                            (selectedPortfolio.assets || []).reduce((acc, asset) => {
+                              const sector = (asset.sector && asset.sector.trim() !== '') ? asset.sector : 'Other';
+                              acc[sector] = (acc[sector] || 0) + (asset.weight || 0);
+                              return acc;
+                            }, {} as Record<string, number>)
+                          ).map(([sector, weight], index) => ({
+                            name: sector,
+                            value: weight,
+                            color: getChartColor(index),
+                          })),
+                          // Add cash if there's any
+                          ...((100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0)) > 0 ? [{
+                            name: 'Cash',
+                            value: 100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0),
+                            color: '#6B7280',
+                          }] : [])
+                        ]}
+                        width={300}
+                        height={300}
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {Array.isArray(selectedPortfolio.tags) && selectedPortfolio.tags.length > 0 && (
-                  <div className={styles.modalTags}>
-                    <span className={styles.detailLabel}>Tags:</span>
-                    <div className={styles.tagsContainer}>
-                      {selectedPortfolio.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" size="small">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {/* Detailed Asset Table */}
+                <div className={styles.detailedTable} style={{ marginTop: '2rem' }}>
+                  <AssetTable
+                    assets={selectedPortfolio.assets || []}
+                    portfolioValue={selectedPortfolio.startingAmount || selectedPortfolio.totalValue || 0}
+                    showActions={false}
+                    showPnL={false}
+                    showDeleteAll={false}
+                  />
+                </div>
               </div>
 
+              {/* Cash Remaining Info */}
+              {(100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0)) > 0 && (
+                <div className={styles.cashSection}>
+                  <h4 className={styles.reviewSectionTitle}>Cash Remaining</h4>
+                  <div className={styles.cashInfo}>
+                    <span className={styles.cashLabel}>Unallocated:</span>
+                    <span className={styles.cashValue}>
+                      {formatPercentage((100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0)) / 100)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Tags */}
+              {Array.isArray(selectedPortfolio.tags) && selectedPortfolio.tags.length > 0 && (
+                <div className={styles.modalTags}>
+                  <span className={styles.detailLabel}>Tags:</span>
+                  <div className={styles.tagsContainer}>
+                    {selectedPortfolio.tags.map((tag) => (
+                      <Badge key={tag} variant="secondary" size="small">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Modal Actions */}
               <div className={styles.modalActions}>
                 <Button
                   variant="outline"
