@@ -95,7 +95,6 @@ const AppRoutes: React.FC = () => {
         <Route path="/" element={<Navigate to={ROUTES.HOME} replace />} />
 
         {/* Portfolio Routes */}
-        <Route path={ROUTES.PORTFOLIO.ROOT} element={<Navigate to={ROUTES.PORTFOLIO.LIST} replace />} />
 
         {/* UPDATED: Use PortfolioListPage instead of ComingSoon */}
         <Route path={ROUTES.PORTFOLIO.LIST} element={<PortfolioListPage />} />

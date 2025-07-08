@@ -35,7 +35,8 @@ const PortfolioListPage: React.FC = () => {
   const dispatch = useDispatch();
 
   // Redux selectors
-  const portfolios = useSelector(selectPortfolios);
+  const portfoliosRaw = useSelector(selectPortfolios);
+  const portfolios = Array.isArray(portfoliosRaw) ? portfoliosRaw : [];
   const loading = useSelector(selectPortfoliosLoading);
   const error = useSelector(selectPortfoliosError);
   const filters = useSelector(selectPortfolioFilters);
@@ -68,7 +69,8 @@ const PortfolioListPage: React.FC = () => {
 
   // Filter and sort portfolios
   const filteredPortfolios = React.useMemo(() => {
-    let filtered = [...portfolios];
+    const portfoliosArray = Array.isArray(portfolios) ? portfolios : [];
+    let filtered = [...portfoliosArray];
 
     // Search filter
     if (searchValue.trim()) {
