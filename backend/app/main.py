@@ -227,7 +227,7 @@ async def list_portfolios():
                             "description": portfolio_data.get("description", ""),
                             "createdAt": portfolio_data.get("createdAt", datetime.now().isoformat()),
                             "lastUpdated": portfolio_data.get("lastUpdated", datetime.now().isoformat()),
-                            "assetsCount": len(portfolio_data.get("assets", [])),
+                            "assetCount": len(portfolio_data.get("assets", [])),
                             "totalValue": portfolio_data.get("totalValue", 0)
                         })
                 except Exception as e:

@@ -21,6 +21,7 @@ import {
   selectPortfoliosError,
   selectPortfolioFilters,
   selectPortfolioSort,
+  selectPortfolioStats,
 } from '../../store/portfolio/selectors';
 import { setPortfolioFilters, setPortfolioSort } from '../../store/portfolio/reducer';
 import { PortfolioListItem } from '../../types/portfolio';
@@ -41,6 +42,7 @@ const PortfolioListPage: React.FC = () => {
   const error = useSelector(selectPortfoliosError);
   const filters = useSelector(selectPortfolioFilters);
   const sort = useSelector(selectPortfolioSort);
+  const stats = useSelector(selectPortfolioStats);
 
   // DEBUG logging
   console.log('🔍 PortfolioListPage - portfoliosRaw:', portfoliosRaw);
@@ -209,22 +211,6 @@ const PortfolioListPage: React.FC = () => {
     dispatch(loadPortfolios());
   };
 
-  // Statistics
-  const totalPortfolios = portfolios.length;
-  const totalAssets = portfolios.reduce((sum, p) => {
-    const assetCount = p.assetCount || 0;
-
-    if (p.assetCount === undefined || p.assetCount === null) {
-      console.warn(`⚠️ Portfolio ${p.name} has undefined/null assetCount`);
-    }
-    return sum + assetCount;
-  }, 0);
-  const avgAssetsPerPortfolio = totalPortfolios > 0 ? Math.round(totalAssets / totalPortfolios) : 0;
-  const lastUpdated = portfolios && portfolios.length > 0
-    ? portfolios.reduce((latest, p) =>
-        new Date(p.lastUpdated || new Date()) > new Date(latest.lastUpdated || new Date()) ? p : latest
-      ).lastUpdated
-    : null;
 
   const sortOptions = [
     { value: 'name-asc', label: 'Name (A-Z)' },
@@ -284,21 +270,21 @@ const PortfolioListPage: React.FC = () => {
         <div className={styles.statsGrid}>
           <Card className={styles.statCard}>
             <div className={styles.statContent}>
-              <div className={styles.statValue}>{totalPortfolios}</div>
+              <div className={styles.statValue}>{stats.totalPortfolios}</div>
               <div className={styles.statLabel}>Total Portfolios</div>
             </div>
           </Card>
 
           <Card className={styles.statCard}>
             <div className={styles.statContent}>
-              <div className={styles.statValue}>{totalAssets}</div>
+              <div className={styles.statValue}>{stats.totalAssets}</div>
               <div className={styles.statLabel}>Total Assets</div>
             </div>
           </Card>
 
           <Card className={styles.statCard}>
             <div className={styles.statContent}>
-              <div className={styles.statValue}>{avgAssetsPerPortfolio}</div>
+              <div className={styles.statValue}>{stats.avgAssetsPerPortfolio}</div>
               <div className={styles.statLabel}>Avg Assets</div>
             </div>
           </Card>
@@ -306,7 +292,7 @@ const PortfolioListPage: React.FC = () => {
           <Card className={styles.statCard}>
             <div className={styles.statContent}>
               <div className={styles.statValue}>
-                {lastUpdated ? formatDate(lastUpdated, 'short') : 'Never'}
+                {stats.lastUpdated ? formatDate(stats.lastUpdated, 'short') : 'Never'}
               </div>
               <div className={styles.statLabel}>Last Updated</div>
             </div>
