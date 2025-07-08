@@ -1,4 +1,4 @@
-/* src/components/common/Modal/Modal.module.css */
+/* frontend/src/components/common/Modal/Modal.module.css */
 .modalRoot {
   position: fixed;
   top: 0;
@@ -12,7 +12,7 @@
   justify-content: center;
   padding: var(--spacing-l);
   overflow-y: auto;
-  z-index: var(--z-modal);
+  z-index: 1000; /* Fallback value if CSS variable is not defined */
   animation: fadeIn 0.2s ease-out;
 }
 
@@ -73,6 +73,7 @@
   padding: var(--spacing-l) var(--spacing-l) 0;
   border-bottom: 1px solid var(--color-divider);
   flex-shrink: 0;
+  position: relative;
 }
 
 .title {
@@ -83,6 +84,7 @@
   color: var(--color-text-light);
   margin: 0;
   padding-bottom: var(--spacing-m);
+  padding-right: 40px; /* Space for close button */
 }
 
 /* Close button */
@@ -102,6 +104,8 @@
   justify-content: center;
   transition: all var(--transition-fast);
   z-index: 1;
+  font-size: 24px;
+  line-height: 1;
 }
 
 .closeButton:hover {
@@ -153,6 +157,22 @@
   gap: var(--spacing-s);
   flex-shrink: 0;
   background-color: rgba(42, 46, 57, 0.7);
+}
+
+/* Size variants */
+.modal.small {
+  width: 400px;
+  max-width: 90vw;
+}
+
+.modal.medium {
+  width: 520px;
+  max-width: 90vw;
+}
+
+.modal.large {
+  width: 800px;
+  max-width: 95vw;
 }
 
 /* Responsive design */
