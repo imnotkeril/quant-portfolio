@@ -29,6 +29,17 @@ import { ROUTES } from '../../constants/routes';
 import { formatDate } from '../../utils/formatters';
 import styles from './styles.module.css';
 
+// Redux selectors
+const portfoliosRaw = useSelector(selectPortfolios);
+const portfolios = Array.isArray(portfoliosRaw) ? portfoliosRaw : [];
+const loading = useSelector(selectPortfoliosLoading);
+const error = useSelector(selectPortfoliosError);
+
+// ДОБАВИТЬ DEBUG:
+console.log('🔍 PortfolioListPage - portfoliosRaw:', portfoliosRaw);
+console.log('🔍 PortfolioListPage - portfolios:', portfolios);
+console.log('🔍 PortfolioListPage - portfolios type:', typeof portfolios);
+
 const PortfolioListPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -71,6 +82,9 @@ const PortfolioListPage: React.FC = () => {
 
   // Filter and sort portfolios
   const filteredPortfolios = React.useMemo(() => {
+    if (!Array.isArray(portfolios) || portfolios.length === 0) {
+      return [];
+    }
     const portfoliosArray = Array.isArray(portfolios) ? portfolios : [];
     let filtered = [...portfoliosArray];
 
@@ -184,11 +198,11 @@ const PortfolioListPage: React.FC = () => {
 
   // Statistics
   const totalPortfolios = portfolios.length;
-  const totalAssets = portfolios.reduce((sum, p) => sum + p.assetCount, 0);
+  const totalAssets = portfolios.reduce((sum, p) => sum + (p.assetCount || 0), 0);
   const avgAssetsPerPortfolio = totalPortfolios > 0 ? Math.round(totalAssets / totalPortfolios) : 0;
-  const lastUpdated = portfolios.length > 0
+  const lastUpdated = portfolios && portfolios.length > 0
     ? portfolios.reduce((latest, p) =>
-        new Date(p.lastUpdated) > new Date(latest.lastUpdated) ? p : latest
+        new Date(p.lastUpdated || new Date()) > new Date(latest.lastUpdated || new Date()) ? p : latest
       ).lastUpdated
     : null;
 

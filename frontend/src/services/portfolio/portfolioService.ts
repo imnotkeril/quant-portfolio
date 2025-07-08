@@ -49,10 +49,18 @@ class PortfolioService {
    */
   async getPortfolios(): Promise<PortfolioListItem[]> {
     try {
-      const response = await apiClient.get<PortfolioListItem[]>(
-        portfolioEndpoints.list()
-      );
-      return response;
+      const response = await apiClient.get<any>(portfolioEndpoints.list());
+
+      if (response && response.portfolios && Array.isArray(response.portfolios)) {
+        return response.portfolios;
+      }
+
+      if (Array.isArray(response)) {
+        return response;
+      }
+
+      console.warn('Unexpected portfolios response format:', response);
+      return [];
     } catch (error) {
       console.error('Error fetching portfolios:', error);
       throw error;
