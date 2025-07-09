@@ -228,7 +228,9 @@ async def list_portfolios():
                             "createdAt": portfolio_data.get("createdAt", datetime.now().isoformat()),
                             "lastUpdated": portfolio_data.get("lastUpdated", datetime.now().isoformat()),
                             "assetCount": len(portfolio_data.get("assets", [])),
-                            "totalValue": portfolio_data.get("totalValue", 0)
+                            "totalValue": portfolio_data.get("totalValue", 0),
+                            "assets": portfolio_data.get("assets", []),  
+                            "startingAmount": portfolio_data.get("startingAmount", 0)
                         })
                 except Exception as e:
                     logger.error(f"Error reading portfolio file {file_path}: {e}")

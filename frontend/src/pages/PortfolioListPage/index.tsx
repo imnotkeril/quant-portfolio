@@ -33,6 +33,7 @@ import { PieChart } from '../../components/charts/PieChart/PieChart';
 import { AssetTable } from '../../components/portfolio/AssetTable/AssetTable';
 import { formatCurrency, formatPercentage } from '../../utils/formatters';
 import { getChartColor } from '../../utils/color';
+import { useAssets } from '../../hooks/useAssets';
 
 
 const PortfolioListPage: React.FC = () => {
@@ -148,28 +149,40 @@ const PortfolioListPage: React.FC = () => {
     return filtered;
   }, [portfolios, searchValue, filters, sort]);
 
+  // Покажем структуру первого портфеля для отладки
+  console.log('🔍 Sample portfolio structure:', portfolios[0]);
+  if (portfolios[0]) {
+    console.log('🔍 Sample portfolio keys:', Object.keys(portfolios[0]));
+    console.log('🔍 Sample portfolio full:', JSON.stringify(portfolios[0], null, 2));
+  }
   // Handlers
   const handleCreatePortfolio = () => {
     navigate(ROUTES.PORTFOLIO.CREATE);
   };
-
+  const { getAssetInfo } = useAssets();
   const handleViewPortfolio = async (portfolioId: string) => {
-    try {
-      const fullPortfolio = await fetch(`/api/v1/portfolios/${portfolioId}`).then(r => r.json());
-      setSelectedPortfolio(fullPortfolio);
-      setShowPortfolioModal(true);
-    } catch (error) {
-      console.error('Error loading portfolio:', error);
-      // Fallback: используем данные из списка
-      const portfolioFromList = portfolios.find(p => p.id === portfolioId);
-      if (portfolioFromList) {
-        setSelectedPortfolio(portfolioFromList);
-        setShowPortfolioModal(true);
-      }
+    console.log('🔍 Loading portfolio from list:', portfolioId);
+
+    const portfolio = portfolios.find(p => p.id === portfolioId);
+    if (!portfolio) {
+      console.error('❌ Portfolio not found:', portfolioId);
+      return;
     }
+
+    console.log('🔍 Base portfolio:', portfolio);
+    console.log('🔍 Portfolio.assets:', portfolio.assets);
+    console.log('🔍 Portfolio.startingAmount:', portfolio.startingAmount);
+    console.log('🔍 Portfolio.totalValue:', portfolio.totalValue);
+    console.log('🔍 All portfolio keys:', Object.keys(portfolio));
+
+    // ВРЕМЕННАЯ ОТЛАДКА: Покажем весь объект
+    console.log('🔍 FULL PORTFOLIO OBJECT:');
+    console.log(JSON.stringify(portfolio, null, 2));
+
+    setSelectedPortfolio(portfolio);
+    setShowPortfolioModal(true);
   };
 
-  // ИСПРАВЛЕНО: Используем правильные пути и константы ROUTES
   const handleAnalyzePortfolio = (portfolioId: string) => {
     navigate(ROUTES.PORTFOLIO.ANALYZE_PATH(portfolioId));
     // Альтернативно: navigate(`/portfolios/${portfolioId}/analyze`);
