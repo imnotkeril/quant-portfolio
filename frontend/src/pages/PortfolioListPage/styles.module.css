@@ -343,9 +343,12 @@
   border-color: var(--color-negative) !important;
 }
 
-/* Modal Content */
+/* Modal Content - LARGER PADDING */
 .modalContent {
   padding: var(--spacing-l);
+  height: auto;
+  max-height: none;
+  overflow: visible;
 }
 
 .portfolioDetails {
@@ -405,6 +408,7 @@
   justify-content: flex-end;
   padding-top: var(--spacing-l);
   border-top: 1px solid var(--color-divider);
+  margin-top: var(--spacing-xl);
 }
 
 /* Confirm Modal */
@@ -440,6 +444,16 @@
 
   .actions {
     justify-content: flex-end;
+  }
+
+  .allocationGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-m);
+  }
+
+  .portfolioModal {
+    width: 95vw !important;
+    max-width: none !important;
   }
 }
 
@@ -492,6 +506,22 @@
     flex-direction: column;
     align-items: stretch;
   }
+
+  .summaryItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .summaryValue {
+    text-align: left;
+  }
+
+  .cashInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
 }
 
 @media (max-width: 480px) {
@@ -515,6 +545,22 @@
     text-align: left;
     max-width: 100%;
   }
+
+  .chartContainer {
+    padding: var(--spacing-s);
+  }
+
+  .detailedTable {
+    padding: var(--spacing-s);
+  }
+
+  .cashSection {
+    padding: var(--spacing-s);
+  }
+
+  .summaryCard {
+    padding: var(--spacing-s);
+  }
 }
 
 /* =============== PORTFOLIO DETAILS MODAL STYLES =============== */
@@ -536,23 +582,27 @@
 .summaryCard {
   background: rgba(42, 46, 57, 0.3);
   border: 1px solid var(--color-divider);
-  border-radius: var(--border-radius-s);
+  border-radius: var(--border-radius-m);
   padding: var(--spacing-l);
 }
 
 .summaryCardTitle {
-  font-size: var(--font-size-h4);
-  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
-  margin: 0 0 var(--spacing-m) 0;
-  padding-bottom: var(--spacing-s);
-  border-bottom: 1px solid rgba(75, 85, 99, 0.3);
+  margin: 0 0 var(--spacing-l) 0;
+  text-align: center;
+  background: linear-gradient(135deg, #10B981, #34D399);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .summaryDetails {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-s);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-m);
+  margin-bottom: var(--spacing-l);
 }
 
 .summaryItem {
@@ -560,7 +610,7 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--spacing-s) 0;
-  border-bottom: 1px solid rgba(75, 85, 99, 0.2);
+  border-bottom: 1px solid var(--color-divider);
 }
 
 .summaryItem:last-child {
@@ -578,8 +628,15 @@
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
   text-align: right;
-  max-width: 60%;
-  word-break: break-word;
+}
+
+.summaryDescription {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body);
+  line-height: 1.5;
+  margin-top: var(--spacing-m);
+  padding-top: var(--spacing-m);
+  border-top: 1px solid var(--color-divider);
 }
 
 /* Asset Allocation */
@@ -597,8 +654,9 @@
 .chartContainer {
   background: rgba(42, 46, 57, 0.3);
   border: 1px solid var(--color-divider);
-  border-radius: var(--border-radius-s);
+  border-radius: var(--border-radius-m);
   padding: var(--spacing-l);
+  min-height: 300px;
 }
 
 .chartTitle {
@@ -614,23 +672,45 @@
   justify-content: center;
   align-items: center;
   margin: 0;
+  min-height: 300px;
+  padding: var(--spacing-m);
 }
 
 .detailedTable {
   background: rgba(42, 46, 57, 0.3);
   border: 1px solid var(--color-divider);
-  border-radius: var(--border-radius-s);
+  border-radius: var(--border-radius-m);
   padding: var(--spacing-l);
-  margin-top: var(--spacing-l);
+  margin-bottom: var(--spacing-l);
+  overflow: visible;
+}
+
+.assetsTable {
+  margin-top: var(--spacing-m);
+  width: 100%;
+  overflow: visible;
+}
+
+/* Hide duplicate table header from AssetTable */
+.assetsTable > div:first-child {
+  display: none;
+}
+
+/* Or if header is in different structure: */
+.assetsTable .tableHeader,
+.assetsTable .table-header,
+.assetsTable h3,
+.assetsTable h4 {
+  display: none !important;
 }
 
 /* Cash Section */
 .cashSection {
-  margin-bottom: var(--spacing-l);
   background: rgba(42, 46, 57, 0.3);
   border: 1px solid var(--color-divider);
-  border-radius: var(--border-radius-s);
+  border-radius: var(--border-radius-m);
   padding: var(--spacing-l);
+  margin-bottom: var(--spacing-xl);
 }
 
 .cashInfo {
@@ -648,70 +728,43 @@
 
 .cashValue {
   font-size: var(--font-size-body);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semi-bold);
+  color: var(--color-accent);
 }
 
-/* Modal Content Adjustments */
-.modalContent {
+/* Warning Section Styles */
+.warningSection {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--border-radius-m);
   padding: var(--spacing-l);
-  max-height: 80vh;
-  overflow-y: auto;
+  margin-bottom: var(--spacing-xl);
 }
 
-/* Responsive for Modal */
-@media (max-width: 1024px) {
-  .allocationGrid {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-l);
-  }
+.warningList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-s);
 }
 
-@media (max-width: 768px) {
-  .modalContent {
-    padding: var(--spacing-m);
-  }
-
-  .summaryItem {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-xs);
-  }
-
-  .summaryValue {
-    text-align: left;
-    max-width: 100%;
-  }
-
-  .cashInfo {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-xs);
-  }
+.warningItem {
+  color: var(--color-warning);
+  font-size: var(--font-size-body);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-s);
 }
 
-@media (max-width: 480px) {
-  .chartContainer {
-    padding: var(--spacing-m);
-  }
-
-  .detailedTable {
-    padding: var(--spacing-m);
-  }
-
-  .cashSection {
-    padding: var(--spacing-m);
-  }
+.warningItem::before {
+  content: '⚠️';
+  flex-shrink: 0;
 }
 
+/* Portfolio Modal Styles - LARGER SIZE */
 .portfolioModal {
-  width: 95vw !important;
-  max-width: 1600px !important;
-  height: 90vh !important;
-}
-
-.portfolioModal .modalContent {
-  height: calc(90vh - 120px);
-  overflow-y: auto;
-  padding: var(--spacing-l);
+  width: 90vw !important;
+  max-width: 1400px !important;
+  height: auto !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
 }

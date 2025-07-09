@@ -35,6 +35,256 @@ import { formatCurrency, formatPercentage } from '../../utils/formatters';
 import { getChartColor } from '../../utils/color';
 import { useAssets } from '../../hooks/useAssets';
 
+// Portfolio View Content Component - SAME LOGIC AS CreationStepReview
+interface PortfolioViewContentProps {
+  portfolio: any;
+  onClose: () => void;
+  onAnalyze: () => void;
+}
+
+const PortfolioViewContent: React.FC<PortfolioViewContentProps> = ({ portfolio, onClose, onAnalyze }) => {
+  // SAME LOGIC AS CreationStepReview - auto-enrich assets with sectors
+  const [enrichedAssets, setEnrichedAssets] = useState<any[]>([]);
+  const { getAssetInfo } = useAssets();
+
+  useEffect(() => {
+    const enrichAssets = async () => {
+      // Convert weights from decimals to percentages first
+      const convertedAssets = (portfolio.assets || []).map(asset => ({
+        ...asset,
+        weight: (asset.weight || 0) * 100, // Convert 0.25 -> 25%
+      }));
+
+      // Then enrich with sector data like in CreationStepReview
+      const enrichedData = await Promise.all(
+        convertedAssets.map(async (asset) => {
+          if (asset.sector) return asset;
+
+          try {
+            const assetInfo = await getAssetInfo(asset.ticker);
+            return {
+              ...asset,
+              sector: assetInfo?.sector || 'Other'
+            };
+          } catch {
+            return { ...asset, sector: 'Other' };
+          }
+        })
+      );
+      setEnrichedAssets(enrichedData);
+    };
+
+    enrichAssets();
+  }, [portfolio.assets, getAssetInfo]);
+
+  const portfolioValue = portfolio.startingAmount || portfolio.totalValue || 100000;
+  const totalWeight = enrichedAssets.reduce((sum, asset) => sum + (asset.weight || 0), 0);
+  const cashWeight = Math.max(0, 100 - totalWeight);
+
+  return (
+    <>
+      {/* Portfolio Overview Section */}
+      <div className={styles.reviewSummary}>
+        <h3 className={styles.reviewSectionTitle}>Portfolio Overview</h3>
+
+        <div className={styles.summaryCard}>
+          <div className={styles.summaryCardTitle}>
+            {portfolio.name}
+          </div>
+          <div className={styles.summaryDetails}>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryLabel}>Starting Amount:</span>
+              <span className={styles.summaryValue}>
+                {formatCurrency(portfolioValue)}
+              </span>
+            </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryLabel}>Total Assets:</span>
+              <span className={styles.summaryValue}>{enrichedAssets.length}</span>
+            </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryLabel}>Total Weight:</span>
+              <span className={styles.summaryValue}>
+                {totalWeight.toFixed(1)}%
+              </span>
+            </div>
+            <div className={styles.summaryItem}>
+              <span className={styles.summaryLabel}>Last Updated:</span>
+              <span className={styles.summaryValue}>
+                {portfolio.updatedAt ? formatDate(portfolio.updatedAt) : 'Never'}
+              </span>
+            </div>
+          </div>
+
+          {portfolio.description && (
+            <div className={styles.summaryDescription}>
+              {portfolio.description}
+            </div>
+          )}
+
+          {portfolio.tags && portfolio.tags.length > 0 && (
+            <div className={styles.modalTags}>
+              <div className={styles.tagsContainer}>
+                {portfolio.tags.map((tag, index) => (
+                  <Badge key={index} variant="secondary" size="small">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Asset Allocation Section - EXACT SAME AS CreationStepReview */}
+      <div className={styles.allocationSection}>
+        <h3 className={styles.reviewSectionTitle}>Asset Allocation</h3>
+
+        <div className={styles.allocationGrid}>
+          {/* Asset Allocation Chart */}
+          <div className={styles.chartContainer}>
+            <h4 className={styles.chartTitle}>By Assets</h4>
+            <div className={styles.allocationChart}>
+              <PieChart
+                data={[
+                  // Top assets
+                  ...enrichedAssets
+                    .filter(asset => asset.weight && asset.weight > 0)
+                    .sort((a, b) => (b.weight || 0) - (a.weight || 0))
+                    .slice(0, 8)
+                    .map((asset, index) => ({
+                      name: asset.ticker,
+                      value: asset.weight || 0,
+                      color: getChartColor(index),
+                    })),
+                  // Remaining assets grouped as "Others"
+                  ...(enrichedAssets.length > 8 ? [{
+                    name: 'Others',
+                    value: enrichedAssets
+                      .slice(8)
+                      .reduce((sum, asset) => sum + (asset.weight || 0), 0),
+                    color: getChartColor(8),
+                  }] : []),
+                  // Cash if there's any
+                  ...(cashWeight > 0 ? [{
+                    name: 'Cash',
+                    value: cashWeight,
+                    color: '#6B7280',
+                  }] : [])
+                ]}
+                height={300}
+                showLegend={true}
+                innerRadius={60}
+                outerRadius={100}
+              />
+            </div>
+          </div>
+
+          {/* Sectors Chart - EXACT SAME LOGIC AS CreationStepReview */}
+          <div className={styles.chartContainer}>
+            <h4 className={styles.chartTitle}>By Sectors</h4>
+            <div className={styles.allocationChart}>
+              <PieChart
+                data={[
+                  // Group assets by sector
+                  ...Object.entries(
+                    enrichedAssets.reduce((acc, asset) => {
+                      const sector = (asset.sector && asset.sector.trim() !== '') ? asset.sector : 'Other';
+                      acc[sector] = (acc[sector] || 0) + asset.weight;
+                      return acc;
+                    }, {} as Record<string, number>)
+                  ).map(([sector, weight], index) => ({
+                    name: sector,
+                    value: weight,
+                    color: getChartColor(index),
+                  })),
+                  // Add cash if there's any
+                  ...(cashWeight > 0 ? [{
+                    name: 'Cash',
+                    value: cashWeight,
+                    color: '#6B7280',
+                  }] : [])
+                ]}
+                height={300}
+                showLegend={true}
+                innerRadius={60}
+                outerRadius={100}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Current Portfolio Table */}
+      <div className={styles.detailedTable}>
+        <h3 className={styles.reviewSectionTitle}>
+          Current Portfolio ({enrichedAssets.length} assets)
+        </h3>
+
+        <AssetTable
+          assets={enrichedAssets}
+          portfolioValue={portfolioValue}
+          onEdit={undefined}
+          onDelete={undefined}
+          showActions={false}
+          showPnL={false}
+          loading={false}
+          className={styles.assetsTable}
+        />
+      </div>
+
+      {/* Cash Remaining Section */}
+      {cashWeight > 0 && (
+        <div className={styles.cashSection}>
+          <h4 className={styles.reviewSectionTitle}>Cash Remaining</h4>
+          <div className={styles.cashInfo}>
+            <span className={styles.cashLabel}>Unallocated Cash:</span>
+            <span className={styles.cashValue}>
+              {formatCurrency((portfolioValue * cashWeight) / 100)} ({cashWeight.toFixed(1)}%)
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Portfolio Warnings */}
+      {(totalWeight > 100 || totalWeight < 100) && (
+        <div className={styles.warningSection}>
+          <h4 className={styles.reviewSectionTitle}>Portfolio Warnings</h4>
+          <div className={styles.warningList}>
+            {totalWeight > 100 && (
+              <div className={styles.warningItem}>
+                Your portfolio is over-allocated by {((totalWeight - 100)).toFixed(1)}%.
+                Consider reducing some positions.
+              </div>
+            )}
+            {totalWeight < 100 && (
+              <div className={styles.warningItem}>
+                Your portfolio is under-allocated by {((100 - totalWeight)).toFixed(1)}%.
+                Consider increasing positions or adding more assets.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal Actions */}
+      <div className={styles.modalActions}>
+        <Button
+          variant="secondary"
+          onClick={onClose}
+        >
+          Close
+        </Button>
+        <Button
+          variant="primary"
+          onClick={onAnalyze}
+        >
+          📊 Analyze Portfolio
+        </Button>
+      </div>
+    </>
+  );
+};
 
 const PortfolioListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -159,7 +409,7 @@ const PortfolioListPage: React.FC = () => {
   const handleCreatePortfolio = () => {
     navigate(ROUTES.PORTFOLIO.CREATE);
   };
-  const { getAssetInfo } = useAssets();
+
   const handleViewPortfolio = async (portfolioId: string) => {
     console.log('🔍 Loading portfolio from list:', portfolioId);
 
@@ -196,7 +446,6 @@ const PortfolioListPage: React.FC = () => {
   const handleDeletePortfolio = (portfolioId: string) => {
     setDeleteConfirmId(portfolioId);
   };
-
 
   const confirmDelete = async () => {
     if (!deleteConfirmId) return;
@@ -236,7 +485,6 @@ const PortfolioListPage: React.FC = () => {
   const handleRefresh = () => {
     dispatch(loadPortfolios());
   };
-
 
   const sortOptions = [
     { value: 'name-asc', label: 'Name (A-Z)' },
@@ -465,182 +713,24 @@ const PortfolioListPage: React.FC = () => {
           )}
         </div>
 
-        {/* Portfolio View Modal */}
+        {/* Portfolio View Modal - USING REAL SECTOR LOGIC */}
         {showPortfolioModal && selectedPortfolio && (
           <Modal
             isOpen={showPortfolioModal}
             onClose={() => setShowPortfolioModal(false)}
-            title={selectedPortfolio.name}
+            title="Portfolio Overview"
             size="large"
             className={styles.portfolioModal}
           >
             <div className={styles.modalContent}>
-              {/* Portfolio Overview */}
-              <div className={styles.reviewSummary}>
-                <h3 className={styles.reviewSectionTitle}>Portfolio Overview</h3>
-
-                <div className={styles.summaryCard}>
-                  <div className={styles.summaryCardTitle}>
-                    {selectedPortfolio.name}
-                  </div>
-                  <div className={styles.summaryDetails}>
-                    <div className={styles.summaryItem}>
-                      <span className={styles.summaryLabel}>Starting Amount:</span>
-                      <span className={styles.summaryValue}>
-                        {formatCurrency(selectedPortfolio.startingAmount || selectedPortfolio.totalValue || 0, 'USD')}
-                      </span>
-                    </div>
-                    <div className={styles.summaryItem}>
-                      <span className={styles.summaryLabel}>Total Assets:</span>
-                      <span className={styles.summaryValue}>{selectedPortfolio.assets?.length || 0}</span>
-                    </div>
-                    <div className={styles.summaryItem}>
-                      <span className={styles.summaryLabel}>Total Weight:</span>
-                      <span className={styles.summaryValue}>
-                        {formatPercentage(selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0)}
-                      </span>
-                    </div>
-                    <div className={styles.summaryItem}>
-                      <span className={styles.summaryLabel}>Last Updated:</span>
-                      <span className={styles.summaryValue}>
-                        {formatDate(selectedPortfolio.lastUpdated, 'full')}
-                      </span>
-                    </div>
-                    {selectedPortfolio.description && (
-                      <div className={styles.summaryItem}>
-                        <span className={styles.summaryLabel}>Description:</span>
-                        <span className={styles.summaryValue}>{selectedPortfolio.description}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Asset Allocation */}
-              <div className={styles.allocationSection}>
-                <h3 className={styles.reviewSectionTitle}>Asset Allocation</h3>
-
-                <div className={styles.allocationGrid}>
-                  {/* Assets Chart */}
-                  <div className={styles.chartContainer}>
-                    <div className={styles.chartTitle}>By Assets</div>
-                    <div className={styles.allocationChart}>
-                      <PieChart
-                        data={[
-                          // Add all assets
-                          ...(selectedPortfolio.assets?.map((asset, index) => ({
-                            name: asset.ticker,
-                            value: (asset.weight || 0) * 100,  // ← УМНОЖИТЬ НА 100
-                            color: getChartColor(index),
-                          })) || []),
-                          // Add cash if there's any
-                          ...((100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0) * 100) > 0 ? [{
-                            name: 'Cash',
-                            value: 100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0) * 100,  // ← УМНОЖИТЬ НА 100
-                            color: '#6B7280',
-                          }] : [])
-                        ]}
-                        width={300}
-                        height={300}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Sectors Chart */}
-                  <div className={styles.chartContainer}>
-                    <div className={styles.chartTitle}>By Sectors</div>
-                    <div className={styles.allocationChart}>
-                      <PieChart
-                        data={[
-                          // Group assets by sector
-                          ...Object.entries(
-                            (selectedPortfolio.assets || []).reduce((acc, asset) => {
-                              const sector = (asset.sector && asset.sector.trim() !== '') ? asset.sector : 'Other';
-                              acc[sector] = (acc[sector] || 0) + (asset.weight || 0) * 100;
-                              return acc;
-                            }, {} as Record<string, number>)
-                          ).map(([sector, weight], index) => ({
-                            name: sector,
-                            value: weight,
-                            color: getChartColor(index),
-                          })),
-                          // Add cash if there's any
-                          ...((100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0) * 100) > 0 ? [{
-                            name: 'Cash',
-                            value: 100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0) * 100,
-                            color: '#6B7280',
-                          }] : [])
-                        ]}
-                        width={300}
-                        height={300}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-
-                {/* Detailed Asset Table */}
-                <div className={styles.detailedTable} style={{ marginTop: '2rem' }}>
-                  <AssetTable
-                    assets={(selectedPortfolio.assets || []).map(asset => ({
-                      ...asset,
-                      weight: (asset.weight || 0) * 100
-                    }))}
-                    portfolioValue={selectedPortfolio.startingAmount || selectedPortfolio.totalValue || 0}
-                    showActions={false}
-                    showPnL={false}
-                    showDeleteAll={false}
-                  />
-                </div>
-              </div>
-
-              {/* Cash Remaining Info */}
-              {(100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0)) > 0 && (
-                <div className={styles.cashSection}>
-                  <h4 className={styles.reviewSectionTitle}>Cash Remaining</h4>
-                  <div className={styles.cashInfo}>
-                    <span className={styles.cashLabel}>Unallocated:</span>
-                    <span className={styles.cashValue}>
-                      {formatPercentage(100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0) * 100)}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {/* Tags */}
-              {Array.isArray(selectedPortfolio.tags) && selectedPortfolio.tags.length > 0 && (
-                <div className={styles.modalTags}>
-                  <span className={styles.detailLabel}>Tags:</span>
-                  <div className={styles.tagsContainer}>
-                    {selectedPortfolio.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" size="small">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Modal Actions */}
-              <div className={styles.modalActions}>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowPortfolioModal(false);
-                    handleAnalyzePortfolio(selectedPortfolio.id);
-                  }}
-                >
-                  📊 Analyze Portfolio
-                </Button>
-                <Button
-                  onClick={() => {
-                    setShowPortfolioModal(false);
-                    handleEditPortfolio(selectedPortfolio.id);
-                  }}
-                >
-                  ✏️ Edit Portfolio
-                </Button>
-              </div>
+              <PortfolioViewContent
+                portfolio={selectedPortfolio}
+                onClose={() => setShowPortfolioModal(false)}
+                onAnalyze={() => {
+                  setShowPortfolioModal(false);
+                  navigate(`/portfolios/${selectedPortfolio.id}/analysis`);
+                }}
+              />
             </div>
           </Modal>
         )}
