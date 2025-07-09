@@ -55,10 +55,10 @@ export const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({
   'data-testid': testId,
 }) => {
   // Create portfolio options for select
-  const portfolioOptions = portfolios.map(portfolio => ({
+  const portfolioOptions = portfolios?.map(portfolio => ({
     value: portfolio.id,
     label: portfolio.name,
-  }));
+  })) || [];
 
   // Handle portfolio selection from dropdown
   const handlePortfolioSelect = (portfolioId: string) => {
@@ -82,8 +82,8 @@ export const PortfolioHeader: React.FC<PortfolioHeaderProps> = ({
   const currentSortValue = `${sort.field}-${sort.direction}`;
 
   // Calculate portfolio statistics
-  const totalPortfolios = portfolios.length;
-  const totalAssets = portfolios.reduce((sum, p) => sum + p.assetCount, 0);
+  const totalPortfolios = portfolios?.length || 0;
+  const totalAssets = portfolios?.reduce((sum, p) => sum + p.assetCount, 0) || 0;
   const avgAssetsPerPortfolio = totalPortfolios > 0 ? totalAssets / totalPortfolios : 0;
   const recentlyUpdated = portfolios.filter(p => {
     const lastUpdated = new Date(p.lastUpdated);

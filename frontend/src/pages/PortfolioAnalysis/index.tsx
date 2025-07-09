@@ -21,7 +21,8 @@ import { usePortfolios } from '../../hooks/usePortfolios';
 import { useAnalytics } from '../../hooks/useAnalytics';
 import {
   selectPortfolioById,
-  selectPortfoliosLoading
+  selectPortfoliosLoading,
+  selectCurrentPortfolio
 } from '../../store/portfolio/selectors';
 import {
   selectPerformanceMetrics,
@@ -36,6 +37,46 @@ import { setSelectedBenchmark, setSelectedTimeframe } from '../../store/analytic
 import { formatCurrency, formatPercentage, formatNumber } from '../../utils/formatters';
 import { ROUTES } from '../../constants/routes';
 import styles from './PortfolioAnalysis.module.css';
+
+// Простые компоненты для состояний
+const LoadingSpinner: React.FC = () => (
+  <PageContainer>
+    <div className={styles.loading}>
+      <div className={styles.spinner} />
+      <p>Loading portfolio...</p>
+    </div>
+  </PageContainer>
+);
+
+const PortfolioNotFound: React.FC = () => {
+  const navigate = useNavigate();
+  return (
+    <PageContainer>
+      <div className={styles.notFound}>
+        <h2>Portfolio Not Found</h2>
+        <p>The requested portfolio could not be found.</p>
+        <Button onClick={() => navigate(ROUTES.HOME)} variant="primary">
+          Back to Dashboard
+        </Button>
+      </div>
+    </PageContainer>
+  );
+};
+
+const PortfolioSelector: React.FC = () => {
+  const navigate = useNavigate();
+  return (
+    <PageContainer>
+      <div className={styles.selector}>
+        <h2>Select Portfolio</h2>
+        <p>Please select a portfolio to analyze.</p>
+        <Button onClick={() => navigate(ROUTES.PORTFOLIO.LIST)} variant="primary">
+          View All Portfolios
+        </Button>
+      </div>
+    </PageContainer>
+  );
+};
 
 interface AnalysisPanel {
   id: string;
@@ -53,7 +94,7 @@ const PortfolioAnalysis: React.FC = () => {
   const analytics = useAnalytics();
 
   // Selectors
-  const portfolio = useSelector(selectPortfolioById(portfolioId || ''));
+  const currentPortfolio = useSelector(selectCurrentPortfolio);
   const portfoliosLoading = useSelector(selectPortfoliosLoading);
   const performanceMetrics = useSelector(selectPerformanceMetrics);
   const riskMetrics = useSelector(selectRiskMetrics);
@@ -69,10 +110,16 @@ const PortfolioAnalysis: React.FC = () => {
 
   // Load portfolio and analytics data
   useEffect(() => {
+    if (portfolios.portfolios.length === 0 && !portfoliosLoading) {
+      portfolios.loadPortfolios();
+    }
+  }, [portfolios.portfolios.length, portfoliosLoading]);
+
+  useEffect(() => {
     if (portfolioId) {
       portfolios.loadPortfolio(portfolioId);
     }
-  }, [portfolioId]);
+  }, [portfolioId, portfolios]);
 
   useEffect(() => {
     if (portfolioId) {
@@ -150,6 +197,19 @@ const PortfolioAnalysis: React.FC = () => {
     { value: 'VXUS', label: 'International Stocks (VXUS)' },
     { value: 'BND', label: 'Total Bond Market (BND)' },
   ];
+
+  // Проверки состояния ПОСЛЕ всех хуков
+  if (!portfolioId) {
+    return <PortfolioSelector />;
+  }
+
+  if (portfoliosLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (!currentPortfolio && !portfoliosLoading) {
+    return <PortfolioNotFound />;
+  }
 
   // Overview Panel
   const OverviewPanel = () => (
@@ -232,9 +292,9 @@ const PortfolioAnalysis: React.FC = () => {
         {/* Portfolio composition */}
         <Card className={styles.compositionCard}>
           <h3 className={styles.cardTitle}>Portfolio Composition</h3>
-          {portfolio?.assets && portfolio.assets.length > 0 ? (
+          {currentPortfolio?.assets && currentPortfolio.assets.length > 0 ? (
             <PieChart
-              data={portfolio.assets.map(asset => ({
+              data={currentPortfolio.assets.map(asset => ({
                 name: asset.symbol,
                 value: asset.weight,
                 fullName: asset.name,
@@ -296,9 +356,9 @@ const PortfolioAnalysis: React.FC = () => {
             Edit Portfolio
           </Button>
         </div>
-        {portfolio?.assets && portfolio.assets.length > 0 ? (
+        {currentPortfolio?.assets && currentPortfolio.assets.length > 0 ? (
           <AssetTable
-            assets={portfolio.assets}
+            assets={currentPortfolio.assets}
             showPerformance
             showMetrics
           />
@@ -384,38 +444,13 @@ const PortfolioAnalysis: React.FC = () => {
     },
   ];
 
-  if (portfoliosLoading) {
-    return (
-      <PageContainer>
-        <div className={styles.loading}>
-          <div className={styles.spinner} />
-          <p>Loading portfolio...</p>
-        </div>
-      </PageContainer>
-    );
-  }
-
-  if (!portfolio && !portfoliosLoading) {
-    return (
-      <PageContainer>
-        <div className={styles.notFound}>
-          <h2>Portfolio Not Found</h2>
-          <p>The requested portfolio could not be found.</p>
-          <Button onClick={() => navigate(ROUTES.HOME)} variant="primary">
-            Back to Dashboard
-          </Button>
-        </div>
-      </PageContainer>
-    );
-  }
-
   return (
     <PageContainer>
       <div className={styles.container}>
         {/* Header */}
-        {portfolio && (
+        {currentPortfolio && (
           <PortfolioHeader
-            portfolio={portfolio}
+            portfolio={currentPortfolio}
             onOptimize={handleOptimize}
             onRiskAnalysis={handleRiskAnalysis}
             onComparison={handleComparison}

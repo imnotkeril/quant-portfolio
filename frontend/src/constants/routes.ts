@@ -13,7 +13,6 @@ export const ROUTES = {
     CREATE: '/portfolios/create',
     DETAILS: '/portfolios/:id',
     EDIT: '/portfolios/:id/edit',
-    ANALYZE: '/portfolios/:id/analyze',
     ANALYSIS: '/portfolios/:id/analysis',
     ANALYSIS_ROOT: '/portfolios/analysis',
     DETAILED_PATH: (id: string) => `/portfolios/${id}`,

@@ -434,8 +434,7 @@ const PortfolioListPage: React.FC = () => {
   };
 
   const handleAnalyzePortfolio = (portfolioId: string) => {
-    navigate(ROUTES.PORTFOLIO.ANALYZE_PATH(portfolioId));
-    // Альтернативно: navigate(`/portfolios/${portfolioId}/analyze`);
+    navigate(ROUTES.PORTFOLIO.ANALYSIS_PATH(portfolioId));  // Правильный роут
   };
 
   const handleEditPortfolio = (portfolioId: string) => {
