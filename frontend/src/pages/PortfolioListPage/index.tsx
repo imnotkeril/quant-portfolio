@@ -472,6 +472,7 @@ const PortfolioListPage: React.FC = () => {
             onClose={() => setShowPortfolioModal(false)}
             title={selectedPortfolio.name}
             size="large"
+            className={styles.portfolioModal}
           >
             <div className={styles.modalContent}>
               {/* Portfolio Overview */}
@@ -496,7 +497,7 @@ const PortfolioListPage: React.FC = () => {
                     <div className={styles.summaryItem}>
                       <span className={styles.summaryLabel}>Total Weight:</span>
                       <span className={styles.summaryValue}>
-                        {formatPercentage((selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0) / 100)}
+                        {formatPercentage(selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0)}
                       </span>
                     </div>
                     <div className={styles.summaryItem}>
@@ -529,13 +530,13 @@ const PortfolioListPage: React.FC = () => {
                           // Add all assets
                           ...(selectedPortfolio.assets?.map((asset, index) => ({
                             name: asset.ticker,
-                            value: asset.weight || 0,
+                            value: (asset.weight || 0) * 100,  // ← УМНОЖИТЬ НА 100
                             color: getChartColor(index),
                           })) || []),
                           // Add cash if there's any
-                          ...((100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0)) > 0 ? [{
+                          ...((100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0) * 100) > 0 ? [{
                             name: 'Cash',
-                            value: 100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0),
+                            value: 100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0) * 100,  // ← УМНОЖИТЬ НА 100
                             color: '#6B7280',
                           }] : [])
                         ]}
@@ -555,7 +556,7 @@ const PortfolioListPage: React.FC = () => {
                           ...Object.entries(
                             (selectedPortfolio.assets || []).reduce((acc, asset) => {
                               const sector = (asset.sector && asset.sector.trim() !== '') ? asset.sector : 'Other';
-                              acc[sector] = (acc[sector] || 0) + (asset.weight || 0);
+                              acc[sector] = (acc[sector] || 0) + (asset.weight || 0) * 100;
                               return acc;
                             }, {} as Record<string, number>)
                           ).map(([sector, weight], index) => ({
@@ -564,9 +565,9 @@ const PortfolioListPage: React.FC = () => {
                             color: getChartColor(index),
                           })),
                           // Add cash if there's any
-                          ...((100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0)) > 0 ? [{
+                          ...((100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0) * 100) > 0 ? [{
                             name: 'Cash',
-                            value: 100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0),
+                            value: 100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0) * 100,
                             color: '#6B7280',
                           }] : [])
                         ]}
@@ -577,10 +578,14 @@ const PortfolioListPage: React.FC = () => {
                   </div>
                 </div>
 
+
                 {/* Detailed Asset Table */}
                 <div className={styles.detailedTable} style={{ marginTop: '2rem' }}>
                   <AssetTable
-                    assets={selectedPortfolio.assets || []}
+                    assets={(selectedPortfolio.assets || []).map(asset => ({
+                      ...asset,
+                      weight: (asset.weight || 0) * 100
+                    }))}
                     portfolioValue={selectedPortfolio.startingAmount || selectedPortfolio.totalValue || 0}
                     showActions={false}
                     showPnL={false}
@@ -596,7 +601,7 @@ const PortfolioListPage: React.FC = () => {
                   <div className={styles.cashInfo}>
                     <span className={styles.cashLabel}>Unallocated:</span>
                     <span className={styles.cashValue}>
-                      {formatPercentage((100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0)) / 100)}
+                      {formatPercentage(100 - (selectedPortfolio.assets?.reduce((sum, asset) => sum + (asset.weight || 0), 0) || 0) * 100)}
                     </span>
                   </div>
                 </div>

@@ -703,3 +703,15 @@
     padding: var(--spacing-m);
   }
 }
+
+.portfolioModal {
+  width: 95vw !important;
+  max-width: 1600px !important;
+  height: 90vh !important;
+}
+
+.portfolioModal .modalContent {
+  height: calc(90vh - 120px);
+  overflow-y: auto;
+  padding: var(--spacing-l);
+}
