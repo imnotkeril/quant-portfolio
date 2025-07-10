@@ -49,7 +49,7 @@ interface UseAnalyticsActions {
   calculateRollingMetrics: (request: RollingMetricsRequest) => Promise<RollingMetricsResponse | null>;
   clearError: () => void;
   clearAnalytics: () => void;
-  getDefaultDateRange: () => { startDate: string; endDate: string };
+  getDefaultDateRange: (timeframe?: string) => { startDate: string; endDate: string };
   getPredefinedTimeRanges: () => Record<string, { startDate: string; endDate: string; label: string }>;
 }
 
@@ -324,7 +324,7 @@ export const useAnalytics = (): UseAnalyticsState & UseAnalyticsActions => {
     setState(prev => ({ ...prev, error: null }));
   }, []);
 
-  // Clear all analytics data
+  // Clear analytics
   const clearAnalytics = useCallback(() => {
     setState(prev => ({
       ...prev,
@@ -335,99 +335,55 @@ export const useAnalytics = (): UseAnalyticsState & UseAnalyticsActions => {
       drawdowns: null,
       comparison: null,
       rollingMetrics: null,
-      error: null
+      error: null,
     }));
   }, []);
 
-  // Get default date range (last 5 years)
-  const getDefaultDateRange = useCallback(() => {
+  // Get default date range
+  const getDefaultDateRange = useCallback((timeframe: string = '1Y') => {
     const endDate = new Date();
     const startDate = new Date();
-    startDate.setFullYear(endDate.getFullYear() - 5);
+
+    switch (timeframe) {
+      case '1M':
+        startDate.setMonth(endDate.getMonth() - 1);
+        break;
+      case '3M':
+        startDate.setMonth(endDate.getMonth() - 3);
+        break;
+      case '6M':
+        startDate.setMonth(endDate.getMonth() - 6);
+        break;
+      case '1Y':
+        startDate.setFullYear(endDate.getFullYear() - 1);
+        break;
+      case '2Y':
+        startDate.setFullYear(endDate.getFullYear() - 2);
+        break;
+      case '5Y':
+        startDate.setFullYear(endDate.getFullYear() - 5);
+        break;
+      default:
+        startDate.setFullYear(endDate.getFullYear() - 1);
+    }
 
     return {
       startDate: startDate.toISOString().split('T')[0],
-      endDate: endDate.toISOString().split('T')[0],
+      endDate: endDate.toISOString().split('T')[0]
     };
   }, []);
 
   // Get predefined time ranges
   const getPredefinedTimeRanges = useCallback(() => {
-    const today = new Date();
-    const ranges: Record<string, { startDate: string; endDate: string; label: string }> = {};
-
-    // Month to Date
-    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-    ranges.mtd = {
-      startDate: monthStart.toISOString().split('T')[0],
-      endDate: today.toISOString().split('T')[0],
-      label: 'Month to Date'
+    return {
+      '1M': { ...getDefaultDateRange('1M'), label: '1 Month' },
+      '3M': { ...getDefaultDateRange('3M'), label: '3 Months' },
+      '6M': { ...getDefaultDateRange('6M'), label: '6 Months' },
+      '1Y': { ...getDefaultDateRange('1Y'), label: '1 Year' },
+      '2Y': { ...getDefaultDateRange('2Y'), label: '2 Years' },
+      '5Y': { ...getDefaultDateRange('5Y'), label: '5 Years' },
     };
-
-    // Year to Date
-    const yearStart = new Date(today.getFullYear(), 0, 1);
-    ranges.ytd = {
-      startDate: yearStart.toISOString().split('T')[0],
-      endDate: today.toISOString().split('T')[0],
-      label: 'Year to Date'
-    };
-
-    // 1 Month
-    const oneMonthAgo = new Date(today);
-    oneMonthAgo.setMonth(today.getMonth() - 1);
-    ranges['1m'] = {
-      startDate: oneMonthAgo.toISOString().split('T')[0],
-      endDate: today.toISOString().split('T')[0],
-      label: '1 Month'
-    };
-
-    // 3 Months
-    const threeMonthsAgo = new Date(today);
-    threeMonthsAgo.setMonth(today.getMonth() - 3);
-    ranges['3m'] = {
-      startDate: threeMonthsAgo.toISOString().split('T')[0],
-      endDate: today.toISOString().split('T')[0],
-      label: '3 Months'
-    };
-
-    // 6 Months
-    const sixMonthsAgo = new Date(today);
-    sixMonthsAgo.setMonth(today.getMonth() - 6);
-    ranges['6m'] = {
-      startDate: sixMonthsAgo.toISOString().split('T')[0],
-      endDate: today.toISOString().split('T')[0],
-      label: '6 Months'
-    };
-
-    // 1 Year
-    const oneYearAgo = new Date(today);
-    oneYearAgo.setFullYear(today.getFullYear() - 1);
-    ranges['1y'] = {
-      startDate: oneYearAgo.toISOString().split('T')[0],
-      endDate: today.toISOString().split('T')[0],
-      label: '1 Year'
-    };
-
-    // 2 Years
-    const twoYearsAgo = new Date(today);
-    twoYearsAgo.setFullYear(today.getFullYear() - 2);
-    ranges['2y'] = {
-      startDate: twoYearsAgo.toISOString().split('T')[0],
-      endDate: today.toISOString().split('T')[0],
-      label: '2 Years'
-    };
-
-    // 5 Years
-    const fiveYearsAgo = new Date(today);
-    fiveYearsAgo.setFullYear(today.getFullYear() - 5);
-    ranges['5y'] = {
-      startDate: fiveYearsAgo.toISOString().split('T')[0],
-      endDate: today.toISOString().split('T')[0],
-      label: '5 Years'
-    };
-
-    return ranges;
-  }, []);
+  }, [getDefaultDateRange]);
 
   return {
     ...state,

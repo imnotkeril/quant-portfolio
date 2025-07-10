@@ -10,7 +10,6 @@ import { SplitPane } from '../../components/layout/SplitPane/SplitPane';
 import Card from '../../components/common/Card/Card';
 import { Button } from '../../components/common/Button/Button';
 import { Select } from '../../components/common/Select/Select';
-import { PortfolioHeader } from '../../components/portfolio/PortfolioHeader/PortfolioHeader';
 import { PortfolioSummary } from '../../components/portfolio/PortfolioSummary/PortfolioSummary';
 import { PerformancePanel } from '../../components/analytics/PerformancePanel/PerformancePanel';
 import { MetricsTable } from '../../components/analytics/MetricsTable/MetricsTable';
@@ -19,11 +18,6 @@ import { LineChart } from '../../components/charts/LineChart/LineChart';
 import { PieChart } from '../../components/charts/PieChart/PieChart';
 import { usePortfolios } from '../../hooks/usePortfolios';
 import { useAnalytics } from '../../hooks/useAnalytics';
-import {
-  selectPortfolioById,
-  selectPortfoliosLoading,
-  selectCurrentPortfolio
-} from '../../store/portfolio/selectors';
 import {
   selectPerformanceMetrics,
   selectRiskMetrics,
@@ -38,7 +32,6 @@ import { formatCurrency, formatPercentage, formatNumber } from '../../utils/form
 import { ROUTES } from '../../constants/routes';
 import styles from './PortfolioAnalysis.module.css';
 
-// Простые компоненты для состояний
 const LoadingSpinner: React.FC = () => (
   <PageContainer>
     <div className={styles.loading}>
@@ -65,14 +58,125 @@ const PortfolioNotFound: React.FC = () => {
 
 const PortfolioSelector: React.FC = () => {
   const navigate = useNavigate();
+  const portfolios = usePortfolios();
+  const [selectedPortfolio, setSelectedPortfolio] = useState<string | null>(null);
+
+  const handleAnalyze = () => {
+    if (selectedPortfolio) {
+      navigate(ROUTES.PORTFOLIO.ANALYSIS_PATH(selectedPortfolio));
+    }
+  };
+
+  const handleCreatePortfolio = () => {
+    navigate(ROUTES.PORTFOLIO.CREATE);
+  };
+
   return (
     <PageContainer>
       <div className={styles.selector}>
-        <h2>Select Portfolio</h2>
-        <p>Please select a portfolio to analyze.</p>
-        <Button onClick={() => navigate(ROUTES.PORTFOLIO.LIST)} variant="primary">
-          View All Portfolios
-        </Button>
+        <div className={styles.header}>
+          <h2>Select Portfolio for Analysis</h2>
+          <p>Choose a portfolio to view detailed analytics and performance metrics.</p>
+        </div>
+
+        {portfolios.loading ? (
+          <div className={styles.loading}>
+            <div className={styles.spinner} />
+            <p>Loading portfolios...</p>
+          </div>
+        ) : portfolios.portfolios.length === 0 ? (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              </svg>
+            </div>
+            <h3>No portfolios found</h3>
+            <p>Create your first portfolio to get started with analysis.</p>
+            <Button onClick={handleCreatePortfolio} variant="primary">
+              Create Portfolio
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className={styles.portfolioGrid}>
+              {portfolios.portfolios.map((portfolio) => (
+                <Card
+                  key={portfolio.id}
+                  className={`${styles.portfolioCard} ${
+                    selectedPortfolio === portfolio.id ? styles.selected : ''
+                  }`}
+                  onClick={() => setSelectedPortfolio(portfolio.id)}
+                >
+                  <div className={styles.portfolioHeader}>
+                    <h3>{portfolio.name}</h3>
+                    {portfolio.tags && portfolio.tags.length > 0 && (
+                      <div className={styles.tags}>
+                        {portfolio.tags.slice(0, 2).map((tag, index) => (
+                          <span key={index} className={styles.tag}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {portfolio.description && (
+                    <p className={styles.description}>{portfolio.description}</p>
+                  )}
+
+                  <div className={styles.portfolioStats}>
+                    <div className={styles.stat}>
+                      <span className={styles.statLabel}>Assets:</span>
+                      <span className={styles.statValue}>{portfolio.assetCount || 0}</span>
+                    </div>
+                    <div className={styles.stat}>
+                      <span className={styles.statLabel}>Updated:</span>
+                      <span className={styles.statValue}>
+                        {portfolio.lastUpdated ? new Date(portfolio.lastUpdated).toLocaleDateString() : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {selectedPortfolio === portfolio.id && (
+                    <div className={styles.selectedIndicator}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M20 6L9 17l-5-5"/>
+                      </svg>
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
+
+            <div className={styles.actions}>
+              <Button
+                variant="primary"
+                onClick={handleAnalyze}
+                disabled={!selectedPortfolio}
+                size="large"
+              >
+                Analyze Selected Portfolio
+              </Button>
+
+              <Button
+                variant="secondary"
+                onClick={handleCreatePortfolio}
+              >
+                Create New Portfolio
+              </Button>
+            </div>
+          </>
+        )}
+
+        {portfolios.error && (
+          <div className={styles.error}>
+            <p>Error loading portfolios: {portfolios.error}</p>
+            <Button onClick={portfolios.loadPortfolios} variant="outline" size="small">
+              Retry
+            </Button>
+          </div>
+        )}
       </div>
     </PageContainer>
   );
@@ -94,8 +198,8 @@ const PortfolioAnalysis: React.FC = () => {
   const analytics = useAnalytics();
 
   // Selectors
-  const currentPortfolio = useSelector(selectCurrentPortfolio);
-  const portfoliosLoading = useSelector(selectPortfoliosLoading);
+  const currentPortfolio = portfolios.currentPortfolio;
+  const portfoliosLoading = portfolios.loading;
   const performanceMetrics = useSelector(selectPerformanceMetrics);
   const riskMetrics = useSelector(selectRiskMetrics);
   const cumulativeReturns = useSelector(selectCumulativeReturns);
@@ -108,19 +212,21 @@ const PortfolioAnalysis: React.FC = () => {
   const [activePanel, setActivePanel] = useState('overview');
   const [isFullScreen, setIsFullScreen] = useState(false);
 
-  // Load portfolio and analytics data
+  // Load portfolios on mount
   useEffect(() => {
     if (portfolios.portfolios.length === 0 && !portfoliosLoading) {
       portfolios.loadPortfolios();
     }
   }, [portfolios.portfolios.length, portfoliosLoading]);
 
+  // Load specific portfolio
   useEffect(() => {
     if (portfolioId) {
       portfolios.loadPortfolio(portfolioId);
     }
   }, [portfolioId, portfolios]);
 
+  // Load analytics data
   useEffect(() => {
     if (portfolioId) {
       const { startDate, endDate } = analytics.getDefaultDateRange(selectedTimeframe);
@@ -140,14 +246,14 @@ const PortfolioAnalysis: React.FC = () => {
         confidenceLevel: 0.95,
       });
 
-      analytics.loadCumulativeReturns({
+      analytics.calculateCumulativeReturns({
         portfolioId,
         startDate,
         endDate,
         benchmark: selectedBenchmark || undefined,
       });
 
-      analytics.loadDrawdowns({
+      analytics.calculateDrawdowns({
         portfolioId,
         startDate,
         endDate,
@@ -198,7 +304,7 @@ const PortfolioAnalysis: React.FC = () => {
     { value: 'BND', label: 'Total Bond Market (BND)' },
   ];
 
-  // Проверки состояния ПОСЛЕ всех хуков
+  // Check conditions for rendering
   if (!portfolioId) {
     return <PortfolioSelector />;
   }
@@ -449,13 +555,31 @@ const PortfolioAnalysis: React.FC = () => {
       <div className={styles.container}>
         {/* Header */}
         {currentPortfolio && (
-          <PortfolioHeader
-            portfolio={currentPortfolio}
-            onOptimize={handleOptimize}
-            onRiskAnalysis={handleRiskAnalysis}
-            onComparison={handleComparison}
-            onEdit={handleEdit}
-          />
+          <div className={styles.portfolioHeader}>
+            <div className={styles.portfolioHeaderContent}>
+              <div className={styles.portfolioInfo}>
+                <h1 className={styles.portfolioTitle}>{currentPortfolio.name}</h1>
+                {currentPortfolio.description && (
+                  <p className={styles.portfolioDescription}>{currentPortfolio.description}</p>
+                )}
+              </div>
+
+              <div className={styles.portfolioActions}>
+                <Button onClick={handleEdit} variant="secondary" size="small">
+                  Edit Portfolio
+                </Button>
+                <Button onClick={handleOptimize} variant="primary" size="small">
+                  Optimize
+                </Button>
+                <Button onClick={handleRiskAnalysis} variant="secondary" size="small">
+                  Risk Analysis
+                </Button>
+                <Button onClick={handleComparison} variant="secondary" size="small">
+                  Compare
+                </Button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Controls */}
