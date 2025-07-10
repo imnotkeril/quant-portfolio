@@ -6,6 +6,12 @@ from app.core.services.enhanced_analytics import EnhancedAnalyticsService
 from app.infrastructure.data.portfolio_manager import PortfolioManagerService
 from app.infrastructure.data.data_fetcher import DataFetcherService
 
+# Import correct dependencies
+from app.api.dependencies import (
+    get_data_fetcher_service,
+    get_portfolio_manager_service
+)
+
 # Import Pydantic models (schemas)
 from app.schemas.analytics import (
     AnalyticsRequest,
@@ -22,22 +28,12 @@ def get_enhanced_analytics_service():
     return EnhancedAnalyticsService()
 
 
-# Dependency to get the portfolio manager service
-def get_portfolio_manager():
-    data_fetcher = DataFetcherService()
-    portfolio_manager = PortfolioManagerService(data_fetcher)
-    return portfolio_manager
-
-def get_data_fetcher():
-    return DataFetcherService()
-
-
 @router.post("/advanced-metrics", response_model=EnhancedAnalyticsRequest)
 def calculate_enhanced_metrics(
         request: AnalyticsRequest,
         enhanced_analytics: EnhancedAnalyticsService = Depends(get_enhanced_analytics_service),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Calculate enhanced metrics like Omega ratio, Ulcer index, etc.
@@ -165,8 +161,8 @@ def calculate_enhanced_metrics(
 def calculate_rolling_metrics(
         request: RollingMetricsRequest,
         enhanced_analytics: EnhancedAnalyticsService = Depends(get_enhanced_analytics_service),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Calculate rolling metrics (e.g., rolling Sharpe ratio, rolling volatility)
@@ -263,8 +259,8 @@ def calculate_rolling_metrics(
 def analyze_seasonal_patterns(
         request: SeasonalAnalysisResponse,
         enhanced_analytics: EnhancedAnalyticsService = Depends(get_enhanced_analytics_service),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Analyze seasonal patterns in portfolio returns
@@ -351,8 +347,8 @@ def calculate_confidence_intervals(
         request: AnalyticsRequest,
         confidence_level: float = Query(0.95, description="Confidence level for interval calculation"),
         enhanced_analytics: EnhancedAnalyticsService = Depends(get_enhanced_analytics_service),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Calculate confidence intervals for portfolio metrics
@@ -435,8 +431,8 @@ def analyze_tail_risk(
         confidence_level: float = Query(0.95, description="Confidence level for tail risk calculation"),
         method: str = Query("historical", description="Method for tail risk calculation"),
         enhanced_analytics: EnhancedAnalyticsService = Depends(get_enhanced_analytics_service),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Analyze tail risk of a portfolio

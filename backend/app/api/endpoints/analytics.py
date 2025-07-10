@@ -5,6 +5,12 @@ from app.core.services.analytics import AnalyticsService
 from app.infrastructure.data.portfolio_manager import PortfolioManagerService
 from app.infrastructure.data.data_fetcher import DataFetcherService
 
+# Import correct dependencies
+from app.api.dependencies import (
+    get_data_fetcher_service,
+    get_portfolio_manager_service
+)
+
 # Import Pydantic models (schemas)
 from app.schemas.analytics import (
     AnalyticsRequest,
@@ -20,33 +26,25 @@ def get_analytics_service():
     return AnalyticsService()
 
 
-# Dependency to get the portfolio manager service
-def get_portfolio_manager():
-    data_fetcher = DataFetcherService()
-    portfolio_manager = PortfolioManagerService(data_fetcher)
-    return portfolio_manager
-
-
-# Dependency to get the data fetcher service
-def get_data_fetcher():
-    return DataFetcherService()
-
-
-@router.post("/performance", response_model=PerformanceMetricsResponse)
+@router.post("/performance/{portfolio_id}", response_model=PerformanceMetricsResponse)
 def calculate_performance_metrics(
-        request: AnalyticsRequest,
+        portfolio_id: str,
+        start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
+        end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
+        benchmark: Optional[str] = Query(None, description="Benchmark ticker symbol"),
+        risk_free_rate: Optional[float] = Query(0.0, description="Risk-free rate"),
         analytics_service: AnalyticsService = Depends(get_analytics_service),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Calculate performance metrics for a portfolio
     """
     try:
         # Load the portfolio
-        portfolio = portfolio_manager.load_portfolio(request.portfolio_id)
+        portfolio = portfolio_manager.load_portfolio(portfolio_id)
         if not portfolio:
-            raise HTTPException(status_code=404, detail=f"Portfolio with ID {request.portfolio_id} not found")
+            raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id} not found")
 
         # Get the assets and weights
         assets = portfolio.get("assets", [])
@@ -57,16 +55,16 @@ def calculate_performance_metrics(
         tickers = list(weights.keys())
 
         # Set default dates if not provided
-        if not request.end_date:
-            request.end_date = datetime.now().strftime("%Y-%m-%d")
+        if not end_date:
+            end_date = datetime.now().strftime("%Y-%m-%d")
 
-        if not request.start_date:
+        if not start_date:
             # Default to 1 year ago
-            start_date = datetime.now() - timedelta(days=365)
-            request.start_date = start_date.strftime("%Y-%m-%d")
+            start_date_obj = datetime.now() - timedelta(days=365)
+            start_date = start_date_obj.strftime("%Y-%m-%d")
 
         # Fetch historical price data
-        price_data = data_fetcher.get_batch_data(tickers, request.start_date, request.end_date)
+        price_data = data_fetcher.get_batch_data(tickers, start_date, end_date)
 
         # Check if price data was retrieved successfully
         if not price_data or all(price_data[ticker].empty for ticker in price_data):
@@ -92,9 +90,9 @@ def calculate_performance_metrics(
 
         # Fetch benchmark data if specified
         benchmark_returns = None
-        if request.benchmark:
+        if benchmark:
             benchmark_data = data_fetcher.get_historical_prices(
-                request.benchmark, request.start_date, request.end_date
+                benchmark, start_date, end_date
             )
 
             if not benchmark_data.empty:
@@ -113,7 +111,7 @@ def calculate_performance_metrics(
         metrics = analytics_service.calculate_portfolio_metrics(
             portfolio_returns,
             benchmark_returns,
-            risk_free_rate=request.risk_free_rate
+            risk_free_rate=risk_free_rate
         )
 
         # Calculate cumulative returns
@@ -126,11 +124,11 @@ def calculate_performance_metrics(
 
         # Prepare the response
         result = {
-            "portfolio_id": request.portfolio_id,
-            "start_date": request.start_date,
-            "end_date": request.end_date,
-            "benchmark": request.benchmark,
-            "risk_free_rate": request.risk_free_rate,
+            "portfolio_id": portfolio_id,
+            "start_date": start_date,
+            "end_date": end_date,
+            "benchmark": benchmark,
+            "risk_free_rate": risk_free_rate,
             "metrics": metrics,
             # Convert time series data to dict for JSON serialization
             "returns": portfolio_returns.to_dict(),
@@ -146,26 +144,28 @@ def calculate_performance_metrics(
 
         return result
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail=f"Portfolio with ID {request.portfolio_id} not found")
+        raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id} not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to calculate performance metrics: {str(e)}")
 
 
-@router.post("/risk", response_model=RiskMetricsResponse)
+@router.post("/risk/{portfolio_id}", response_model=RiskMetricsResponse)
 def calculate_risk_metrics(
-        request: AnalyticsRequest,
+        portfolio_id: str,
+        start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
+        end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
         analytics_service: AnalyticsService = Depends(get_analytics_service),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Calculate risk metrics for a portfolio
     """
     try:
         # Load the portfolio
-        portfolio = portfolio_manager.load_portfolio(request.portfolio_id)
+        portfolio = portfolio_manager.load_portfolio(portfolio_id)
         if not portfolio:
-            raise HTTPException(status_code=404, detail=f"Portfolio with ID {request.portfolio_id} not found")
+            raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id} not found")
 
         # Get the assets and weights
         assets = portfolio.get("assets", [])
@@ -176,16 +176,16 @@ def calculate_risk_metrics(
         tickers = list(weights.keys())
 
         # Set default dates if not provided
-        if not request.end_date:
-            request.end_date = datetime.now().strftime("%Y-%m-%d")
+        if not end_date:
+            end_date = datetime.now().strftime("%Y-%m-%d")
 
-        if not request.start_date:
+        if not start_date:
             # Default to 1 year ago
-            start_date = datetime.now() - timedelta(days=365)
-            request.start_date = start_date.strftime("%Y-%m-%d")
+            start_date_obj = datetime.now() - timedelta(days=365)
+            start_date = start_date_obj.strftime("%Y-%m-%d")
 
         # Fetch historical price data
-        price_data = data_fetcher.get_batch_data(tickers, request.start_date, request.end_date)
+        price_data = data_fetcher.get_batch_data(tickers, start_date, end_date)
 
         # Check if price data was retrieved successfully
         if not price_data or all(price_data[ticker].empty for ticker in price_data):
@@ -228,9 +228,9 @@ def calculate_risk_metrics(
 
         # Prepare the response
         result = {
-            "portfolio_id": request.portfolio_id,
-            "start_date": request.start_date,
-            "end_date": request.end_date,
+            "portfolio_id": portfolio_id,
+            "start_date": start_date,
+            "end_date": end_date,
             "risk_metrics": {
                 "volatility": volatility,
                 "max_drawdown": max_drawdown,
@@ -245,7 +245,7 @@ def calculate_risk_metrics(
 
         return result
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail=f"Portfolio with ID {request.portfolio_id} not found")
+        raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id} not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to calculate risk metrics: {str(e)}")
 
@@ -256,8 +256,8 @@ def calculate_returns(
         period: str = Query("daily", description="Period for returns calculation"),
         method: str = Query("simple", description="Method for returns calculation"),
         analytics_service: AnalyticsService = Depends(get_analytics_service),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Calculate returns for a portfolio
@@ -350,22 +350,24 @@ def calculate_returns(
         raise HTTPException(status_code=500, detail=f"Failed to calculate returns: {str(e)}")
 
 
-@router.post("/cumulative-returns")
+@router.post("/cumulative-returns/{portfolio_id}")
 def calculate_cumulative_returns(
-        request: AnalyticsRequest,
+        portfolio_id: str,
         method: str = Query("simple", description="Method for returns calculation"),
+        start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
+        end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
         analytics_service: AnalyticsService = Depends(get_analytics_service),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Calculate cumulative returns for a portfolio
     """
     try:
         # Load the portfolio
-        portfolio = portfolio_manager.load_portfolio(request.portfolio_id)
+        portfolio = portfolio_manager.load_portfolio(portfolio_id)
         if not portfolio:
-            raise HTTPException(status_code=404, detail=f"Portfolio with ID {request.portfolio_id} not found")
+            raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id} not found")
 
         # Get the assets and weights
         assets = portfolio.get("assets", [])
@@ -376,16 +378,16 @@ def calculate_cumulative_returns(
         tickers = list(weights.keys())
 
         # Set default dates if not provided
-        if not request.end_date:
-            request.end_date = datetime.now().strftime("%Y-%m-%d")
+        if not end_date:
+            end_date = datetime.now().strftime("%Y-%m-%d")
 
-        if not request.start_date:
+        if not start_date:
             # Default to 1 year ago
-            start_date = datetime.now() - timedelta(days=365)
-            request.start_date = start_date.strftime("%Y-%m-%d")
+            start_date_obj = datetime.now() - timedelta(days=365)
+            start_date = start_date_obj.strftime("%Y-%m-%d")
 
         # Fetch historical price data
-        price_data = data_fetcher.get_batch_data(tickers, request.start_date, request.end_date)
+        price_data = data_fetcher.get_batch_data(tickers, start_date, end_date)
 
         # Check if price data was retrieved successfully
         if not price_data or all(price_data[ticker].empty for ticker in price_data):
@@ -425,9 +427,9 @@ def calculate_cumulative_returns(
 
         # Prepare the response
         result = {
-            "portfolio_id": request.portfolio_id,
-            "start_date": request.start_date,
-            "end_date": request.end_date,
+            "portfolio_id": portfolio_id,
+            "start_date": start_date,
+            "end_date": end_date,
             "method": method,
             "cumulative_returns": cumulative_returns.to_dict(),
             "asset_cumulative_returns": asset_cumulative_returns
@@ -435,26 +437,28 @@ def calculate_cumulative_returns(
 
         return result
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail=f"Portfolio with ID {request.portfolio_id} not found")
+        raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id} not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to calculate cumulative returns: {str(e)}")
 
 
-@router.post("/drawdowns")
+@router.post("/drawdowns/{portfolio_id}")
 def calculate_drawdowns(
-        request: AnalyticsRequest,
+        portfolio_id: str,
+        start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
+        end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
         analytics_service: AnalyticsService = Depends(get_analytics_service),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Calculate drawdowns for a portfolio
     """
     try:
         # Load the portfolio
-        portfolio = portfolio_manager.load_portfolio(request.portfolio_id)
+        portfolio = portfolio_manager.load_portfolio(portfolio_id)
         if not portfolio:
-            raise HTTPException(status_code=404, detail=f"Portfolio with ID {request.portfolio_id} not found")
+            raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id} not found")
 
         # Get the assets and weights
         assets = portfolio.get("assets", [])
@@ -465,16 +469,16 @@ def calculate_drawdowns(
         tickers = list(weights.keys())
 
         # Set default dates if not provided
-        if not request.end_date:
-            request.end_date = datetime.now().strftime("%Y-%m-%d")
+        if not end_date:
+            end_date = datetime.now().strftime("%Y-%m-%d")
 
-        if not request.start_date:
+        if not start_date:
             # Default to 1 year ago
-            start_date = datetime.now() - timedelta(days=365)
-            request.start_date = start_date.strftime("%Y-%m-%d")
+            start_date_obj = datetime.now() - timedelta(days=365)
+            start_date = start_date_obj.strftime("%Y-%m-%d")
 
         # Fetch historical price data
-        price_data = data_fetcher.get_batch_data(tickers, request.start_date, request.end_date)
+        price_data = data_fetcher.get_batch_data(tickers, start_date, end_date)
 
         # Check if price data was retrieved successfully
         if not price_data or all(price_data[ticker].empty for ticker in price_data):
@@ -512,9 +516,9 @@ def calculate_drawdowns(
 
         # Prepare the response
         result = {
-            "portfolio_id": request.portfolio_id,
-            "start_date": request.start_date,
-            "end_date": request.end_date,
+            "portfolio_id": portfolio_id,
+            "start_date": start_date,
+            "end_date": end_date,
             "max_drawdown": drawdown.min(),
             "current_drawdown": drawdown.iloc[-1],
             "drawdown_series": drawdown.to_dict(),
@@ -523,7 +527,7 @@ def calculate_drawdowns(
 
         return result
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail=f"Portfolio with ID {request.portfolio_id} not found")
+        raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id} not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to calculate drawdowns: {str(e)}")
 
@@ -536,8 +540,8 @@ def compare_portfolios(
         end_date: Optional[str] = None,
         benchmark: Optional[str] = None,
         analytics_service: AnalyticsService = Depends(get_analytics_service),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Compare performance of two portfolios
