@@ -134,6 +134,14 @@ class ApiClient {
       const status = response.status;
       const data = response.data as any;
 
+      // Добавить логирование для отладки
+      console.error('API Error Response:', {
+        status,
+        url: response.config?.url,
+        method: response.config?.method,
+        data
+      });
+
       let errorMessage = 'An error occurred';
       let code: string | undefined;
       let details: Record<string, any> | undefined;

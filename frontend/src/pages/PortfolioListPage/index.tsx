@@ -47,6 +47,13 @@ const PortfolioViewContent: React.FC<PortfolioViewContentProps> = ({ portfolio, 
   const [enrichedAssets, setEnrichedAssets] = useState<any[]>([]);
   const { getAssetInfo } = useAssets();
 
+
+  // Автоматическая загрузка портфелей при монтировании
+  useEffect(() => {
+    console.log('PortfolioListPage mounted, loading portfolios...');
+    dispatch(loadPortfolios());
+  }, [dispatch]);
+
   useEffect(() => {
     const enrichAssets = async () => {
       // Convert weights from decimals to percentages first

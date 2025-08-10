@@ -49,24 +49,48 @@ class PortfolioService {
    */
   async getPortfolios(): Promise<PortfolioListItem[]> {
     try {
-      const response = await apiClient.get<any>(portfolioEndpoints.list());
+      console.log('Fetching portfolios from:', portfolioEndpoints.list());
+      const response = await apiClient.get<PortfolioListItem[] | { portfolios: PortfolioListItem[] }>(
+        portfolioEndpoints.list()
+      );
 
-      if (response && response.portfolios && Array.isArray(response.portfolios)) {
-        return response.portfolios;
+      console.log('Raw API response:', response);
+
+      // Обработка различных форматов ответа
+      if (response && typeof response === 'object') {
+        // Если ответ содержит поле portfolios
+        if ('portfolios' in response && Array.isArray(response.portfolios)) {
+          console.log('Found portfolios in response.portfolios:', response.portfolios);
+          return response.portfolios;
+        }
+
+        // Если ответ содержит поле data с портфелями
+        if ('data' in response && Array.isArray((response as any).data)) {
+          console.log('Found portfolios in response.data:', (response as any).data);
+          return (response as any).data;
+        }
       }
 
+      // Если ответ сам является массивом
       if (Array.isArray(response)) {
+        console.log('Response is array of portfolios:', response);
         return response;
       }
 
-      console.warn('Unexpected portfolios response format:', response);
+      console.warn('Unexpected response format, returning empty array:', response);
       return [];
     } catch (error) {
       console.error('Error fetching portfolios:', error);
+
+      // Если ошибка сети, вернуть пустой массив вместо выброса ошибки
+      if (error instanceof Error && error.message.includes('Network error')) {
+        console.error('Backend is not available. Please ensure the server is running on http://localhost:8080');
+        return [];
+      }
+
       throw error;
     }
   }
-
   /**
    * Get portfolio by ID
    */
