@@ -5,7 +5,7 @@ import logging
 import pandas as pd
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Union
+from typing import Dict, List, Tuple, Optional, Union, Any
 import re
 from app.core.interfaces.storage_provider import StorageProvider
 from app.core.interfaces.data_provider import DataProvider
@@ -62,29 +62,56 @@ class PortfolioManagerService:
             logging.error(f"Error saving portfolio {portfolio.id}: {e}")
             raise
 
-    def load_portfolio(self, portfolio_id: str) -> Optional[Portfolio]:
+    def load_portfolio(self, portfolio_id: str) -> Optional[Dict[str, Any]]:
         """
-        Load portfolio from storage
+        Load portfolio from storage as dictionary (for analytics compatibility)
 
         Args:
             portfolio_id: ID of the portfolio to load
 
         Returns:
-            Loaded portfolio or None if not found
+            Loaded portfolio as dictionary or None if not found
         """
         filename = f"{portfolio_id}.json"
 
         try:
-            # Load from storage
+            # Load from storage as dictionary
             portfolio_dict = self.storage_provider.load_json(filename)
-            portfolio = Portfolio.from_dict(portfolio_dict)
-            logging.info(f"Portfolio '{portfolio.name}' loaded with ID {portfolio_id}")
-            return portfolio
+
+            if not portfolio_dict:
+                logging.error(f"Portfolio data is empty for ID: {portfolio_id}")
+                return None
+
+            logging.info(f"Portfolio '{portfolio_dict.get('name', portfolio_id)}' loaded with ID {portfolio_id}")
+            return portfolio_dict
+
         except FileNotFoundError:
-            logging.warning(f"Portfolio with ID {portfolio_id} not found")
+            logging.error(f"Portfolio not found: {portfolio_id}")
             return None
         except Exception as e:
             logging.error(f"Error loading portfolio {portfolio_id}: {e}")
+            raise
+
+    def load_portfolio_as_object(self, portfolio_id: str) -> Optional[Portfolio]:
+        """
+        Load portfolio from storage as Portfolio object
+
+        Args:
+            portfolio_id: ID of the portfolio to load
+
+        Returns:
+            Loaded portfolio as Portfolio object or None if not found
+        """
+        portfolio_dict = self.load_portfolio(portfolio_id)
+
+        if not portfolio_dict:
+            return None
+
+        try:
+            portfolio = Portfolio.from_dict(portfolio_dict)
+            return portfolio
+        except Exception as e:
+            logging.error(f"Error converting portfolio dict to object {portfolio_id}: {e}")
             return None
 
     def list_portfolios(self) -> List[Dict]:

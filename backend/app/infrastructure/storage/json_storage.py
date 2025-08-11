@@ -43,6 +43,74 @@ class JsonStorageService(StorageProvider):
             path.mkdir(exist_ok=True)
             logging.info(f"Created directory: {path}")
 
+    def save_json(self, data: Dict[str, Any], filename: str) -> str:
+        """
+        Save data to JSON file (compatibility method).
+
+        Args:
+            data: Dictionary data to save
+            filename: Filename (with or without extension)
+
+        Returns:
+            Path to the saved file
+        """
+        # Ensure filename has .json extension
+        if not filename.endswith('.json'):
+            filename += '.json'
+
+        # Save to portfolios directory by default
+        file_path = self.storage_dir / 'portfolios' / filename
+
+        # Create directory if it doesn't exist
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        try:
+            with open(file_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+
+            logging.info(f"Saved data to JSON file: {file_path}")
+            return str(file_path)
+        except Exception as e:
+            logging.error(f"Error saving JSON data to {file_path}: {e}")
+            raise
+
+    def load_json(self, filename: str) -> Dict[str, Any]:
+        """
+        Load data from JSON file (compatibility method).
+
+        Args:
+            filename: Filename (with or without extension)
+
+        Returns:
+            Loaded dictionary data
+
+        Raises:
+            FileNotFoundError: If file doesn't exist
+        """
+        # Ensure filename has .json extension
+        if not filename.endswith('.json'):
+            filename += '.json'
+
+        # Load from portfolios directory by default
+        file_path = self.storage_dir / 'portfolios' / filename
+
+        if not file_path.exists():
+            logging.error(f"JSON file not found: {file_path}")
+            raise FileNotFoundError(f"File {filename} not found")
+
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+            logging.info(f"Loaded data from JSON file: {file_path}")
+            return data
+        except json.JSONDecodeError as e:
+            logging.error(f"Error decoding JSON from {file_path}: {e}")
+            raise
+        except Exception as e:
+            logging.error(f"Error loading JSON data from {file_path}: {e}")
+            raise
+
     def save_portfolio(
             self,
             portfolio_data: Dict[str, Any],
