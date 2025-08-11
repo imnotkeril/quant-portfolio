@@ -13,28 +13,16 @@ from app.schemas.asset import (
 )
 from app.infrastructure.data.data_fetcher import DataFetcherService
 from app.infrastructure.data.portfolio_manager import PortfolioManagerService
+from app.api.dependencies import get_data_fetcher_service, get_portfolio_manager_service
 
 router = APIRouter(prefix="/assets", tags=["assets"])
-
-
-def get_data_fetcher():
-    """Dependency injection for data fetcher"""
-    # This will be replaced with dependency injection in a real app
-    from app.api.dependencies import get_data_fetcher_service
-    return get_data_fetcher_service()
-
-
-def get_portfolio_manager():
-    """Dependency injection for portfolio manager"""
-    from app.api.dependencies import get_portfolio_manager_service
-    return get_portfolio_manager_service()
 
 
 @router.get("/search", response_model=List[AssetSearch])
 async def search_assets(
         query: str = Query(..., description="Search query string"),
         limit: int = Query(10, description="Maximum number of results to return"),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Search for assets by name or ticker
@@ -63,7 +51,7 @@ async def get_historical_data(
         start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
         end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
         interval: str = Query("1d", description="Data interval (1d, 1wk, 1mo)"),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Get historical price data for an asset
@@ -86,11 +74,10 @@ async def get_historical_data(
             start_date = (datetime.now() - timedelta(days=365)).strftime("%Y-%m-%d")
 
         # Get historical price data
-        price_data = data_fetcher.get_historical_prices(
+        price_data = data_fetcher.get_historical_data(
             ticker=ticker,
             start_date=start_date,
-            end_date=end_date,
-            interval=interval
+            end_date=end_date
         )
 
         if price_data.empty:
@@ -136,7 +123,7 @@ async def get_historical_data(
 @router.get("/info/{ticker}")
 async def get_asset_info(
         ticker: str = Path(..., description="Asset ticker symbol"),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Get detailed asset information including current price
@@ -275,39 +262,6 @@ async def get_asset_price(
             detail=f"Failed to get asset price: {str(e)}"
         )
 
-@router.get("/info/{ticker}")
-async def get_asset_info(
-        ticker: str = Path(..., description="Asset ticker symbol"),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
-):
-    """
-    Get detailed information about an asset
-
-    Args:
-        ticker: Asset ticker symbol
-
-    Returns:
-        Asset information
-    """
-    try:
-        info = data_fetcher.get_company_info(ticker)
-
-        if not info:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No information found for {ticker}"
-            )
-
-        return info
-    except HTTPException:
-        raise
-    except Exception as e:
-        logging.error(f"Error getting information for {ticker}: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get asset information: {str(e)}"
-        )
-
 
 @router.get("/performance/{ticker}", response_model=AssetPerformance)
 async def get_asset_performance(
@@ -315,7 +269,7 @@ async def get_asset_performance(
         start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
         end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
         benchmark: Optional[str] = Query(None, description="Benchmark ticker"),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Get performance metrics for an asset
@@ -338,11 +292,10 @@ async def get_asset_performance(
             start_date = (datetime.now() - timedelta(days=365)).strftime("%Y-%m-%d")
 
         # Get historical price data
-        price_data = data_fetcher.get_historical_prices(
+        price_data = data_fetcher.get_historical_data(
             ticker=ticker,
             start_date=start_date,
-            end_date=end_date,
-            interval="1d"
+            end_date=end_date
         )
 
         if price_data.empty:
@@ -354,11 +307,10 @@ async def get_asset_performance(
         # Get benchmark data if specified
         benchmark_data = None
         if benchmark:
-            benchmark_data = data_fetcher.get_historical_prices(
+            benchmark_data = data_fetcher.get_historical_data(
                 ticker=benchmark,
                 start_date=start_date,
-                end_date=end_date,
-                interval="1d"
+                end_date=end_date
             )
 
         # Calculate performance metrics
@@ -463,7 +415,7 @@ async def get_asset_performance(
 @router.get("/validate/{ticker}")
 async def validate_ticker(
         ticker: str = Path(..., description="Asset ticker symbol"),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Validate if a ticker symbol exists
@@ -492,7 +444,7 @@ async def validate_ticker(
 
 @router.get("/market-status")
 async def get_market_status(
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Get current market status
@@ -513,7 +465,7 @@ async def get_market_status(
 
 @router.get("/sectors/performance")
 async def get_sector_performance(
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Get sector performance data

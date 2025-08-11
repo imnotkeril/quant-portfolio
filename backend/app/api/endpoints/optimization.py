@@ -1,10 +1,21 @@
+"""
+Portfolio optimization endpoints
+"""
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 import numpy as np
+import logging
+
 from app.core.services.optimization import OptimizationService
 from app.infrastructure.data.portfolio_manager import PortfolioManagerService
 from app.infrastructure.data.data_fetcher import DataFetcherService
+
+# Import correct dependencies
+from app.api.dependencies import (
+    get_data_fetcher_service,
+    get_portfolio_manager_service
+)
 
 # Import Pydantic models (schemas)
 from app.schemas.optimization import (
@@ -16,21 +27,12 @@ from app.schemas.optimization import (
 
 router = APIRouter(prefix="/optimization", tags=["optimization"])
 
+logger = logging.getLogger(__name__)
+
 
 # Dependency to get the portfolio optimizer service
 def get_portfolio_optimizer():
     return OptimizationService()
-
-
-# Dependency to get the portfolio manager service
-def get_portfolio_manager():
-    data_fetcher = DataFetcherService()
-    portfolio_manager = PortfolioManagerService(data_fetcher)
-    return portfolio_manager
-
-# Dependency to get the data fetcher service
-def get_data_fetcher():
-    return DataFetcherService()
 
 
 @router.post("/", response_model=OptimizationResponse)
@@ -38,18 +40,22 @@ def optimize_portfolio(
         request: OptimizationRequest,
         method: str = Query("markowitz", description="Optimization method"),
         portfolio_optimizer: OptimizationService = Depends(get_portfolio_optimizer),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Optimize portfolio using various methods
     """
     try:
+        logger.info(f"Optimizing portfolio with method: {method}")
+
         # Validate optimization method
         valid_methods = ["markowitz", "risk_parity", "minimum_variance", "maximum_sharpe", "equal_weight"]
         if method not in valid_methods:
-            raise HTTPException(status_code=400,
-                                detail=f"Invalid optimization method: {method}. Valid options are: {', '.join(valid_methods)}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid optimization method: {method}. Valid options are: {', '.join(valid_methods)}"
+            )
 
         # Load the portfolio if specified
         portfolio = None
@@ -67,23 +73,28 @@ def optimize_portfolio(
             raise HTTPException(status_code=400, detail="No tickers provided for optimization")
 
         # Set default dates if not provided
-        if not request.end_date:
-            request.end_date = datetime.now().strftime("%Y-%m-%d")
+        start_date = request.start_date
+        end_date = request.end_date
 
-        if not request.start_date:
+        if not end_date:
+            end_date = datetime.now().strftime("%Y-%m-%d")
+
+        if not start_date:
             # Default to 3 years ago for reasonable return estimation
-            start_date = datetime.now() - timedelta(days=3 * 365)
-            request.start_date = start_date.strftime("%Y-%m-%d")
+            start_date_obj = datetime.now() - timedelta(days=3 * 365)
+            start_date = start_date_obj.strftime("%Y-%m-%d")
 
         # Fetch historical price data
-        price_data = data_fetcher.get_batch_data(tickers, request.start_date, request.end_date)
+        price_data = data_fetcher.get_batch_data(tickers, start_date, end_date)
 
         # Check if price data was retrieved successfully
         valid_tickers = [ticker for ticker, prices in price_data.items() if not prices.empty]
 
         if not valid_tickers:
-            raise HTTPException(status_code=400,
-                                detail="Failed to retrieve price data for any of the specified tickers")
+            raise HTTPException(
+                status_code=400,
+                detail="Failed to retrieve price data for any of the specified tickers"
+            )
 
         if len(valid_tickers) < len(tickers):
             missing_tickers = set(tickers) - set(valid_tickers)
@@ -114,7 +125,7 @@ def optimize_portfolio(
 
         # Gather optimization parameters
         optimization_params = {
-            "risk_free_rate": request.risk_free_rate
+            "risk_free_rate": request.risk_free_rate or 0.02
         }
 
         # Add method-specific parameters
@@ -159,9 +170,9 @@ def optimize_portfolio(
         response = {
             "optimization_method": method,
             "tickers": tickers,
-            "start_date": request.start_date,
-            "end_date": request.end_date,
-            "risk_free_rate": request.risk_free_rate,
+            "start_date": start_date,
+            "end_date": end_date,
+            "risk_free_rate": optimization_params["risk_free_rate"],
             "optimal_weights": result["optimal_weights"],
             "expected_return": result["expected_return"],
             "expected_risk": result["expected_risk"],
@@ -179,61 +190,28 @@ def optimize_portfolio(
         if "efficient_frontier" in result:
             response["efficient_frontier"] = result["efficient_frontier"]
 
-        # If portfolio_id was provided, create a new optimized portfolio
-        portfolio_id = getattr(request, 'portfolio_id', None)
-        create_optimized_portfolio = getattr(request, 'create_optimized_portfolio', False)
-
-        # If portfolio_id was provided, create a new optimized portfolio
-        if portfolio_id and create_optimized_portfolio:
-            # Create a new portfolio with the optimized weights
-            optimized_portfolio = {
-                "name": f"{portfolio['name']} - Optimized ({method.capitalize()})",
-                "description": f"Optimized version of {portfolio['name']} using {method} method",
-                "created": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "assets": []
-            }
-
-            # Add assets with optimized weights
-            for ticker, weight in result["optimal_weights"].items():
-                # Find the original asset data if available
-                original_asset = next((asset for asset in portfolio.get("assets", []) if asset["ticker"] == ticker),
-                                      None)
-
-                if original_asset:
-                    # Copy relevant fields from the original asset
-                    asset_data = {k: v for k, v in original_asset.items() if k not in ["weight"]}
-                    asset_data["weight"] = weight
-                else:
-                    # Create a basic asset entry
-                    asset_data = {
-                        "ticker": ticker,
-                        "weight": weight
-                    }
-
-                optimized_portfolio["assets"].append(asset_data)
-
-            # Save the optimized portfolio
-            saved_portfolio = portfolio_manager.save_portfolio(optimized_portfolio)
-            response["optimized_portfolio_id"] = saved_portfolio
-
         return response
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail=f"Portfolio with ID {request.portfolio_id} not found")
+
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to optimize portfolio: {str(e)}")
+        logger.error(f"Error in portfolio optimization: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Optimization failed: {str(e)}")
 
 
 @router.post("/efficient-frontier", response_model=EfficientFrontierResponse)
 def calculate_efficient_frontier(
         request: EfficientFrontierRequest,
         portfolio_optimizer: OptimizationService = Depends(get_portfolio_optimizer),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Calculate efficient frontier for a set of assets
     """
     try:
+        logger.info(f"Calculating efficient frontier for {len(request.tickers)} assets")
+
         # Load the portfolio if specified
         portfolio_id = getattr(request, 'portfolio_id', None)
         portfolio = None
@@ -251,23 +229,28 @@ def calculate_efficient_frontier(
             raise HTTPException(status_code=400, detail="No tickers provided for efficient frontier calculation")
 
         # Set default dates if not provided
-        if not request.end_date:
-            request.end_date = datetime.now().strftime("%Y-%m-%d")
+        start_date = request.start_date
+        end_date = request.end_date
 
-        if not request.start_date:
+        if not end_date:
+            end_date = datetime.now().strftime("%Y-%m-%d")
+
+        if not start_date:
             # Default to 3 years ago for reasonable return estimation
-            start_date = datetime.now() - timedelta(days=3 * 365)
-            request.start_date = start_date.strftime("%Y-%m-%d")
+            start_date_obj = datetime.now() - timedelta(days=3 * 365)
+            start_date = start_date_obj.strftime("%Y-%m-%d")
 
         # Fetch historical price data
-        price_data = data_fetcher.get_batch_data(tickers, request.start_date, request.end_date)
+        price_data = data_fetcher.get_batch_data(tickers, start_date, end_date)
 
         # Check if price data was retrieved successfully
         valid_tickers = [ticker for ticker, prices in price_data.items() if not prices.empty]
 
         if not valid_tickers:
-            raise HTTPException(status_code=400,
-                                detail="Failed to retrieve price data for any of the specified tickers")
+            raise HTTPException(
+                status_code=400,
+                detail="Failed to retrieve price data for any of the specified tickers"
+            )
 
         if len(valid_tickers) < len(tickers):
             missing_tickers = set(tickers) - set(valid_tickers)
@@ -293,14 +276,14 @@ def calculate_efficient_frontier(
         returns_df = returns_df.dropna()
 
         if returns_df.empty:
-            raise HTTPException(status_code=400,
-                                detail="Not enough overlapping data points for efficient frontier calculation")
+            raise HTTPException(
+                status_code=400,
+                detail="Not enough overlapping data points for efficient frontier calculation"
+            )
 
         # Calculate efficient frontier
-        # We can use the markowitz optimization with different target returns to get the efficient frontier
         efficient_frontier = []
 
-        # Alternative approach: Use the built-in efficient frontier calculation in PortfolioOptimizer
         # Get mean returns and covariance
         expected_returns = returns_df.mean() * 252
         min_return = expected_returns.min()
@@ -312,9 +295,10 @@ def calculate_efficient_frontier(
 
         for target_return in target_returns:
             try:
-                result = portfolio_optimizer.markowitz_optimization(
+                result = portfolio_optimizer.optimize_portfolio(
                     returns_df,
-                    risk_free_rate=request.risk_free_rate,
+                    "markowitz",
+                    risk_free_rate=request.risk_free_rate or 0.02,
                     target_return=target_return,
                     min_weight=request.min_weight or 0.0,
                     max_weight=request.max_weight or 1.0
@@ -333,16 +317,18 @@ def calculate_efficient_frontier(
 
         # Calculate the optimal portfolios
         # Global minimum variance portfolio
-        min_var_result = portfolio_optimizer.minimum_variance_optimization(
+        min_var_result = portfolio_optimizer.optimize_portfolio(
             returns_df,
+            "minimum_variance",
             min_weight=request.min_weight or 0.0,
             max_weight=request.max_weight or 1.0
         )
 
         # Maximum Sharpe ratio portfolio
-        max_sharpe_result = portfolio_optimizer.maximum_sharpe_optimization(
+        max_sharpe_result = portfolio_optimizer.optimize_portfolio(
             returns_df,
-            risk_free_rate=request.risk_free_rate,
+            "maximum_sharpe",
+            risk_free_rate=request.risk_free_rate or 0.02,
             min_weight=request.min_weight or 0.0,
             max_weight=request.max_weight or 1.0
         )
@@ -357,7 +343,7 @@ def calculate_efficient_frontier(
             cov_matrix = returns_df.cov() * 252
             portfolio_risk = np.sqrt(pd.Series(weights).dot(cov_matrix).dot(pd.Series(weights)))
 
-            sharpe_ratio = (portfolio_return - request.risk_free_rate) / portfolio_risk if portfolio_risk > 0 else 0
+            sharpe_ratio = (portfolio_return - (request.risk_free_rate or 0.02)) / portfolio_risk if portfolio_risk > 0 else 0
 
             current_portfolio_point = {
                 "return": float(portfolio_return),
@@ -369,9 +355,9 @@ def calculate_efficient_frontier(
         # Prepare the response
         response = {
             "tickers": valid_tickers,
-            "start_date": request.start_date,
-            "end_date": request.end_date,
-            "risk_free_rate": request.risk_free_rate,
+            "start_date": start_date,
+            "end_date": end_date,
+            "risk_free_rate": request.risk_free_rate or 0.02,
             "efficient_frontier": efficient_frontier,
             "min_variance_portfolio": {
                 "return": min_var_result["expected_return"],
@@ -390,18 +376,20 @@ def calculate_efficient_frontier(
             response["current_portfolio"] = current_portfolio_point
 
         return response
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail=f"Portfolio with ID {request.portfolio_id} not found")
+
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to calculate efficient frontier: {str(e)}")
+        logger.error(f"Error calculating efficient frontier: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Efficient frontier calculation failed: {str(e)}")
 
 
 @router.post("/markowitz", response_model=OptimizationResponse)
 def markowitz_optimization(
         request: OptimizationRequest,
         portfolio_optimizer: OptimizationService = Depends(get_portfolio_optimizer),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Optimize portfolio using Markowitz mean-variance optimization
@@ -420,8 +408,8 @@ def markowitz_optimization(
 def risk_parity_optimization(
         request: OptimizationRequest,
         portfolio_optimizer: OptimizationService = Depends(get_portfolio_optimizer),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Optimize portfolio using Risk Parity (equal risk contribution)
@@ -440,8 +428,8 @@ def risk_parity_optimization(
 def minimum_variance_optimization(
         request: OptimizationRequest,
         portfolio_optimizer: OptimizationService = Depends(get_portfolio_optimizer),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Optimize portfolio for minimum variance
@@ -460,8 +448,8 @@ def minimum_variance_optimization(
 def maximum_sharpe_optimization(
         request: OptimizationRequest,
         portfolio_optimizer: OptimizationService = Depends(get_portfolio_optimizer),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Optimize portfolio for maximum Sharpe ratio
@@ -480,8 +468,8 @@ def maximum_sharpe_optimization(
 def equal_weight_optimization(
         request: OptimizationRequest,
         portfolio_optimizer: OptimizationService = Depends(get_portfolio_optimizer),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
     Create an equal-weighted portfolio

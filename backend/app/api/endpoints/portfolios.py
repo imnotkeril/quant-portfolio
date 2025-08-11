@@ -17,19 +17,13 @@ from app.schemas.portfolio import (
 from app.core.domain.portfolio import Portfolio
 from app.core.domain.asset import Asset
 from app.infrastructure.data.portfolio_manager import PortfolioManagerService
+from app.api.dependencies import get_portfolio_manager_service
 
 router = APIRouter(prefix="/portfolios", tags=["portfolios"])
 
 
-def get_portfolio_manager():
-    """Dependency injection for portfolio manager"""
-    # This will be replaced with dependency injection in a real app
-    from app.api.dependencies import get_portfolio_manager_service
-    return get_portfolio_manager_service()
-
-
 @router.get("/", response_model=List[PortfolioList])
-async def list_portfolios(portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager)):
+async def list_portfolios(portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service)):
     """
     List all portfolios
 
@@ -50,7 +44,7 @@ async def list_portfolios(portfolio_manager: PortfolioManagerService = Depends(g
 @router.post("/", response_model=PortfolioResponse, status_code=status.HTTP_201_CREATED)
 async def create_portfolio(
         portfolio: PortfolioCreate,
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service)
 ):
     """
     Create a new portfolio
@@ -113,7 +107,7 @@ async def create_portfolio(
 @router.get("/{portfolio_id}", response_model=PortfolioResponse)
 async def get_portfolio(
         portfolio_id: str = Path(..., description="The ID of the portfolio to get"),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service)
 ):
     """
     Get a specific portfolio
@@ -138,7 +132,7 @@ async def get_portfolio(
 async def update_portfolio(
         portfolio_update: PortfolioUpdate,
         portfolio_id: str = Path(..., description="The ID of the portfolio to update"),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service)
 ):
     """
     Update a portfolio
@@ -225,7 +219,7 @@ async def update_portfolio(
 @router.delete("/{portfolio_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_portfolio(
         portfolio_id: str = Path(..., description="The ID of the portfolio to delete"),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service)
 ):
     """
     Delete a portfolio
@@ -253,7 +247,7 @@ async def delete_portfolio(
 @router.post("/from-text", response_model=PortfolioResponse, status_code=status.HTTP_201_CREATED)
 async def create_portfolio_from_text(
         portfolio_text: TextPortfolioCreate,
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service)
 ):
     """
     Create a portfolio from text
@@ -302,7 +296,7 @@ async def import_portfolio_from_csv(
         file: UploadFile = File(...),
         portfolio_name: Optional[str] = Form(None),
         description: Optional[str] = Form(""),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service)
 ):
     """
     Import a portfolio from CSV
@@ -360,7 +354,7 @@ async def import_portfolio_from_csv(
 @router.get("/{portfolio_id}/export-csv")
 async def export_portfolio_to_csv(
         portfolio_id: str = Path(..., description="The ID of the portfolio to export"),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service)
 ):
     """
     Export a portfolio to CSV
@@ -400,7 +394,7 @@ async def export_portfolio_to_csv(
 @router.post("/{portfolio_id}/update-prices", response_model=PortfolioResponse)
 async def update_portfolio_prices(
         portfolio_id: str = Path(..., description="The ID of the portfolio to update prices for"),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service)
 ):
     """
     Update portfolio prices
@@ -439,7 +433,7 @@ async def update_portfolio_prices(
 async def add_asset_to_portfolio(
         asset: AssetCreate,
         portfolio_id: str = Path(..., description="The ID of the portfolio to add asset to"),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service)
 ):
     """
     Add asset to portfolio
@@ -500,7 +494,7 @@ async def add_asset_to_portfolio(
 async def remove_asset_from_portfolio(
         portfolio_id: str = Path(..., description="The ID of the portfolio"),
         ticker: str = Path(..., description="The ticker of the asset to remove"),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager)
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service)
 ):
     """
     Remove asset from portfolio
