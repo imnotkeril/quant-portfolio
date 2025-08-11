@@ -11,10 +11,14 @@ from app.infrastructure.data.data_fetcher import DataFetcherService
 
 # Import correct dependencies
 from app.api.dependencies import (
-    get_analytics_service,
     get_data_fetcher_service,
     get_portfolio_manager_service
 )
+
+# Local dependency for analytics service
+def get_analytics_service():
+    from app.core.services.analytics import AnalyticsService
+    return AnalyticsService()
 
 # Import Pydantic models (schemas)
 from app.schemas.analytics import (
@@ -52,9 +56,16 @@ def calculate_performance_metrics(
     logger.info(f"End date: {request.end_date}")
 
     try:
+        # ДОБАВИТЬ СЮДА VALIDATION:
+        if not portfolio_id:
+            raise HTTPException(status_code=400, detail="Portfolio ID is required")
+
+        # продолжение существующего кода...
+        portfolio_id = request.portfolio_id
         portfolio_id = request.portfolio_id
         start_date = request.start_date
         end_date = request.end_date
+
         benchmark = request.benchmark
         risk_free_rate = request.risk_free_rate or 0.02
 

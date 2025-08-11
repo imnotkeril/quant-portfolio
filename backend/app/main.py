@@ -93,7 +93,6 @@ async def lifespan(app: FastAPI):
     logger.info("🛑 Shutting down application")
 
 
-# Create FastAPI app
 app = FastAPI(
     title=settings.APP_NAME,
     description="Professional investment portfolio management and analytics platform",
@@ -104,12 +103,23 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+@app.get("/debug/health")
+def debug_health():
+    return {
+        "status": "ok",
+        "timestamp": datetime.now().isoformat(),
+        "cors_origins": settings.CORS_ORIGINS,
+        "debug_mode": settings.DEBUG,
+        "api_prefix": settings.API_PREFIX
+    }
+
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.CORS_ORIGINS + ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
     allow_headers=["*"],
     expose_headers=["*"],
 )

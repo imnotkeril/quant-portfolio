@@ -221,13 +221,21 @@ const PortfolioAnalysis: React.FC = () => {
 
   // Load portfolio and analytics data
   useEffect(() => {
-    if (portfolioId) {
+    let isMounted = true;
+
+    if (portfolioId && isMounted) {
       portfolios.loadPortfolio(portfolioId);
     }
-  }, [portfolioId]); //
+
+    return () => {
+      isMounted = false;
+    };
+  }, [portfolioId]);
 
   useEffect(() => {
-    if (portfolioId) {
+    let isMounted = true;
+
+    if (portfolioId && isMounted) {
       const { startDate, endDate } = analytics.getDefaultDateRange(selectedTimeframe);
 
       // Load performance metrics
@@ -265,6 +273,10 @@ const PortfolioAnalysis: React.FC = () => {
         endDate,
       });
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [portfolioId, selectedTimeframe, selectedBenchmark]);
 
   // Handle navigation
