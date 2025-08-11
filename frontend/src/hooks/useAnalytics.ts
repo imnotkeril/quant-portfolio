@@ -369,7 +369,7 @@ export const useAnalytics = (): UseAnalyticsState & UseAnalyticsActions => {
 
     return {
       startDate: startDate.toISOString().split('T')[0],
-      endDate: endDate.toISOString().split('T')[0]
+      endDate: endDate.toISOString().split('T')[0],
     };
   }, []);
 

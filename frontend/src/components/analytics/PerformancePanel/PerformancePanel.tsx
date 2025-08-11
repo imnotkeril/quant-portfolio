@@ -59,7 +59,7 @@ export const PerformancePanel: React.FC<PerformancePanelProps> = ({
         benchmark: selectedBenchmark || undefined,
       });
     }
-  }, [portfolioId, selectedBenchmark, analytics]);
+  }, [portfolioId, selectedBenchmark]);
 
   // Main performance metrics cards data
   const mainMetricsData = useMemo((): MetricsCardData[] => {

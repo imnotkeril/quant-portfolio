@@ -219,14 +219,14 @@ const PortfolioAnalysis: React.FC = () => {
     }
   }, [portfolios.portfolios.length, portfoliosLoading]);
 
-  // Load specific portfolio
+  // Load portfolio and analytics data
   useEffect(() => {
     if (portfolioId) {
       portfolios.loadPortfolio(portfolioId);
     }
-  }, [portfolioId, portfolios]);
+  }, [portfolioId]); // ← Убрать portfolios из зависимостей
 
-  // Load analytics data
+  // Отдельный useEffect для загрузки аналитики
   useEffect(() => {
     if (portfolioId) {
       const { startDate, endDate } = analytics.getDefaultDateRange(selectedTimeframe);
@@ -259,7 +259,7 @@ const PortfolioAnalysis: React.FC = () => {
         endDate,
       });
     }
-  }, [portfolioId, selectedTimeframe, selectedBenchmark, analytics]);
+  }, [portfolioId, selectedTimeframe, selectedBenchmark]); // ← Убрать analytics из зависимостей
 
   // Handle navigation
   const handleOptimize = () => {
