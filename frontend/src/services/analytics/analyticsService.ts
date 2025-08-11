@@ -23,13 +23,40 @@ import { formatDate } from '../../utils/formatters';
  */
 class AnalyticsService {
   /**
+   * Transform camelCase request data to snake_case for API
+   */
+  private transformRequestData(request: AnalyticsRequest): any {
+    return {
+      portfolio_id: request.portfolioId,
+      start_date: request.startDate,
+      end_date: request.endDate,
+      benchmark: request.benchmark,
+      risk_free_rate: request.riskFreeRate,
+      periods_per_year: request.periodsPerYear,
+      confidence_level: request.confidenceLevel,
+    };
+  }
+
+  /**
+   * Transform rolling metrics request data to snake_case for API
+   */
+  private transformRollingMetricsRequestData(request: RollingMetricsRequest): any {
+    return {
+      ...this.transformRequestData(request),
+      window: request.window,
+      metrics: request.metrics,
+      min_periods: request.minPeriods,
+    };
+  }
+
+  /**
    * Calculate performance metrics for a portfolio
    */
   async calculatePerformanceMetrics(request: AnalyticsRequest): Promise<PerformanceMetricsResponse> {
     try {
       const response = await apiClient.post<PerformanceMetricsResponse>(
         endpoints.analytics.performance(),
-        request
+        this.transformRequestData(request)
       );
       return response;
     } catch (error) {
@@ -45,7 +72,7 @@ class AnalyticsService {
     try {
       const response = await apiClient.post<RiskMetricsResponse>(
         endpoints.analytics.risk(),
-        request
+        this.transformRequestData(request)
       );
       return response;
     } catch (error) {
@@ -65,7 +92,7 @@ class AnalyticsService {
     try {
       const response = await apiClient.post<ReturnsResponse>(
         `${endpoints.analytics.returns()}?period=${period}&method=${method}`,
-        request
+        this.transformRequestData(request)
       );
       return response;
     } catch (error) {
@@ -84,7 +111,7 @@ class AnalyticsService {
     try {
       const response = await apiClient.post<CumulativeReturnsResponse>(
         `${endpoints.analytics.cumulativeReturns()}?method=${method}`,
-        request
+        this.transformRequestData(request)
       );
       return response;
     } catch (error) {
@@ -100,7 +127,7 @@ class AnalyticsService {
     try {
       const response = await apiClient.post<DrawdownsResponse>(
         endpoints.analytics.drawdowns(),
-        request
+        this.transformRequestData(request)
       );
       return response;
     } catch (error) {
@@ -145,7 +172,7 @@ class AnalyticsService {
     try {
       const response = await apiClient.post<RollingMetricsResponse>(
         endpoints.enhancedAnalytics.rollingMetrics(),
-        request
+        this.transformRollingMetricsRequestData(request)
       );
       return response;
     } catch (error) {
@@ -154,10 +181,13 @@ class AnalyticsService {
     }
   }
 
+  /**
+   * Validate analytics request data
+   */
   validateAnalyticsRequest(request: AnalyticsRequest): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-    // Check required fields - исправлено: portfolioId вместо portfolio_id
+    // Check required fields
     if (!request.portfolioId?.trim()) {
       errors.push('Portfolio ID is required');
     }
