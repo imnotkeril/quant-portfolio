@@ -193,3 +193,23 @@ class ComparisonResponse(BaseModel):
     drawdowns: Optional[Dict[str, Dict[str, List[float]]]] = Field(None, description="Comparison of drawdowns")
     start_date: Optional[str] = Field(None, description="Start date")
     end_date: Optional[str] = Field(None, description="End date")
+
+class ComparisonRequest(BaseModel):
+    """Schema for portfolio comparison requests."""
+    portfolio_id1: str = Field(..., description="First portfolio ID")
+    portfolio_id2: str = Field(..., description="Second portfolio ID")
+    start_date: Optional[str] = Field(None, description="Start date (YYYY-MM-DD)")
+    end_date: Optional[str] = Field(None, description="End date (YYYY-MM-DD)")
+    benchmark: Optional[str] = Field(None, description="Benchmark ticker symbol")
+    metrics: Optional[List[str]] = Field(None, description="Specific metrics to compare")
+
+
+class ComparisonResponse(BaseModel):
+    """Schema for portfolio comparison response."""
+    portfolio_id1: str = Field(..., description="First portfolio ID")
+    portfolio_id2: str = Field(..., description="Second portfolio ID")
+    start_date: Optional[str] = Field(None, description="Start date")
+    end_date: Optional[str] = Field(None, description="End date")
+    comparison_metrics: Dict[str, Any] = Field(..., description="Comparison results")
+    relative_performance: Optional[Dict[str, float]] = Field(None, description="Relative performance metrics")
+    correlation: Optional[float] = Field(None, description="Correlation between portfolios")

@@ -96,6 +96,40 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+def get_analytics_service() -> 'AnalyticsService':
+    """
+    Dependency for getting an AnalyticsService instance.
+    """
+    from app.core.services.analytics import AnalyticsService
+    return AnalyticsService()
+
+
+# Enhanced Analytics Service
+def get_enhanced_analytics_service() -> 'EnhancedAnalyticsService':
+    """
+    Dependency for getting an EnhancedAnalyticsService instance.
+    """
+    from app.core.services.enhanced_analytics import EnhancedAnalyticsService
+    return EnhancedAnalyticsService()
+
+
+# Optimization Service
+def get_optimization_service() -> 'OptimizationService':
+    """
+    Dependency for getting an OptimizationService instance.
+    """
+    from app.core.services.optimization import OptimizationService
+    return OptimizationService()
+
+
+# Risk Management Service
+def get_risk_management_service() -> 'RiskManagementService':
+    """
+    Dependency for getting a RiskManagementService instance.
+    """
+    from app.core.services.risk_management import RiskManagementService
+    return RiskManagementService()
+
 
 # Optional authentication (returns None if no token)
 def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme)) -> Optional[dict]:
