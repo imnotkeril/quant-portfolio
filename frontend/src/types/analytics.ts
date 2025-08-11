@@ -13,6 +13,7 @@ export interface AnalyticsRequest {
   benchmark?: string;
   riskFreeRate?: number;
   periodsPerYear?: number;
+  confidenceLevel?: number;
 }
 
 /**

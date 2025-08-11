@@ -224,28 +224,33 @@ const PortfolioAnalysis: React.FC = () => {
     if (portfolioId) {
       portfolios.loadPortfolio(portfolioId);
     }
-  }, [portfolioId]); // ← Убрать portfolios из зависимостей
+  }, [portfolioId]); //
 
-  // Отдельный useEffect для загрузки аналитики
   useEffect(() => {
     if (portfolioId) {
       const { startDate, endDate } = analytics.getDefaultDateRange(selectedTimeframe);
 
-      // Load all analytics data
+      // Load performance metrics
       analytics.calculatePerformanceMetrics({
         portfolioId,
         startDate,
         endDate,
         benchmark: selectedBenchmark || undefined,
+        riskFreeRate: 0.02,
+        periodsPerYear: 252
       });
 
+      // Load risk metrics with confidence level
       analytics.calculateRiskMetrics({
         portfolioId,
         startDate,
         endDate,
         confidenceLevel: 0.95,
+        riskFreeRate: 0.02,
+        periodsPerYear: 252
       });
 
+      // Load cumulative returns
       analytics.calculateCumulativeReturns({
         portfolioId,
         startDate,
@@ -253,13 +258,14 @@ const PortfolioAnalysis: React.FC = () => {
         benchmark: selectedBenchmark || undefined,
       });
 
+      // Load drawdowns
       analytics.calculateDrawdowns({
         portfolioId,
         startDate,
         endDate,
       });
     }
-  }, [portfolioId, selectedTimeframe, selectedBenchmark]); // ← Убрать analytics из зависимостей
+  }, [portfolioId, selectedTimeframe, selectedBenchmark]);
 
   // Handle navigation
   const handleOptimize = () => {

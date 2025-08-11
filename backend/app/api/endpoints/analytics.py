@@ -30,6 +30,10 @@ from app.schemas.analytics import (
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 @router.post("/performance", response_model=PerformanceMetricsResponse)
 def calculate_performance_metrics(
@@ -41,6 +45,12 @@ def calculate_performance_metrics(
     """
     Calculate performance metrics for a portfolio
     """
+    # Отладочное логирование для диагностики
+    logger.info(f"Received request for performance metrics: {request}")
+    logger.info(f"Portfolio ID: {request.portfolio_id}")
+    logger.info(f"Start date: {request.start_date}")
+    logger.info(f"End date: {request.end_date}")
+
     try:
         portfolio_id = request.portfolio_id
         start_date = request.start_date
@@ -48,10 +58,16 @@ def calculate_performance_metrics(
         benchmark = request.benchmark
         risk_free_rate = request.risk_free_rate or 0.02
 
-        # Load the portfolio
+        # Дополнительное логирование для проверки загрузки портфеля
+        logger.info(f"Attempting to load portfolio: {portfolio_id}")
         portfolio = portfolio_manager.load_portfolio(portfolio_id)
+
         if not portfolio:
+            logger.error(f"Portfolio not found: {portfolio_id}")
             raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id} not found")
+
+        logger.info(f"Portfolio loaded successfully: {portfolio.get('name', 'Unknown')}")
+
 
         # Get the assets and weights
         assets = portfolio.get("assets", [])

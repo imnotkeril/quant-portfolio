@@ -10,16 +10,49 @@ class AnalyticsRequest(BaseModel):
     start_date: Optional[str] = Field(None, description="Start date (YYYY-MM-DD)")
     end_date: Optional[str] = Field(None, description="End date (YYYY-MM-DD)")
     benchmark: Optional[str] = Field(None, description="Benchmark ticker symbol")
-    risk_free_rate: Optional[float] = Field(0.0, description="Risk-free rate (annual, e.g., 0.02 for 2%)")
+    risk_free_rate: Optional[float] = Field(0.02, description="Risk-free rate (annual, e.g., 0.02 for 2%)")
     periods_per_year: Optional[int] = Field(252, description="Trading periods per year (252 for daily)")
+    confidence_level: Optional[float] = Field(0.95,
+                                              description="Confidence level for risk metrics (e.g., 0.95 for 95%)")
 
     class Config:
-        arbitrary_types_allowed = True
-        json_encoders = {
-            pd.DataFrame: lambda df: df.to_dict(orient="records"),
-            pd.Series: lambda s: s.to_dict(),
-            np.ndarray: lambda arr: arr.tolist(),
+        # Позволяет принимать как camelCase, так и snake_case
+        allow_population_by_field_name = True
+        # Автоматическое преобразование camelCase в snake_case
+        alias_generator = lambda field_name: field_name  # Оставляем как есть
+        extra = "ignore"  # Игнорировать дополнительные поля
+
+        # Альтернативные имена полей для совместимости с frontend
+        fields = {
+            'portfolio_id': {'alias': 'portfolioId'},
+            'start_date': {'alias': 'startDate'},
+            'end_date': {'alias': 'endDate'},
+            'risk_free_rate': {'alias': 'riskFreeRate'},
+            'periods_per_year': {'alias': 'periodsPerYear'},
+            'confidence_level': {'alias': 'confidenceLevel'}
         }
+
+    @validator('portfolio_id')
+    def validate_portfolio_id(cls, v):
+        if not v or not v.strip():
+            raise ValueError('Portfolio ID is required and cannot be empty')
+        return v.strip()
+
+    @validator('start_date', 'end_date')
+    def validate_dates(cls, v):
+        if v is None:
+            return v
+        try:
+            datetime.strptime(v, '%Y-%m-%d')
+            return v
+        except ValueError:
+            raise ValueError('Date must be in YYYY-MM-DD format')
+
+    @validator('confidence_level')
+    def validate_confidence_level(cls, v):
+        if v is not None and (v <= 0 or v >= 1):
+            raise ValueError('Confidence level must be between 0 and 1')
+        return v
 
 
 class MetricResponse(BaseModel):

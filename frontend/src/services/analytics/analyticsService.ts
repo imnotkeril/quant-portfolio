@@ -154,13 +154,10 @@ class AnalyticsService {
     }
   }
 
-  /**
-   * Validate analytics request
-   */
   validateAnalyticsRequest(request: AnalyticsRequest): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
-    // Check required fields
+    // Check required fields - исправлено: portfolioId вместо portfolio_id
     if (!request.portfolioId?.trim()) {
       errors.push('Portfolio ID is required');
     }
@@ -184,13 +181,18 @@ class AnalyticsService {
     }
 
     // Validate risk-free rate
-    if (request.riskFreeRate !== undefined && (isNaN(request.riskFreeRate) || request.riskFreeRate < 0)) {
-      errors.push('Risk-free rate must be a valid non-negative number');
+    if (request.riskFreeRate !== undefined && (request.riskFreeRate < 0 || request.riskFreeRate > 1)) {
+      errors.push('Risk-free rate must be between 0 and 1');
+    }
+
+    // Validate confidence level
+    if (request.confidenceLevel !== undefined && (request.confidenceLevel <= 0 || request.confidenceLevel >= 1)) {
+      errors.push('Confidence level must be between 0 and 1');
     }
 
     // Validate periods per year
-    if (request.periodsPerYear !== undefined && (isNaN(request.periodsPerYear) || request.periodsPerYear <= 0)) {
-      errors.push('Periods per year must be a positive number');
+    if (request.periodsPerYear !== undefined && request.periodsPerYear <= 0) {
+      errors.push('Periods per year must be positive');
     }
 
     return {
