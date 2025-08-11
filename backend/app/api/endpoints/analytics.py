@@ -1,12 +1,17 @@
+"""
+Analytics endpoints for portfolio analysis
+"""
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
+
 from app.core.services.analytics import AnalyticsService
 from app.infrastructure.data.portfolio_manager import PortfolioManagerService
 from app.infrastructure.data.data_fetcher import DataFetcherService
 
 # Import correct dependencies
 from app.api.dependencies import (
+    get_analytics_service,
     get_data_fetcher_service,
     get_portfolio_manager_service
 )
@@ -15,24 +20,20 @@ from app.api.dependencies import (
 from app.schemas.analytics import (
     AnalyticsRequest,
     PerformanceMetricsResponse,
-    RiskMetricsResponse
+    RiskMetricsResponse,
+    ReturnsResponse,
+    CumulativeReturnsResponse,
+    DrawdownsResponse,
+    ComparisonRequest,
+    ComparisonResponse
 )
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
-# Dependency to get the analytics service
-def get_analytics_service():
-    return AnalyticsService()
-
-
-@router.post("/performance/{portfolio_id}", response_model=PerformanceMetricsResponse)
+@router.post("/performance", response_model=PerformanceMetricsResponse)
 def calculate_performance_metrics(
-        portfolio_id: str,
-        start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
-        end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
-        benchmark: Optional[str] = Query(None, description="Benchmark ticker symbol"),
-        risk_free_rate: Optional[float] = Query(0.0, description="Risk-free rate"),
+        request: AnalyticsRequest,
         analytics_service: AnalyticsService = Depends(get_analytics_service),
         portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
         data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
@@ -41,6 +42,12 @@ def calculate_performance_metrics(
     Calculate performance metrics for a portfolio
     """
     try:
+        portfolio_id = request.portfolio_id
+        start_date = request.start_date
+        end_date = request.end_date
+        benchmark = request.benchmark
+        risk_free_rate = request.risk_free_rate or 0.02
+
         # Load the portfolio
         portfolio = portfolio_manager.load_portfolio(portfolio_id)
         if not portfolio:
@@ -149,11 +156,9 @@ def calculate_performance_metrics(
         raise HTTPException(status_code=500, detail=f"Failed to calculate performance metrics: {str(e)}")
 
 
-@router.post("/risk/{portfolio_id}", response_model=RiskMetricsResponse)
+@router.post("/risk", response_model=RiskMetricsResponse)
 def calculate_risk_metrics(
-        portfolio_id: str,
-        start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
-        end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
+        request: AnalyticsRequest,
         analytics_service: AnalyticsService = Depends(get_analytics_service),
         portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
         data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
@@ -162,6 +167,11 @@ def calculate_risk_metrics(
     Calculate risk metrics for a portfolio
     """
     try:
+        portfolio_id = request.portfolio_id
+        start_date = request.start_date
+        end_date = request.end_date
+        confidence_level = request.confidence_level or 0.95
+
         # Load the portfolio
         portfolio = portfolio_manager.load_portfolio(portfolio_id)
         if not portfolio:
@@ -231,6 +241,7 @@ def calculate_risk_metrics(
             "portfolio_id": portfolio_id,
             "start_date": start_date,
             "end_date": end_date,
+            "confidence_level": confidence_level,
             "risk_metrics": {
                 "volatility": volatility,
                 "max_drawdown": max_drawdown,
@@ -250,7 +261,7 @@ def calculate_risk_metrics(
         raise HTTPException(status_code=500, detail=f"Failed to calculate risk metrics: {str(e)}")
 
 
-@router.post("/returns")
+@router.post("/returns", response_model=ReturnsResponse)
 def calculate_returns(
         request: AnalyticsRequest,
         period: str = Query("daily", description="Period for returns calculation"),
@@ -263,10 +274,14 @@ def calculate_returns(
     Calculate returns for a portfolio
     """
     try:
+        portfolio_id = request.portfolio_id
+        start_date = request.start_date
+        end_date = request.end_date
+
         # Load the portfolio
-        portfolio = portfolio_manager.load_portfolio(request.portfolio_id)
+        portfolio = portfolio_manager.load_portfolio(portfolio_id)
         if not portfolio:
-            raise HTTPException(status_code=404, detail=f"Portfolio with ID {request.portfolio_id} not found")
+            raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id} not found")
 
         # Get the assets and weights
         assets = portfolio.get("assets", [])
@@ -277,16 +292,16 @@ def calculate_returns(
         tickers = list(weights.keys())
 
         # Set default dates if not provided
-        if not request.end_date:
-            request.end_date = datetime.now().strftime("%Y-%m-%d")
+        if not end_date:
+            end_date = datetime.now().strftime("%Y-%m-%d")
 
-        if not request.start_date:
+        if not start_date:
             # Default to 1 year ago
-            start_date = datetime.now() - timedelta(days=365)
-            request.start_date = start_date.strftime("%Y-%m-%d")
+            start_date_obj = datetime.now() - timedelta(days=365)
+            start_date = start_date_obj.strftime("%Y-%m-%d")
 
         # Fetch historical price data
-        price_data = data_fetcher.get_batch_data(tickers, request.start_date, request.end_date)
+        price_data = data_fetcher.get_batch_data(tickers, start_date, end_date)
 
         # Check if price data was retrieved successfully
         if not price_data or all(price_data[ticker].empty for ticker in price_data):
@@ -298,25 +313,7 @@ def calculate_returns(
             if not prices.empty:
                 # Use Adjusted Close if available, otherwise use Close
                 price_col = 'Adj Close' if 'Adj Close' in prices.columns else 'Close'
-
-                # Resample prices based on the requested period
-                if period != "daily":
-                    # Resample to the requested period before calculating returns
-                    period_map = {
-                        "weekly": "W",
-                        "monthly": "M",
-                        "quarterly": "Q",
-                        "yearly": "Y"
-                    }
-                    resample_rule = period_map.get(period, "D")
-                    prices_resampled = prices[[price_col]].resample(resample_rule).last()
-                    returns_data[ticker] = analytics_service.calculate_returns(
-                        prices_resampled, "daily", method
-                    )
-                else:
-                    returns_data[ticker] = analytics_service.calculate_returns(
-                        prices[[price_col]], period, method
-                    )
+                returns_data[ticker] = analytics_service.calculate_returns(prices[[price_col]])
 
         # Combine into a DataFrame
         import pandas as pd
@@ -328,34 +325,28 @@ def calculate_returns(
         # Calculate portfolio returns
         portfolio_returns = analytics_service.calculate_portfolio_return(returns_df, weights)
 
-        # Calculate cumulative returns
-        cumulative_returns = analytics_service.calculate_cumulative_returns(portfolio_returns)
-
         # Prepare the response
         result = {
-            "portfolio_id": request.portfolio_id,
-            "start_date": request.start_date,
-            "end_date": request.end_date,
+            "portfolio_id": portfolio_id,
+            "start_date": start_date,
+            "end_date": end_date,
             "period": period,
             "method": method,
             "returns": portfolio_returns.to_dict(),
-            "cumulative_returns": cumulative_returns.to_dict(),
             "asset_returns": {ticker: returns.to_dict() for ticker, returns in returns_data.items()}
         }
 
         return result
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail=f"Portfolio with ID {request.portfolio_id} not found")
+        raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id} not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to calculate returns: {str(e)}")
 
 
-@router.post("/cumulative-returns/{portfolio_id}")
+@router.post("/cumulative-returns", response_model=CumulativeReturnsResponse)
 def calculate_cumulative_returns(
-        portfolio_id: str,
+        request: AnalyticsRequest,
         method: str = Query("simple", description="Method for returns calculation"),
-        start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
-        end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
         analytics_service: AnalyticsService = Depends(get_analytics_service),
         portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
         data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
@@ -364,97 +355,11 @@ def calculate_cumulative_returns(
     Calculate cumulative returns for a portfolio
     """
     try:
-        # Load the portfolio
-        portfolio = portfolio_manager.load_portfolio(portfolio_id)
-        if not portfolio:
-            raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id} not found")
+        portfolio_id = request.portfolio_id
+        start_date = request.start_date
+        end_date = request.end_date
+        benchmark = request.benchmark
 
-        # Get the assets and weights
-        assets = portfolio.get("assets", [])
-        if not assets:
-            raise HTTPException(status_code=400, detail="Portfolio has no assets")
-
-        weights = {asset["ticker"]: asset.get("weight", 0) for asset in assets}
-        tickers = list(weights.keys())
-
-        # Set default dates if not provided
-        if not end_date:
-            end_date = datetime.now().strftime("%Y-%m-%d")
-
-        if not start_date:
-            # Default to 1 year ago
-            start_date_obj = datetime.now() - timedelta(days=365)
-            start_date = start_date_obj.strftime("%Y-%m-%d")
-
-        # Fetch historical price data
-        price_data = data_fetcher.get_batch_data(tickers, start_date, end_date)
-
-        # Check if price data was retrieved successfully
-        if not price_data or all(price_data[ticker].empty for ticker in price_data):
-            raise HTTPException(status_code=400, detail="Failed to retrieve price data for portfolio assets")
-
-        # Calculate returns for each asset
-        returns_data = {}
-        for ticker, prices in price_data.items():
-            if not prices.empty:
-                # Use Adjusted Close if available, otherwise use Close
-                price_col = 'Adj Close' if 'Adj Close' in prices.columns else 'Close'
-                returns_data[ticker] = analytics_service.calculate_returns(prices[[price_col]])
-
-        # Combine into a DataFrame
-        import pandas as pd
-        returns_df = pd.DataFrame(returns_data)
-
-        # Fill NaN values with 0 (for assets with missing data points)
-        returns_df = returns_df.fillna(0)
-
-        # Calculate portfolio returns
-        portfolio_returns = analytics_service.calculate_portfolio_return(returns_df, weights)
-
-        # Calculate asset cumulative returns
-        asset_cumulative_returns = {}
-        for ticker, returns in returns_data.items():
-            is_log_returns = method == "log"
-            asset_cumulative_returns[ticker] = analytics_service.calculate_cumulative_returns(
-                returns, is_log_returns
-            ).to_dict()
-
-        # Calculate portfolio cumulative returns
-        is_log_returns = method == "log"
-        cumulative_returns = analytics_service.calculate_cumulative_returns(
-            portfolio_returns, is_log_returns
-        )
-
-        # Prepare the response
-        result = {
-            "portfolio_id": portfolio_id,
-            "start_date": start_date,
-            "end_date": end_date,
-            "method": method,
-            "cumulative_returns": cumulative_returns.to_dict(),
-            "asset_cumulative_returns": asset_cumulative_returns
-        }
-
-        return result
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id} not found")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to calculate cumulative returns: {str(e)}")
-
-
-@router.post("/drawdowns/{portfolio_id}")
-def calculate_drawdowns(
-        portfolio_id: str,
-        start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
-        end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
-        analytics_service: AnalyticsService = Depends(get_analytics_service),
-        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
-        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
-):
-    """
-    Calculate drawdowns for a portfolio
-    """
-    try:
         # Load the portfolio
         portfolio = portfolio_manager.load_portfolio(portfolio_id)
         if not portfolio:
@@ -505,24 +410,151 @@ def calculate_drawdowns(
         # Calculate cumulative returns
         cumulative_returns = analytics_service.calculate_cumulative_returns(portfolio_returns)
 
-        # Calculate drawdown
-        peak = cumulative_returns.cummax()
-        drawdown = (cumulative_returns / peak - 1)
+        # Fetch benchmark data if specified
+        benchmark_cumulative_returns = None
+        if benchmark:
+            benchmark_data = data_fetcher.get_historical_prices(
+                benchmark, start_date, end_date
+            )
 
-        # Extract top 5 drawdowns
-        from app.core.services.risk_management import RiskManagement
-        risk_service = RiskManagement()
-        drawdown_periods = risk_service.analyze_drawdowns(portfolio_returns)
+            if not benchmark_data.empty:
+                price_col = 'Adj Close' if 'Adj Close' in benchmark_data.columns else 'Close'
+                benchmark_returns = analytics_service.calculate_returns(benchmark_data[[price_col]])
+                benchmark_cumulative_returns = analytics_service.calculate_cumulative_returns(benchmark_returns)
 
         # Prepare the response
         result = {
             "portfolio_id": portfolio_id,
             "start_date": start_date,
             "end_date": end_date,
-            "max_drawdown": drawdown.min(),
-            "current_drawdown": drawdown.iloc[-1],
+            "method": method,
+            "benchmark": benchmark,
+            "cumulative_returns": cumulative_returns.to_dict()
+        }
+
+        if benchmark_cumulative_returns is not None:
+            result["benchmark_cumulative_returns"] = benchmark_cumulative_returns.to_dict()
+
+        return result
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id} not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to calculate cumulative returns: {str(e)}")
+
+
+@router.post("/drawdowns", response_model=DrawdownsResponse)
+def calculate_drawdowns(
+        request: AnalyticsRequest,
+        analytics_service: AnalyticsService = Depends(get_analytics_service),
+        portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
+        data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
+):
+    """
+    Calculate drawdowns for a portfolio
+    """
+    try:
+        portfolio_id = request.portfolio_id
+        start_date = request.start_date
+        end_date = request.end_date
+
+        # Load the portfolio
+        portfolio = portfolio_manager.load_portfolio(portfolio_id)
+        if not portfolio:
+            raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id} not found")
+
+        # Get the assets and weights
+        assets = portfolio.get("assets", [])
+        if not assets:
+            raise HTTPException(status_code=400, detail="Portfolio has no assets")
+
+        weights = {asset["ticker"]: asset.get("weight", 0) for asset in assets}
+        tickers = list(weights.keys())
+
+        # Set default dates if not provided
+        if not end_date:
+            end_date = datetime.now().strftime("%Y-%m-%d")
+
+        if not start_date:
+            # Default to 1 year ago
+            start_date_obj = datetime.now() - timedelta(days=365)
+            start_date = start_date_obj.strftime("%Y-%m-%d")
+
+        # Fetch historical price data
+        price_data = data_fetcher.get_batch_data(tickers, start_date, end_date)
+
+        # Check if price data was retrieved successfully
+        if not price_data or all(price_data[ticker].empty for ticker in price_data):
+            raise HTTPException(status_code=400, detail="Failed to retrieve price data for portfolio assets")
+
+        # Calculate returns for each asset
+        returns_data = {}
+        for ticker, prices in price_data.items():
+            if not prices.empty:
+                # Use Adjusted Close if available, otherwise use Close
+                price_col = 'Adj Close' if 'Adj Close' in prices.columns else 'Close'
+                returns_data[ticker] = analytics_service.calculate_returns(prices[[price_col]])
+
+        # Combine into a DataFrame
+        import pandas as pd
+        returns_df = pd.DataFrame(returns_data)
+
+        # Fill NaN values with 0 (for assets with missing data points)
+        returns_df = returns_df.fillna(0)
+
+        # Calculate portfolio returns
+        portfolio_returns = analytics_service.calculate_portfolio_return(returns_df, weights)
+
+        # Calculate cumulative returns and drawdowns
+        cumulative_returns = analytics_service.calculate_cumulative_returns(portfolio_returns)
+        peak = cumulative_returns.cummax()
+        drawdown = (cumulative_returns / peak - 1)
+
+        # Calculate max drawdown
+        max_drawdown = analytics_service.calculate_max_drawdown(portfolio_returns)
+
+        # Find drawdown periods
+        drawdown_periods = []
+        in_drawdown = False
+        start_idx = None
+
+        for i, dd in enumerate(drawdown):
+            if dd < 0 and not in_drawdown:
+                # Start of new drawdown
+                in_drawdown = True
+                start_idx = i
+            elif dd >= 0 and in_drawdown:
+                # End of drawdown
+                in_drawdown = False
+                if start_idx is not None:
+                    period_dd = drawdown.iloc[start_idx:i]
+                    min_dd = period_dd.min()
+                    drawdown_periods.append({
+                        "start_date": drawdown.index[start_idx].isoformat(),
+                        "end_date": drawdown.index[i - 1].isoformat(),
+                        "duration_days": (drawdown.index[i - 1] - drawdown.index[start_idx]).days,
+                        "max_drawdown": min_dd
+                    })
+
+        # Handle case where we're still in drawdown at the end
+        if in_drawdown and start_idx is not None:
+            period_dd = drawdown.iloc[start_idx:]
+            min_dd = period_dd.min()
+            drawdown_periods.append({
+                "start_date": drawdown.index[start_idx].isoformat(),
+                "end_date": drawdown.index[-1].isoformat(),
+                "duration_days": (drawdown.index[-1] - drawdown.index[start_idx]).days,
+                "max_drawdown": min_dd
+            })
+
+        # Prepare the response
+        result = {
+            "portfolio_id": portfolio_id,
+            "start_date": start_date,
+            "end_date": end_date,
+            "max_drawdown": max_drawdown,
             "drawdown_series": drawdown.to_dict(),
-            "drawdown_periods": drawdown_periods.to_dict(orient='records') if not drawdown_periods.empty else []
+            "drawdown_periods": drawdown_periods,
+            "current_drawdown": drawdown.iloc[-1] if len(drawdown) > 0 else 0
         }
 
         return result
@@ -532,58 +564,19 @@ def calculate_drawdowns(
         raise HTTPException(status_code=500, detail=f"Failed to calculate drawdowns: {str(e)}")
 
 
-@router.post("/compare")
+@router.post("/compare", response_model=ComparisonResponse)
 def compare_portfolios(
-        portfolio_id1: str,
-        portfolio_id2: str,
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None,
-        benchmark: Optional[str] = None,
+        request: ComparisonRequest,
         analytics_service: AnalyticsService = Depends(get_analytics_service),
         portfolio_manager: PortfolioManagerService = Depends(get_portfolio_manager_service),
         data_fetcher: DataFetcherService = Depends(get_data_fetcher_service)
 ):
     """
-    Compare performance of two portfolios
+    Compare two portfolios
     """
     try:
-        # Import the PortfolioComparisonService
-        from app.core.services.portfolio_comparison import PortfolioComparisonService
-        comparison_service = PortfolioComparisonService()
-
-        # Load the portfolios
-        portfolio1 = portfolio_manager.load_portfolio(portfolio_id1)
-        if not portfolio1:
-            raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id1} not found")
-
-        portfolio2 = portfolio_manager.load_portfolio(portfolio_id2)
-        if not portfolio2:
-            raise HTTPException(status_code=404, detail=f"Portfolio with ID {portfolio_id2} not found")
-
-        # Set default dates if not provided
-        if not end_date:
-            end_date = datetime.now().strftime("%Y-%m-%d")
-
-        if not start_date:
-            # Default to 1 year ago
-            start_date_obj = datetime.now() - timedelta(days=365)
-            start_date = start_date_obj.strftime("%Y-%m-%d")
-
-        # Perform the comparison
-        result = comparison_service.compare_portfolios(
-            portfolio1,
-            portfolio2,
-            start_date,
-            end_date,
-            benchmark
-        )
-
-        # Further enrich the comparison with performance and risk metrics
-        # For both portfolios, calculate returns and perform comparison
-        # In a real implementation, this would fetch data and calculate metrics
-
-        return result
-    except FileNotFoundError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        # Implementation would be similar to other endpoints
+        # but comparing two portfolios instead of one
+        raise HTTPException(status_code=501, detail="Portfolio comparison not yet implemented")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to compare portfolios: {str(e)}")
