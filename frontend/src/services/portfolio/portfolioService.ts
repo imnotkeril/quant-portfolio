@@ -84,7 +84,7 @@ class PortfolioService {
 
       // Если ошибка сети, вернуть пустой массив вместо выброса ошибки
       if (error instanceof Error && error.message.includes('Network error')) {
-        console.error('Backend is not available. Please ensure the server is running on http://localhost:8080');
+        console.error('Backend is not available. Please ensure the server is running on http://localhost:8000');
         return [];
       }
 
