@@ -83,8 +83,9 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"❌ Failed to create directories: {e}")
 
-    logger.info(f"🎯 API available at: http://localhost:8080{settings.API_PREFIX}")
-    logger.info(f"📖 API docs at: http://localhost:8080/docs")
+    # ИСПРАВЛЕНО: порт 8080 → 8000
+    logger.info(f"🎯 API available at: http://localhost:8000{settings.API_PREFIX}")
+    logger.info(f"📖 API docs at: http://localhost:8000/docs")
 
     yield
 
@@ -118,14 +119,15 @@ try:
     logger.info("✅ Assets router loaded")
 except ImportError as e:
     logger.warning(f"⚠️ Assets router not available: {e}")
-"""
+
+# ИСПРАВЛЕНО: раскомментирован portfolios router
 try:
     from app.api.endpoints import portfolios
     app.include_router(portfolios.router, prefix=settings.API_PREFIX, tags=["portfolios"])
     logger.info("✅ Portfolios router loaded")
 except ImportError as e:
     logger.warning(f"⚠️ Portfolios router not available: {e}")
-"""
+
 try:
     from app.api.endpoints import analytics
     app.include_router(analytics.router, prefix=settings.API_PREFIX, tags=["analytics"])
@@ -229,7 +231,7 @@ async def list_portfolios():
                             "lastUpdated": portfolio_data.get("lastUpdated", datetime.now().isoformat()),
                             "assetCount": len(portfolio_data.get("assets", [])),
                             "totalValue": portfolio_data.get("totalValue", 0),
-                            "assets": portfolio_data.get("assets", []),  
+                            "assets": portfolio_data.get("assets", []),
                             "startingAmount": portfolio_data.get("startingAmount", 0)
                         })
                 except Exception as e:
