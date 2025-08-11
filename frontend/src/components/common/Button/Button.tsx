@@ -1,71 +1,83 @@
-// frontend/src/components/common/Button/Button.tsx
-import React from 'react';
+/**
+ * Button Component - FIXED VERSION with forwardRef
+ * Universal button component with support for refs
+ * File: frontend/src/components/common/Button/Button.tsx
+ */
+import React, { forwardRef } from 'react';
 import classNames from 'classnames';
 import styles from './Button.module.css';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'text' | 'danger';
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'text';
 export type ButtonSize = 'small' | 'medium' | 'large';
 
 interface ButtonProps {
   variant?: ButtonVariant;
   size?: ButtonSize;
   disabled?: boolean;
-  loading?: boolean;
   fullWidth?: boolean;
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  children: React.ReactNode;
-  className?: string;
-  type?: 'button' | 'submit' | 'reset';
+  loading?: boolean;
   icon?: React.ReactNode;
   iconPosition?: 'start' | 'end';
-  'aria-label'?: string;
-  'data-testid'?: string;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  children?: React.ReactNode;
+  className?: string;
+  type?: 'button' | 'submit' | 'reset';
+  ariaLabel?: string;
   id?: string;
   name?: string;
   tabIndex?: number;
   autoFocus?: boolean;
   style?: React.CSSProperties;
+  'data-testid'?: string;
 }
 
-// Loading spinner component
+// LoadingSpinner component for loading state
 const LoadingSpinner: React.FC<{ size: ButtonSize }> = ({ size }) => {
-  const spinnerSize = size === 'small' ? '12px' : size === 'large' ? '18px' : '14px';
+  const spinnerSize = size === 'small' ? 12 : size === 'medium' ? 16 : 20;
 
   return (
-    <div
+    <svg
+      width={spinnerSize}
+      height={spinnerSize}
+      viewBox="0 0 24 24"
+      fill="none"
       className={styles.spinner}
-      style={{
-        width: spinnerSize,
-        height: spinnerSize,
-        border: `2px solid transparent`,
-        borderTop: `2px solid currentColor`,
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite',
-      }}
-    />
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeDasharray="32"
+        strokeDashoffset="32"
+      />
+    </svg>
   );
 };
 
-export const Button: React.FC<ButtonProps> = ({
+// Button component with forwardRef
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   variant = 'primary',
   size = 'medium',
   disabled = false,
-  loading = false,
   fullWidth = false,
+  loading = false,
+  icon,
+  iconPosition = 'start',
   onClick,
   children,
   className,
   type = 'button',
-  icon,
-  iconPosition = 'start',
-  'aria-label': ariaLabel,
-  'data-testid': dataTestId,
+  ariaLabel,
   id,
   name,
   tabIndex,
   autoFocus,
   style,
-}) => {
+  'data-testid': dataTestId,
+}, ref) => {
   const isDisabled = disabled || loading;
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -109,6 +121,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
+      ref={ref}
       type={type}
       className={classNames(
         styles.button,
@@ -137,6 +150,8 @@ export const Button: React.FC<ButtonProps> = ({
       {renderContent()}
     </button>
   );
-};
+});
+
+Button.displayName = 'Button';
 
 export default Button;
