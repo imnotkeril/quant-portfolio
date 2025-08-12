@@ -23,30 +23,38 @@ import { formatDate } from '../../utils/formatters';
  */
 class AnalyticsService {
   /**
-   * Transform camelCase request data to snake_case for API
+   * Build query parameters from analytics request
    */
-  private transformRequestData(request: AnalyticsRequest): any {
-    return {
-      portfolio_id: request.portfolioId,
-      start_date: request.startDate,
-      end_date: request.endDate,
-      benchmark: request.benchmark,
-      risk_free_rate: request.riskFreeRate,
-      periods_per_year: request.periodsPerYear,
-      confidence_level: request.confidenceLevel,
-    };
-  }
+  private buildQueryParams(request: AnalyticsRequest): URLSearchParams {
+    const params = new URLSearchParams();
 
-  /**
-   * Transform rolling metrics request data to snake_case for API
-   */
-  private transformRollingMetricsRequestData(request: RollingMetricsRequest): any {
-    return {
-      ...this.transformRequestData(request),
-      window: request.window,
-      metrics: request.metrics,
-      min_periods: request.minPeriods,
-    };
+    params.append('portfolio_id', request.portfolioId);
+
+    if (request.startDate) {
+      params.append('start_date', request.startDate);
+    }
+
+    if (request.endDate) {
+      params.append('end_date', request.endDate);
+    }
+
+    if (request.benchmark) {
+      params.append('benchmark', request.benchmark);
+    }
+
+    if (request.riskFreeRate !== undefined) {
+      params.append('risk_free_rate', request.riskFreeRate.toString());
+    }
+
+    if (request.periodsPerYear !== undefined) {
+      params.append('periods_per_year', request.periodsPerYear.toString());
+    }
+
+    if (request.confidenceLevel !== undefined) {
+      params.append('confidence_level', request.confidenceLevel.toString());
+    }
+
+    return params;
   }
 
   /**
@@ -54,9 +62,10 @@ class AnalyticsService {
    */
   async calculatePerformanceMetrics(request: AnalyticsRequest): Promise<PerformanceMetricsResponse> {
     try {
-      const response = await apiClient.post<PerformanceMetricsResponse>(
-        endpoints.analytics.performance(),
-        this.transformRequestData(request)
+      const params = this.buildQueryParams(request);
+
+      const response = await apiClient.get<PerformanceMetricsResponse>(
+        `${endpoints.analytics.performance()}?${params.toString()}`
       );
       return response;
     } catch (error) {
@@ -70,9 +79,10 @@ class AnalyticsService {
    */
   async calculateRiskMetrics(request: AnalyticsRequest): Promise<RiskMetricsResponse> {
     try {
-      const response = await apiClient.post<RiskMetricsResponse>(
-        endpoints.analytics.risk(),
-        this.transformRequestData(request)
+      const params = this.buildQueryParams(request);
+
+      const response = await apiClient.get<RiskMetricsResponse>(
+        `${endpoints.analytics.risk()}?${params.toString()}`
       );
       return response;
     } catch (error) {
@@ -90,9 +100,12 @@ class AnalyticsService {
     method: string = 'simple'
   ): Promise<ReturnsResponse> {
     try {
-      const response = await apiClient.post<ReturnsResponse>(
-        `${endpoints.analytics.returns()}?period=${period}&method=${method}`,
-        this.transformRequestData(request)
+      const params = this.buildQueryParams(request);
+      params.append('period', period);
+      params.append('method', method);
+
+      const response = await apiClient.get<ReturnsResponse>(
+        `${endpoints.analytics.returns()}?${params.toString()}`
       );
       return response;
     } catch (error) {
@@ -109,9 +122,11 @@ class AnalyticsService {
     method: string = 'simple'
   ): Promise<CumulativeReturnsResponse> {
     try {
-      const response = await apiClient.post<CumulativeReturnsResponse>(
-        `${endpoints.analytics.cumulativeReturns()}?method=${method}`,
-        this.transformRequestData(request)
+      const params = this.buildQueryParams(request);
+      params.append('method', method);
+
+      const response = await apiClient.get<CumulativeReturnsResponse>(
+        `${endpoints.analytics.cumulativeReturns()}?${params.toString()}`
       );
       return response;
     } catch (error) {
@@ -125,9 +140,10 @@ class AnalyticsService {
    */
   async calculateDrawdowns(request: AnalyticsRequest): Promise<DrawdownsResponse> {
     try {
-      const response = await apiClient.post<DrawdownsResponse>(
-        endpoints.analytics.drawdowns(),
-        this.transformRequestData(request)
+      const params = this.buildQueryParams(request);
+
+      const response = await apiClient.get<DrawdownsResponse>(
+        `${endpoints.analytics.drawdowns()}?${params.toString()}`
       );
       return response;
     } catch (error) {
@@ -155,7 +171,7 @@ class AnalyticsService {
       if (endDate) params.append('end_date', endDate);
       if (benchmark) params.append('benchmark', benchmark);
 
-      const response = await apiClient.post<ComparisonResponse>(
+      const response = await apiClient.get<ComparisonResponse>(
         `${endpoints.analytics.compare()}?${params.toString()}`
       );
       return response;
@@ -170,9 +186,23 @@ class AnalyticsService {
    */
   async calculateRollingMetrics(request: RollingMetricsRequest): Promise<RollingMetricsResponse> {
     try {
+      // For rolling metrics, keep POST since it's more complex data
+      const requestData = {
+        portfolio_id: request.portfolioId,
+        start_date: request.startDate,
+        end_date: request.endDate,
+        benchmark: request.benchmark,
+        risk_free_rate: request.riskFreeRate,
+        periods_per_year: request.periodsPerYear,
+        confidence_level: request.confidenceLevel,
+        window: request.window,
+        metrics: request.metrics,
+        min_periods: request.minPeriods,
+      };
+
       const response = await apiClient.post<RollingMetricsResponse>(
         endpoints.enhancedAnalytics.rollingMetrics(),
-        this.transformRollingMetricsRequestData(request)
+        requestData
       );
       return response;
     } catch (error) {

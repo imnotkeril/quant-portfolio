@@ -115,7 +115,7 @@ def debug_health():
 
 # =============== MIDDLEWARE SETUP ===============
 
-# FIXED: Use proper CORS middleware from settings instead of duplicating
+# CORS middleware with proper settings
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -126,8 +126,9 @@ app.add_middleware(
 )
 
 
-# =============== ROUTERS SETUP ===============
+# =============== ROUTERS SETUP (ONLY EXISTING ONES) ===============
 
+# Assets router
 try:
     from app.api.endpoints import assets
     app.include_router(assets.router, prefix=settings.API_PREFIX, tags=["assets"])
@@ -135,6 +136,7 @@ try:
 except ImportError as e:
     logger.warning(f"⚠️ Assets router not available: {e}")
 
+# Portfolios router
 try:
     from app.api.endpoints import portfolios
     app.include_router(portfolios.router, prefix=settings.API_PREFIX, tags=["portfolios"])
@@ -142,6 +144,7 @@ try:
 except ImportError as e:
     logger.warning(f"⚠️ Portfolios router not available: {e}")
 
+# Analytics router
 try:
     from app.api.endpoints import analytics
     app.include_router(analytics.router, prefix=settings.API_PREFIX, tags=["analytics"])
@@ -149,7 +152,7 @@ try:
 except ImportError as e:
     logger.warning(f"⚠️ Analytics router not available: {e}")
 
-# Enhanced Analytics
+# Enhanced Analytics router
 try:
     from app.api.endpoints import enhanced_analytics
     app.include_router(enhanced_analytics.router, prefix=settings.API_PREFIX, tags=["enhanced-analytics"])
@@ -157,62 +160,7 @@ try:
 except ImportError as e:
     logger.warning(f"⚠️ Enhanced Analytics router not available: {e}")
 
-# Optimization
-try:
-    from app.api.endpoints import optimization
-    app.include_router(optimization.router, prefix=settings.API_PREFIX, tags=["optimization"])
-    logger.info("✅ Optimization router loaded")
-except ImportError as e:
-    logger.warning(f"⚠️ Optimization router not available: {e}")
-
-# Advanced Optimization
-try:
-    from app.api.endpoints import advanced_optimization
-    app.include_router(advanced_optimization.router, prefix=settings.API_PREFIX, tags=["advanced-optimization"])
-    logger.info("✅ Advanced Optimization router loaded")
-except ImportError as e:
-    logger.warning(f"⚠️ Advanced Optimization router not available: {e}")
-
-# Risk Management
-try:
-    from app.api.endpoints import risk
-    app.include_router(risk.router, prefix=settings.API_PREFIX, tags=["risk"])
-    logger.info("✅ Risk Management router loaded")
-except ImportError as e:
-    logger.warning(f"⚠️ Risk Management router not available: {e}")
-
-# Scenarios
-try:
-    from app.api.endpoints import scenarios
-    app.include_router(scenarios.router, prefix=settings.API_PREFIX, tags=["scenarios"])
-    logger.info("✅ Scenarios router loaded")
-except ImportError as e:
-    logger.warning(f"⚠️ Scenarios router not available: {e}")
-
-# Historical Analysis
-try:
-    from app.api.endpoints import historical
-    app.include_router(historical.router, prefix=settings.API_PREFIX, tags=["historical"])
-    logger.info("✅ Historical Analysis router loaded")
-except ImportError as e:
-    logger.warning(f"⚠️ Historical Analysis router not available: {e}")
-
-# Portfolio Comparison
-try:
-    from app.api.endpoints import comparison
-    app.include_router(comparison.router, prefix=settings.API_PREFIX, tags=["comparison"])
-    logger.info("✅ Portfolio Comparison router loaded")
-except ImportError as e:
-    logger.warning(f"⚠️ Portfolio Comparison router not available: {e}")
-
-# Reports
-try:
-    from app.api.endpoints import reports
-    app.include_router(reports.router, prefix=settings.API_PREFIX, tags=["reports"])
-    logger.info("✅ Reports router loaded")
-except ImportError as e:
-    logger.warning(f"⚠️ Reports router not available: {e}")
-
+# System router
 try:
     from app.api.endpoints import system
     app.include_router(system.router, prefix=settings.API_PREFIX, tags=["system"])
@@ -220,12 +168,12 @@ try:
 except ImportError as e:
     logger.warning(f"⚠️ System router not available: {e}")
 
-
-# =============== PORTFOLIO ENDPOINTS (BASIC IMPLEMENTATION) ===============
+# =============== PORTFOLIO ENDPOINTS (FALLBACK IMPLEMENTATION) ===============
+# Keep the fallback implementation in case the router isn't loaded
 
 @app.get("/api/v1/portfolios")
-async def list_portfolios():
-    """List all available portfolios"""
+async def list_portfolios_fallback():
+    """List all available portfolios - Fallback implementation"""
     try:
         portfolios = []
         portfolio_dir = Path(settings.PORTFOLIO_DIR)
@@ -266,8 +214,8 @@ async def list_portfolios():
 
 
 @app.get("/api/v1/portfolios/{portfolio_id}")
-async def get_portfolio(portfolio_id: str):
-    """Get a specific portfolio"""
+async def get_portfolio_fallback(portfolio_id: str):
+    """Get a specific portfolio - Fallback implementation"""
     try:
         portfolio_file = Path(settings.PORTFOLIO_DIR) / f"{portfolio_id}.json"
 
@@ -295,8 +243,8 @@ async def get_portfolio(portfolio_id: str):
 
 
 @app.put("/api/v1/portfolios/{portfolio_id}")
-async def update_portfolio(portfolio_id: str, portfolio_data: dict):
-    """Update a portfolio"""
+async def update_portfolio_fallback(portfolio_id: str, portfolio_data: dict):
+    """Update a portfolio - Fallback implementation"""
     try:
         portfolio_file = Path(settings.PORTFOLIO_DIR) / f"{portfolio_id}.json"
 
@@ -327,8 +275,8 @@ async def update_portfolio(portfolio_id: str, portfolio_data: dict):
 
 
 @app.delete("/api/v1/portfolios/{portfolio_id}")
-async def delete_portfolio(portfolio_id: str):
-    """Delete a portfolio"""
+async def delete_portfolio_fallback(portfolio_id: str):
+    """Delete a portfolio - Fallback implementation"""
     try:
         portfolio_file = Path(settings.PORTFOLIO_DIR) / f"{portfolio_id}.json"
 
@@ -388,8 +336,8 @@ async def health_check():
         "features": {
             "portfolios": True,
             "analytics": True,
-            "optimization": True,
-            "risk_management": True,
+            "optimization": False,  # Not implemented yet
+            "risk_management": False,  # Not implemented yet
             "real_time_data": bool(settings.ALPHA_VANTAGE_API_KEY)
         }
     }
