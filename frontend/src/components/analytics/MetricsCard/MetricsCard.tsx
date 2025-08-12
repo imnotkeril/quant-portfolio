@@ -58,19 +58,20 @@ export const MetricsCard: React.FC<MetricsCardProps> = ({
   } = data;
 
   const formatValue = (val: number | string): string => {
-  if (typeof val === 'string') return val;
+    if (typeof val === 'string') return val;
 
-  switch (type) {
-    case 'percentage':
-      return formatPercentage(val / 100, precision); // Если val уже в процентах, то val
-    case 'currency':
-      return formatCurrency(val, precision.toString());
-    case 'ratio':
-      return formatNumber(val, precision);
-    default:
-      return formatNumber(val, precision);
-  }
-};
+    switch (type) {
+      case 'percentage':
+        // Value is already in decimal format (0.1 = 10%), so multiply by 100 for display
+        return formatPercentage(val, precision);
+      case 'currency':
+        return formatCurrency(val, precision.toString());
+      case 'ratio':
+        return formatNumber(val, precision);
+      default:
+        return formatNumber(val, precision);
+    }
+  };
 
   const calculateChange = (): { change: number; changePercentage: number } | null => {
     if (typeof value === 'string' || typeof previousValue === 'string' || previousValue === undefined) {
@@ -98,9 +99,9 @@ export const MetricsCard: React.FC<MetricsCardProps> = ({
     if (!trend || !showTrend) return null;
 
     const trendConfig = {
-      up: { icon: '↗', color: 'var(--color-positive)' },
-      down: { icon: '↘', color: 'var(--color-negative)' },
-      neutral: { icon: '→', color: 'var(--color-neutral-gray)' },
+      up: { icon: '↗', color: 'var(--color-positive, #16a34a)' },
+      down: { icon: '↘', color: 'var(--color-negative, #dc2626)' },
+      neutral: { icon: '→', color: 'var(--color-neutral-gray, #6b7280)' },
     };
 
     const config = trendConfig[trend];
@@ -126,11 +127,23 @@ export const MetricsCard: React.FC<MetricsCardProps> = ({
     className
   );
 
+  if (loading) {
+    return (
+      <Card className={cardClasses} data-testid={testId}>
+        <div className={styles.content}>
+          <div className={styles.loadingState}>
+            <div className={styles.loadingSpinner} />
+            <span>Loading...</span>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card
       className={cardClasses}
       onClick={onClick}
-      loading={loading}
       hoverable={!!onClick}
       data-testid={testId}
     >
@@ -164,7 +177,7 @@ export const MetricsCard: React.FC<MetricsCardProps> = ({
                   {change.change > 0 ? '+' : ''}
                 </span>
                 <span className={styles.changeValue}>
-                  {formatPercentage(change.changePercentage, 1)}
+                  {formatPercentage(change.changePercentage / 100, 1)}
                 </span>
               </div>
             )}
@@ -179,7 +192,7 @@ export const MetricsCard: React.FC<MetricsCardProps> = ({
                     [styles.negative]: benchmarkDiff.diff < 0,
                   }
                 )}>
-                  {benchmarkDiff.diff > 0 ? '+' : ''}{formatPercentage(benchmarkDiff.diffPercentage, 1)}
+                  {benchmarkDiff.diff > 0 ? '+' : ''}{formatPercentage(benchmarkDiff.diffPercentage / 100, 1)}
                 </span>
               </div>
             )}

@@ -48,6 +48,7 @@ export const MetricsTable: React.FC<MetricsTableProps> = ({
 
     switch (type) {
       case 'percentage':
+        // Value is already in decimal format, so use directly with formatPercentage
         return formatPercentage(value, precision);
       case 'currency':
         return formatCurrency(value, precision.toString());
@@ -57,21 +58,21 @@ export const MetricsTable: React.FC<MetricsTableProps> = ({
         return formatNumber(value, precision);
     }
   };
-  const tableSize = size === 'medium' ? 'middle' : size;
+
   const getTrendBadge = (trend?: string) => {
-  if (!trend || !showTrend) return null;
+    if (!trend || !showTrend) return null;
 
-  const trendConfig = {
-    positive: { className: styles.trendPositive, text: '↗' },
-    negative: { className: styles.trendNegative, text: '↘' },
-    neutral: { className: styles.trendNeutral, text: '→' },
+    const trendConfig = {
+      positive: { className: styles.trendPositive, text: '↗' },
+      negative: { className: styles.trendNegative, text: '↘' },
+      neutral: { className: styles.trendNeutral, text: '→' },
+    };
+
+    const config = trendConfig[trend as keyof typeof trendConfig];
+    if (!config) return null;
+
+    return <span className={config.className}>{config.text}</span>;
   };
-
-  const config = trendConfig[trend as keyof typeof trendConfig];
-  if (!config) return null;
-
-  return <span className={config.className}>{config.text}</span>;
-};
 
   const renderDifference = (value: number | string, benchmark: number | string) => {
     if (typeof value === 'string' || typeof benchmark === 'string') return null;
@@ -160,6 +161,23 @@ export const MetricsTable: React.FC<MetricsTableProps> = ({
     styles[size],
     className
   );
+
+  // If no metrics, show empty state
+  if (!loading && metrics.length === 0) {
+    return (
+      <Card title={title} className={className} data-testid={testId}>
+        <div className={styles.emptyState}>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+          </svg>
+          <h3>No Metrics Available</h3>
+          <p>No metrics data to display at this time.</p>
+        </div>
+      </Card>
+    );
+  }
 
   if (grouped) {
     return (

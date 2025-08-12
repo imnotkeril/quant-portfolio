@@ -17,7 +17,6 @@ import { AssetTable } from '../../components/portfolio/AssetTable/AssetTable';
 import { LineChart } from '../../components/charts/LineChart/LineChart';
 import { PieChart } from '../../components/charts/PieChart/PieChart';
 import { usePortfolios } from '../../hooks/usePortfolios';
-import { useAnalytics } from '../../hooks/useAnalytics';
 import {
   selectPerformanceMetrics,
   selectRiskMetrics,
@@ -25,9 +24,21 @@ import {
   selectDrawdowns,
   selectReturns,
   selectSelectedBenchmark,
-  selectSelectedTimeframe
+  selectSelectedTimeframe,
+  selectAnalyticsLoading
 } from '../../store/analytics/selectors';
-import { setSelectedBenchmark, setSelectedTimeframe } from '../../store/analytics/reducer';
+import {
+  setSelectedBenchmark,
+  setSelectedTimeframe,
+  setAnalysisParams,
+  clearAnalyticsData
+} from '../../store/analytics/reducer';
+import {
+  loadPerformanceMetrics,
+  loadRiskMetrics,
+  loadCumulativeReturns,
+  loadDrawdowns
+} from '../../store/analytics/actions';
 import { formatCurrency, formatPercentage, formatNumber } from '../../utils/formatters';
 import { ROUTES } from '../../constants/routes';
 import styles from './PortfolioAnalysis.module.css';
@@ -182,6 +193,43 @@ const PortfolioSelector: React.FC = () => {
   );
 };
 
+// Helper function to get default date range
+const getDefaultDateRange = (timeframe: string = '1Y') => {
+  const endDate = new Date();
+  const startDate = new Date();
+
+  switch (timeframe) {
+    case '1M':
+      startDate.setMonth(endDate.getMonth() - 1);
+      break;
+    case '3M':
+      startDate.setMonth(endDate.getMonth() - 3);
+      break;
+    case '6M':
+      startDate.setMonth(endDate.getMonth() - 6);
+      break;
+    case '1Y':
+      startDate.setFullYear(endDate.getFullYear() - 1);
+      break;
+    case '2Y':
+      startDate.setFullYear(endDate.getFullYear() - 2);
+      break;
+    case '5Y':
+      startDate.setFullYear(endDate.getFullYear() - 5);
+      break;
+    case 'ALL':
+      startDate.setFullYear(endDate.getFullYear() - 10);
+      break;
+    default:
+      startDate.setFullYear(endDate.getFullYear() - 1);
+  }
+
+  return {
+    startDate: startDate.toISOString().split('T')[0],
+    endDate: endDate.toISOString().split('T')[0],
+  };
+};
+
 interface AnalysisPanel {
   id: string;
   title: string;
@@ -195,7 +243,6 @@ const PortfolioAnalysis: React.FC = () => {
 
   // Hooks
   const portfolios = usePortfolios();
-  const analytics = useAnalytics();
 
   // Selectors
   const currentPortfolio = portfolios.currentPortfolio;
@@ -207,6 +254,7 @@ const PortfolioAnalysis: React.FC = () => {
   const returns = useSelector(selectReturns);
   const selectedBenchmark = useSelector(selectSelectedBenchmark);
   const selectedTimeframe = useSelector(selectSelectedTimeframe);
+  const analyticsLoading = useSelector(selectAnalyticsLoading);
 
   // Local state
   const [activePanel, setActivePanel] = useState('overview');
@@ -219,65 +267,60 @@ const PortfolioAnalysis: React.FC = () => {
     }
   }, [portfolios.portfolios.length, portfoliosLoading]);
 
-  // Load portfolio and analytics data
+  // Load portfolio on mount
   useEffect(() => {
-    let isMounted = true;
-
-    if (portfolioId && isMounted) {
+    if (portfolioId) {
       portfolios.loadPortfolio(portfolioId);
     }
-
-    return () => {
-      isMounted = false;
-    };
   }, [portfolioId]);
 
+  // Load analytics data when portfolio or settings change
   useEffect(() => {
-    let isMounted = true;
+    if (portfolioId) {
+      const { startDate, endDate } = getDefaultDateRange(selectedTimeframe);
 
-    if (portfolioId && isMounted) {
-      const { startDate, endDate } = analytics.getDefaultDateRange(selectedTimeframe);
+      // Update analysis params
+      dispatch(setAnalysisParams({
+        startDate,
+        endDate,
+        riskFreeRate: 0.02,
+        periodsPerYear: 252,
+        confidenceLevel: 0.95
+      }));
 
-      // Load performance metrics
-      analytics.calculatePerformanceMetrics({
+      // Load analytics data using Redux actions
+      const analyticsPayload = {
         portfolioId,
         startDate,
         endDate,
         benchmark: selectedBenchmark || undefined,
         riskFreeRate: 0.02,
         periodsPerYear: 252
-      });
+      };
 
-      // Load risk metrics with confidence level
-      analytics.calculateRiskMetrics({
-        portfolioId,
-        startDate,
-        endDate,
-        confidenceLevel: 0.95,
-        riskFreeRate: 0.02,
-        periodsPerYear: 252
-      });
+      // Dispatch Redux actions instead of using analytics hook
+      dispatch(loadPerformanceMetrics(analyticsPayload));
 
-      // Load cumulative returns
-      analytics.calculateCumulativeReturns({
+      dispatch(loadRiskMetrics({
+        ...analyticsPayload,
+        confidenceLevel: 0.95
+      }));
+
+      dispatch(loadCumulativeReturns({
         portfolioId,
         startDate,
         endDate,
         benchmark: selectedBenchmark || undefined,
-      });
+        method: 'simple'
+      }));
 
-      // Load drawdowns
-      analytics.calculateDrawdowns({
+      dispatch(loadDrawdowns({
         portfolioId,
         startDate,
-        endDate,
-      });
+        endDate
+      }));
     }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [portfolioId, selectedTimeframe, selectedBenchmark]);
+  }, [portfolioId, selectedTimeframe, selectedBenchmark, dispatch]);
 
   // Handle navigation
   const handleOptimize = () => {
@@ -297,6 +340,54 @@ const PortfolioAnalysis: React.FC = () => {
   const handleEdit = () => {
     if (portfolioId) {
       navigate(ROUTES.PORTFOLIO.EDIT.replace(':id', portfolioId));
+    }
+  };
+
+  // Handle timeframe change
+  const handleTimeframeChange = (value: string | number | (string | number)[]) => {
+    const timeframe = Array.isArray(value) ? value[0] : value;
+    dispatch(setSelectedTimeframe(String(timeframe)));
+  };
+
+  // Handle benchmark change
+  const handleBenchmarkChange = (value: string | number | (string | number)[]) => {
+    const benchmark = Array.isArray(value) ? value[0] : value;
+    dispatch(setSelectedBenchmark(String(benchmark) === '' ? null : String(benchmark)));
+  };
+
+  // Handle refresh
+  const handleRefresh = () => {
+    dispatch(clearAnalyticsData());
+
+    if (portfolioId) {
+      const { startDate, endDate } = getDefaultDateRange(selectedTimeframe);
+
+      const analyticsPayload = {
+        portfolioId,
+        startDate,
+        endDate,
+        benchmark: selectedBenchmark || undefined,
+        riskFreeRate: 0.02,
+        periodsPerYear: 252
+      };
+
+      dispatch(loadPerformanceMetrics(analyticsPayload));
+      dispatch(loadRiskMetrics({
+        ...analyticsPayload,
+        confidenceLevel: 0.95
+      }));
+      dispatch(loadCumulativeReturns({
+        portfolioId,
+        startDate,
+        endDate,
+        benchmark: selectedBenchmark || undefined,
+        method: 'simple'
+      }));
+      dispatch(loadDrawdowns({
+        portfolioId,
+        startDate,
+        endDate
+      }));
     }
   };
 
@@ -369,12 +460,14 @@ const PortfolioAnalysis: React.FC = () => {
               <div className={styles.metric}>
                 <span className={styles.metricLabel}>Sharpe Ratio</span>
                 <span className={styles.metricValue}>
-                  {formatNumber(performanceMetrics.sharpeRatio, 2)}
+                  {formatNumber(performanceMetrics.ratioMetrics?.sharpeRatio || 0, 2)}
                 </span>
               </div>
             </div>
-          ) : (
+          ) : analyticsLoading.performance ? (
             <div className={styles.loading}>Loading performance data...</div>
+          ) : (
+            <div className={styles.noData}>No performance data available</div>
           )}
         </Card>
 
@@ -408,8 +501,10 @@ const PortfolioAnalysis: React.FC = () => {
                 </span>
               </div>
             </div>
-          ) : (
+          ) : analyticsLoading.risk ? (
             <div className={styles.loading}>Loading risk data...</div>
+          ) : (
+            <div className={styles.noData}>No risk data available</div>
           )}
         </Card>
 
@@ -451,8 +546,10 @@ const PortfolioAnalysis: React.FC = () => {
               height={350}
               formatY={(value) => `${value.toFixed(1)}%`}
             />
-          ) : (
+          ) : analyticsLoading.cumulativeReturns ? (
             <div className={styles.loading}>Loading performance chart...</div>
+          ) : (
+            <div className={styles.noData}>No cumulative returns data available</div>
           )}
         </Card>
       </div>
@@ -505,18 +602,20 @@ const PortfolioAnalysis: React.FC = () => {
           {riskMetrics ? (
             <MetricsTable
               metrics={[
-                { label: 'Value at Risk (95%)', value: riskMetrics.var95, type: 'percentage' },
-                { label: 'Conditional VaR (95%)', value: riskMetrics.cvar95, type: 'percentage' },
-                { label: 'Maximum Drawdown', value: riskMetrics.maxDrawdown, type: 'percentage' },
-                { label: 'Beta', value: riskMetrics.beta, type: 'number' },
-                { label: 'Alpha', value: riskMetrics.alpha, type: 'percentage' },
-                { label: 'Tracking Error', value: riskMetrics.trackingError, type: 'percentage' },
-                { label: 'Information Ratio', value: riskMetrics.informationRatio, type: 'number' },
-                { label: 'Sortino Ratio', value: riskMetrics.sortinoRatio, type: 'number' },
+                { name: 'Value at Risk (95%)', value: riskMetrics.var95, type: 'percentage' },
+                { name: 'Conditional VaR (95%)', value: riskMetrics.cvar95, type: 'percentage' },
+                { name: 'Maximum Drawdown', value: riskMetrics.maxDrawdown, type: 'percentage' },
+                { name: 'Beta', value: riskMetrics.beta, type: 'number' },
+                { name: 'Alpha', value: riskMetrics.alpha, type: 'percentage' },
+                { name: 'Tracking Error', value: riskMetrics.trackingError, type: 'percentage' },
+                { name: 'Information Ratio', value: riskMetrics.informationRatio, type: 'number' },
+                { name: 'Sortino Ratio', value: riskMetrics.sortinoRatio, type: 'number' },
               ]}
             />
-          ) : (
+          ) : analyticsLoading.risk ? (
             <div className={styles.loading}>Loading risk metrics...</div>
+          ) : (
+            <div className={styles.noData}>No risk metrics available</div>
           )}
         </Card>
 
@@ -537,8 +636,10 @@ const PortfolioAnalysis: React.FC = () => {
               formatY={(value) => `${value.toFixed(1)}%`}
               fillArea
             />
-          ) : (
+          ) : analyticsLoading.drawdowns ? (
             <div className={styles.loading}>Loading drawdown data...</div>
+          ) : (
+            <div className={styles.noData}>No drawdown data available</div>
           )}
         </Card>
       </div>
@@ -607,20 +708,28 @@ const PortfolioAnalysis: React.FC = () => {
               <Select
                 label="Timeframe"
                 value={selectedTimeframe}
-                onChange={(value) => dispatch(setSelectedTimeframe(value))}
+                onChange={handleTimeframeChange}
                 options={timeframeOptions}
                 size="small"
               />
               <Select
                 label="Benchmark"
                 value={selectedBenchmark || ''}
-                onChange={(value) => dispatch(setSelectedBenchmark(value || null))}
+                onChange={handleBenchmarkChange}
                 options={benchmarkOptions}
                 size="small"
               />
             </div>
 
             <div className={styles.controlsRight}>
+              <Button
+                onClick={handleRefresh}
+                variant="outline"
+                size="small"
+                loading={Object.values(analyticsLoading).some(Boolean)}
+              >
+                Refresh
+              </Button>
               <Button
                 onClick={() => setIsFullScreen(!isFullScreen)}
                 variant="ghost"

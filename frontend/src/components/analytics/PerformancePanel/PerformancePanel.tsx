@@ -10,7 +10,6 @@ import { Select } from '../../common/Select/Select';
 import { MetricsCard, MetricsCardData } from '../MetricsCard/MetricsCard';
 import { MetricsTable, MetricItem } from '../MetricsTable/MetricsTable';
 import { ReturnsChart } from '../ReturnsChart/ReturnsChart';
-import { useAnalytics } from '../../../hooks/useAnalytics';
 import {
   selectPerformanceMetrics,
   selectPerformanceLoading,
@@ -19,7 +18,16 @@ import {
   selectSelectedTimeframe,
   selectSelectedBenchmark,
 } from '../../../store/analytics/selectors';
-import { setSelectedTimeframe, setSelectedBenchmark } from '../../../store/analytics/reducer';
+import {
+  setSelectedTimeframe,
+  setSelectedBenchmark,
+  clearAnalyticsData,
+  setAnalysisParams
+} from '../../../store/analytics/reducer';
+import {
+  loadPerformanceMetrics,
+  loadCumulativeReturns
+} from '../../../store/analytics/actions';
 import { formatPercentage, formatNumber } from '../../../utils/formatters';
 import styles from './PerformancePanel.module.css';
 
@@ -31,6 +39,43 @@ interface PerformancePanelProps {
   'data-testid'?: string;
 }
 
+// Helper function to get default date range
+const getDefaultDateRange = (timeframe: string = '1Y') => {
+  const endDate = new Date();
+  const startDate = new Date();
+
+  switch (timeframe) {
+    case '1M':
+      startDate.setMonth(endDate.getMonth() - 1);
+      break;
+    case '3M':
+      startDate.setMonth(endDate.getMonth() - 3);
+      break;
+    case '6M':
+      startDate.setMonth(endDate.getMonth() - 6);
+      break;
+    case '1Y':
+      startDate.setFullYear(endDate.getFullYear() - 1);
+      break;
+    case '2Y':
+      startDate.setFullYear(endDate.getFullYear() - 2);
+      break;
+    case '5Y':
+      startDate.setFullYear(endDate.getFullYear() - 5);
+      break;
+    case 'YTD':
+      startDate = new Date(endDate.getFullYear(), 0, 1);
+      break;
+    default:
+      startDate.setFullYear(endDate.getFullYear() - 1);
+  }
+
+  return {
+    startDate: startDate.toISOString().split('T')[0],
+    endDate: endDate.toISOString().split('T')[0],
+  };
+};
+
 export const PerformancePanel: React.FC<PerformancePanelProps> = ({
   portfolioId,
   showAdvancedMetrics = true,
@@ -39,7 +84,6 @@ export const PerformancePanel: React.FC<PerformancePanelProps> = ({
   'data-testid': testId,
 }) => {
   const dispatch = useDispatch();
-  const analytics = useAnalytics();
 
   const performanceMetrics = useSelector(selectPerformanceMetrics);
   const performanceLoading = useSelector(selectPerformanceLoading);
@@ -48,18 +92,31 @@ export const PerformancePanel: React.FC<PerformancePanelProps> = ({
   const selectedTimeframe = useSelector(selectSelectedTimeframe);
   const selectedBenchmark = useSelector(selectSelectedBenchmark);
 
-  // Load performance metrics on mount and when dependencies change
+  // Load performance metrics when component mounts or dependencies change
   useEffect(() => {
     if (portfolioId) {
-      const { startDate, endDate } = analytics.getDefaultDateRange();
-      analytics.calculatePerformanceMetrics({
+      const { startDate, endDate } = getDefaultDateRange(selectedTimeframe);
+
+      dispatch(loadPerformanceMetrics({
         portfolioId,
         startDate,
         endDate,
         benchmark: selectedBenchmark || undefined,
-      });
+        riskFreeRate: 0.02,
+        periodsPerYear: 252
+      }));
+
+      if (showChart) {
+        dispatch(loadCumulativeReturns({
+          portfolioId,
+          startDate,
+          endDate,
+          benchmark: selectedBenchmark || undefined,
+          method: 'simple'
+        }));
+      }
     }
-  }, [portfolioId, selectedBenchmark]);
+  }, [portfolioId, selectedBenchmark, selectedTimeframe, dispatch, showChart]);
 
   // Main performance metrics cards data
   const mainMetricsData = useMemo((): MetricsCardData[] => {
@@ -164,31 +221,93 @@ export const PerformancePanel: React.FC<PerformancePanelProps> = ({
   }, [performanceMetrics]);
 
   const handleTimeframeChange = (value: string | number | (string | number)[]) => {
-  const timeframe = Array.isArray(value) ? value[0] : value;
-  const stringTimeframe = String(timeframe);
+    const timeframe = Array.isArray(value) ? value[0] : value;
+    const stringTimeframe = String(timeframe);
 
-  dispatch(setSelectedTimeframe(stringTimeframe));
+    dispatch(setSelectedTimeframe(stringTimeframe));
 
-  const ranges = analytics.getPredefinedTimeRanges();
-  const selectedRange = ranges[stringTimeframe];
+    // Reload analytics with new timeframe
+    const { startDate, endDate } = getDefaultDateRange(stringTimeframe);
 
-  if (selectedRange) {
-    analytics.calculatePerformanceMetrics({
+    dispatch(setAnalysisParams({
+      startDate,
+      endDate
+    }));
+
+    dispatch(loadPerformanceMetrics({
       portfolioId,
-      startDate: selectedRange.startDate,
-      endDate: selectedRange.endDate,
+      startDate,
+      endDate,
       benchmark: selectedBenchmark || undefined,
-    });
-  }
-};
+      riskFreeRate: 0.02,
+      periodsPerYear: 252
+    }));
+
+    if (showChart) {
+      dispatch(loadCumulativeReturns({
+        portfolioId,
+        startDate,
+        endDate,
+        benchmark: selectedBenchmark || undefined,
+        method: 'simple'
+      }));
+    }
+  };
 
   const handleBenchmarkChange = (value: string | number | (string | number)[]) => {
-  const benchmark = Array.isArray(value) ? value[0] : value;
-  const stringBenchmark = String(benchmark);
+    const benchmark = Array.isArray(value) ? value[0] : value;
+    const stringBenchmark = String(benchmark);
 
-  const newBenchmark = stringBenchmark === 'none' ? null : stringBenchmark;
-  dispatch(setSelectedBenchmark(newBenchmark));
-};
+    const newBenchmark = stringBenchmark === 'none' ? null : stringBenchmark;
+    dispatch(setSelectedBenchmark(newBenchmark));
+
+    // Reload analytics with new benchmark
+    const { startDate, endDate } = getDefaultDateRange(selectedTimeframe);
+
+    dispatch(loadPerformanceMetrics({
+      portfolioId,
+      startDate,
+      endDate,
+      benchmark: newBenchmark || undefined,
+      riskFreeRate: 0.02,
+      periodsPerYear: 252
+    }));
+
+    if (showChart) {
+      dispatch(loadCumulativeReturns({
+        portfolioId,
+        startDate,
+        endDate,
+        benchmark: newBenchmark || undefined,
+        method: 'simple'
+      }));
+    }
+  };
+
+  const handleRefresh = () => {
+    dispatch(clearAnalyticsData());
+
+    const { startDate, endDate } = getDefaultDateRange(selectedTimeframe);
+
+    dispatch(loadPerformanceMetrics({
+      portfolioId,
+      startDate,
+      endDate,
+      benchmark: selectedBenchmark || undefined,
+      riskFreeRate: 0.02,
+      periodsPerYear: 252
+    }));
+
+    if (showChart) {
+      dispatch(loadCumulativeReturns({
+        portfolioId,
+        startDate,
+        endDate,
+        benchmark: selectedBenchmark || undefined,
+        method: 'simple'
+      }));
+    }
+  };
 
   const timeframeOptions = [
     { value: '1M', label: '1M' },
@@ -238,7 +357,8 @@ export const PerformancePanel: React.FC<PerformancePanelProps> = ({
           <Button
             variant="outline"
             size="small"
-            onClick={() => analytics.clearAnalytics()}
+            onClick={handleRefresh}
+            loading={performanceLoading}
             className={styles.refreshButton}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -288,6 +408,22 @@ export const PerformancePanel: React.FC<PerformancePanelProps> = ({
           loading={performanceLoading}
           className={styles.advancedMetrics}
         />
+      )}
+
+      {/* No data state */}
+      {!performanceLoading && !performanceMetrics && (
+        <Card className={styles.noDataCard}>
+          <div className={styles.noData}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+            <h3>No Performance Data</h3>
+            <p>Performance metrics are not available for this portfolio.</p>
+            <Button onClick={handleRefresh} variant="primary" size="small">
+              Try Again
+            </Button>
+          </div>
+        </Card>
       )}
     </div>
   );
