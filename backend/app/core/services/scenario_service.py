@@ -1,469 +1,443 @@
 # backend/app/core/services/scenario_service.py
-import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
-from typing import Dict, List, Tuple, Optional, Union, Any
+import numpy as np
+from typing import Dict, List, Optional, Any, Tuple
+from datetime import datetime, timedelta
 import logging
-import random
+import json
+from pathlib import Path
 
-# Setup logging
 logger = logging.getLogger(__name__)
 
 
 class ScenarioService:
-    """Scenario modeling service."""
+    """Scenario modeling and chaining service."""
 
     def __init__(self):
-        """Initialize with predefined scenario chains."""
-        # Defining the structure of scenario chains
-        self.scenario_chains = {
-            "inflation_shock": {
-                "name": "Inflation shock",
-                "initial_impact": {"inflation": 5.0, "market": -0.05},
-                "leads_to": [
-                    {
-                        "scenario": "rate_hike",
-                        "probability": 0.8,
-                        "delay": 30,  # days
-                        "magnitude_modifier": 1.2  # enhance effect
-                    }
-                ]
+        """Initialize the scenario service with predefined scenarios."""
+        self.predefined_scenarios = self._load_predefined_scenarios()
+        self.scenario_chains = {}  # Store user-created scenario chains
+
+    def _load_predefined_scenarios(self) -> Dict[str, Dict[str, Any]]:
+        """Load predefined market scenarios."""
+        scenarios = {
+            "market_crash": {
+                "name": "Market Crash",
+                "description": "Sudden market decline similar to 2008 or 2020",
+                "impact": {
+                    "equity": -0.30,  # 30% decline
+                    "bonds": -0.10,  # 10% decline
+                    "commodities": -0.20,  # 20% decline
+                    "real_estate": -0.25,  # 25% decline
+                    "crypto": -0.50  # 50% decline
+                },
+                "duration_days": 60,
+                "probability": 0.02,  # 2% annual probability
+                "correlation_increase": 0.3  # Correlations increase by 30%
             },
-            "rate_hike": {
-                "name": "Raising the stakes",
-                "initial_impact": {"interest_rates": 1.5, "bonds": -0.10, "tech_stocks": -0.15},
-                "leads_to": [
-                    {
-                        "scenario": "credit_crunch",
-                        "probability": 0.6,
-                        "delay": 60,
-                        "magnitude_modifier": 1.0
-                    },
-                    {
-                        "scenario": "housing_decline",
-                        "probability": 0.7,
-                        "delay": 90,
-                        "magnitude_modifier": 0.9
-                    }
-                ]
+
+            "inflation_spike": {
+                "name": "Inflation Spike",
+                "description": "Rapid inflation increase affecting different assets",
+                "impact": {
+                    "equity": -0.15,  # Growth stocks suffer
+                    "bonds": -0.20,  # Bonds decline significantly
+                    "commodities": 0.25,  # Commodities benefit
+                    "real_estate": 0.05,  # Real estate slight benefit
+                    "crypto": -0.10  # Crypto mixed impact
+                },
+                "duration_days": 180,  # Longer duration
+                "probability": 0.05,
+                "correlation_increase": 0.2
             },
-            "credit_crunch": {
-                "name": "Credit Crisis",
-                "initial_impact": {"financials": -0.20, "consumer_discretionary": -0.15, "market": -0.10},
-                "leads_to": [
-                    {
-                        "scenario": "recession",
-                        "probability": 0.7,
-                        "delay": 120,
-                        "magnitude_modifier": 1.1
-                    }
-                ]
+
+            "geopolitical_crisis": {
+                "name": "Geopolitical Crisis",
+                "description": "Major geopolitical event causing market uncertainty",
+                "impact": {
+                    "equity": -0.20,
+                    "bonds": 0.05,  # Flight to safety
+                    "commodities": 0.15,  # Oil/gold spike
+                    "real_estate": -0.10,
+                    "crypto": -0.25  # High volatility
+                },
+                "duration_days": 90,
+                "probability": 0.03,
+                "correlation_increase": 0.25
             },
-            "housing_decline": {
-                "name": "The real estate market is falling",
-                "initial_impact": {"real_estate": -0.25, "financials": -0.10, "construction": -0.20},
-                "leads_to": [
-                    {
-                        "scenario": "consumer_weakness",
-                        "probability": 0.65,
-                        "delay": 60,
-                        "magnitude_modifier": 0.9
-                    }
-                ]
+
+            "interest_rate_shock": {
+                "name": "Interest Rate Shock",
+                "description": "Unexpected central bank rate changes",
+                "impact": {
+                    "equity": -0.10,
+                    "bonds": -0.15,  # Duration risk
+                    "commodities": -0.05,
+                    "real_estate": -0.20,  # Highly sensitive
+                    "crypto": -0.15
+                },
+                "duration_days": 30,  # Quick impact
+                "probability": 0.08,
+                "correlation_increase": 0.15
             },
-            "consumer_weakness": {
-                "name": "Weakening consumer demand",
-                "initial_impact": {"consumer_discretionary": -0.15, "retail": -0.20, "market": -0.05},
-                "leads_to": [
-                    {
-                        "scenario": "recession",
-                        "probability": 0.6,
-                        "delay": 90,
-                        "magnitude_modifier": 1.0
-                    }
-                ]
-            },
-            "recession": {
-                "name": "Economic recession",
-                "initial_impact": {"market": -0.25, "unemployment": 3.0, "gdp": -2.0},
-                "leads_to": []  # Final state
+
+            "liquidity_crisis": {
+                "name": "Liquidity Crisis",
+                "description": "Market liquidity dries up across asset classes",
+                "impact": {
+                    "equity": -0.25,
+                    "bonds": -0.05,  # Government bonds safe haven
+                    "commodities": -0.15,
+                    "real_estate": -0.30,  # Very illiquid
+                    "crypto": -0.40  # Extreme volatility
+                },
+                "duration_days": 120,
+                "probability": 0.01,
+                "correlation_increase": 0.4  # Extreme correlation spike
             }
         }
+        return scenarios
 
-    def get_all_scenarios(self) -> Dict[str, Dict]:
-        """
-        Get all available scenario chains.
+    def get_available_scenarios(self) -> List[Dict[str, str]]:
+        """Get list of available predefined scenarios."""
+        return [
+            {
+                "key": key,
+                "name": scenario["name"],
+                "description": scenario["description"],
+                "probability": scenario["probability"]
+            }
+            for key, scenario in self.predefined_scenarios.items()
+        ]
 
-        Returns:
-            Dictionary with scenario chains
-        """
-        return self.scenario_chains
-
-    def get_scenario(self, scenario_key: str) -> Dict:
-        """
-        Get a specific scenario by key.
-
-        Args:
-            scenario_key: Scenario key
-
-        Returns:
-            Scenario data
-        """
-        if scenario_key not in self.scenario_chains:
-            return {'error': f'Unknown scenario: {scenario_key}'}
-
-        return self.scenario_chains[scenario_key]
-
-    def add_scenario(
+    def simulate_scenario_impact(
             self,
+            portfolio_weights: Dict[str, float],
             scenario_key: str,
-            name: str,
-            initial_impact: Dict[str, float],
-            leads_to: List[Dict] = None
-    ) -> Dict:
+            portfolio_value: float = 100000,
+            asset_mapping: Optional[Dict[str, str]] = None
+    ) -> Dict[str, Any]:
         """
-        Add a new scenario chain.
+        Simulate the impact of a scenario on a portfolio.
 
         Args:
-            scenario_key: Scenario key
-            name: Scenario name
-            initial_impact: Dictionary with initial impacts {factor: value}
-            leads_to: List of scenarios that this can lead to
-
-        Returns:
-            Added scenario data
-        """
-        if scenario_key in self.scenario_chains:
-            return {'error': f'Scenario already exists: {scenario_key}'}
-
-        if leads_to is None:
-            leads_to = []
-
-        # Validate leads_to structure
-        for link in leads_to:
-            if 'scenario' not in link or 'probability' not in link:
-                return {'error': 'Invalid leads_to structure'}
-
-            if link.get('scenario') not in self.scenario_chains:
-                return {'error': f'Unknown scenario in leads_to: {link.get("scenario")}'}
-
-        # Add the new scenario
-        self.scenario_chains[scenario_key] = {
-            "name": name,
-            "initial_impact": initial_impact,
-            "leads_to": leads_to
-        }
-
-        return self.scenario_chains[scenario_key]
-
-    def modify_scenario(
-            self,
-            scenario_key: str,
-            name: Optional[str] = None,
-            initial_impact: Optional[Dict[str, float]] = None,
-            leads_to: Optional[List[Dict]] = None
-    ) -> Dict:
-        """
-        Modify an existing scenario chain.
-
-        Args:
-            scenario_key: Scenario key
-            name: New scenario name (optional)
-            initial_impact: New initial impacts (optional)
-            leads_to: New leads_to list (optional)
-
-        Returns:
-            Modified scenario data
-        """
-        if scenario_key not in self.scenario_chains:
-            return {'error': f'Unknown scenario: {scenario_key}'}
-
-        # Update the scenario
-        if name is not None:
-            self.scenario_chains[scenario_key]["name"] = name
-
-        if initial_impact is not None:
-            self.scenario_chains[scenario_key]["initial_impact"] = initial_impact
-
-        if leads_to is not None:
-            # Validate leads_to structure
-            for link in leads_to:
-                if 'scenario' not in link or 'probability' not in link:
-                    return {'error': 'Invalid leads_to structure'}
-
-                if link.get('scenario') not in self.scenario_chains:
-                    return {'error': f'Unknown scenario in leads_to: {link.get("scenario")}'}
-
-            self.scenario_chains[scenario_key]["leads_to"] = leads_to
-
-        return self.scenario_chains[scenario_key]
-
-    def delete_scenario(self, scenario_key: str) -> Dict:
-        """
-        Delete a scenario chain.
-
-        Args:
-            scenario_key: Scenario key
-
-        Returns:
-            Status message
-        """
-        if scenario_key not in self.scenario_chains:
-            return {'error': f'Unknown scenario: {scenario_key}'}
-
-        # Check if this scenario is referenced by others
-        for key, scenario in self.scenario_chains.items():
-            for link in scenario.get('leads_to', []):
-                if link.get('scenario') == scenario_key:
-                    return {'error': f'Cannot delete scenario that is referenced by {key}'}
-
-        # Delete the scenario
-        del self.scenario_chains[scenario_key]
-
-        return {'message': f'Scenario deleted: {scenario_key}'}
-
-    def simulate_scenario_chain(
-            self,
-            starting_scenario: str,
-            num_simulations: int = 1000
-    ) -> Dict:
-        """
-        Simulates possible chains of events starting from a given scenario.
-
-        Args:
-            starting_scenario: Key of the starting scenario
-            num_simulations: Number of simulations to run
+            portfolio_weights: Dictionary of asset weights
+            scenario_key: Key of the scenario to simulate
+            portfolio_value: Initial portfolio value
+            asset_mapping: Mapping of tickers to asset classes
 
         Returns:
             Dictionary with simulation results
         """
-        if starting_scenario not in self.scenario_chains:
-            return {'error': f'Unknown starting scenario: {starting_scenario}'}
+        if scenario_key not in self.predefined_scenarios:
+            raise ValueError(f"Unknown scenario: {scenario_key}")
 
-        all_results = []
+        scenario = self.predefined_scenarios[scenario_key]
 
-        for _ in range(num_simulations):
-            # Start with the original scenario
-            current_scenario = starting_scenario
-            chain = [current_scenario]
-            total_impact = self.scenario_chains[current_scenario]["initial_impact"].copy()
-            timeline = [0]  # days since the start of the first event
+        # Default asset class mapping if not provided
+        if asset_mapping is None:
+            asset_mapping = self._get_default_asset_mapping()
 
-            # Continue the chain as long as there are subsequent events
-            while current_scenario in self.scenario_chains and "leads_to" in self.scenario_chains[current_scenario]:
-                next_events = self.scenario_chains[current_scenario]["leads_to"]
-
-                # If there are no subsequent events, end the chain
-                if not next_events:
-                    break
-
-                # For each possible subsequent event
-                triggered_next = False
-                for next_event in next_events:
-                    # Determine whether an event will occur (based on probability)
-                    if random.random() < next_event["probability"]:
-                        current_scenario = next_event["scenario"]
-                        chain.append(current_scenario)
-                        timeline.append(timeline[-1] + next_event["delay"])
-
-                        # Sum up the influence, taking into account the strength modifier
-                        for factor, impact in self.scenario_chains[current_scenario]["initial_impact"].items():
-                            if factor in total_impact:
-                                total_impact[factor] += impact * next_event["magnitude_modifier"]
-                            else:
-                                total_impact[factor] = impact * next_event["magnitude_modifier"]
-
-                        triggered_next = True
-                        break
-
-                # If none of the subsequent events triggered, terminate the chain
-                if not triggered_next:
-                    break
-
-            all_results.append({
-                "chain": chain,
-                "timeline": timeline,
-                "total_impact": total_impact
-            })
-
-        # Analyze simulation results
-        chain_counts = {}
-        for result in all_results:
-            chain_str = " -> ".join([self.scenario_chains[s]["name"] for s in result["chain"]])
-            chain_counts[chain_str] = chain_counts.get(chain_str, 0) + 1
-
-        impacts = {}
-        for result in all_results:
-            for factor, value in result["total_impact"].items():
-                if factor not in impacts:
-                    impacts[factor] = []
-                impacts[factor].append(value)
-
-        # Calculate impact statistics
-        impact_stats = {}
-        for factor, values in impacts.items():
-            impact_stats[factor] = {
-                "mean": np.mean(values),
-                "median": np.median(values),
-                "p5": np.percentile(values, 5),
-                "p95": np.percentile(values, 95)
-            }
-
-        # Sort chains by frequency
-        sorted_chains = sorted(chain_counts.items(), key=lambda x: x[1], reverse=True)
-        most_common_chains = [{"chain": chain, "frequency": count, "percentage": count / num_simulations * 100}
-                              for chain, count in sorted_chains[:10]]
-
-        return {
-            "starting_scenario": starting_scenario,
-            "num_simulations": num_simulations,
-            "all_results": all_results,
-            "most_common_chains": most_common_chains,
-            "impact_statistics": impact_stats
-        }
-
-    def visualize_scenario_chains(self, chain_results: List[Dict]) -> Dict:
-        """
-        Creates data for visualizing scenario chains.
-
-        Args:
-            chain_results: Results from simulate_scenario_chain
-
-        Returns:
-            Dictionary with visualization data
-        """
-        if not chain_results:
-            return {'error': 'No chain results provided'}
-
-        # Counting transitions between scenarios
-        transitions = {}
-        for result in chain_results:
-            chain = result["chain"]
-            for i in range(len(chain) - 1):
-                from_scenario = chain[i]
-                to_scenario = chain[i + 1]
-                key = (from_scenario, to_scenario)
-                transitions[key] = transitions.get(key, 0) + 1
-
-        # Creating data for a sankey chart
-        source = []
-        target = []
-        value = []
-
-        # We collect unique scenarios
-        all_scenarios = set()
-        for from_s, to_s in transitions.keys():
-            all_scenarios.add(from_s)
-            all_scenarios.add(to_s)
-
-        # Create a mapping of scenarios to indices
-        scenario_indices = {scenario: i for i, scenario in enumerate(all_scenarios)}
-
-        # Collecting data for the chart
-        for (from_s, to_s), count in transitions.items():
-            source.append(scenario_indices[from_s])
-            target.append(scenario_indices[to_s])
-            value.append(count)
-
-        labels = [self.scenario_chains[s]["name"] for s in all_scenarios]
-
-        return {
-            "sankey_data": {
-                "source": source,
-                "target": target,
-                "value": value,
-                "labels": labels
-            }
-        }
-
-    def evaluate_portfolio_impact(
-            self,
-            portfolio_data: Dict,
-            scenario_key: str,
-            sector_mappings: Dict[str, str] = None
-    ) -> Dict:
-        """
-        Evaluate the impact of a scenario on a portfolio.
-
-        Args:
-            portfolio_data: Dictionary with portfolio data
-            scenario_key: Scenario key
-            sector_mappings: Dictionary mapping sectors to impact factors
-
-        Returns:
-            Dictionary with impact analysis
-        """
-        if scenario_key not in self.scenario_chains:
-            return {'error': f'Unknown scenario: {scenario_key}'}
-
-        if 'assets' not in portfolio_data or not portfolio_data['assets']:
-            return {'error': 'Invalid portfolio data'}
-
-        # Get scenario data
-        scenario = self.scenario_chains[scenario_key]
-        initial_impact = scenario['initial_impact']
-
-        # Default sector mappings if not provided
-        if sector_mappings is None:
-            sector_mappings = {
-                'Technology': 'tech_stocks',
-                'Financials': 'financials',
-                'Real Estate': 'real_estate',
-                'Consumer Discretionary': 'consumer_discretionary',
-                'Consumer Staples': 'consumer_staples',
-                'Energy': 'energy',
-                'Materials': 'materials',
-                'Industrials': 'industrials',
-                'Utilities': 'utilities',
-                'Health Care': 'health_care',
-                'Communication Services': 'communication_services'
-            }
-
-        # Calculate impact on each asset
+        # Calculate portfolio impact
+        total_impact = 0.0
         asset_impacts = {}
-        total_portfolio_impact = 0
 
-        for asset in portfolio_data['assets']:
-            ticker = asset['ticker']
-            weight = asset.get('weight', 0)
-            sector = asset.get('sector', 'Unknown')
+        for ticker, weight in portfolio_weights.items():
+            # Determine asset class
+            asset_class = asset_mapping.get(ticker, "equity")  # Default to equity
 
-            asset_impact = 0
-            impact_factors = []
-
-            # Add market impact if available
-            if 'market' in initial_impact:
-                asset_impact += initial_impact['market']
-                impact_factors.append(('market', initial_impact['market']))
-
-            # Add sector-specific impact if available
-            if sector in sector_mappings and sector_mappings[sector] in initial_impact:
-                impact_factor = sector_mappings[sector]
-                sector_impact = initial_impact[impact_factor]
-                asset_impact += sector_impact
-                impact_factors.append((sector, sector_impact))
-
-            # Add asset-specific impact if available
-            if ticker.lower() in initial_impact:
-                ticker_impact = initial_impact[ticker.lower()]
-                asset_impact += ticker_impact
-                impact_factors.append((ticker, ticker_impact))
+            # Get scenario impact for this asset class
+            class_impact = scenario["impact"].get(asset_class, scenario["impact"]["equity"])
 
             # Calculate weighted impact
-            weighted_impact = asset_impact * weight
-            total_portfolio_impact += weighted_impact
+            weighted_impact = weight * class_impact
+            total_impact += weighted_impact
 
             asset_impacts[ticker] = {
-                'weight': weight,
-                'sector': sector,
-                'impact': asset_impact,
-                'weighted_impact': weighted_impact,
-                'impact_factors': impact_factors
+                "asset_class": asset_class,
+                "class_impact": class_impact,
+                "weight": weight,
+                "weighted_impact": weighted_impact,
+                "estimated_loss": portfolio_value * weight * class_impact
             }
 
+        # Calculate portfolio values
+        portfolio_loss = portfolio_value * total_impact
+        portfolio_value_after = portfolio_value + portfolio_loss
+
         return {
-            'scenario': scenario_key,
-            'scenario_name': scenario['name'],
-            'total_portfolio_impact': total_portfolio_impact,
-            'asset_impacts': asset_impacts
+            "scenario": scenario,
+            "portfolio_impact": {
+                "initial_value": portfolio_value,
+                "total_impact_pct": total_impact,
+                "total_loss": portfolio_loss,
+                "value_after_scenario": portfolio_value_after,
+                "recovery_estimate_days": self._estimate_recovery_time(total_impact, scenario)
+            },
+            "asset_impacts": asset_impacts,
+            "scenario_duration_days": scenario["duration_days"],
+            "scenario_probability": scenario["probability"]
         }
+
+    def create_scenario_chain(
+            self,
+            name: str,
+            initial_scenario: str,
+            chain_scenarios: List[Dict[str, Any]],
+            description: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Create a chain of scenarios (one leading to another).
+
+        Args:
+            name: Name for the scenario chain
+            initial_scenario: Starting scenario key
+            chain_scenarios: List of follow-up scenarios with probabilities
+            description: Optional description
+
+        Returns:
+            Dictionary with the created scenario chain
+        """
+        scenario_chain = {
+            "name": name,
+            "description": description or f"Scenario chain starting with {initial_scenario}",
+            "initial_scenario": initial_scenario,
+            "chain": chain_scenarios,
+            "created_at": datetime.now().isoformat(),
+            "total_probability": self._calculate_chain_probability(initial_scenario, chain_scenarios)
+        }
+
+        # Store the chain
+        self.scenario_chains[name] = scenario_chain
+
+        logger.info(f"Created scenario chain: {name}")
+        return scenario_chain
+
+    def simulate_scenario_chain(
+            self,
+            chain_name: str,
+            portfolio_weights: Dict[str, float],
+            portfolio_value: float = 100000,
+            asset_mapping: Optional[Dict[str, str]] = None
+    ) -> Dict[str, Any]:
+        """
+        Simulate the impact of a complete scenario chain.
+
+        Args:
+            chain_name: Name of the scenario chain
+            portfolio_weights: Dictionary of asset weights
+            portfolio_value: Initial portfolio value
+            asset_mapping: Mapping of tickers to asset classes
+
+        Returns:
+            Dictionary with chain simulation results
+        """
+        if chain_name not in self.scenario_chains:
+            raise ValueError(f"Unknown scenario chain: {chain_name}")
+
+        chain = self.scenario_chains[chain_name]
+
+        # Simulate initial scenario
+        current_value = portfolio_value
+        current_weights = portfolio_weights.copy()
+        simulation_steps = []
+
+        # Step 1: Initial scenario
+        initial_result = self.simulate_scenario_impact(
+            current_weights,
+            chain["initial_scenario"],
+            current_value,
+            asset_mapping
+        )
+
+        simulation_steps.append({
+            "step": 1,
+            "scenario_key": chain["initial_scenario"],
+            "scenario_name": initial_result["scenario"]["name"],
+            "result": initial_result
+        })
+
+        current_value = initial_result["portfolio_impact"]["value_after_scenario"]
+
+        # Simulate follow-up scenarios
+        for i, follow_up in enumerate(chain["chain"], start=2):
+            scenario_key = follow_up["scenario"]
+            occurs = follow_up.get("probability", 1.0) > np.random.random()
+
+            if occurs:
+                step_result = self.simulate_scenario_impact(
+                    current_weights,
+                    scenario_key,
+                    current_value,
+                    asset_mapping
+                )
+
+                simulation_steps.append({
+                    "step": i,
+                    "scenario_key": scenario_key,
+                    "scenario_name": step_result["scenario"]["name"],
+                    "occurred": True,
+                    "result": step_result
+                })
+
+                current_value = step_result["portfolio_impact"]["value_after_scenario"]
+            else:
+                simulation_steps.append({
+                    "step": i,
+                    "scenario_key": scenario_key,
+                    "occurred": False,
+                    "skipped_probability": follow_up.get("probability", 1.0)
+                })
+
+        # Calculate total impact
+        total_impact_pct = (current_value - portfolio_value) / portfolio_value
+
+        return {
+            "chain_name": chain_name,
+            "chain_info": chain,
+            "simulation_steps": simulation_steps,
+            "final_result": {
+                "initial_value": portfolio_value,
+                "final_value": current_value,
+                "total_impact_pct": total_impact_pct,
+                "total_loss": current_value - portfolio_value,
+                "steps_occurred": sum(1 for step in simulation_steps if step.get("occurred", True))
+            }
+        }
+
+    def analyze_scenario_correlations(
+            self,
+            scenario_keys: List[str]
+    ) -> Dict[str, Any]:
+        """
+        Analyze correlations between different scenarios.
+
+        Args:
+            scenario_keys: List of scenario keys to analyze
+
+        Returns:
+            Dictionary with correlation analysis
+        """
+        if not all(key in self.predefined_scenarios for key in scenario_keys):
+            unknown = [key for key in scenario_keys if key not in self.predefined_scenarios]
+            raise ValueError(f"Unknown scenarios: {unknown}")
+
+        # Create impact matrix
+        asset_classes = ["equity", "bonds", "commodities", "real_estate", "crypto"]
+        impact_matrix = []
+
+        for scenario_key in scenario_keys:
+            scenario = self.predefined_scenarios[scenario_key]
+            impacts = [scenario["impact"].get(asset_class, 0) for asset_class in asset_classes]
+            impact_matrix.append(impacts)
+
+        # Calculate correlation matrix
+        impact_df = pd.DataFrame(impact_matrix, index=scenario_keys, columns=asset_classes)
+        correlation_matrix = impact_df.T.corr()  # Correlate scenarios
+
+        return {
+            "scenarios": scenario_keys,
+            "asset_classes": asset_classes,
+            "impact_matrix": impact_df.to_dict(),
+            "correlation_matrix": correlation_matrix.to_dict(),
+            "highly_correlated_pairs": self._find_correlated_pairs(correlation_matrix, threshold=0.7)
+        }
+
+    def get_scenario_chain(self, name: str) -> Optional[Dict[str, Any]]:
+        """Get a specific scenario chain by name."""
+        return self.scenario_chains.get(name)
+
+    def list_scenario_chains(self) -> List[Dict[str, str]]:
+        """List all created scenario chains."""
+        return [
+            {
+                "name": name,
+                "description": chain["description"],
+                "initial_scenario": chain["initial_scenario"],
+                "created_at": chain["created_at"]
+            }
+            for name, chain in self.scenario_chains.items()
+        ]
+
+    def delete_scenario_chain(self, name: str) -> bool:
+        """Delete a scenario chain."""
+        if name in self.scenario_chains:
+            del self.scenario_chains[name]
+            logger.info(f"Deleted scenario chain: {name}")
+            return True
+        return False
+
+    def _get_default_asset_mapping(self) -> Dict[str, str]:
+        """Get default mapping of common tickers to asset classes."""
+        return {
+            # Equity ETFs/Indices
+            "SPY": "equity", "QQQ": "equity", "VTI": "equity", "IWM": "equity",
+            "VEA": "equity", "VWO": "equity", "EFA": "equity", "EEM": "equity",
+
+            # Bond ETFs
+            "BND": "bonds", "AGG": "bonds", "TLT": "bonds", "IEF": "bonds",
+            "LQD": "bonds", "HYG": "bonds", "EMB": "bonds",
+
+            # Commodities
+            "GLD": "commodities", "SLV": "commodities", "USO": "commodities",
+            "UNG": "commodities", "DBA": "commodities", "DBC": "commodities",
+
+            # Real Estate
+            "VNQ": "real_estate", "IYR": "real_estate", "REIT": "real_estate",
+
+            # Crypto
+            "BTC": "crypto", "ETH": "crypto", "GBTC": "crypto"
+        }
+
+    def _estimate_recovery_time(self, impact: float, scenario: Dict[str, Any]) -> int:
+        """Estimate recovery time based on impact severity and scenario type."""
+        base_duration = scenario["duration_days"]
+        impact_severity = abs(impact)
+
+        # Recovery is typically 2-5x the crisis duration
+        if impact_severity > 0.3:  # Severe crisis
+            recovery_multiplier = 5
+        elif impact_severity > 0.2:  # Major crisis
+            recovery_multiplier = 3
+        elif impact_severity > 0.1:  # Moderate crisis
+            recovery_multiplier = 2
+        else:  # Minor crisis
+            recovery_multiplier = 1
+
+        return int(base_duration * recovery_multiplier)
+
+    def _calculate_chain_probability(
+            self,
+            initial_scenario: str,
+            chain_scenarios: List[Dict[str, Any]]
+    ) -> float:
+        """Calculate the total probability of a scenario chain occurring."""
+        initial_prob = self.predefined_scenarios[initial_scenario]["probability"]
+
+        chain_prob = initial_prob
+        for scenario in chain_scenarios:
+            scenario_prob = scenario.get("probability", 1.0)
+            chain_prob *= scenario_prob
+
+        return chain_prob
+
+    def _find_correlated_pairs(
+            self,
+            correlation_matrix: pd.DataFrame,
+            threshold: float = 0.7
+    ) -> List[Dict[str, Any]]:
+        """Find highly correlated scenario pairs."""
+        correlated_pairs = []
+
+        for i in range(len(correlation_matrix.columns)):
+            for j in range(i + 1, len(correlation_matrix.columns)):
+                corr_value = correlation_matrix.iloc[i, j]
+                if abs(corr_value) > threshold:
+                    correlated_pairs.append({
+                        "scenario_1": correlation_matrix.columns[i],
+                        "scenario_2": correlation_matrix.columns[j],
+                        "correlation": corr_value,
+                        "relationship": "positive" if corr_value > 0 else "negative"
+                    })
+
+        return sorted(correlated_pairs, key=lambda x: abs(x["correlation"]), reverse=True)
