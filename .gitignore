@@ -9,20 +9,15 @@ __pycache__/
 .venv/
 
 # --- Node / React ---
-# Игнорируем node_modules и lock-файлы в любом месте
 node_modules/
 frontend/node_modules/
-**/node_modules/
-**/package-lock.json
-**/yarn.lock
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Кэш сборки и временные файлы
-dist/
-build/
-.env
+# Lock файлы (оставь только если не хочешь фиксировать версии)
+# **/package-lock.json
+# **/yarn.lock
 
 # --- Streamlit ---
 .streamlit/
