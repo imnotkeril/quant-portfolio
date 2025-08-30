@@ -1,6 +1,6 @@
 """
 Portfolio Creation page - Create and configure investment portfolios.
-Advanced portfolio builder with validation and real-time data.
+ДОБАВЛЕНО: Автоматическое распределение средств с расчетом количества акций.
 """
 import streamlit as st
 import pandas as pd
@@ -103,8 +103,76 @@ def get_ticker_info(ticker):
         st.warning(f"Could not fetch data for {ticker}: {str(e)}")
         return None
 
+def calculate_shares_allocation(portfolio_amount, assets):
+    """
+    Calculate actual shares and cash remainder for portfolio.
+
+    Args:
+        portfolio_amount: Total amount to invest
+        assets: List of assets with weights and current prices
+
+    Returns:
+        Dictionary with allocation details
+    """
+    try:
+        allocations = {}
+        total_invested = 0
+
+        for asset in assets:
+            ticker = asset['ticker']
+            target_weight = asset['weight'] / 100.0  # Convert % to decimal
+            current_price = asset.get('info', {}).get('current_price', 0)
+
+            if current_price <= 0:
+                # If no price data, skip this asset
+                allocations[ticker] = {
+                    'shares': 0,
+                    'amount': 0,
+                    'weight_actual': 0,
+                    'target_amount': portfolio_amount * target_weight,
+                    'price_missing': True
+                }
+                continue
+
+            # Calculate target allocation amount
+            target_amount = portfolio_amount * target_weight
+
+            # Calculate number of shares (round down to whole shares)
+            shares = int(target_amount / current_price)
+
+            # Calculate actual amount invested
+            actual_amount = shares * current_price
+
+            # Calculate actual weight
+            actual_weight = (actual_amount / portfolio_amount) if portfolio_amount > 0 else 0
+
+            allocations[ticker] = {
+                'shares': shares,
+                'amount': actual_amount,
+                'weight_actual': actual_weight * 100,  # Convert back to %
+                'target_amount': target_amount,
+                'current_price': current_price,
+                'price_missing': False
+            }
+
+            total_invested += actual_amount
+
+        cash_remainder = portfolio_amount - total_invested
+
+        return {
+            'allocations': allocations,
+            'cash_remainder': cash_remainder,
+            'total_invested': total_invested,
+            'total_amount': portfolio_amount,
+            'investment_ratio': (total_invested / portfolio_amount) if portfolio_amount > 0 else 0
+        }
+
+    except Exception as e:
+        st.error(f"Error calculating shares allocation: {str(e)}")
+        return None
+
 def show_portfolio_form():
-    """Show portfolio creation form."""
+    """Show portfolio creation form with amount field."""
     create_section_header("📝 Portfolio Details", "", "Enter basic portfolio information")
 
     col1, col2 = st.columns([2, 1])
@@ -124,6 +192,21 @@ def show_portfolio_form():
             height=100
         )
 
+        # ДОБАВЛЕНО: Portfolio Amount field
+        col_amount, col_currency = st.columns([3, 1])
+        with col_amount:
+            portfolio_amount = st.number_input(
+                "Portfolio Amount *",
+                min_value=100.0,
+                max_value=10000000.0,
+                value=10000.0,
+                step=100.0,
+                help="Total amount to invest in this portfolio"
+            )
+        with col_currency:
+            st.write("")  # Spacing
+            st.write("**USD**")  # Currency display
+
         # Portfolio tags
         portfolio_tags = st.text_input(
             "Tags (comma-separated)",
@@ -142,12 +225,19 @@ def show_portfolio_form():
                 <li>Diversify across sectors and asset classes</li>
                 <li>Start with 5-15 positions for good diversification</li>
             </ul>
+            <h4>💰 Amount Guidelines</h4>
+            <ul>
+                <li><strong>$1,000-$5,000:</strong> 3-5 positions</li>
+                <li><strong>$5,000-$25,000:</strong> 5-10 positions</li>
+                <li><strong>$25,000+:</strong> 10-20 positions</li>
+            </ul>
         </div>
         """, unsafe_allow_html=True)
 
     return {
         'name': portfolio_name,
         'description': portfolio_description,
+        'amount': portfolio_amount,
         'tags': [tag.strip() for tag in portfolio_tags.split(',') if tag.strip()] if portfolio_tags else []
     }
 
@@ -285,6 +375,95 @@ def show_asset_builder():
 
     return st.session_state.portfolio_assets
 
+def show_shares_allocation():
+    """НОВАЯ ФУНКЦИЯ: Show calculated shares allocation."""
+    if not st.session_state.portfolio_assets or not st.session_state.get('portfolio_form', {}).get('amount'):
+        return
+
+    create_section_header("💰 Shares Allocation", "", "Calculated number of shares and cash remainder")
+
+    portfolio_amount = st.session_state.portfolio_form['amount']
+
+    # Calculate shares allocation
+    allocation_result = calculate_shares_allocation(portfolio_amount, st.session_state.portfolio_assets)
+
+    if not allocation_result:
+        st.error("Unable to calculate shares allocation")
+        return
+
+    # Summary metrics
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        st.markdown(get_metric_card_html(
+            "Total Amount",
+            f"${allocation_result['total_amount']:,.0f}",
+            "Portfolio value",
+            "neutral"
+        ), unsafe_allow_html=True)
+
+    with col2:
+        st.markdown(get_metric_card_html(
+            "Invested",
+            f"${allocation_result['total_invested']:,.0f}",
+            f"{allocation_result['investment_ratio']*100:.1f}% of total",
+            "positive"
+        ), unsafe_allow_html=True)
+
+    with col3:
+        cash_color = "warning" if allocation_result['cash_remainder'] > allocation_result['total_amount'] * 0.1 else "neutral"
+        st.markdown(get_metric_card_html(
+            "Cash Remainder",
+            f"${allocation_result['cash_remainder']:,.0f}",
+            f"{(allocation_result['cash_remainder']/allocation_result['total_amount'])*100:.1f}% cash",
+            cash_color
+        ), unsafe_allow_html=True)
+
+    with col4:
+        assets_count = len([a for a in allocation_result['allocations'].values() if a['shares'] > 0])
+        st.markdown(get_metric_card_html(
+            "Assets Bought",
+            str(assets_count),
+            f"Out of {len(st.session_state.portfolio_assets)}",
+            "positive" if assets_count == len(st.session_state.portfolio_assets) else "warning"
+        ), unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # Detailed allocation table
+    st.markdown("### 📊 Detailed Allocation")
+
+    # Create DataFrame for better display
+    allocation_data = []
+    for ticker, alloc in allocation_result['allocations'].items():
+        allocation_data.append({
+            'Ticker': ticker,
+            'Current Price': f"${alloc['current_price']:.2f}" if not alloc['price_missing'] else "N/A",
+            'Target %': f"{[a['weight'] for a in st.session_state.portfolio_assets if a['ticker'] == ticker][0]:.1f}%",
+            'Target Amount': f"${alloc['target_amount']:,.0f}",
+            'Shares': alloc['shares'],
+            'Actual Amount': f"${alloc['amount']:,.0f}",
+            'Actual %': f"{alloc['weight_actual']:.1f}%",
+            'Difference': f"${alloc['target_amount'] - alloc['amount']:+,.0f}"
+        })
+
+    if allocation_data:
+        df = pd.DataFrame(allocation_data)
+        st.dataframe(df, use_container_width=True)
+
+    # Show warnings for assets that couldn't be bought
+    missed_assets = [ticker for ticker, alloc in allocation_result['allocations'].items()
+                    if alloc['shares'] == 0 and not alloc['price_missing']]
+
+    if missed_assets:
+        st.warning(f"⚠️ Cannot buy shares for: {', '.join(missed_assets)} (insufficient allocation or high price)")
+
+    price_missing_assets = [ticker for ticker, alloc in allocation_result['allocations'].items()
+                           if alloc['price_missing']]
+
+    if price_missing_assets:
+        st.error(f"❌ Price data missing for: {', '.join(price_missing_assets)}")
+
 def show_portfolio_preview():
     """Show portfolio preview and analytics."""
     if not st.session_state.portfolio_assets:
@@ -359,15 +538,17 @@ def create_portfolio():
         # Create portfolio data structure in the format expected by backend
         portfolio_id = f"portfolio_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
+        # ОБНОВЛЕНО: Добавляем portfolio_amount в данные портфеля
         portfolio_data = {
             'id': portfolio_id,
             'name': st.session_state.portfolio_form['name'],
             'description': st.session_state.portfolio_form['description'],
+            'portfolio_amount': st.session_state.portfolio_form['amount'],  # НОВОЕ поле
             'tags': st.session_state.portfolio_form['tags'],
             'assets': {},
             'created_at': datetime.now().isoformat(),
             'updated_at': datetime.now().isoformat(),
-            'last_updated': datetime.now().isoformat(),  # Add this field that backend expects
+            'last_updated': datetime.now().isoformat(),
             'total_weight': 0
         }
 
@@ -378,7 +559,10 @@ def create_portfolio():
             portfolio_data['assets'][asset['ticker']] = {
                 'ticker': asset['ticker'],
                 'weight': weight_decimal,
-                'added_at': datetime.now().isoformat()
+                'added_at': datetime.now().isoformat(),
+                # ДОБАВЛЕНО: Сохраняем информацию о ценах и расчетах
+                'current_price': asset.get('info', {}).get('current_price') if asset.get('info') else None,
+                'price_date': datetime.now().isoformat()
             }
             total_weight += weight_decimal
 
@@ -400,38 +584,7 @@ def create_portfolio():
 
         except Exception as storage_error:
             st.error(f"❌ Storage error: {str(storage_error)}")
-
-            # Fallback: try portfolio manager with dict (some versions may accept it)
-            try:
-                # Create a mock portfolio object structure
-                class MockPortfolio:
-                    def __init__(self, data):
-                        self.id = data['id']
-                        self.name = data['name']
-                        self.description = data['description']
-                        self.tags = data['tags']
-                        self.assets = data['assets']
-                        self.created_at = data['created_at']
-                        self.updated_at = data['updated_at']
-
-                    def to_dict(self):
-                        return {
-                            'id': self.id,
-                            'name': self.name,
-                            'description': self.description,
-                            'tags': self.tags,
-                            'assets': self.assets,
-                            'created_at': self.created_at,
-                            'updated_at': self.updated_at
-                        }
-
-                mock_portfolio = MockPortfolio(portfolio_data)
-                filename = portfolio_manager.save_portfolio(mock_portfolio)
-                return True, filename
-
-            except Exception as fallback_error:
-                st.error(f"❌ Fallback save failed: {str(fallback_error)}")
-                return False, None
+            return False, None
 
     except Exception as e:
         st.error(f"❌ Failed to create portfolio: {str(e)}")
@@ -450,8 +603,13 @@ def show_creation_actions():
     with col1:
         if st.button("💾 Save Portfolio", type="primary", use_container_width=True):
             # Validate portfolio form
-            if not st.session_state.get('portfolio_form', {}).get('name'):
+            form_data = st.session_state.get('portfolio_form', {})
+            if not form_data.get('name'):
                 st.error("❌ Portfolio name is required")
+                return
+
+            if not form_data.get('amount') or form_data.get('amount') <= 0:
+                st.error("❌ Portfolio amount is required and must be positive")
                 return
 
             # Check if we have assets
@@ -471,8 +629,9 @@ def show_creation_actions():
                     # Show portfolio summary
                     total_assets = len(st.session_state.portfolio_assets)
                     total_weight = sum(asset['weight'] for asset in st.session_state.portfolio_assets)
+                    portfolio_amount = st.session_state.portfolio_form['amount']
 
-                    st.success(f"📊 Portfolio Summary: {total_assets} assets, {total_weight:.1f}% allocated")
+                    st.success(f"💰 Portfolio: ${portfolio_amount:,.0f} across {total_assets} assets ({total_weight:.1f}% allocated)")
 
                     # Clear session state after successful creation
                     if st.button("🔄 Create Another Portfolio", use_container_width=True):
@@ -482,14 +641,6 @@ def show_creation_actions():
                         st.rerun()
                 else:
                     st.error("❌ Failed to create portfolio. Please check the error messages above.")
-
-                    # Show debug info
-                    with st.expander("🔧 Debug Information"):
-                        st.json({
-                            "portfolio_form": st.session_state.get('portfolio_form', {}),
-                            "portfolio_assets_count": len(st.session_state.portfolio_assets),
-                            "first_asset": st.session_state.portfolio_assets[0] if st.session_state.portfolio_assets else None
-                        })
 
     with col2:
         if st.button("🎲 Quick Diversified Portfolio", use_container_width=True):
@@ -562,6 +713,10 @@ def main():
     if portfolio_assets:
         st.markdown("---")
         show_portfolio_preview()
+
+        # НОВАЯ СЕКЦИЯ: Показываем расчет количества акций
+        st.markdown("---")
+        show_shares_allocation()
 
         st.markdown("---")
         show_creation_actions()
