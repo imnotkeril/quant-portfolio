@@ -179,3 +179,22 @@ SUPPORTED_FORMATS = {
     "exports": [".pdf", ".xlsx", ".csv"],
     "images": [".png", ".jpg", ".svg"]
 }
+
+# Chart configuration
+CHART_CONFIG = {
+    "theme": "plotly_dark",
+    "default_height": 400,
+    "default_width": None,
+    "show_legend": True,
+    "grid_color": COLORS["grid_lines"],
+    "paper_bgcolor": COLORS["chart_background"],
+    "plot_bgcolor": COLORS["chart_background"],
+    "font_color": COLORS["text_primary"],
+    "font_family": "Inter",
+    "margin": {
+        "l": 50,
+        "r": 50,
+        "t": 50,
+        "b": 50
+    }
+}
