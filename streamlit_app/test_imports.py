@@ -18,7 +18,7 @@ try:
         validate_ticker,
         generate_portfolio_id,
         normalize_weights,
-        set_cached_data,
+        cache_data,  # ← ИСПРАВЛЕНО
         get_cached_data,
         COLORS,
         apply_custom_css,

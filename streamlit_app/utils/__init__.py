@@ -31,13 +31,14 @@ from .validators import (
     validate_text_portfolio
 )
 
+
 # Import all helpers
 from .helpers import (
     generate_portfolio_id,
     normalize_weights,
     calculate_portfolio_value,
     convert_weights_to_shares,
-    set_cached_data,
+    cache_data,  # ← ИСПРАВЛЕНО
     get_cached_data,
     clear_cache,
     serialize_for_json,
@@ -111,7 +112,7 @@ __all__ = [
     "normalize_weights",
     "calculate_portfolio_value",
     "convert_weights_to_shares",
-    "set_cached_data",
+    "cache_data",  # ← ИСПРАВЛЕНО
     "get_cached_data",
     "clear_cache",
     "serialize_for_json",
