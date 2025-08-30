@@ -1,1 +1,581 @@
-/* Component-specific CSS */
+/**
+ * Component-specific CSS for Wild Market Capital Streamlit app
+ * Styles for metrics cards, charts, tables, and other UI components
+ */
+
+/* Metrics Cards - Enhanced from Python styling */
+.metric-card {
+  background: linear-gradient(135deg, var(--wmc-surface) 0%, var(--wmc-surface-secondary) 100%);
+  padding: var(--wmc-spacing-lg);
+  border-radius: var(--wmc-radius-lg);
+  border: 1px solid var(--wmc-border);
+  box-shadow: var(--wmc-shadow-md);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: var(--wmc-spacing-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--wmc-primary), var(--wmc-secondary));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--wmc-shadow-lg);
+  border-color: var(--wmc-primary);
+}
+
+.metric-card:hover::before {
+  opacity: 1;
+}
+
+.metric-header {
+  display: flex;
+  align-items: center;
+  gap: var(--wmc-spacing-sm);
+  margin-bottom: var(--wmc-spacing-sm);
+}
+
+.metric-icon {
+  font-size: var(--wmc-font-size-lg);
+  opacity: 0.8;
+}
+
+.metric-title {
+  font-size: var(--wmc-font-size-xs);
+  font-weight: 600;
+  color: var(--wmc-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.metric-value {
+  font-size: var(--wmc-font-size-2xl);
+  font-weight: 700;
+  color: var(--wmc-text-primary);
+  margin: var(--wmc-spacing-sm) 0;
+  font-family: 'Inter', monospace;
+  line-height: 1.1;
+}
+
+.metric-delta {
+  font-size: var(--wmc-font-size-sm);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--wmc-spacing-xs);
+  margin-top: var(--wmc-spacing-xs);
+}
+
+.metric-delta.positive {
+  color: var(--wmc-success);
+}
+
+.metric-delta.positive::before {
+  content: '▲';
+  font-size: var(--wmc-font-size-xs);
+}
+
+.metric-delta.negative {
+  color: var(--wmc-danger);
+}
+
+.metric-delta.negative::before {
+  content: '▼';
+  font-size: var(--wmc-font-size-xs);
+}
+
+.metric-delta.neutral {
+  color: var(--wmc-text-muted);
+}
+
+.metric-delta.neutral::before {
+  content: '—';
+  font-size: var(--wmc-font-size-xs);
+}
+
+.metric-description {
+  font-size: var(--wmc-font-size-xs);
+  color: var(--wmc-text-muted);
+  margin-top: var(--wmc-spacing-xs);
+  line-height: 1.4;
+}
+
+/* Performance Grid Layout */
+.performance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--wmc-spacing-lg);
+  margin: var(--wmc-spacing-xl) 0;
+}
+
+.performance-grid .metric-card {
+  margin-bottom: 0;
+}
+
+/* Portfolio Summary Card */
+.portfolio-summary {
+  background: linear-gradient(135deg, var(--wmc-surface) 0%, var(--wmc-surface-secondary) 100%);
+  padding: var(--wmc-spacing-xl);
+  border-radius: var(--wmc-radius-lg);
+  margin: var(--wmc-spacing-lg) 0;
+  border: 1px solid var(--wmc-border);
+  box-shadow: var(--wmc-shadow-md);
+  position: relative;
+}
+
+.portfolio-summary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--wmc-primary), var(--wmc-secondary), var(--wmc-accent));
+}
+
+.portfolio-summary h2,
+.portfolio-summary h3 {
+  margin-bottom: var(--wmc-spacing-md);
+  color: var(--wmc-text-primary);
+}
+
+/* Analytics Section */
+.analytics-section {
+  background: linear-gradient(135deg, var(--wmc-surface) 0%, var(--wmc-surface-secondary) 100%);
+  border-radius: var(--wmc-radius-lg);
+  padding: var(--wmc-spacing-xl);
+  margin: var(--wmc-spacing-md) 0;
+  border: 1px solid var(--wmc-border);
+  box-shadow: var(--wmc-shadow-sm);
+}
+
+.analytics-section h3 {
+  margin-bottom: var(--wmc-spacing-md);
+  color: var(--wmc-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--wmc-spacing-sm);
+}
+
+.analytics-section h4 {
+  color: var(--wmc-text-primary);
+  margin-bottom: var(--wmc-spacing-sm);
+  font-size: var(--wmc-font-size-lg);
+}
+
+.analytics-section ul {
+  color: var(--wmc-text-secondary);
+  line-height: 1.6;
+  padding-left: var(--wmc-spacing-lg);
+}
+
+.analytics-section li {
+  margin-bottom: var(--wmc-spacing-xs);
+  position: relative;
+}
+
+.analytics-section li::marker {
+  color: var(--wmc-primary);
+}
+
+/* Hero Section */
+.hero-section {
+  text-align: center;
+  padding: var(--wmc-spacing-xl) var(--wmc-spacing-lg);
+  background: linear-gradient(135deg, var(--wmc-surface) 0%, var(--wmc-surface-secondary) 100%);
+  border-radius: var(--wmc-radius-lg);
+  margin: var(--wmc-spacing-xl) 0;
+  border: 1px solid var(--wmc-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, var(--wmc-primary)10, transparent 70%);
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.hero-section h1 {
+  font-size: var(--wmc-font-size-3xl);
+  margin-bottom: var(--wmc-spacing-md);
+  background: linear-gradient(135deg, var(--wmc-primary), var(--wmc-secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-section p {
+  font-size: var(--wmc-font-size-lg);
+  color: var(--wmc-text-secondary);
+  margin-bottom: var(--wmc-spacing-lg);
+  position: relative;
+  z-index: 1;
+}
+
+/* Status Indicators */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wmc-spacing-xs);
+  padding: var(--wmc-spacing-xs) var(--wmc-spacing-sm);
+  border-radius: var(--wmc-radius-xl);
+  font-size: var(--wmc-font-size-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-indicator.success {
+  background: rgba(116, 241, 116, 0.1);
+  color: var(--wmc-success);
+  border: 1px solid rgba(116, 241, 116, 0.2);
+}
+
+.status-indicator.danger {
+  background: rgba(250, 161, 164, 0.1);
+  color: var(--wmc-danger);
+  border: 1px solid rgba(250, 161, 164, 0.2);
+}
+
+.status-indicator.warning {
+  background: rgba(255, 245, 157, 0.1);
+  color: var(--wmc-warning);
+  border: 1px solid rgba(255, 245, 157, 0.2);
+}
+
+.status-indicator.info {
+  background: rgba(144, 191, 249, 0.1);
+  color: var(--wmc-info);
+  border: 1px solid rgba(144, 191, 249, 0.2);
+}
+
+.status-indicator::before {
+  content: '●';
+  font-size: 8px;
+  animation: wmc-pulse 2s infinite;
+}
+
+/* Progress Bar */
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--wmc-surface-secondary);
+  border-radius: var(--wmc-radius-xl);
+  overflow: hidden;
+  margin: var(--wmc-spacing-sm) 0;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--wmc-primary), var(--wmc-secondary));
+  border-radius: var(--wmc-radius-xl);
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.progress-bar-fill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: wmc-shimmer 2s infinite;
+}
+
+@keyframes wmc-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Data Tables Enhancements */
+.stDataFrame {
+  border-radius: var(--wmc-radius-md) !important;
+  overflow: hidden !important;
+  box-shadow: var(--wmc-shadow-sm) !important;
+  border: 1px solid var(--wmc-border) !important;
+}
+
+.stDataFrame table {
+  background: var(--wmc-surface) !important;
+  color: var(--wmc-text-primary) !important;
+  font-family: var(--wmc-font-family) !important;
+}
+
+.stDataFrame th {
+  background: var(--wmc-surface-secondary) !important;
+  color: var(--wmc-text-primary) !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  font-size: var(--wmc-font-size-xs) !important;
+  border-bottom: 2px solid var(--wmc-border) !important;
+}
+
+.stDataFrame td {
+  background: var(--wmc-surface) !important;
+  color: var(--wmc-text-secondary) !important;
+  border-bottom: 1px solid var(--wmc-border) !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.stDataFrame tr:hover td {
+  background: var(--wmc-surface-secondary) !important;
+}
+
+/* Chart Container Enhancements */
+.plotly-chart {
+  border-radius: var(--wmc-radius-md) !important;
+  overflow: hidden !important;
+  box-shadow: var(--wmc-shadow-sm) !important;
+  background: var(--wmc-surface) !important;
+  padding: var(--wmc-spacing-md) !important;
+  margin: var(--wmc-spacing-md) 0 !important;
+  border: 1px solid var(--wmc-border) !important;
+  transition: all 0.3s ease !important;
+}
+
+.plotly-chart:hover {
+  box-shadow: var(--wmc-shadow-md) !important;
+  border-color: var(--wmc-primary) !important;
+}
+
+/* Form Elements */
+.stSelectbox > div > div {
+  background: var(--wmc-surface) !important;
+  border: 1px solid var(--wmc-border) !important;
+  border-radius: var(--wmc-radius-md) !important;
+  color: var(--wmc-text-primary) !important;
+  font-family: var(--wmc-font-family) !important;
+}
+
+.stTextInput > div > div > input,
+.stNumberInput > div > div > input {
+  background: var(--wmc-surface) !important;
+  border: 1px solid var(--wmc-border) !important;
+  border-radius: var(--wmc-radius-md) !important;
+  color: var(--wmc-text-primary) !important;
+  font-family: var(--wmc-font-family) !important;
+  transition: all 0.2s ease !important;
+}
+
+.stTextInput > div > div > input:focus,
+.stNumberInput > div > div > input:focus {
+  border-color: var(--wmc-primary) !important;
+  box-shadow: 0 0 0 2px rgba(191, 159, 251, 0.2) !important;
+}
+
+/* Button Enhancements */
+.stButton > button {
+  background: linear-gradient(135deg, var(--wmc-primary) 0%, var(--wmc-secondary) 100%) !important;
+  color: var(--wmc-text-primary) !important;
+  border: none !important;
+  border-radius: var(--wmc-radius-md) !important;
+  padding: var(--wmc-spacing-sm) var(--wmc-spacing-lg) !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+  font-family: var(--wmc-font-family) !important;
+  text-transform: none !important;
+  letter-spacing: 0.025em !important;
+}
+
+.stButton > button:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: var(--wmc-shadow-md) !important;
+  filter: brightness(1.1) !important;
+}
+
+.stButton > button:active {
+  transform: translateY(0) !important;
+}
+
+/* Alert Enhancements */
+.stAlert {
+  border-radius: var(--wmc-radius-md) !important;
+  border: none !important;
+  font-family: var(--wmc-font-family) !important;
+  box-shadow: var(--wmc-shadow-sm) !important;
+}
+
+.stInfo {
+  background: linear-gradient(135deg, rgba(144, 191, 249, 0.1), rgba(144, 191, 249, 0.05)) !important;
+  border-left: 4px solid var(--wmc-info) !important;
+  color: var(--wmc-info) !important;
+}
+
+.stSuccess {
+  background: linear-gradient(135deg, rgba(116, 241, 116, 0.1), rgba(116, 241, 116, 0.05)) !important;
+  border-left: 4px solid var(--wmc-success) !important;
+  color: var(--wmc-success) !important;
+}
+
+.stWarning {
+  background: linear-gradient(135deg, rgba(255, 245, 157, 0.1), rgba(255, 245, 157, 0.05)) !important;
+  border-left: 4px solid var(--wmc-warning) !important;
+  color: var(--wmc-warning) !important;
+}
+
+.stError {
+  background: linear-gradient(135deg, rgba(250, 161, 164, 0.1), rgba(250, 161, 164, 0.05)) !important;
+  border-left: 4px solid var(--wmc-danger) !important;
+  color: var(--wmc-danger) !important;
+}
+
+/* Sidebar Enhancements */
+.css-1d391kg {
+  background: linear-gradient(180deg, var(--wmc-background) 0%, var(--wmc-surface-secondary) 100%) !important;
+  border-right: 1px solid var(--wmc-border) !important;
+}
+
+.sidebar .sidebar-content {
+  padding: var(--wmc-spacing-md) !important;
+}
+
+/* Loading Spinner */
+.stSpinner {
+  color: var(--wmc-primary) !important;
+}
+
+/* Expander Enhancements */
+.streamlit-expanderHeader {
+  background: var(--wmc-surface-secondary) !important;
+  color: var(--wmc-text-primary) !important;
+  border: 1px solid var(--wmc-border) !important;
+  border-radius: var(--wmc-radius-md) !important;
+  font-family: var(--wmc-font-family) !important;
+  font-weight: 500 !important;
+}
+
+.streamlit-expanderHeader:hover {
+  background: var(--wmc-surface) !important;
+  border-color: var(--wmc-primary) !important;
+}
+
+.streamlit-expanderContent {
+  background: var(--wmc-surface) !important;
+  border: 1px solid var(--wmc-border) !important;
+  border-top: none !important;
+  border-radius: 0 0 var(--wmc-radius-md) var(--wmc-radius-md) !important;
+}
+
+/* Tooltip */
+.tooltip {
+  position: relative;
+  cursor: help;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--wmc-surface-secondary);
+  color: var(--wmc-text-primary);
+  padding: var(--wmc-spacing-xs) var(--wmc-spacing-sm);
+  border-radius: var(--wmc-radius-sm);
+  font-size: var(--wmc-font-size-xs);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+  border: 1px solid var(--wmc-border);
+  box-shadow: var(--wmc-shadow-md);
+}
+
+.tooltip:hover::after {
+  opacity: 1;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .performance-grid {
+    grid-template-columns: 1fr;
+    gap: var(--wmc-spacing-md);
+  }
+
+  .metric-card {
+    padding: var(--wmc-spacing-md);
+  }
+
+  .metric-value {
+    font-size: var(--wmc-font-size-xl);
+  }
+
+  .hero-section h1 {
+    font-size: var(--wmc-font-size-2xl);
+  }
+
+  .analytics-section {
+    padding: var(--wmc-spacing-md);
+  }
+
+  .portfolio-summary {
+    padding: var(--wmc-spacing-md);
+  }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  .metric-card,
+  .stButton > button,
+  .plotly-chart {
+    transition: none !important;
+  }
+
+  .metric-card:hover {
+    transform: none !important;
+  }
+
+  .stButton > button:hover {
+    transform: none !important;
+  }
+}
+
+/* Focus indicators for keyboard navigation */
+.metric-card:focus-within {
+  outline: 2px solid var(--wmc-primary);
+  outline-offset: 2px;
+}
+
+/* Print styles for metrics */
+@media print {
+  .metric-card {
+    background: white !important;
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  .performance-grid {
+    display: block !important;
+  }
+
+  .metric-card {
+    display: inline-block !important;
+    width: 48% !important;
+    margin: 1% !important;
+  }
+}

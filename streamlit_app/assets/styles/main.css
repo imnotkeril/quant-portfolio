@@ -1,1 +1,395 @@
-/* Main CSS file for additional styling */
+/**
+ * Main CSS file for Wild Market Capital Streamlit app
+ * Additional styling to complement the Python styling module
+ */
+
+/* Import Google Fonts for Inter font family */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Root variables - Wild Market Capital color scheme */
+:root {
+  /* Main colors */
+  --wmc-background: #0D1015;
+  --wmc-surface: #1A1E24;
+  --wmc-surface-secondary: #161B22;
+  --wmc-primary: #BF9FFB;
+  --wmc-secondary: #90BFF9;
+  --wmc-accent: #FFF59D;
+
+  /* Text colors */
+  --wmc-text-primary: #FFFFFF;
+  --wmc-text-secondary: #D1D4DC;
+  --wmc-text-muted: #9CA3AF;
+
+  /* Status colors */
+  --wmc-success: #74F174;
+  --wmc-danger: #FAA1A4;
+  --wmc-warning: #FFF59D;
+  --wmc-info: #90BFF9;
+
+  /* Border and shadow colors */
+  --wmc-border: #2A2E39;
+  --wmc-border-light: #3C4043;
+  --wmc-shadow: rgba(0, 0, 0, 0.3);
+
+  /* Spacing */
+  --wmc-spacing-xs: 4px;
+  --wmc-spacing-sm: 8px;
+  --wmc-spacing-md: 16px;
+  --wmc-spacing-lg: 24px;
+  --wmc-spacing-xl: 32px;
+
+  /* Border radius */
+  --wmc-radius-sm: 4px;
+  --wmc-radius-md: 8px;
+  --wmc-radius-lg: 12px;
+  --wmc-radius-xl: 16px;
+
+  /* Typography */
+  --wmc-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --wmc-font-size-xs: 0.75rem;
+  --wmc-font-size-sm: 0.875rem;
+  --wmc-font-size-md: 1rem;
+  --wmc-font-size-lg: 1.125rem;
+  --wmc-font-size-xl: 1.25rem;
+  --wmc-font-size-2xl: 1.5rem;
+  --wmc-font-size-3xl: 2rem;
+}
+
+/* Global overrides for Streamlit elements */
+.stApp {
+  font-family: var(--wmc-font-family) !important;
+  background: var(--wmc-background) !important;
+  color: var(--wmc-text-primary) !important;
+}
+
+/* Main container styling */
+.main .block-container {
+  padding-top: var(--wmc-spacing-lg) !important;
+  max-width: 1400px !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--wmc-surface);
+  border-radius: var(--wmc-radius-sm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--wmc-border);
+  border-radius: var(--wmc-radius-sm);
+  border: 1px solid var(--wmc-surface-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--wmc-primary);
+}
+
+/* Enhanced text styling */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--wmc-font-family) !important;
+  color: var(--wmc-text-primary) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.025em !important;
+}
+
+/* Link styling */
+a {
+  color: var(--wmc-primary) !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+}
+
+a:hover {
+  color: var(--wmc-secondary) !important;
+  text-decoration: underline !important;
+}
+
+/* Code styling */
+code {
+  background: var(--wmc-surface-secondary) !important;
+  color: var(--wmc-accent) !important;
+  padding: var(--wmc-spacing-xs) var(--wmc-spacing-sm) !important;
+  border-radius: var(--wmc-radius-sm) !important;
+  font-family: 'Fira Code', 'Consolas', 'Monaco', monospace !important;
+  font-size: var(--wmc-font-size-sm) !important;
+}
+
+pre code {
+  display: block !important;
+  padding: var(--wmc-spacing-md) !important;
+  border: 1px solid var(--wmc-border) !important;
+  overflow-x: auto !important;
+}
+
+/* Selection styling */
+::selection {
+  background: var(--wmc-primary);
+  color: var(--wmc-background);
+}
+
+::-moz-selection {
+  background: var(--wmc-primary);
+  color: var(--wmc-background);
+}
+
+/* Focus states */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--wmc-primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* Loading animation keyframes */
+@keyframes wmc-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes wmc-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes wmc-bounce {
+  0%, 20%, 53%, 80%, 100% {
+    animation-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+    transform: translate3d(0,0,0);
+  }
+  40%, 43% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    animation-timing-function: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0,-1px,0);
+  }
+}
+
+@keyframes wmc-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes wmc-slide-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wmc-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Utility classes */
+.wmc-pulse {
+  animation: wmc-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.wmc-spin {
+  animation: wmc-spin 1s linear infinite;
+}
+
+.wmc-bounce {
+  animation: wmc-bounce 1s infinite;
+}
+
+.wmc-slide-in-right {
+  animation: wmc-slide-in-right 0.3s ease-out;
+}
+
+.wmc-slide-in-up {
+  animation: wmc-slide-in-up 0.3s ease-out;
+}
+
+.wmc-fade-in {
+  animation: wmc-fade-in 0.3s ease-out;
+}
+
+/* Text utilities */
+.wmc-text-xs { font-size: var(--wmc-font-size-xs) !important; }
+.wmc-text-sm { font-size: var(--wmc-font-size-sm) !important; }
+.wmc-text-md { font-size: var(--wmc-font-size-md) !important; }
+.wmc-text-lg { font-size: var(--wmc-font-size-lg) !important; }
+.wmc-text-xl { font-size: var(--wmc-font-size-xl) !important; }
+.wmc-text-2xl { font-size: var(--wmc-font-size-2xl) !important; }
+.wmc-text-3xl { font-size: var(--wmc-font-size-3xl) !important; }
+
+.wmc-text-primary { color: var(--wmc-text-primary) !important; }
+.wmc-text-secondary { color: var(--wmc-text-secondary) !important; }
+.wmc-text-muted { color: var(--wmc-text-muted) !important; }
+.wmc-text-success { color: var(--wmc-success) !important; }
+.wmc-text-danger { color: var(--wmc-danger) !important; }
+.wmc-text-warning { color: var(--wmc-warning) !important; }
+.wmc-text-info { color: var(--wmc-info) !important; }
+
+/* Background utilities */
+.wmc-bg-primary { background-color: var(--wmc-primary) !important; }
+.wmc-bg-secondary { background-color: var(--wmc-secondary) !important; }
+.wmc-bg-surface { background-color: var(--wmc-surface) !important; }
+.wmc-bg-surface-secondary { background-color: var(--wmc-surface-secondary) !important; }
+.wmc-bg-success { background-color: var(--wmc-success) !important; }
+.wmc-bg-danger { background-color: var(--wmc-danger) !important; }
+.wmc-bg-warning { background-color: var(--wmc-warning) !important; }
+.wmc-bg-info { background-color: var(--wmc-info) !important; }
+
+/* Border utilities */
+.wmc-border { border: 1px solid var(--wmc-border) !important; }
+.wmc-border-light { border: 1px solid var(--wmc-border-light) !important; }
+.wmc-border-primary { border: 1px solid var(--wmc-primary) !important; }
+.wmc-border-success { border: 1px solid var(--wmc-success) !important; }
+.wmc-border-danger { border: 1px solid var(--wmc-danger) !important; }
+.wmc-border-warning { border: 1px solid var(--wmc-warning) !important; }
+
+.wmc-border-t { border-top: 1px solid var(--wmc-border) !important; }
+.wmc-border-b { border-bottom: 1px solid var(--wmc-border) !important; }
+.wmc-border-l { border-left: 1px solid var(--wmc-border) !important; }
+.wmc-border-r { border-right: 1px solid var(--wmc-border) !important; }
+
+/* Spacing utilities */
+.wmc-m-0 { margin: 0 !important; }
+.wmc-m-xs { margin: var(--wmc-spacing-xs) !important; }
+.wmc-m-sm { margin: var(--wmc-spacing-sm) !important; }
+.wmc-m-md { margin: var(--wmc-spacing-md) !important; }
+.wmc-m-lg { margin: var(--wmc-spacing-lg) !important; }
+.wmc-m-xl { margin: var(--wmc-spacing-xl) !important; }
+
+.wmc-p-0 { padding: 0 !important; }
+.wmc-p-xs { padding: var(--wmc-spacing-xs) !important; }
+.wmc-p-sm { padding: var(--wmc-spacing-sm) !important; }
+.wmc-p-md { padding: var(--wmc-spacing-md) !important; }
+.wmc-p-lg { padding: var(--wmc-spacing-lg) !important; }
+.wmc-p-xl { padding: var(--wmc-spacing-xl) !important; }
+
+/* Border radius utilities */
+.wmc-rounded-sm { border-radius: var(--wmc-radius-sm) !important; }
+.wmc-rounded-md { border-radius: var(--wmc-radius-md) !important; }
+.wmc-rounded-lg { border-radius: var(--wmc-radius-lg) !important; }
+.wmc-rounded-xl { border-radius: var(--wmc-radius-xl) !important; }
+.wmc-rounded-full { border-radius: 9999px !important; }
+
+/* Shadow utilities */
+.wmc-shadow-sm {
+  box-shadow: 0 1px 2px 0 var(--wmc-shadow) !important;
+}
+
+.wmc-shadow-md {
+  box-shadow: 0 4px 6px -1px var(--wmc-shadow), 0 2px 4px -1px var(--wmc-shadow) !important;
+}
+
+.wmc-shadow-lg {
+  box-shadow: 0 10px 15px -3px var(--wmc-shadow), 0 4px 6px -2px var(--wmc-shadow) !important;
+}
+
+.wmc-shadow-xl {
+  box-shadow: 0 20px 25px -5px var(--wmc-shadow), 0 10px 10px -5px var(--wmc-shadow) !important;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .main .block-container {
+    padding-left: var(--wmc-spacing-sm) !important;
+    padding-right: var(--wmc-spacing-sm) !important;
+  }
+
+  .wmc-text-responsive-xl {
+    font-size: var(--wmc-font-size-lg) !important;
+  }
+
+  .wmc-text-responsive-2xl {
+    font-size: var(--wmc-font-size-xl) !important;
+  }
+
+  .wmc-text-responsive-3xl {
+    font-size: var(--wmc-font-size-2xl) !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .wmc-text-responsive-xl {
+    font-size: var(--wmc-font-size-xl) !important;
+  }
+
+  .wmc-text-responsive-2xl {
+    font-size: var(--wmc-font-size-2xl) !important;
+  }
+
+  .wmc-text-responsive-3xl {
+    font-size: var(--wmc-font-size-3xl) !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .stApp {
+    background: white !important;
+    color: black !important;
+  }
+
+  .wmc-no-print {
+    display: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --wmc-primary: #E6D5FF;
+    --wmc-secondary: #B8E6FF;
+    --wmc-border: #4A5568;
+    --wmc-text-secondary: #FFFFFF;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode enforcement */
+@media (prefers-color-scheme: light) {
+  .stApp {
+    background: var(--wmc-background) !important;
+    color: var(--wmc-text-primary) !important;
+  }
+}
