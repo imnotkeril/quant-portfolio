@@ -4,6 +4,7 @@ Main dashboard for Wild Market Capital portfolio management.
 """
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
@@ -359,7 +360,7 @@ def show_performance_summary():
         # Generate mock cumulative returns
         returns = [0]
         for _ in range(len(dates)-1):
-            returns.append(returns[-1] + (0.5 + i * 0.2) + (0.1 * (0.5 - pd.np.random.random())))
+            returns.append(returns[-1] + (0.5 + i * 0.2) + (0.1 * (0.5 - np.random.random())))
 
         fig.add_trace(go.Scatter(
             x=dates,
