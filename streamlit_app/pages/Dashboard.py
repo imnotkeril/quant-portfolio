@@ -1,6 +1,7 @@
 """
 Dashboard page - Complete portfolio overview and analytics.
 Main dashboard for Wild Market Capital portfolio management.
+ИСПРАВЛЕНО: Убрана избыточная диагностика, оставлен только core функционал
 """
 import streamlit as st
 import pandas as pd
@@ -18,7 +19,7 @@ from components.sidebar_nav import create_sidebar_navigation, create_page_header
 # Page configuration
 st.set_page_config(
     page_title=f"Dashboard - {APP_CONFIG['title']}",
-    page_icon="📊",
+    page_icon="Dashboard",
     layout="wide"
 )
 
@@ -30,45 +31,16 @@ def load_portfolio_data():
         portfolio_manager = ServiceManager.get_portfolio_manager()
 
         if portfolio_manager is None:
-            st.error("❌ Portfolio Manager not available")
+            st.error("Portfolio Manager not available")
             return []
 
         # Get portfolios list
         portfolios = portfolio_manager.list_portfolios()
 
-        # Debug: show what we got
-        if portfolios:
-            st.sidebar.success(f"✅ Loaded {len(portfolios)} portfolios from backend")
-        else:
-            st.sidebar.warning("⚠️ No portfolios found in backend storage")
-
-            # Try direct storage access for debugging
-            try:
-                storage_service = ServiceManager.get_json_storage_service()
-                if storage_service:
-                    files = storage_service.list_files('.json')
-                    st.sidebar.info(f"🔍 Found {len(files)} JSON files in storage")
-                    if files:
-                        st.sidebar.write("Files found:", [f.name for f in files[:5]])
-            except Exception as debug_e:
-                st.sidebar.error(f"Debug error: {str(debug_e)}")
-
         return portfolios
 
     except Exception as e:
         st.error(f"Failed to load portfolio data: {str(e)}")
-
-        # Show detailed error for debugging
-        with st.expander("🔧 Debug Information"):
-            st.code(f"Error: {str(e)}")
-            st.code(f"Error type: {type(e).__name__}")
-
-            try:
-                import traceback
-                st.code(traceback.format_exc())
-            except:
-                pass
-
         return []
 
 @st.cache_data(ttl=300)
@@ -104,7 +76,7 @@ def get_market_data():
 
 def show_portfolio_overview():
     """Show comprehensive portfolio overview."""
-    create_section_header("📈 Portfolio Overview", "", "Your investment portfolios at a glance")
+    create_section_header("Portfolio Overview", "", "Your investment portfolios at a glance")
 
     portfolios = load_portfolio_data()
 
@@ -114,7 +86,7 @@ def show_portfolio_overview():
         with col2:
             st.markdown("""
             <div class="hero-section">
-                <h3>🚀 Get Started with Wild Market Capital</h3>
+                <h3>Get Started with Wild Market Capital</h3>
                 <p>Create your first investment portfolio to unlock powerful analytics and optimization tools.</p>
             </div>
             """, unsafe_allow_html=True)
@@ -125,14 +97,14 @@ def show_portfolio_overview():
 
     # Portfolio metrics
     total_portfolios = len(portfolios)
-    total_assets = sum(len(p.get('assets', [])) for p in portfolios)
+    total_assets = sum(p.get('asset_count', 0) for p in portfolios)
 
     # Calculate portfolio values (mock calculation for now)
     portfolio_values = []
     for portfolio in portfolios:
         # Mock value calculation - in real implementation would use current prices
-        assets = portfolio.get('assets', [])
-        mock_value = len(assets) * 10000  # Mock $10k per asset
+        assets_count = portfolio.get('asset_count', 0)
+        mock_value = assets_count * 10000  # Mock $10k per asset
         portfolio_values.append(mock_value)
 
     total_value = sum(portfolio_values)
@@ -175,12 +147,12 @@ def show_portfolio_overview():
 
 def show_portfolio_list():
     """Show detailed portfolio list."""
-    create_section_header("💼 Your Portfolios", "", "Manage and analyze your investment portfolios")
+    create_section_header("Your Portfolios", "", "Manage and analyze your investment portfolios")
 
     portfolios = load_portfolio_data()
 
     if not portfolios:
-        st.info("📝 No portfolios found. Create your first portfolio to get started!")
+        st.info("No portfolios found. Create your first portfolio to get started!")
         return
 
     # Portfolio list with enhanced details
@@ -194,7 +166,7 @@ def show_portfolio_list():
                 st.caption(description[:100] + "..." if len(description) > 100 else description)
 
             with col2:
-                assets_count = len(portfolio.get('assets', []))
+                assets_count = portfolio.get('asset_count', 0)
                 st.metric("Assets", assets_count)
 
             with col3:
@@ -217,12 +189,12 @@ def show_portfolio_list():
 
 def show_market_overview():
     """Show market overview with major indices."""
-    create_section_header("🌍 Market Overview", "", "Major market indices and trends")
+    create_section_header("Market Overview", "", "Major market indices and trends")
 
     market_data = get_market_data()
 
     if not market_data:
-        st.warning("⚠️ Unable to load market data")
+        st.warning("Unable to load market data")
         return
 
     # Market indices cards
@@ -304,40 +276,40 @@ def show_market_chart():
 
 def show_quick_actions():
     """Show enhanced quick actions."""
-    create_section_header("🚀 Quick Actions", "", "Common tasks and workflows")
+    create_section_header("Quick Actions", "", "Common tasks and workflows")
 
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown(f"""
         <div class="analytics-section">
-            <h4>📊 Portfolio Management</h4>
+            <h4>Portfolio Management</h4>
         </div>
         """, unsafe_allow_html=True)
 
-        if st.button("📝 Create New Portfolio", use_container_width=True):
+        if st.button("Create New Portfolio", use_container_width=True):
             st.switch_page("pages/Portfolio_Creation.py")
 
-        if st.button("📈 Analyze Portfolio", use_container_width=True):
+        if st.button("Analyze Portfolio", use_container_width=True):
             st.switch_page("pages/Portfolio_Analysis.py")
 
-        if st.button("📊 Compare Portfolios", use_container_width=True):
+        if st.button("Compare Portfolios", use_container_width=True):
             st.switch_page("pages/Portfolio_Comparison.py")
 
     with col2:
         st.markdown(f"""
         <div class="analytics-section">
-            <h4>🔧 Advanced Tools</h4>
+            <h4>Advanced Tools</h4>
         </div>
         """, unsafe_allow_html=True)
 
-        if st.button("⚖️ Portfolio Optimization", use_container_width=True):
+        if st.button("Portfolio Optimization", use_container_width=True):
             st.switch_page("pages/Portfolio_Optimization.py")
 
-        if st.button("🛡️ Risk Management", use_container_width=True):
-            st.switch_page("pages/Portfolio_Risk.py")
+        if st.button("Risk Management", use_container_width=True):
+            st.switch_page("pages/Risk_Management.py")
 
-        if st.button("🎲 Scenario Analysis", use_container_width=True):
+        if st.button("Scenario Analysis", use_container_width=True):
             st.switch_page("pages/Scenario_Analysis.py")
 
 def show_performance_summary():
@@ -347,7 +319,7 @@ def show_performance_summary():
     if not portfolios:
         return
 
-    create_section_header("📊 Performance Summary", "", "Portfolio performance over time")
+    create_section_header("Performance Summary", "", "Portfolio performance over time")
 
     # Mock performance data for demonstration
     dates = pd.date_range(start='2024-01-01', end='2024-12-31', freq='M')
@@ -384,6 +356,41 @@ def show_performance_summary():
 
     st.plotly_chart(fig, use_container_width=True)
 
+def show_diagnostic_info():
+    """Show diagnostic information in expandable section."""
+    with st.sidebar.expander("Diagnostic Info", expanded=False):
+        from services.service_manager import ServiceManager
+
+        # Get diagnosis
+        diagnosis = ServiceManager.diagnose_portfolio_loading()
+
+        st.write("**Settings Available:**", diagnosis['settings_available'])
+        st.write("**JSON Storage Available:**", diagnosis['json_storage_available'])
+
+        if diagnosis['paths']:
+            st.write("**Paths:**")
+            for key, value in diagnosis['paths'].items():
+                st.write(f"  {key}: {value}")
+
+        if diagnosis['portfolio_files']:
+            st.write(f"**Portfolio Files Found:** {len(diagnosis['portfolio_files'])}")
+            for filename in diagnosis['portfolio_files'][:5]:
+                st.write(f"  {filename}")
+        else:
+            st.write("**Portfolio Files Found:** 0")
+
+        if diagnosis.get('sample_portfolio'):
+            st.write("**Sample Portfolio:**")
+            sample = diagnosis['sample_portfolio']
+            st.write(f"  File: {sample['filename']}")
+            st.write(f"  Asset Count: {sample['asset_count']}")
+            st.write(f"  Has Assets Field: {sample['has_assets_field']}")
+
+        if diagnosis['errors']:
+            st.write("**Errors:**")
+            for error in diagnosis['errors']:
+                st.write(f"  {error}")
+
 def main():
     """Main Dashboard page function."""
     # Apply custom styling
@@ -391,6 +398,9 @@ def main():
 
     # Create sidebar navigation
     create_sidebar_navigation()
+
+    # Show diagnostic info in sidebar
+    show_diagnostic_info()
 
     # Page header
     create_page_header("Dashboard")

@@ -1,6 +1,6 @@
 """
 Backend services integration for Streamlit app.
-Direct imports from existing backend without API calls.
+ИСПРАВЛЕНО: Убран импорт несуществующего app.config, создан локальный settings
 """
 import sys
 from pathlib import Path
@@ -11,8 +11,6 @@ sys.path.insert(0, str(backend_path))
 
 # Import all backend services (using correct paths from existing structure)
 try:
-    # Try different import approaches
-    import sys
     print(f"📍 Python path: {sys.path[:3]}")
     print(f"📍 Current working directory: {Path.cwd()}")
     print(f"📍 Backend path: {backend_path}")
@@ -70,8 +68,8 @@ try:
         print(f"❌ MemoryCacheService import failed: {e}")
         MemoryCacheService = None
 
-    # Import config
-    from app.config import settings
+    # ИСПРАВЛЕНО: Убран импорт app.config, создаем локальный settings
+    print("⚠️ Using local settings instead of backend config")
 
     print("✅ Successfully imported core backend services for Streamlit")
 
@@ -98,7 +96,37 @@ except ImportError as e:
     PortfolioManagerService = None
     JsonStorageService = None
     MemoryCacheService = None
-    settings = None
+
+# ИСПРАВЛЕНО: Создаем локальный settings объект для Streamlit
+class StreamlitSettings:
+    """Local settings for Streamlit app since backend config not available."""
+
+    def __init__(self):
+        # Путь к данным Streamlit приложения
+        streamlit_app_dir = Path(__file__).parent.parent  # streamlit_app/
+        self.DATA_DIR = streamlit_app_dir / "data"
+        self.PORTFOLIO_DIR = streamlit_app_dir / "data" / "portfolios"
+        self.CACHE_DIR = streamlit_app_dir / "data" / "cache"
+        self.REPORTS_DIR = streamlit_app_dir / "data" / "reports"
+
+        # Создаем папки если не существуют
+        self.DATA_DIR.mkdir(exist_ok=True)
+        self.PORTFOLIO_DIR.mkdir(parents=True, exist_ok=True)
+        self.CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        self.REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
+        # Другие настройки
+        self.CACHE_EXPIRY_DAYS = 1
+        self.CACHE_DEFAULT_EXPIRY = 86400  # 24 hours
+        self.ALPHA_VANTAGE_API_KEY = None
+
+        print(f"🔧 StreamlitSettings initialized:")
+        print(f"   DATA_DIR: {self.DATA_DIR}")
+        print(f"   PORTFOLIO_DIR: {self.PORTFOLIO_DIR}")
+        print(f"   Portfolios dir exists: {self.PORTFOLIO_DIR.exists()}")
+
+# Создаем экземпляр settings
+settings = StreamlitSettings()
 
 __all__ = [
     'AnalyticsService',
